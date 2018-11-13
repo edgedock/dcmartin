@@ -1,3 +1,8 @@
+###
+### MAKEFILE FOR HORIZON SERVICE
+###
+
+
 # Transform the machine arch into some standard values: "arm", "arm64", or "amd64"
 SYSTEM_ARCH := $(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
 
