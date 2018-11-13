@@ -1,0 +1,74 @@
+ARG BUILD_FROM=arm32v6/alpine:latest
+
+FROM $BUILD_FROM
+
+ENV LANG C.UTF-8
+
+RUN echo "@edge http://nl.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories
+#RUN echo "@edgecommunity http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+RUN echo "@testing http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+  
+RUN apk add --update --no-cache \
+  apache2 \
+  apache2-utils \
+  bc \
+  coreutils \
+  curl \
+  dateutils \
+  findutils \
+  ffmpeg@edge \
+  motion@testing \
+  gawk \
+  imagemagick \
+  inotify-tools \
+  jq \
+  mosquitto-clients \
+  python3 \
+  tcsh \
+  git
+
+# environment
+ENV CONFIG_PATH /data/options.json
+ENV MOTION_CONF /etc/motion/motion.conf
+
+# Copy rootts
+COPY rootfs /
+
+## APACHE
+
+ARG MOTION_APACHE_CONF=/etc/apache2/httpd.conf
+ARG MOTION_APACHE_HTDOCS=/var/www/localhost/htdocs
+ARG MOTION_APACHE_CGIBIN=/var/www/localhost/cgi-bin
+ARG MOTION_APACHE_HOST=localhost
+ARG MOTION_APACHE_PORT=7999
+ARG MOTION_APACHE_ADMIN=root@hassio.local
+
+ENV MOTION_APACHE_CONF "${MOTION_APACHE_CONF}"
+ENV MOTION_APACHE_HTDOCS "${MOTION_APACHE_HTDOCS}"
+ENV MOTION_APACHE_CGIBIN "${MOTION_APACHE_CGIBIN}"
+ENV MOTION_APACHE_HOST "${MOTION_APACHE_HOST}"
+ENV MOTION_APACHE_PORT "${MOTION_APACHE_PORT}"
+ENV MOTION_APACHE_ADMIN "${MOTION_APACHE_ADMIN}"
+
+# Ports for motion (control and stream)
+EXPOSE ${MOTION_APACHE_PORT}
+
+EXPOSE 8000
+EXPOSE 8090
+
+CMD [ "/usr/bin/run.sh" ]
+
+# Build arugments
+ARG BUILD_ARCH
+ARG BUILD_DATE
+ARG BUILD_REF
+ARG BUILD_VERSION
+
+# Labels
+LABEL \
+    io.hass.name="MOTION" \
+    io.hass.description="Motion package as addon w/ support for image classification" \ 
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="addon" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="David C Martin <github@dcmartin.com>"
