@@ -1,10 +1,10 @@
 {
   "org": "$HZN_ORG_ID",
-  "label": "$CPU_NAME for $ARCH",
-  "description": "Provides a REST API to query the CPU percent",
+  "label": "$SERVICE_NAME for $ARCH",
+  "description": "Provides motion-project.io as service",
   "public": true,
-  "url": "https://$MYDOMAIN/service-$CPU_NAME",
-  "version": "$CPU_VERSION",
+  "url": "https://$MYDOMAIN/service-$SERVICE_NAME",
+  "version": "$SERVICE_VERSION",
   "arch": "$ARCH",
   "sharable": "single",
   "requiredServices": [],
@@ -12,7 +12,7 @@
   "deployment": {
     "services": {
       "cpu": {
-        "image": "$DOCKER_HUB_ID/${ARCH}_$CPU_NAME:$CPU_VERSION"
+        "image": "$DOCKER_HUB_ID/${ARCH}_$SERVICE_NAME:$SERVICE_VERSION"
       }
     }
   }
