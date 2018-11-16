@@ -127,17 +127,17 @@ foreach mac ( $macs )
 	echo "No device key or public key"
       endif
       if ($token != null) then
-        echo "CONFIGURED ($id); node: " `echo "$node" | jq -c '.'`
+        echo "CONFIGURED ($id); node: $node"
         set hzn = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn'`
         if ($#hzn == 0) then
           ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - ibm.biz/horizon-setup | sudo bash -s'
         endif
         set hnl = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hzn node list'`
         if ($#hnl) then
-          echo "Node list: " `echo "$hnl" | jq -c '.'`
+          echo "Node list: $hnl"
         endif
       else
-        echo "CONFIGURING ($id); node $device; exchange ${exchange_username}:${exchange_password} in $exchange_org at $exchange_url; pattern $pattern_org/$pattern_id @ $pattern_url"
+        echo "CONFIGURING ($id); node $node"
         # get client specifics
         set client_username = "pi"
         set client_password = "raspberry"
