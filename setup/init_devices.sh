@@ -43,7 +43,6 @@ if (! -e "$out") then
   exit
 endif
 
-set ips = ( `egrep "Nmap scan" "$out" | awk '{ print $5 }'` )
 set macs = ( `egrep MAC "$out" | sed "s/.*: \([^ ]*\) .*/\1/"` )
 
 set i = 1
@@ -55,11 +54,13 @@ foreach mac ( $macs )
     # find configuration for device
     set conf = `jq '.configurations[]|select(.nodes[].id=="'$id'")' "$config"`
     if ($#conf) then
+      set conf_id = ( `echo "$conf" | jq -r '.id'` )
       # get nodes
       set node = (  `echo "$conf" | jq '.nodes[]|select(.id=="'"$id"'")'` )
       if ($#node) then
         set device = ( `echo "$node" | jq -r '.device'` )
         set token = ( `echo "$node" | jq -r '.token'` )
+        set client_key = ( `echo "$node" | jq -r '.key'` )
       endif
       # get pattern
       set patid = ( `echo "$conf" | jq -r '.pattern?'` )
@@ -94,21 +95,50 @@ foreach mac ( $macs )
       echo "Cannot find configuration for device: $id"
     endif
     if ($?device && $?token && $?pattern_org && $?pattern_url && $?exchange_org && $?exchange_url) then
-      if ($token != null) then
-        echo "CONFIGURED: MAC $mac; IP $ips[$i]; id $id; node $device with token $token; exchange ${exchange_username}:${exchange_password} in $exchange_org at $exchange_url; pattern $pattern_org/$pattern_id @ $pattern_url"
+      set client_ipaddr = `egrep -B 2 "$mac" "$out" | egrep "Nmap scan" | awk '{ print $5 }'`
+      echo "FOUND ($id): MAC $mac; IP $client_ipaddr"
+      # get keys 
+      set public_key = ( `echo "$conf" | jq -r '.public_key'` )
+      if ($#public_key && "$public_key" != null ) then
+	set device_key = "$public_key"
+	set private_key = ( `echo "$conf" | jq -r '.private_key'` )
+      endif
+      # generate new key if none
+      if ($?device_key == 0) then
+	ssh-keygen -t rsa -f "$conf_id" -N ""
+	set private_key = '{ "encoding": "base64", "value": "'`base64 "$conf_id"`'" }'
+	set public_key = '{ "encoding": "base64", "value": "'`base64 "$conf_id.pub"`'" }'
+	rm -f "$conf_id" "$conf_id.pub"
+	# update configuration
+	jq '(.configurations[]|select(.id=="'$conf_id'").public_key)|='"$public_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+	jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+	# use public key of configuration
+	set device_key = "$public_key"
+      endif
+      # process public key for device
+      set pke = ( `echo "$device_key" | jq -r '.encoding'` )
+      if ($#pke && "$pke" == "base64") then
+	set private_keyfile = /tmp/$0:t.$$.pri
+	set device_keyfile = /tmp/$0:t.$$.pub
+	echo "$device_key" | jq -r '.value' | base64 -D >! "$device_keyfile"
+	echo "$private_key" | jq -r '.value' | base64 -D >! "$private_keyfile"
+	chmod 400 "$device_keyfile" "$private_keyfile"
       else
-        echo "SETUP: MAC $mac; IP $ips[$i]; id $id; node $device; exchange ${exchange_username}:${exchange_password} in $exchange_org at $exchange_url; pattern $pattern_org/$pattern_id @ $pattern_url"
-        echo "CONF: $conf"
-        set pke = ( `echo "$conf" | jq -r '.public_key.encoding'` )
-        if ($#pke && "$pke" == "base64") then
-          set public_keyfile = /tmp/$0:t.$$.pub
-          echo "$conf" | jq -r '.public_key.value' | base64 -D >! "$public_keyfile"
-          echo "PUBLIC_KEYFILE: $public_keyfile"
-        else
-          echo "ERROR: No public key found"
-          exit
+	echo "No device key or public key"
+      endif
+      if ($token != null) then
+        echo "CONFIGURED ($id); node: " `echo "$node" | jq -c '.'`
+        set hzn = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn'`
+        if ($#hzn == 0) then
+          ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - ibm.biz/horizon-setup | sudo bash -s'
         endif
-        set client_ipaddr = $ips[$i]
+        set hnl = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hzn node list'`
+        if ($#hnl) then
+          echo "Node list: " `echo "$hnl" | jq -c '.'`
+        endif
+      else
+        echo "CONFIGURING ($id); node $device; exchange ${exchange_username}:${exchange_password} in $exchange_org at $exchange_url; pattern $pattern_org/$pattern_id @ $pattern_url"
+        # get client specifics
         set client_username = "pi"
         set client_password = "raspberry"
         set ssh_copy_id = /tmp/$0:t.$$.exp
@@ -116,19 +146,26 @@ foreach mac ( $macs )
           | sed 's|%%CLIENT_IPADDR%%|'"${client_ipaddr}"'|g' \
           | sed 's|%%CLIENT_USERNAME%%|'"${client_username}"'|g' \
           | sed 's|%%CLIENT_PASSWORD%%|'"${client_password}"'|g' \
-          | sed 's|%%PUBLIC_KEYFILE%%|'"${public_keyfile}"'|g' \
+          | sed 's|%%PUBLIC_KEYFILE%%|'"${device_keyfile}"'|g' \
           >! "$ssh_copy_id"
         if (-s "$ssh_copy_id") then
-          echo "SSH_COPY_ID: $ssh_copy_id"
-          set result = ( `expect -d -f "$ssh_copy_id" |& egrep failure | sed 's/.*failure.*/failure/g'` )
-          echo "$result"
+          set failed = ( `expect -d -f "$ssh_copy_id" |& egrep failure | sed 's/.*failure.*/failure/g'` )
+          if ($#failed) then
+            echo "FAILURE: ${device}: ssh_copy_id ${client_ipaddr} ${client_username} ${client_password} ${device_keyfile}"
+          else
+            echo "SUCCESS: ${device}: ssh_copy_id ${client_ipaddr} ${client_username} ${client_password} ${device_keyfile}"
+            set node = ( `jq '.configurations[].nodes[]|select(.id=="'$id'")|.token="'"${client_password}"'"|.key='"${device_key}"'|.ip="'"$client_ipaddr"'"' "$config"` )
+            jq '(.configurations[].nodes[]|select(.id=="'$id'"))|='"$node" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+          endif 
+          rm -f "$ssh_copy_id"
+          rm -f "$device_keyfile"
         else
-          echo "ERROR: Failure to communicate""
+          echo "ERROR: Failure to communicate"
           exit
         endif
       endif
     else
-      echo "ERROR: failure"
+      echo "ERROR: configuration file $config is malformed"
       exit
     endif
   endif
