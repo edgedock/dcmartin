@@ -11,7 +11,7 @@
   "userInput": [],
   "deployment": {
     "services": {
-      "cpu": {
+      "motion": {
         "image": "$DOCKER_HUB_ID/${ARCH}_$SERVICE_NAME:$SERVICE_VERSION"
       }
     }

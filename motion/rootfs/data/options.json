@@ -1,6 +1,6 @@
 {
   "log_level": "info",
-  "log_motion": 2,
+  "log_motion": 6,
   "devicedb": "motion",
   "name": "davidsimac",
   "username": "test",
