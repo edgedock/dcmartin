@@ -54,6 +54,8 @@ endif
 
 set macs = ( `egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/'` )
 
+echo "DEBUG: found $#macs devices by MAC"
+
 set i = 1
 foreach mac ( $macs )
   unset id device token pattern_org pattern_url exchange_org exchange_url
@@ -73,10 +75,27 @@ foreach mac ( $macs )
   if ($#conf == 0) then
     echo "ERROR: Cannot find node configuration for device: $id"
     exit 1
+  endif
+
+  # get configuration id and keys
+  set conf_id = ( `echo "$conf" | jq -r '.id'` )
+  set public_key = ( `echo "$conf" | jq '.public_key'` )
+  set private_key = ( `echo "$conf" | jq '.private_key'` )
+  if ($#public_key > 1 && $#private_key > 1) then
+    echo "DEBUG: public $public_key private $private_key"
   else
-    # get configuration id
-    set conf_id = ( `echo "$conf" | jq -r '.id'` )
-    echo "DEBUG: Found configuration $conf_id"
+    # generate new key if none
+    ssh-keygen -t rsa -f "$conf_id" -N ""
+    if (! -s "$conf_id" || ! -s "$conf_id.pub") then
+      echo "ERROR: failed to create key files for $conf_id"
+      exit 1
+    endif
+    set public_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "${conf_id}.pub"`'" }'
+    jq '(.configurations[]|select(.id=="'$conf_id'").public_key)|='"$public_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+    set private_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "$conf_id"`'" }'
+    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+    # cleanup
+    rm -f "$conf_id" "${conf_id}.pub"
   endif
 
   # get node configuration
@@ -88,70 +107,55 @@ foreach mac ( $macs )
   if ( `echo "$node_state" | jq '.ssh'` != 'null' ) then
     # device has ssh configured
     echo "DEVICE ($id) has ssh configured"
-    set config_ssh = false
-  else
     set config_ssh = true
+  else
+    set config_ssh = false
   endif
 
   ## test if software configured
   if ( `echo "$node_state" | jq '.software'` != 'null' ) then
     # device has software configured
     echo "DEVICE ($id) has software configured"
-    set config_software = false
-  else
     set config_software = true
+  else
+    set config_software = false
   endif
 
   ## test if pattern configured
   if ( `echo "$node_state" | jq '.pattern'` != 'null' ) then
     # device has ssh configured
     echo "DEVICE ($id) has pattern configured"
-    set config_pattern = false
+    set config_pattern = true
   else
     # attempt to configure pattern on device
-    set config_pattern = true
+    set config_pattern = false
   endif
 
   ## test if network configured
   if ( `echo "$node_state" | jq '.network'` != 'null' ) then
     # device has network configured
-    echo "DEVICE ($id) has network configured"
-    set config_network = false
+    echo "DEVICE ($id) has network configured" `echo "$node_state" | jq -c '.network'`
+    set config_network = true
   else
     # attempt to configure network on device
-    set config_network = true
+    set config_network = false
   endif
 
+  echo "DEBUG: device ($id): SSH $config_ssh SOFTWARE $config_software PATTERN $config_pattern"
+
   ## CONFIG SSH
-  if ($config_ssh != "true") then
-    echo "INFO: Device $id has ssh configured"
+  if ($config_ssh == "true") then
+    echo "INFO: Device $id has ssh configured" `echo "$node_state" | jq -c '.ssh'`
   else
     # get node configuration specifics
     set device = ( `echo "$node" | jq -r '.device'` )
     set token = ( `echo "$node" | jq -r '.token'` )
-    # get keys 
-    set public_key = ( `echo "$conf" | jq -r '.public_key'` )
-    if ($#public_key && "$public_key" != null ) then
-      set device_key = "$public_key"
-      set private_key = ( `echo "$conf" | jq -r '.private_key'` )
-    else
-      # generate new key if none
-      ssh-keygen -t rsa -f "$conf_id" -N ""
-      set private_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "$conf_id"`'" }'
-      set public_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "$conf_id.pub"`'" }'
-      rm -f "$conf_id" "$conf_id.pub"
-      # update configuration
-      jq '(.configurations[]|select(.id=="'$conf_id'").public_key)|='"$public_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
-      jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
-      # use public key of configuration
-      set device_key = "$public_key"
-    endif
     # process public key for device
-    set pke = ( `echo "$device_key" | jq -r '.encoding'` )
+    set pke = ( `echo "$public_key" | jq -r '.encoding'` )
     if ($#pke && "$pke" == "base64") then
-      set device_keyfile = /tmp/$0:t.$$.pub
-      echo "$device_key" | jq -r '.value' | base64 --decode >! "$device_keyfile"
-      chmod 400 "$device_keyfile"
+      set public_keyfile = /tmp/$0:t.$$.pub
+      echo "$public_key" | jq -r '.value' | base64 --decode >! "$public_keyfile"
+      chmod 400 "$public_keyfile"
       set private_keyfile = /tmp/$0:t.$$.pri
       echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
       chmod 400 "$private_keyfile"
@@ -165,44 +169,53 @@ foreach mac ( $macs )
       | sed 's|%%CLIENT_IPADDR%%|'"${client_ipaddr}"'|g' \
       | sed 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
       | sed 's|%%CLIENT_PASSWORD%%|'"${CLIENT_PASSWORD}"'|g' \
-      | sed 's|%%PUBLIC_KEYFILE%%|'"${device_keyfile}"'|g' \
+      | sed 's|%%PUBLIC_KEYFILE%%|'"${public_keyfile}"'|g' \
       >! "$ssh_copy_id"
     set failed = ( `expect -d -f "$ssh_copy_id" |& egrep failure | sed 's/.*failure.*/failure/g'` )
     if ($#failed) then
-      echo "FAILURE: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${device_keyfile}"
+      echo "FAILURE: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${public_keyfile}"
     else
-      echo "SUCCESS: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${device_keyfile}"
-      set node = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"token":"'"${CLIENT_PASSWORD}"'","key":'"${device_key}"',"ip":"'"$client_ipaddr"'"}' "$config"` )
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      echo "SUCCESS: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${public_keyfile}"
+      ## UPDATE NODE
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"token":"'"${CLIENT_PASSWORD}"'","key":'"${public_key}"',"ip":"'"$client_ipaddr"'"}' "$config"` )
+      ## UPDATE CONFIGURATION
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
     endif 
     rm -f "$ssh_copy_id"
-    rm -f "$device_keyfile"
+    rm -f "$public_keyfile"
     rm -f "$private_keyfile"
+    # get new status
+    set config_ssh = ( `jq '.nodes[]|select(.id=="'$id'").ssh != null' "$config"` )
   endif
 
   ## CONFIG SOFTWARE
-  if ($config_software != "true") then
-    echo "INFO: Device $id has software configured"
+  if ($config_software == "true") then
+    echo "INFO: Device $id has software configured" `echo "$node" | jq -c '.software'`
+  else if ($config_ssh != "true") then
+    # echo "DEBUG: device $id does not have ssh configured"
   else
     # get private key
-    set private_key = ( `echo "$conf" | jq -r '.private_key'` )
+    set private_key = ( `echo "$conf" | jq '.private_key'` )
     set private_keyfile = /tmp/$0:t.$$.pri
     echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
     chmod 400 "$private_keyfile"
     # install software
-    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - ibm.biz/horizon-setup | sudo bash -s'` )
+    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - ibm.biz/horizon-setup | sudo bash -s' | jq '.'` )
     if ($#result == 0) then
       echo "FAILURE: Cannot install software onto ${device}"
     else
-      set node = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
     endif
+    set config_software = ( `jq '.nodes[]|select(.id=="'$id'").software != null' "$config"` )
+  else
+    # echo "DEBUG: SSH $config_ssh SOFTWARE $config_software"
   endif
 
   ## CONFIG PATTERN
-  if ($config_pattern != "true") then
+  if ($config_pattern == "true") then
     echo "INFO: Device $id has pattern configured"
-  else
+  else if ($config_ssh == true && $config_software == true) then
     # get pattern
     set patid = ( `echo "$conf" | jq -r '.pattern?'` )
     if ($#patid) then
@@ -247,9 +260,12 @@ foreach mac ( $macs )
     if ($#result == 0) then
       echo "FAILURE: Cannot install software onto ${device}"
     else
-      set node = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
     endif
+    set config_pattern = ( `jq '.nodes[]|select(.id=="'$id'").pattern != null' "$config"` )
+  else
+    echo "DEBUG: SSH $config_ssh SOFTWARE $config_software PATTERN $config_pattern"
   endif
 
   # go to next
