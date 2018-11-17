@@ -42,6 +42,8 @@ set SECONDS = `date "+%s"`
 set DATE = `echo $SECONDS \/ $TTL \* $TTL | bc`
 set out = "/tmp/$0:t.$DATE.txt"
 
+mkdir -p "/tmp/$0:t.$$"
+
 if (! -e "$out") then
   rm -f "$out:r:r".*
   /usr/bin/sudo nmap -sn -T5 "$net" >! "$out"
@@ -82,18 +84,18 @@ foreach mac ( $macs )
   set public_key = ( `echo "$conf" | jq '.public_key'` )
   set private_key = ( `echo "$conf" | jq '.private_key'` )
   if ($#public_key > 1 && $#private_key > 1) then
-    echo "DEBUG: public $public_key private $private_key"
+    # echo "DEBUG: public $public_key private $private_key"
   else
     # generate new key if none
-    ssh-keygen -t rsa -f "$conf_id" -N ""
+    ssh-keygen -t rsa -f "$conf_id" -N "" >& /dev/null
     if (! -s "$conf_id" || ! -s "$conf_id.pub") then
       echo "ERROR: failed to create key files for $conf_id"
       exit 1
     endif
     set public_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "${conf_id}.pub"`'" }'
-    jq '(.configurations[]|select(.id=="'$conf_id'").public_key)|='"$public_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+    jq '(.configurations[]|select(.id=="'$conf_id'").public_key)|='"$public_key" "$config" >! "/tmp/$0:t.$$/$config"; mv -f "/tmp/$0:t.$$/$config" "$config"
     set private_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "$conf_id"`'" }'
-    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! "/tmp/$0:t.$$/$config"; mv -f "/tmp/$0:t.$$/$config" "$config"
     # cleanup
     rm -f "$conf_id" "${conf_id}.pub"
   endif
@@ -153,10 +155,10 @@ foreach mac ( $macs )
     # process public key for device
     set pke = ( `echo "$public_key" | jq -r '.encoding'` )
     if ($#pke && "$pke" == "base64") then
-      set public_keyfile = /tmp/$0:t.$$.pub
+      set public_keyfile = "/tmp/$0:t.$$/$conf_id.pub"
       echo "$public_key" | jq -r '.value' | base64 --decode >! "$public_keyfile"
       chmod 400 "$public_keyfile"
-      set private_keyfile = /tmp/$0:t.$$.pri
+      set private_keyfile = "/tmp/$0:t.$$/$conf_id.pri"
       echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
       chmod 400 "$private_keyfile"
     else
@@ -164,7 +166,7 @@ foreach mac ( $macs )
       exit 1
     endif
     # perform ssh-copy-id using distribution default username and password
-    set ssh_copy_id = /tmp/$0:t.$$.exp
+    set ssh_copy_id = "/tmp/$0:t.$$/ssh-copy-id.exp"
     cat "ssh-copy-id.tmpl" \
       | sed 's|%%CLIENT_IPADDR%%|'"${client_ipaddr}"'|g' \
       | sed 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
@@ -176,10 +178,16 @@ foreach mac ( $macs )
       echo "FAILURE: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${public_keyfile}"
     else
       echo "SUCCESS: ${device}: ssh_copy_id ${client_ipaddr} ${CLIENT_USERNAME} ${CLIENT_PASSWORD} ${public_keyfile}"
-      ## UPDATE NODE
-      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"token":"'"${CLIENT_PASSWORD}"'","key":'"${public_key}"',"ip":"'"$client_ipaddr"'"}' "$config"` )
+      # run secondary configuration
+      set config_script = "/tmp/$0:t.$$/config.sh"
+      cat "config.tmpl" \
+        | sed 's|%%DEVICE_NAME%%|'"${device}"'|g' \
+        >! "$config_script"
+      scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "$config_script" "${CLIENT_USERNAME}@${client_ipaddr}:." 
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'sudo bash '"$config_script:t"
       ## UPDATE CONFIGURATION
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"token":"'"${CLIENT_PASSWORD}"'","key":'"${public_key}"',"device":"'"$device"'"}' "$config"` )
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "/tmp/$0:t.$$/$config"; mv -f "/tmp/$0:t.$$/$config" "$config"
     endif 
     rm -f "$ssh_copy_id"
     rm -f "$public_keyfile"
@@ -205,7 +213,7 @@ foreach mac ( $macs )
       echo "FAILURE: Cannot install software onto ${device}"
     else
       set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "/tmp/$0:t.$$/$config"; mv -f "/tmp/$0:t.$$/$config" "$config"
     endif
     set config_software = ( `jq '.nodes[]|select(.id=="'$id'").software != null' "$config"` )
   else
@@ -261,11 +269,11 @@ foreach mac ( $macs )
       echo "FAILURE: Cannot install software onto ${device}"
     else
       set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! /tmp/$0:t.$$.json; mv -f /tmp/$0:t.$$.json "$config"
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "/tmp/$0:t.$$/$config"; mv -f "/tmp/$0:t.$$/$config" "$config"
     endif
     set config_pattern = ( `jq '.nodes[]|select(.id=="'$id'").pattern != null' "$config"` )
   else
-    echo "DEBUG: SSH $config_ssh SOFTWARE $config_software PATTERN $config_pattern"
+    # echo "DEBUG: SSH $config_ssh SOFTWARE $config_software PATTERN $config_pattern"
   endif
 
   # go to next
