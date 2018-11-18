@@ -6,9 +6,18 @@ Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available
 
 **Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
+## Usage
+
+1. Copy the `template.json` file and edit for your environment
+1. Run the `init-devices.sh` script with the name of your configuration file; default is `horizon.json`
+```
+sudo ./init-devices.sh myconfig.json
+```
+Inspect the resulting configuration file for node state
+
 ## Configuration
 
-Change the `template.json` file for your environment.
+Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
 
 ### Option: `nodes`
 
@@ -34,10 +43,11 @@ Example status of node from list during initialization; state information includ
 
 + *ssh* 
   - `id` for configuration used, including `device` name and `token`
+  - devices have hostname changed, configuration public key authorized, and ssh disabled with password
 + *software* 
-  - `repository` for package, `horizon` version and `command`, and `docker` version information
+  - `repository` for installation package, `horizon` version and `command`, `docker` version information
 + *exchange* 
-  - `id` and `status` of exchange, `node` list, including `node.id` for `device` name and `node.pattern` for assigned pattern
+  - `id`, `status` of exchange, and `node` list
 
 ```
     { "mac": "B8:27:EB:F7:3A:8C", "id": "rp8",
