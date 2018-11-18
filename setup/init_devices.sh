@@ -439,8 +439,7 @@ foreach mac ( $macs )
   else
     set pattern = `echo "$node_state" | jq '.pattern'`
     echo "INFO: ($id): PATTERN configured $pattern"
-  else 
-
+  endif
 
   if ($?DEBUG) echo "DEBUG: ($id): KEYS $config_keys SSH $config_ssh SOFTWARE $config_software EXCHANGE $config_network PATTERN $config_pattern NETWORK $config_network"
 
