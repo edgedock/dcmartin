@@ -17,11 +17,6 @@ else
   exit 1
 endif
 
-## default login and password for target device image
-set CLIENT_USERNAME = "pi"
-set CLIENT_PASSWORD = "raspberry"
-set CLIENT_HOSTNAME = "raspberrypi"
-
 onintr cleanup
 
 if ($#argv > 0) then
@@ -39,7 +34,7 @@ if ($#argv > 1) then
 else
   set net = "192.168.1.0/24"
 endif
-echo "$0 - using net ($net)" >&! /dev/stderr
+echo "INFO: executing $0 $config $net" >&! /dev/stderr
 
 set TTL = 14400 # seconds
 set SECONDS = `date "+%s"`
@@ -61,6 +56,17 @@ endif
 set macs = ( `egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/'` )
 
 if ($?DEBUG) echo "DEBUG: found $#macs devices by MAC"
+
+## DISTRIBUTION config
+
+set CLIENT_USERNAME = `jq -r '.distribution.client.username' "$config"`
+set CLIENT_PASSWORD = `jq -r '.distribution.client.password' "$config"`
+set CLIENT_HOSTNAME = `jq -r '.distribution.client.hostname' "$config"`
+set CLIENT_DISTRIBUTION = `jq '.distribution|{"id":.id,"kernel_version":.kernel_version,"release_date":.release_date,"version":.version}' "$config"`
+
+###
+### ITERATE OVER ALL MACS on LAN
+###
 
 foreach mac ( $macs )
   # get ipaddr
@@ -136,8 +142,8 @@ foreach mac ( $macs )
     echo "$public_key" | jq -r '.value' | base64 --decode >! "$public_keyfile"
     chmod 400 "$public_keyfile"
   else
-    echo "ERROR: ($id): invalid public key encoding"
-    continue
+    echo "FATAL: ($id): invalid public key encoding"
+    exit 1
   endif
 
   # process private key for device
@@ -147,8 +153,8 @@ foreach mac ( $macs )
     echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
     chmod 400 "$private_keyfile"
   else
-    echo "ERROR: ($id): invalid private key encoding"
-    continue
+    echo "FATAL: ($id): invalid private key encoding"
+    exit 1
   endif
 
   ## CONFIG SSH
@@ -183,8 +189,7 @@ foreach mac ( $macs )
     echo "WARN: ($id): SSH failed"
     continue
   else
-    set ssh = `echo "$node_state" | jq '.ssh'`
-    echo "INFO: ($id): SSH configured $ssh" 
+    echo "INFO: ($id): SSH configured" `echo "$node_state" | jq '.ssh'`
   endif
 
   ## CONFIG SECURITY
@@ -237,8 +242,13 @@ foreach mac ( $macs )
 	echo "ERROR: ($id): SOFTWARE failed"
         continue
       endif
+      # add location of hzn command
       set result = ( `echo "$result" | jq '.command="'"$hzn"'"'` )
+      # add distribution information
+      set result = ( `echo "$result" | jq '.distribution='"${CLIENT_DISTRIBUTION}"` )
+      # update node state
       set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
+      # update configuration file
       jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     endif
     set config_software = ( `jq '.nodes[]|select(.id=="'$id'").software != null' "$config"` )
@@ -248,9 +258,7 @@ foreach mac ( $macs )
     echo "WARN: ($id): SOFTWARE failed"
     continue
   else
-    set software = `echo "$node_state" | jq '.software'`
-    echo "INFO: ($id): SOFTWARE configured $software" 
-    set hzn = ( `echo "$software" | jq -r '.command'` )
+    echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq '.software'`
   endif
 
   ## CONFIG EXCHANGE
@@ -303,8 +311,7 @@ foreach mac ( $macs )
     echo "WARN: ($id): EXCHANGE failed"
     continue
   else
-    set exchange = `echo "$node_state" | jq -c '.exchange'`
-    echo "INFO: ($id): EXCHANGE configured $exchange"
+    echo "INFO: ($id): EXCHANGE configured" `echo "$node_state" | jq '.exchange'`
   endif
 
   ## CONFIG PATTERN
@@ -333,6 +340,8 @@ foreach mac ( $macs )
     set found = `echo "$node_state" | jq '.exchange.node.id=="'"$device"'"'`
     if ($found == "false") then
       echo "WARN: ($id): node not found in exchange"
+    else
+      if ($?DEBUG) echo "DEBUG: ($id): node found in exchange"
     endif 
 
     set ex_id = `echo "$node_state" | jq -r '.exchange.id'`
@@ -340,48 +349,72 @@ foreach mac ( $macs )
     set ex_username = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "$config"`
     set ex_password = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "$config"`
 
-    # test if node is unconfigured in exchange
-    set unconfigured = `echo "$node_state" | jq '.exchange.node.configstate.state=="unconfigured"'`
-    if ($unconfigured != 'true') then
-      echo "ERROR: ($id): PATTERN failed; node is not in unconfigured state"
-      continue
+    # test if node is configured with pattern
+    set node_status = `echo "$node_state" | jq -r '.exchange.node.configstate.state'`
+    set node_pattern = `echo "$node_state" | jq -r '.exchange.node.pattern'`
+
+    # unregister node iff
+    if ($node_status == "configured" && $node_pattern == "${pt_org}/${pt_id}") then
+      if ($?DEBUG) echo "DEBUG: ($id): node is configured with pattern"
+    else if ($node_status != "unconfigured") then
+      # unregister client
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn unregister -f'
+      # POLL client for node list information; wait until device identifier matches requested
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+      while ( `echo "$result" | jq '.exchange.node.configstate.state=="unconfigured"'` == false)
+	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (60): $result"
+	sleep 60
+	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+      end
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
+    else
+      if ($?DEBUG) echo "DEBUG: ($id): node is unconfigured"
     endif
 
-    # perform registration
-    set input = "$TMP/input.json"
-    echo '{"services": [{"org": "'"${pt_org}"'","url": "'"${pt_url}"'","versionRange": "[0.0.0,INFINITY)","variables": {' >> "${input}"
-    set pvs = `echo "${pt_vars}" | jq -r '.[].key'`
-    foreach pv ( ${pvs} )
-      set value = `echo "${pt_vars}" | jq -r '.[]|select(.key="'"${pv}"'").value'`
-      echo '"'"${pv}"'":"'"${value}"'"' >> "${input}"
-    end
-    echo '}}]}' >> "${input}"
-    # copy input to client
-    scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
-    # set command to execute on client
-    set cmd = "hzn register -n ${device}:${token} ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
-    if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
-    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd}"` )
+    # register node iff
+    if (`echo "$node_state" | jq '.exchange.node.configstate.state=="unconfigured"'` == true) then
+      if ($?DEBUG) echo "DEBUG: ($id): node is in unconfigured state"
+      # create pattern registration file
+      set input = "$TMP/input.json"
+      echo '{"services": [{"org": "'"${pt_org}"'","url": "'"${pt_url}"'","versionRange": "[0.0.0,INFINITY)","variables": {' >> "${input}"
+      # process all variables 
+      set pvs = `echo "${pt_vars}" | jq -r '.[].key'`
+      foreach pv ( ${pvs} )
+        set value = `echo "${pt_vars}" | jq -r '.[]|select(.key="'"${pv}"'").value'`
+        echo '"'"${pv}"'":"'"${value}"'"' >> "${input}"
+      end
+      echo '}}]}' >> "${input}"
 
-    # check registration
+      # copy pattern registration file to client
+      scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
+      # create command to execute on client
+      set cmd = "hzn register -n ${device}:${token} ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
+      if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
+      # perform registration
+      set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd}"` )
+    endif
+
+    # POLL client for node list information; wait until device identifier matches requested
     set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
     while ( `echo "$result" | jq '.id?=="'"$device"'"'` == 'false' )
-      if ($?DEBUG) echo "DEBUG: ($id): Waiting on registration (60)"
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on registration (60): $result"
       sleep 60
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
     end
+    # update node state
     set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
-    echo "INFO: Registration complete for ${ex_org}/${device}"
+    if ($?DEBUG) echo "DEBUG: registration complete for ${ex_org}/${device}"
 
-    # check agreements
+    # POLL client for agreementlist information; wait until agreement exists
     set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
-    while ( `echo "$result" | jq '.?==[]'` == 'false' ) then
-        if ($?DEBUG) echo "DEBUG: ($id): Waiting on agreement (60)"
-        sleep 60
-        set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
+    while ( $#result <= 1) 
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (60): $result"
+      sleep 60
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
     end
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern|.agreement='"$result" "$config"` )
-    echo "INFO: Agreement complete: $result" 
+    # update node state
+    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
+    if ($?DEBUG) echo "DEBUG: agreement complete: $result" 
 
     # update configuration
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
@@ -392,14 +425,11 @@ foreach mac ( $macs )
     echo "WARN: ($id): PATTERN failed"
     continue
   else
-    set pattern = `echo "$node_state" | jq '.pattern'`
-    echo "INFO: ($id): PATTERN configured $pattern"
+    echo "INFO: ($id): PATTERN configured" `echo "$node_state" | jq '.pattern'`
   else 
 
   ## CONFIG NETWORK
-  if ($config_network == "true") then
-    echo "INFO: ($id): NETWORK configured" `echo "$node_state" | jq -c '.network'`
-  else 
+  if ($config_network != "true") then
     echo "INFO: ($id): configuring NETWORK"
     # get network
     set nwid = ( `echo "$conf" | jq -r '.network?'` )
@@ -433,12 +463,11 @@ foreach mac ( $macs )
     set config_network = ( `jq '.nodes[]|select(.id=="'$id'").network != null' "$config"` )
   endif
   # sanity
-  if ($config_pattern != "true") then
-    echo "WARN: ($id): PATTERN failed"
+  if ($config_network != "true") then
+    echo "WARN: ($id): NETWORK failed"
     continue
   else
-    set pattern = `echo "$node_state" | jq '.pattern'`
-    echo "INFO: ($id): PATTERN configured $pattern"
+    echo "INFO: ($id): NETWORK configured" `echo "$node_state" | jq -c '.network'`
   endif
 
   if ($?DEBUG) echo "DEBUG: ($id): KEYS $config_keys SSH $config_ssh SOFTWARE $config_software EXCHANGE $config_network PATTERN $config_pattern NETWORK $config_network"
