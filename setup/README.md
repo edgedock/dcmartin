@@ -30,11 +30,11 @@ Example initial `nodes` list:
   ] 
 ```
 
-Example status of node from list during initialization; states include:
+Example status of node from list during initialization; state information includes:
 
-`ssh` -- `id` for configuration used, including `device` name and `token`
-`software` -- `repository` for package, `horizon` version and `command`, and `docker` version information
-`exchange` -- `id` and `status` of exchange, `node` list, including `node.id` for `device` name and `node.pattern` for assigned pattern
+1. `ssh` -- `id` for configuration used, including `device` name and `token`
+1. `software` -- `repository` for package, `horizon` version and `command`, and `docker` version information
+1. `exchange` -- `id` and `status` of exchange, `node` list, including `node.id` for `device` name and `node.pattern` for assigned pattern
 
 ```
     { "mac": "B8:27:EB:F7:3A:8C", "id": "rp8",
