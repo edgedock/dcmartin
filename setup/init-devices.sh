@@ -356,6 +356,8 @@ foreach mac ( $macs )
     # unregister node iff
     if ($node_status == "configured" && $node_pattern == "${pt_org}/${pt_id}") then
       if ($?DEBUG) echo "DEBUG: ($id): node is configured with pattern"
+    else if ($node_status == "configuring" && $node_pattern == "${pt_org}/${pt_id}") then
+      if ($?DEBUG) echo "DEBUG: ($id): node is configuring with pattern"
     else if ($node_status != "unconfigured") then
       # unregister client
       ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn unregister -f'
