@@ -1,0 +1,21 @@
+#!/bin/bash
+echo '%%DEVICE_NAME%%' > /etc/hostname
+sed -i 's/raspberrypi/%%DEVICE_NAME%%/' /etc/hosts
+
+echo 'spawn passwd' > passwd.exp
+echo 'for {} 1 {} { expect {' >> passwd.exp
+echo '  "Enter new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
+echo '  "Retype new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
+echo '  "password updated successfully" { send_user "success" exit }}}' >> passwd.exp
+
+RESULT=$(expect -f passwd.exp |& egrep success | sed 's/.*success.*/success/g')
+
+echo "Password change: ${RESULT}"
+
+echo 'ChallengeResponseAuthentication no' > sshd_config
+echo 'PasswordAuthentication no' >> sshd_config
+echo 'UsePAM no' >> sshd_config
+
+mv sshd_config /etc/ssh/sshd_config
+/etc/init.d/ssh restart
+
