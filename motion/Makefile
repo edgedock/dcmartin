@@ -14,6 +14,8 @@ export SERVICE_NAME := $(shell jq -r '.slug' config.json)
 export SERVICE_VERSION := $(shell jq -r '.version' config.json)
 export MYDOMAIN := $(shell jq -r '.url' config.json)
 
+BUILD_FROM := $(shell jq -r .build_from.$(ARCH) build.json)
+
 DOCKER_NAME ?= $(ARCH)_$(SERVICE_NAME)
 DOCKER_HUB_ID ?= openhorizon
 export MYDOMAIN ?= github.com/open-horizon/examples/wiki
@@ -26,7 +28,7 @@ default: all
 all: build run check
 
 build:
-	docker build -t $(DOCKER_TAG) -f ./Dockerfile.$(ARCH) .
+	docker build --build-arg BUILD_FROM=$(BUILD_FROM) .
 
 run:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
