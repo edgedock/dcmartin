@@ -140,12 +140,12 @@ List of pattern definitions of `id`, `org`, and `url` for the patterns available
     {
       "id": "cpu2msghub",
       "org": "IBM",
-      "url": "https://github.com/open-horizon/examples/wiki/service-cpu2msghub"
+      "url": "github.com.open-horizon.examples.cpu2msghub"
     },
     {
       "id": "sdr2msghub",
       "org": "IBM",
-      "url": "https://github.com/open-horizon/examples/wiki/service-sdr2msghub"
+      "url": "github.com.open-horizon.examples.sdr2msghub"
     }
   ]
 ```
