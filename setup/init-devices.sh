@@ -399,19 +399,29 @@ foreach mac ( $macs )
     # POLL client for node list information; wait until device identifier matches requested
     set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
     while ( `echo "$result" | jq '.id?=="'"$device"'"'` == 'false' )
-      if ($?DEBUG) echo "DEBUG: ($id): waiting on registration (60): $result"
-      sleep 60
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on registration (10): $result"
+      sleep 10
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
     end
     # update node state
     set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
     if ($?DEBUG) echo "DEBUG: registration complete for ${ex_org}/${device}"
 
+    # POLL client for node list information; wait for configured state
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+    while ( `echo "$result" | jq '.configstate.state=="configured"'` == false)
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on configuration (10): $result"
+      sleep 10
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+    end
+    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
+    if ($?DEBUG) echo "DEBUG: ($id): node is configured"
+
     # POLL client for agreementlist information; wait until agreement exists
     set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
     while ( $#result <= 1) 
-      if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (60): $result"
-      sleep 60
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (10): $result"
+      sleep 10
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
     end
     # update node state
@@ -428,7 +438,7 @@ foreach mac ( $macs )
     continue
   else
     echo "INFO: ($id): PATTERN configured" `echo "$node_state" | jq '.pattern'`
-  else 
+  endif
 
   ## CONFIG NETWORK
   if ($config_network != "true") then
