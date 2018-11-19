@@ -56,7 +56,7 @@ for CMD in jq curl ssh expect; do
   C=$(command -v $CMD)
   if [ -z "${C}" ]; then
     echo "+++ INFO: Installing ${CMD}" >&2
-    apt-get install -y ${CMD}
+    apt-get install -y ${CMD} >&2
   fi
 done
 
@@ -64,7 +64,7 @@ done
 CMD=$(command -v docker)
 if [ -z "${CMD}" ]; then
   echo "*** WARN: Installing docker" >&2
-  curl -fsSL "get.docker.com" | sh
+  curl -fsSL "get.docker.com" | sh >&2
 fi
 
 ###
@@ -80,7 +80,7 @@ fi
 CMD=$(command -v hzn)
 if [ ! -z "${CMD}" ]; then
   echo "*** WARN: Open Horizon already installed as ${CMD}; upgrading" >&2
-  apt-get upgrade -y horizon bluehorizon horizon-cli
+  apt-get upgrade -y horizon bluehorizon horizon-cli >&2
 else
   if [ ! -n "${APT_LIST}" ]; then
     APT_LIST=/etc/apt/sources.list.d/bluehorizon.list
@@ -96,15 +96,15 @@ else
   fi
   # get public key and install
   echo "+++ INFO: Adding key for Open Horizon from ${PUBLICKEY_URL}" >&2
-  curl -fsSL "${PUBLICKEY_URL}" | apt-key add -
+  curl -fsSL "${PUBLICKEY_URL}" | apt-key add - >&2
   echo "+++ INFO: Configuring Open Horizon repository ${APT_REPO} for ${ARCH}" >&2
   # create repository entry 
   echo "deb [arch=${ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
   echo "deb-src [arch=${ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
   echo "+++ INFO: Updating apt(1)" >&2
-  apt-get update -y
+  apt-get update -y >&2
   echo "+++ INFO: Installing Open Horizon" >&2
-  apt-get install -y horizon bluehorizon horizon-cli
+  apt-get install -y horizon bluehorizon horizon-cli >&2
   # confirm installation
   if [ -z $(command -v hzn) ]; then
     echo "!!! ERROR: Failed to install horizon; exiting" >&2
@@ -131,16 +131,16 @@ else
   echo ':syslogtag, startswith, "docker" -/var/log/docker.log' >> "${LOG_CONF}"
   echo '& stop' >> "${LOG_CONF}"
   echo "+++ INFO: Restarting rsyslog(8)" >&2
-  service rsyslog restart
+  service rsyslog restart >&2
 fi
 
 # SERVICE ACTIVATION
 if [ $(systemctl is-active horizon.service) != "active" ]; then
   echo "+++ INFO: The horizon.service is not active; starting" >&2
-  systemctl start horizon.service
+  systemctl start horizon.service >&2
 else
   echo "*** WARN: The horizon.service is already active; restarting" >&2
-  systemctl restart horizon.service
+  systemctl restart horizon.service >&2
 fi
 
 echo '{"repository":"'$APT_REPO'","horizon":"'`hzn version`'","docker":"'`docker --version`'","command":"'`command -v hzn`'"}'
