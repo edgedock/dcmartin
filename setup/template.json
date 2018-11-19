@@ -1,4 +1,5 @@
 {
+  "setup": "http://ibm.biz/horizon-setup",
   "distribution": {
     "id": "raspbian-stretch-lite",
     "kernel_version": "4.14",

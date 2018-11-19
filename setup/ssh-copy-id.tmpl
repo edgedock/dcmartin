@@ -5,6 +5,10 @@ for {} 1 {} {
       send "yes\r"
       continue
     }
+    "ermission denied" {
+      send_error "failure"
+      exit
+    }
     "assword:" { 
       send "%%CLIENT_PASSWORD%%\r" 
       expect { 
@@ -19,7 +23,7 @@ for {} 1 {} {
 	"assword:" {
 	  send_error "failure"
 	  exit
-	}
+        }
       }
     }
   }

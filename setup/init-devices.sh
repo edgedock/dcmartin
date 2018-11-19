@@ -58,7 +58,7 @@ set macs = ( `egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/'` )
 if ($?DEBUG) echo "DEBUG: found $#macs devices by MAC"
 
 ## DISTRIBUTION config
-
+set HORIZON_SETUP_URL = `jq -r '.setup' "$config"`
 set CLIENT_USERNAME = `jq -r '.distribution.client.username' "$config"`
 set CLIENT_PASSWORD = `jq -r '.distribution.client.password' "$config"`
 set CLIENT_HOSTNAME = `jq -r '.distribution.client.hostname' "$config"`
@@ -234,23 +234,18 @@ foreach mac ( $macs )
   if ($config_software != "true") then
     echo "INFO: ($id): configuring SOFTWARE"
     # install software
-    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - ibm.biz/horizon-setup | sudo bash -s' | jq '.'` )
-    if ($#result) then
-      # test for successful installation
-      set hzn = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'command -v hzn'`
-      if ($#hzn == 0) then
-	echo "ERROR: ($id): SOFTWARE failed"
-        continue
-      endif
-      # add location of hzn command
-      set result = ( `echo "$result" | jq '.command="'"$hzn"'"'` )
-      # add distribution information
-      set result = ( `echo "$result" | jq '.distribution='"${CLIENT_DISTRIBUTION}"` )
-      # update node state
-      set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
-      # update configuration file
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
+    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash -s' | jq '.'` )
+    if ($#result <= 1) then
+      echo "ERROR: ($id): SOFTWARE failed"
+      continue
     endif
+    # add distribution information
+    set result = ( `echo "$result" | jq '.distribution='"${CLIENT_DISTRIBUTION}"` )
+    # update node state
+    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
+    # update configuration file
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
+    # update software configuration
     set config_software = ( `jq '.nodes[]|select(.id=="'$id'").software != null' "$config"` )
   endif
   # sanity
