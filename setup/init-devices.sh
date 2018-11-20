@@ -101,7 +101,7 @@ foreach mac ( $macs )
   set config_ssh = `echo "$node_state" | jq '.ssh!=null'`
   set config_security = `echo "$node_state" | jq '.ssh.device!=null'`
   set config_software = `echo "$node_state" | jq '.software!=null'`
-  set config_exchange = `echo "$node_state" | jq '.exchange!=null'`
+  set config_exchange = `echo "$node_state" | jq '.exchange.node!=null'`
   set config_pattern = `echo "$node_state" | jq '.pattern!=null'`
   set config_network = `echo "$node_state" | jq '.network!=null'`
 
@@ -270,6 +270,36 @@ foreach mac ( $macs )
     echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq '.software'`
   endif
 
+# hzn exchange node create -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge -n "dcm-macbook:whocares"
+#
+# hzn exchange node list -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge dcm-macbook
+# {
+#   "cgiroua@us.ibm.com/dcm-macbook": {
+#     "lastHeartbeat": "2018-11-20T01:02:58.676Z[UTC]",
+#     "msgEndPoint": "",
+#     "name": "dcm-macbook",
+#     "owner": "cgiroua@us.ibm.com/dcmartin@us.ibm.com",
+#     "pattern": "",
+#     "publicKey": "",
+#     "registeredServices": [],
+#     "softwareVersions": {},
+#     "token": "********"
+#   }
+# }
+
+# hzn exchange status -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge 
+# {
+#   "dbSchemaVersion": 13,
+#   "msg": "Exchange server operating normally",
+#   "numberOfAgbotAgreements": 1,
+#   "numberOfAgbotMsgs": 0,
+#   "numberOfAgbots": 2,
+#   "numberOfNodeAgreements": 2,
+#   "numberOfNodeMsgs": 0,
+#   "numberOfNodes": 9,
+#   "numberOfUsers": 21
+# }
+
   ## CONFIG EXCHANGE
   if ($config_exchange != "true") then
     echo "INFO: ($id): configuring EXCHANGE"
@@ -284,38 +314,57 @@ foreach mac ( $macs )
       echo "ERROR: ($id): exchange $ex_id not found in exchanges"
       continue
     endif
+    # update node state
+    set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.id="'"$ex_id"'"' "$config"` )
+
     # credentials for exchange
     set ex_org = ( `echo "$exchange" | jq -r '.org'` )
     set ex_url = ( `echo "$exchange" | jq -r '.url'` )
     set ex_username = ( `echo "$exchange" | jq -r '.username'` )
     set ex_password = ( `echo "$exchange" | jq -r '.password'` )
+    set ex_device = ( `echo "$node_state" | jq -r '.ssh.device'` )
+    set ex_token = ( `echo "$node_state" | jq -r '.ssh.token'` )
 
-    # check exchange status
-    set cmd = "hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"`
-    if ($#result == 0) then
-      echo "WARN: ($id): EXCHANGE failed; status not received"
-      set result = 'null'
-    else
-      set result = '{"id":"'"$ex_id"'","status":'"$result"}'
+    # create node in exchange (always returns nothing)
+    set cmd = "hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    # test for failure status
+    if ($status != 0) then
+      echo "ERROR: ($id): EXCHANGE failed; $cmd"
+      continue
     endif
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.exchange='"$result" "$config"` )
+    # get exchange node information
+    set cmd = "hzn exchange node list -o ${ex_org} -u ${ex_username}:${ex_password} ${ex_device}"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"`
+    if ($#result <= 1) then
+      echo "ERROR: ($id): EXCHANGE failed; $cmd"
+      continue
+    else
+      # update node state
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.node='"$result" "$config"` )
+      # get exchange status
+      set cmd = "hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"`
+      if ($#result == 0) then
+	echo "WARN: ($id): EXCHANGE failed; $cmd"
+	set result = 'null'
+      else
+	set result = '{"id":"'"$ex_id"'","status":'"$result"'}'
+      endif
+      # update node state
+      set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.status='"$result" "$config"` )
+    endif
+
+    # update configuration
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
-    set config_exchange = ( `jq '.nodes[]|select(.id=="'$id'").exchange != null' "$config"` )
+
+    set config_exchange = ( `jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "$config"` )
   endif
   # sanity
   if ($config_exchange != "true") then
     echo "WARN: ($id): EXCHANGE failed"
     continue
   else
-    # check node list
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list'`
-    if ($#result == 0) then
-      echo "WARN: ($id): EXCHANGE failed; node list not received"
-      set result = 'null'
-    endif
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     echo "INFO: ($id): EXCHANGE configured" `echo "$node_state" | jq '.exchange'`
   endif
 
@@ -372,8 +421,8 @@ foreach mac ( $macs )
       # POLL client for node list information; wait until device identifier matches requested
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
       while ( `echo "$result" | jq '.node.configstate.state=="unconfigured"'` == false)
-	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (60): $result"
-	sleep 60
+	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (10): $result"
+	sleep 10
 	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
       end
       set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
@@ -396,7 +445,8 @@ foreach mac ( $macs )
       # copy pattern registration file to client
       scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
       # create command to execute on client
-      set cmd = "hzn register -n ${device}:${token} ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
+      # set cmd = "hzn register -n ${device}:${token} ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
+      set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
       if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
       # perform registration
       set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd}"` )
@@ -437,6 +487,7 @@ foreach mac ( $macs )
     # update configuration
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set config_pattern = ( `jq '.nodes[]|select(.id=="'$id'").pattern != null' "$config"` )
+
   endif
   # sanity
   if ($config_pattern != "true") then
