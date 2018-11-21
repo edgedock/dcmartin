@@ -28,7 +28,7 @@ else
   ARCH=$(dpkg --print-architecture)
 endif
 
-if [ -z "${ARCH}" ];
+if [ -z "${ARCH}" ]; then
   echo "Cannot automagically identify architecture (${ARCH}); options are: arm, arm64, amd64, ppc64el" >&2
   exit 1
 fi
