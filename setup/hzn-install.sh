@@ -68,7 +68,7 @@ fi
 ###
 
 if [ ! -n "${APT_REPO}" ]; then
-  APT_REPO=testing
+  APT_REPO=updates
   echo "*** WARN: Using default APT_REPO = ${APT_REPO}" >&2
 fi
 
