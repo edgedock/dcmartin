@@ -24,17 +24,13 @@ if [ "${ARCH}" == "aarch64" ]; then
   ARCH="arm64"
 elif [ "${ARCH}" == "x86_64" ]; then
   ARCH="amd64"
-elif [ "${ARCH}" == "armv7l" ]; then
-  ARCH=$(dpkg --print-architecture)
 else
+  ARCH=$(dpkg --print-architecture)
+endif
+
+if [ -z "${ARCH}" ];
   echo "Cannot automagically identify architecture (${ARCH}); options are: arm, arm64, amd64, ppc64el" >&2
-  read -p 'Architecture: ' ARCH
-  if [ -n "${ARCH}" ]; then
-    echo "+++ INFO: Specified ${ARCH}" >&2
-  else
-    echo "!!! ERROR: No architecture defined; exiting" >&2
-    exit 1
-  fi
+  exit 1
 fi
 
 echo "+++ INFO: Using architecture: ${ARCH}" >&2
