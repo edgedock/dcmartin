@@ -26,7 +26,7 @@ elif [ "${ARCH}" == "x86_64" ]; then
   ARCH="amd64"
 else
   ARCH=$(dpkg --print-architecture)
-endif
+fi
 
 if [ -z "${ARCH}" ]; then
   echo "Cannot automagically identify architecture (${ARCH}); options are: arm, arm64, amd64, ppc64el" >&2
