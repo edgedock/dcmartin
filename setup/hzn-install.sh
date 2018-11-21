@@ -86,7 +86,7 @@ else
     PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key
     echo "*** WARN: Using default PUBLICKEY_URL = ${PUBLICKEY_URL}" >&2
   fi
-  if [ -s "${APT_LIST}" ]; then
+  if [ -e "${APT_LIST}" ]; then
     echo "*** WARN: Existing Open Horizon ${APT_LIST}; deleting" >&2
     rm -f "${APT_LIST}"
   fi
