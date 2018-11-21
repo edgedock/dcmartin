@@ -2,7 +2,7 @@
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.
 
-**Note**: _You will need an IBM Cloud [account][ibm-registration]
+**Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
 ## Setup
 The basic installation script `hzn-setup.sh` may be used to install the Open Horizon software under LINUX.
@@ -27,7 +27,7 @@ You may create and publish your patterns to your organization.  Refer to the [ex
 ## Initialization
 The `init-device.sh` script automates the setup, installation, and configuration of devices.  This script processes a list of `nodes` identified by the `MAC` addresses on the local area network (LAN); Instructions for usage are provided below.
 
-**RECOMMENDED**: Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script.
+**RECOMMENDED**: _Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script._
 
 Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
