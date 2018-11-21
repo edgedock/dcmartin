@@ -8,6 +8,8 @@ The basic installation script `hzn-setup.sh` may be used to install the Open Hor
 wget -qO ibm.biz/horizon-setup | bash
 ```
 
+The `init-device.sh` script automates the setup, installation, and configuration of devices.  Instructions for usage are provided below.
+
 Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
 **Note**: _You will need an IBM Cloud [account][ibm-registration]_
