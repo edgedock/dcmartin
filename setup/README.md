@@ -2,7 +2,7 @@
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
-You may create and publish your patterns to your organization.  Refer to the [examples][https://github.com/open-horizon/examples] available on GitHub; a work-in-progress for the [Motion][http://motion-project.io/] software as a pattern is being developed [here][https://github.com/dcmartin/open-horizon/tree/master/motion].
+You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub; a work-in-progress for the [Motion][Motion] software as a pattern is being [developed][here].
 
 **Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
@@ -11,7 +11,7 @@ The basic installation script `hzn-setup.sh` may be used to install the Open Hor
 ```
 wget -qO ibm.biz/horizon-setup | bash
 ```
-A quick way to get started is to download an Ubuntu [image][http://releases.ubuntu.com/18.04.1/] and start a new virtual machine, e.g. using [VirtualBox][https://www.virtualbox.org/], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
+A quick way to get started is to download an Ubuntu [image][image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
 
 ## Initialization
 The `init-device.sh` script automates the setup, installation, and configuration of devices.  This script processes a list of `nodes` identified by the `MAC` addresses on the local area network (LAN); Instructions for usage are provided below.
@@ -290,4 +290,9 @@ David C Martin (github@dcmartin.com)
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
 [edge-install]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/adding-devices.html
 [macos-install]: https://github.com/open-horizon/anax/releases
-[hzn-setup]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/hzn-setup.sh
+[hzn-setup]: https://raw.githubusercontent.com/dcmartin/open-horizon/master/setup/hzn-setup.sh
+[image]: http://releases.ubuntu.com/18.04.1/
+[examples]: https://github.com/open-horizon/examples
+[Motion]: http://motion-project.io/
+[here]: https://github.com/dcmartin/open-horizon/tree/master/motion
+[VirtualBox]: https://www.virtualbox.org/
