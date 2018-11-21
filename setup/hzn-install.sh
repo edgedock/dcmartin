@@ -29,7 +29,7 @@ else
 fi
 
 if [ -z "${ARCH}" ]; then
-  echo "Cannot automagically identify architecture (${ARCH}); options are: arm, arm64, amd64, ppc64el" >&2
+  echo "Cannot automagically identify architecture; options are: arm, arm64, amd64, ppc64el" >&2
   exit 1
 fi
 
