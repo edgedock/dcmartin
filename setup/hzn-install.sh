@@ -138,6 +138,8 @@ else
   echo "*** WARN: The horizon.service is already active; restarting" >&2
   systemctl restart horizon.service >&2
 fi
+# sleep to enable start or restart
+sleep 5
 
 echo '{"repository":"'$APT_REPO'","horizon":"'`hzn version`'","docker":"'`docker --version`'","command":"'`command -v hzn`'"}'
 
