@@ -43,18 +43,25 @@
   ],
   "exchanges": [
     {
-      "id": "exchange-1",
+      "id": "staging",
       "org": "%%HORIZON_ORG_ID%%",
-      "url": "%%HORIZON_EXCHANGE_URL%%",
+      "url": "https://stg.edge-fabric.com/vi",
+      "username": "%%EXCHANGE_USERNAME%%",
+      "password": "%%EXCHANGE_PASSWORD%%"
+    },
+    {
+      "id": "production",
+      "org": "%%HORIZON_ORG_ID%%",
+      "url": "https://alpha.edge-fabric.com/vi",
       "username": "%%EXCHANGE_USERNAME%%",
       "password": "%%EXCHANGE_PASSWORD%%"
     }
   ],
   "configurations": [
     {
-      "id": "configuration-1",
+      "id": "cpuconf",
       "pattern": "cpu2msghub",
-      "exchange": "exchange-1",
+      "exchange": "production",
       "network": "PRODUCTION",
       "public_key": null,
       "private_key": null,
@@ -69,9 +76,9 @@
       ]
     },
     {
-      "id": "configuration-2",
+      "id": "sdrconf",
       "pattern": "sdr2msghub",
-      "exchange": "exchange-1",
+      "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }

@@ -1,7 +1,14 @@
 #!/bin/tcsh
-
 setenv DEBUG
 unsetenv VERBOSE
+
+set noglob
+
+###
+### default EXCHANGE URL
+###
+
+setenv HZN_EXCHANGE_URL "https://alpha.edge-fabric.com/v1"
 
 if (! -e "/usr/local/bin/nmap" && ! -e "/usr/bin/nmap") then
   /bin/echo 'No nmap(8); install using brew or apt' >& /dev/stderr
@@ -29,6 +36,13 @@ if (! -s "$config" ) then
   exit 1
 endif
 
+## DISTRIBUTION config
+set HORIZON_SETUP_URL = `jq -r '.setup' "$config"`
+set CLIENT_USERNAME = `jq -r '.distribution.client.username' "$config"`
+set CLIENT_PASSWORD = `jq -r '.distribution.client.password' "$config"`
+set CLIENT_HOSTNAME = `jq -r '.distribution.client.hostname' "$config"`
+set CLIENT_DISTRIBUTION = `jq '.distribution|{"id":.id,"kernel_version":.kernel_version,"release_date":.release_date,"version":.version}' "$config"`
+
 if ($#argv > 1) then
   set net = $argv[2]
 else
@@ -40,11 +54,19 @@ set TTL = 14400 # seconds
 set SECONDS = `date "+%s"`
 set DATE = `echo $SECONDS \/ $TTL \* $TTL | bc`
 set TMP = "/tmp/$0:t.$$"
+
+# make temporary directory for working files
 mkdir -p "$TMP"
+if (! -d "$TMP") then
+  echo "FATAL: no $TMP"
+  exit 1
+endif
 
 set out = "/tmp/$0:t.$DATE.txt"
 if (! -e "$out") then
-  rm -fr "$out:r:r".*.txt
+  unset noglob
+  rm -f "$out:h/$0:t".*.txt
+  set noglob
   /usr/bin/sudo nmap -sn -T5 "$net" >! "$out"
 endif
 
@@ -56,13 +78,6 @@ endif
 set macs = ( `egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/'` )
 
 if ($?DEBUG) echo "DEBUG: found $#macs devices by MAC"
-
-## DISTRIBUTION config
-set HORIZON_SETUP_URL = `jq -r '.setup' "$config"`
-set CLIENT_USERNAME = `jq -r '.distribution.client.username' "$config"`
-set CLIENT_PASSWORD = `jq -r '.distribution.client.password' "$config"`
-set CLIENT_HOSTNAME = `jq -r '.distribution.client.hostname' "$config"`
-set CLIENT_DISTRIBUTION = `jq '.distribution|{"id":.id,"kernel_version":.kernel_version,"release_date":.release_date,"version":.version}' "$config"`
 
 ###
 ### ITERATE OVER ALL MACS on LAN
@@ -84,7 +99,7 @@ foreach mac ( $macs )
   # find configuration which includes device
   set conf = `jq '.configurations[]|select(.nodes[].id=="'$id'")' "$config"`
   if ($#conf == 0) then
-    echo "WARN: ($id): Cannot find node configuration for device: $id"
+    echo "ERROR: ($id): Cannot find node configuration for device: $id"
     continue
   else
     # identify configuration
@@ -107,28 +122,32 @@ foreach mac ( $macs )
 
   ## CONFIGURATION KEYS
   if ($config_keys != 'true') then
-    if ($?DEBUG) echo "DEBUG: ($id): configuring KEYS for $conf_id"
-    # generate new key
-    ssh-keygen -t rsa -f "$conf_id" -N "" >& /dev/null
-    # test for success
-    if (! -s "$conf_id" || ! -s "$conf_id.pub") then
-      echo "ERROR: ($id): failed to create key files for $conf_id"
-      exit 1
+    # test for existing keys
+    if (! -s "$conf_id" && ! -s "${conf_id}.pub") then
+      if ($?DEBUG) echo "DEBUG: ($id): configuring KEYS for $conf_id"
+      # generate new key
+      ssh-keygen -t rsa -f "$conf_id" -N "" >& /dev/null
+      # test for success
+      if (! -s "$conf_id" || ! -s "$conf_id.pub") then
+        echo "ERROR: ($id): failed to create key files for $conf_id"
+        exit 1
+      endif
+    else
+      echo "INFO: ($id): using existing keys $conf_id"
     endif
+    # save into configuration
     set public_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "${conf_id}.pub"`'" }'
     jq '(.configurations[]|select(.id=="'"$conf_id"'").public_key)|='"$public_key" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set private_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "$conf_id"`'" }'
     jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"$private_key" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set conf = `jq '.configurations[]|select(.nodes[].id=="'$id'")' "$config"`
-    # cleanup
-    rm -f "$conf_id" "${conf_id}.pub"
     # update status
     set config_keys = `echo "$conf" | jq '.public_key!=null'`
   endif
   # sanity
   if ($config_keys != 'true') then
-    echo "WARN: ($id): failure to configure keys for $conf_id"
-    continue
+    echo "FATAL: ($id): failure to configure keys for $conf_id"
+    exit
   else
     set public_key = ( `echo "$conf" | jq '.public_key'` )
     set private_key = ( `echo "$conf" | jq '.private_key'` )
@@ -159,8 +178,9 @@ foreach mac ( $macs )
 
   ## CONFIG SSH
   if ($config_ssh != "true") then
-    echo "INFO: ($id): configuring SSH"
-    # perform ssh-copy-id using distribution default username and password
+    echo "INFO: ($id): SSH configuring $client_ipaddr"
+
+    # edit template ssh-copy-id 
     set ssh_copy_id = "$TMP/ssh-copy-id.exp"
     cat "ssh-copy-id.tmpl" \
       | sed 's|%%CLIENT_IPADDR%%|'"${client_ipaddr}"'|g' \
@@ -171,12 +191,12 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "DEBUG: ($id): attempting ssh-copy-id ($public_keyfile) to device $id"
     set success = ( `expect -d -f "$ssh_copy_id" |& egrep success | sed 's/.*success.*/success/g'` )
     if ($#success == 0) then
-      echo "WARN: ($id) SSH failed; consider re-flashing"
-      continue;
+      echo "ERROR: ($id) SSH failed; consider re-flashing"
+      continue
     endif
     echo "INFO: target $id configured with $conf_id public key"
     ## UPDATE CONFIGURATION
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"id":"'"${conf_id}"'"}' "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.ssh.id="'"${conf_id}"'"'` )
     if ($?DEBUG) echo "DEBUG: ($id): updating configuration $config"
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     rm -f "$ssh_copy_id"
@@ -185,14 +205,14 @@ foreach mac ( $macs )
   endif
   # sanity
   if ($config_ssh != "true") then
-    echo "WARN: ($id): SSH failed"
+    echo "ERROR: ($id): SSH failed"
     continue
   else
     # test access
     set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'whoami'` )
     if ($#result == 0 || "$result" != "${CLIENT_USERNAME}") then
-      echo "WARN: ($id) SSH failed; cannot confirm identity" `echo "$node_state" | jq '.ssh'`
-      continue;
+      echo "ERROR: ($id) SSH failed; cannot confirm identity" `echo "$node_state" | jq '.ssh'`
+      continue
     endif
     echo "INFO: ($id): SSH configured" `echo "$node_state" | jq '.ssh'`
   endif
@@ -204,7 +224,7 @@ foreach mac ( $macs )
     set device = ( `echo "$node_conf" | jq -r '.device'` )
     set token = ( `echo "$node_conf" | jq -r '.token'` )
     if ($#device == 0 || $#token == 0) then
-      echo "WARN: ($id): node configuration device or token are unspecified: $node_conf"
+      echo "ERROR: ($id): node configuration device or token are unspecified: $node_conf"
       continue
     endif
     # create device and token script
@@ -219,21 +239,21 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "DEBUG: ($id): invoking SSH script ($config_script:t)"
     ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'sudo bash '"$config_script:t"
     ## UPDATE CONFIGURATION
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.ssh={"id":"'"$conf_id"'","token":"'"${token}"'","device":"'"${device}"'"}' "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.ssh={"id":"'"$conf_id"'","token":"'"${token}"'","device":"'"${device}"'"}'` )
     if ($?DEBUG) echo "DEBUG: ($id): updating configuration $config"
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set config_security = `echo "$node_state" | jq '.ssh.device!=null'`
   endif
   # sanity
   if ($config_security != "true") then
-    echo "WARN: ($id): SECURITY failed"
+    echo "ERROR: ($id): SECURITY failed"
     continue
   else
     # test access
     set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hostname'` )
-    if ($#result == 0 || "$result" != "${CLIENT_HOSTNAME}") then
-      echo "WARN: ($id) SSH failed; cannot confirm hostname" `echo "$node_state" | jq '.ssh'`
-      continue;
+    if ($#result == 0 || `echo "$node_state" | jq -r '.ssh.device=="'"$result"'"'` != 'true') then
+      echo "ERROR: ($id) SSH failed; cannot confirm hostname: ${result}" `echo "$node_state" | jq '.ssh'`
+      continue
     endif
     echo "INFO: ($id): SECURITY configured" `echo "$node_state" | jq '.ssh'`
   endif
@@ -244,13 +264,15 @@ foreach mac ( $macs )
     # install software
     set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash -s' | jq '.'` )
     if ($#result <= 1) then
-      echo "ERROR: ($id): SOFTWARE failed"
+      echo "ERROR: ($id): SOFTWARE failed; result = $result"
       continue
     endif
     # add distribution information
-    set result = ( `echo "$result" | jq '.distribution='"${CLIENT_DISTRIBUTION}"` )
+    set result = ( `echo "$result" | jq '.|.distribution='"${CLIENT_DISTRIBUTION}"` )
+    if ($?DEBUG) echo "DEBUG: ($id): result = $result"
     # update node state
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.software='"$result" "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.|.software='"$result"` )
+    if ($?DEBUG) echo "DEBUG: ($id): node state = $node_state"
     # update configuration file
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     # update software configuration
@@ -263,15 +285,13 @@ foreach mac ( $macs )
   else
     # test access
     set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'command -v hzn'` )
-    if ($#result == 0) then
-      echo "WARN: ($id) SOFTWARE failed; cannot confirm command" `echo "$node_state" | jq '.software'`
-      continue;
+    if ($#result == 0 || `echo "$node_state" | jq -r '.software.command=="'$result'"'` != 'true') then
+      echo "ERROR: ($id) SOFTWARE failed; cannot confirm command" `echo "$node_state" | jq '.software'`
+      continue
     endif
     echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq '.software'`
   endif
 
-# hzn exchange node create -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge -n "dcm-macbook:whocares"
-#
 # hzn exchange node list -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge dcm-macbook
 # {
 #   "cgiroua@us.ibm.com/dcm-macbook": {
@@ -314,48 +334,81 @@ foreach mac ( $macs )
       echo "ERROR: ($id): exchange $ex_id not found in exchanges"
       continue
     endif
-    # update node state
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.id="'"$ex_id"'"' "$config"` )
-
-    # credentials for exchange
-    set ex_org = ( `echo "$exchange" | jq -r '.org'` )
+    # check URL for exchange
     set ex_url = ( `echo "$exchange" | jq -r '.url'` )
+    if ($#ex_url == 0 || "$ex_url" == "null") then
+      set ex_url = "$HZN_EXCHANGE_URL"
+      echo "WARN: exchange $ex_id does not have URL specified; using default: $ex_url"
+    endif
+
+    # update node state
+    set node_state = ( `echo "$node_state" | jq '.exchange.id="'"$ex_id"'"|.exchange.url="'"$ex_url"'"'` )
+    if ($?DEBUG) echo "DEBUG: ($id): node state:" `echo "$node_state" | jq -c '.'`
+
+    # get exchange specifics
+    set ex_org = ( `echo "$exchange" | jq -r '.org'` )
     set ex_username = ( `echo "$exchange" | jq -r '.username'` )
     set ex_password = ( `echo "$exchange" | jq -r '.password'` )
     set ex_device = ( `echo "$node_state" | jq -r '.ssh.device'` )
     set ex_token = ( `echo "$node_state" | jq -r '.ssh.token'` )
 
-    # create node in exchange (always returns nothing)
-    set cmd = "hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
+    # force specification of exchange URL
+    set cmd = "sudo sed -i 's|HZN_EXCHANGE_URL=.*|HZN_EXCHANGE_URL=${ex_url}|' /etc/default/horizon"
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    set cmd = "sudo systemctl restart horizon || false"
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
     ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
     # test for failure status
     if ($status != 0) then
       echo "ERROR: ($id): EXCHANGE failed; $cmd"
       continue
     endif
+
+    # create node in exchange (always returns nothing)
+    set cmd = "hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    set result = $status
+    while ( $result != 0 )
+	if ($?DEBUG) echo "WARN: ($id): failed command ($result): $cmd"
+        ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+        set result = $status
+    end
+
     # get exchange node information
     set cmd = "hzn exchange node list -o ${ex_org} -u ${ex_username}:${ex_password} ${ex_device}"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"`
-    if ($#result <= 1) then
-      echo "ERROR: ($id): EXCHANGE failed; $cmd"
-      continue
-    else
-      # update node state
-      set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.node='"$result" "$config"` )
-      # get exchange status
-      set cmd = "hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"`
-      if ($#result == 0) then
-	echo "WARN: ($id): EXCHANGE failed; $cmd"
-	set result = 'null'
-      else
-	set result = '{"id":"'"$ex_id"'","status":'"$result"'}'
-      endif
-      # update node state
-      set node_state = ( `jq '.nodes[]|select(.id=="'$id'").exchange|.status='"$result" "$config"` )
-    endif
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/henl.json"
+    set result = $status
+    while ($result != 0 || ! -s "$TMP/henl.json" )
+      echo "WARN: ($id): EXCHANGE retry; $cmd"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/henl.json"
+      set result = $status
+    end
+    if ($?DEBUG) echo "DEBUG: ($id): result $TMP/henl.json" `jq -c '.' "$TMP/henl.json"`
+    # update node state
+    set result = `sed 's/{}/null/g' "$TMP/henl.json" | jq '.'`
+    set node_state = ( `echo "$node_state" | jq '.exchange.node='"$result"` )
+    if ($?DEBUG) echo "DEBUG: ($id): node state:" `echo "$node_state" | jq -c '.'`
 
-    # update configuration
+    # get exchange status
+    set cmd = "hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/hes.json"
+    set result = $status
+    while ($result != 0 || ! -s "$TMP/hes.json")
+      echo "WARN: ($id): EXCHANGE retry; $cmd"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/hes.json"
+      set result = $status
+    end
+    if ($?DEBUG) echo "DEBUG: ($id): result $TMP/hes.json" `jq -c '.' "$TMP/hes.json"`
+    # update node state
+    set result = `sed 's/{}/null/g' "$TMP/hes.json" | jq '.'`
+    set node_state = ( `echo "$node_state" | jq '.exchange.status='"$result"` )
+    if ($?DEBUG) echo "DEBUG: ($id): node state:" `echo "$node_state" | jq -c '.'`
+
+    ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
 
     set config_exchange = ( `jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "$config"` )
@@ -417,13 +470,19 @@ foreach mac ( $macs )
       continue
     else if ($node_status != "unconfigured") then
       # unregister client
-      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn unregister -f'
+      set cmd = 'hzn unregister -f'
+      if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
       # POLL client for node list information; wait until device identifier matches requested
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
-      while ( `echo "$result" | jq '.node.configstate.state=="unconfigured"'` == false)
+      set cmd = 'hzn node list'
+      if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
+      while ( `echo "$result" | jq '.node.configstate.state=="unconfigured"'` == false )
 	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (10): $result"
 	sleep 10
-	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+        set cmd = 'hzn node list'
+        if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
       end
       set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.node='"$result" "$config"` )
     endif
@@ -484,10 +543,9 @@ foreach mac ( $macs )
     set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
     if ($?DEBUG) echo "DEBUG: agreement complete: $result" 
 
-    # update configuration
+    ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set config_pattern = ( `jq '.nodes[]|select(.id=="'$id'").pattern != null' "$config"` )
-
   endif
   # sanity
   if ($config_pattern != "true") then
@@ -528,6 +586,8 @@ foreach mac ( $macs )
     ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'sudo mv '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
     set result = '{ "ssid": "'"${nw_ssid}"'","password":"'"${nw_password}"'"}'
     set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.network='"$result" "$config"` )
+
+    ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
     set config_network = ( `jq '.nodes[]|select(.id=="'$id'").network != null' "$config"` )
   endif
@@ -544,9 +604,9 @@ foreach mac ( $macs )
 end
 
 done:
-rm -fr "$TMP"
+if ($?DEBUG == 0) rm -fr "$TMP"
 exit 0
 
 cleanup:
-rm -fr "$TMP"
+if ($?DEBUG == 0) rm -fr "$TMP"
 exit 1
