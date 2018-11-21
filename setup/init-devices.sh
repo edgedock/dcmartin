@@ -2,6 +2,12 @@
 setenv DEBUG
 unsetenv VERBOSE
 
+if ( `whoami` != "root" ) then
+  echo "ERROR: Please run as root, e.g. sudo $0 $argv" 
+  exit 1
+endif
+
+# no glob'ing by default
 set noglob
 
 ###
@@ -10,6 +16,7 @@ set noglob
 
 setenv HZN_EXCHANGE_URL "https://alpha.edge-fabric.com/v1"
 
+## check for necessary tooling
 if (! -e "/usr/local/bin/nmap" && ! -e "/usr/bin/nmap") then
   /bin/echo 'No nmap(8); install using brew or apt' >& /dev/stderr
   exit 1
@@ -50,7 +57,7 @@ else
 endif
 echo "INFO: executing: $0 $config $net" >&! /dev/stderr
 
-set TTL = 14400 # seconds
+set TTL = 300 # seconds
 set SECONDS = `date "+%s"`
 set DATE = `echo $SECONDS \/ $TTL \* $TTL | bc`
 set TMP = "/tmp/$0:t.$$"
@@ -67,7 +74,7 @@ if (! -e "$out") then
   unset noglob
   rm -f "$out:h/$0:t".*.txt
   set noglob
-  /usr/bin/sudo nmap -sn -T5 "$net" >! "$out"
+  nmap -sn -T5 "$net" >! "$out"
 endif
 
 if (! -e "$out") then
@@ -77,7 +84,7 @@ endif
 
 set macs = ( `egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/'` )
 
-if ($?DEBUG) echo "DEBUG: found $#macs devices by MAC"
+echo "INFO: found $#macs devices by MAC"
 
 ###
 ### ITERATE OVER ALL MACS on LAN
@@ -89,11 +96,11 @@ foreach mac ( $macs )
   # search for device by mac
   set id = `jq -r '.nodes[]|select(.mac=="'$mac'").id' "$config"`
   if ($#id == 0) then
-    if ($?VERBOSE) echo "VERBOSE: ($id): NOT FOUND; MAC: $mac; IP: $client_ipaddr"
+    if ($?VERBOSE) echo "VERBOSE: NOT FOUND; MAC: $mac; IP: $client_ipaddr"
     continue
   else
     # get ip address from nmap output file
-    if ($?DEBUG) echo "DEBUG: ($id): FOUND ($id); MAC: $mac; IP $client_ipaddr"
+    echo "INFO: ($id): FOUND ($id); MAC: $mac; IP $client_ipaddr"
   endif
 
   # find configuration which includes device
@@ -133,7 +140,7 @@ foreach mac ( $macs )
         exit 1
       endif
     else
-      echo "INFO: ($id): using existing keys $conf_id"
+      if ($?VERBOSE) echo "VERBOSE: ($id): using existing keys $conf_id"
     endif
     # save into configuration
     set public_key = '{ "encoding": "base64", "value": "'`${BASE64_ENCODE} "${conf_id}.pub"`'" }'
@@ -151,15 +158,19 @@ foreach mac ( $macs )
   else
     set public_key = ( `echo "$conf" | jq '.public_key'` )
     set private_key = ( `echo "$conf" | jq '.private_key'` )
-    if ($?DEBUG) echo "DEBUG: ($id): KEYS configured: $conf_id"
+    if ($?VERBOSE) echo "VERBOSE: ($id): KEYS configured: $conf_id"
   endif
 
   # process public key for device
   set pke = ( `echo "$public_key" | jq -r '.encoding'` )
   if ($#pke && "$pke" == "base64") then
     set public_keyfile = "$TMP/$conf_id.pub"
-    echo "$public_key" | jq -r '.value' | base64 --decode >! "$public_keyfile"
-    chmod 400 "$public_keyfile"
+    if ( ! -e "$public_keyfile" ) then
+      echo "$public_key" | jq -r '.value' | base64 --decode >! "$public_keyfile"
+      chmod 400 "$public_keyfile"
+    else
+      if ($?DEBUG) echo "DEBUG: ($id): found existing keyfile: $public_keyfile"
+    endif
   else
     echo "FATAL: ($id): invalid public key encoding"
     exit 1
@@ -169,8 +180,12 @@ foreach mac ( $macs )
   set pke = ( `echo "$private_key" | jq -r '.encoding'` )
   if ($#pke && "$pke" == "base64") then
     set private_keyfile = "$TMP/$conf_id"
-    echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
-    chmod 400 "$private_keyfile"
+    if ( ! -e "$private_keyfile" ) then
+      echo "$private_key" | jq -r '.value' | base64 --decode >! "$private_keyfile"
+      chmod 400 "$private_keyfile"
+    else
+      if ($?DEBUG) echo "DEBUG: ($id): found existing keyfile: $private_keyfile"
+    endif
   else
     echo "FATAL: ($id): invalid private key encoding"
     exit 1
@@ -178,7 +193,7 @@ foreach mac ( $macs )
 
   ## CONFIG SSH
   if ($config_ssh != "true") then
-    echo "INFO: ($id): SSH configuring $client_ipaddr"
+    if ($?DEBUG) echo "DEBUG: ($id): SSH attempting to configure: $client_ipaddr"
 
     # edit template ssh-copy-id 
     set ssh_copy_id = "$TMP/ssh-copy-id.exp"
@@ -188,13 +203,13 @@ foreach mac ( $macs )
       | sed 's|%%CLIENT_PASSWORD%%|'"${CLIENT_PASSWORD}"'|g' \
       | sed 's|%%PUBLIC_KEYFILE%%|'"${public_keyfile}"'|g' \
       >! "$ssh_copy_id"
-    if ($?DEBUG) echo "DEBUG: ($id): attempting ssh-copy-id ($public_keyfile) to device $id"
+    if ($?VERBOSE) echo "VERBOSE: ($id): attempting ssh-copy-id ($public_keyfile) to device $id"
     set success = ( `expect -d -f "$ssh_copy_id" |& egrep success | sed 's/.*success.*/success/g'` )
     if ($#success == 0) then
       echo "ERROR: ($id) SSH failed; consider re-flashing"
       continue
     endif
-    echo "INFO: target $id configured with $conf_id public key"
+    if ($?DEBUG) echo "DEBUG: target $id configured with $conf_id public key"
     ## UPDATE CONFIGURATION
     set node_state = ( `echo "$node_state" | jq '.ssh.id="'"${conf_id}"'"'` )
     if ($?DEBUG) echo "DEBUG: ($id): updating configuration $config"
@@ -262,7 +277,7 @@ foreach mac ( $macs )
   if ($config_software != "true") then
     echo "INFO: ($id): configuring SOFTWARE"
     # install software
-    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash -s' | jq '.'` )
+    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash -s 2> /dev/null' | jq '.'` )
     if ($#result <= 1) then
       echo "ERROR: ($id): SOFTWARE failed; result = $result"
       continue
@@ -354,11 +369,11 @@ foreach mac ( $macs )
 
     # force specification of exchange URL
     set cmd = "sudo sed -i 's|HZN_EXCHANGE_URL=.*|HZN_EXCHANGE_URL=${ex_url}|' /etc/default/horizon"
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
     set cmd = "sudo systemctl restart horizon || false"
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
     # test for failure status
     if ($status != 0) then
       echo "ERROR: ($id): EXCHANGE failed; $cmd"
@@ -367,46 +382,46 @@ foreach mac ( $macs )
 
     # create node in exchange (always returns nothing)
     set cmd = "hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
     set result = $status
     while ( $result != 0 )
 	if ($?DEBUG) echo "WARN: ($id): failed command ($result): $cmd"
-        ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+        ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
         set result = $status
     end
 
     # get exchange node information
     set cmd = "hzn exchange node list -o ${ex_org} -u ${ex_username}:${ex_password} ${ex_device}"
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/henl.json"
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" >! "$TMP/henl.json"
     set result = $status
     while ($result != 0 || ! -s "$TMP/henl.json" )
       echo "WARN: ($id): EXCHANGE retry; $cmd"
-      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/henl.json"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" >! "$TMP/henl.json"
       set result = $status
     end
-    if ($?DEBUG) echo "DEBUG: ($id): result $TMP/henl.json" `jq -c '.' "$TMP/henl.json"`
+    if ($?VERBOSE) echo "VERBOSE: ($id): result $TMP/henl.json" `jq -c '.' "$TMP/henl.json"`
     # update node state
     set result = `sed 's/{}/null/g' "$TMP/henl.json" | jq '.'`
     set node_state = ( `echo "$node_state" | jq '.exchange.node='"$result"` )
-    if ($?DEBUG) echo "DEBUG: ($id): node state:" `echo "$node_state" | jq -c '.'`
+    if ($?VERBOSE) echo "VERBOSE: ($id): node state:" `echo "$node_state" | jq -c '.'`
 
     # get exchange status
     set cmd = "hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/hes.json"
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" >! "$TMP/hes.json"
     set result = $status
     while ($result != 0 || ! -s "$TMP/hes.json")
       echo "WARN: ($id): EXCHANGE retry; $cmd"
-      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" >! "$TMP/hes.json"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" >! "$TMP/hes.json"
       set result = $status
     end
-    if ($?DEBUG) echo "DEBUG: ($id): result $TMP/hes.json" `jq -c '.' "$TMP/hes.json"`
+    if ($?VERBOSE) echo "VERBOSE: ($id): result $TMP/hes.json" `jq -c '.' "$TMP/hes.json"`
     # update node state
     set result = `sed 's/{}/null/g' "$TMP/hes.json" | jq '.'`
     set node_state = ( `echo "$node_state" | jq '.exchange.status='"$result"` )
-    if ($?DEBUG) echo "DEBUG: ($id): node state:" `echo "$node_state" | jq -c '.'`
+    if ($?VERBOSE) echo "VERBOSE: ($id): node state:" `echo "$node_state" | jq -c '.'`
 
     ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
@@ -436,21 +451,14 @@ foreach mac ( $macs )
       echo "ERROR: ($id): pattern $ptid not found in patterns"
       continue
     endif
+
     # pattern for registration
     set pt_id = ( `echo "$pattern" | jq -r '.id'` )
     set pt_org = ( `echo "$pattern" | jq -r '.org'` )
     set pt_url = ( `echo "$pattern" | jq -r '.url'` )
     set pt_vars = ( `echo "$conf" | jq '.variables'` )
     
-    # test if node is identified in exchange 
-    set device = `echo "$node_state" | jq -r '.ssh.device'`
-    set found = `echo "$node_state" | jq '.node.node.id=="'"$device"'"'`
-    if ($found == "false") then
-      echo "WARN: ($id): node not found in exchange"
-    else
-      if ($?DEBUG) echo "DEBUG: ($id): node found in exchange"
-    endif 
-
+    # get node specifics
     set ex_id = `echo "$node_state" | jq -r '.exchange.id'`
     set ex_org = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").org' "$config"`
     set ex_username = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "$config"`
@@ -458,13 +466,13 @@ foreach mac ( $macs )
 
     # get node status
     set cmd = 'hzn node list'
-    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
+    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
     set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
 
     # test if node is configured with pattern
     set node_status = `echo "$node_state" | jq -r '.node.configstate.state'`
-    set node_pattern = `echo "$node_state" | jq -r '.pattern'`
+    set node_pattern = `echo "$node_state" | jq -r '.node.pattern'`
 
     # unregister node iff
     if ($node_status == "configured" && $node_pattern == "${pt_org}/${pt_id}") then
@@ -478,17 +486,17 @@ foreach mac ( $macs )
       # unregister client
       set cmd = 'hzn unregister -f'
       if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd"
+      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
 
       # POLL client for node list information; wait until device identifier matches requested
       set cmd = 'hzn node list'
       if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
       while ( `echo "$result" | jq '.configstate.state=="unconfigured"'` == false )
 	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (10): $result"
 	sleep 10
         if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
+	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
       end
       set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
     endif
@@ -515,25 +523,27 @@ foreach mac ( $macs )
       # perform registration
       set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
       if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
-      set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd}"` )
+      set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd} 2> /dev/null"` )
     endif
 
     # POLL client for node list information; wait for configured state
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+    set cmd = "hzn node list"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
     while ( `echo "$result" | jq '.configstate.state=="configured"'` == false)
       if ($?DEBUG) echo "DEBUG: ($id): waiting on configuration (10): $result"
       sleep 10
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
     end
     set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
     if ($?DEBUG) echo "DEBUG: ($id): node is configured"
 
     # POLL client for agreementlist information; wait until agreement exists
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
+    set cmd = "hzn agreement list"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
     while ( $#result <= 1) 
       if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (10): $result"
       sleep 10
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
     end
     # update node state
     set node_state = ( `echo "$node_state" | jq '.pattern='"$result"` )
@@ -579,7 +589,8 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "DEBUG: ($id): copying script ($config_script)"
     scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "$config_script" "${CLIENT_USERNAME}@${client_ipaddr}:." 
     if ($?DEBUG) echo "DEBUG: ($id): invoking script ($config_script:t)"
-    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'sudo mv '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
+    set cmd = 'sudo mv -f '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
     set result = '{ "ssid": "'"${nw_ssid}"'","password":"'"${nw_password}"'"}'
     set node_state = ( `echo "$node_state" | jq '.network='"$result"` )
 
