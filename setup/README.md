@@ -14,7 +14,7 @@ wget -qO ibm.biz/horizon-setup | bash
 A quick way to get started is to download an Ubuntu [image][image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
 
 ## Initialization
-The `init-device.sh` script automates the setup, installation, and configuration of devices.  This script processes a list of `nodes` identified by the `MAC` addresses on the local area network (LAN); Instructions for usage are provided below.
+The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested for RaspberryPi running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.
 
 **RECOMMENDED**: _Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script._
 
