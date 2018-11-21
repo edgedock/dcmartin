@@ -1,6 +1,8 @@
 # About
 
-This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.
+This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
+
+You may create and publish your patterns to your organization.  Refer to the [examples][https://github.com/open-horizon/examples] available on GitHub; a work-in-progress for the [Motion][http://motion-project.io/] software as a pattern is being developed [here][https://github.com/dcmartin/open-horizon/tree/master/motion].
 
 **Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
@@ -11,25 +13,10 @@ wget -qO ibm.biz/horizon-setup | bash
 ```
 A quick way to get started is to download an Ubuntu [image][http://releases.ubuntu.com/18.04.1/] and start a new virtual machine, e.g. using [VirtualBox][https://www.virtualbox.org/], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
 
-## Patterns
-The edge fabric runs _patterns_ which correspond to one or more LINUX containers providing various services.  There are two public patterns in the **IBM** organization which periodically send data an IBM Message Hub (aka Kafka) service _topic_:
-
-+ IBM/cpu2msghub - sends a CPU measurement and GPS location message to your **private** topic
-+ IBM/sdr2msghub - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
-
-Both patterns require an API key and list of service broker URL's.
-
-+ MSGHUB_API_KEY - a **private** key for each user; may be shared across multiple devices
-+ MSGHUB_BROKER_URL - a list of URL for the IBM Message Hub service
-
-You may create and publish your patterns to your organization.  Refer to the [examples][https://github.com/open-horizon/examples] available on GitHub; a work-in-progress for the [Motion][http://motion-project.io/] software as a pattern is being developed [here][https://github.com/dcmartin/open-horizon/tree/master/motion].
-
 ## Initialization
 The `init-device.sh` script automates the setup, installation, and configuration of devices.  This script processes a list of `nodes` identified by the `MAC` addresses on the local area network (LAN); Instructions for usage are provided below.
 
 **RECOMMENDED**: _Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script._
-
-Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
 ## Usage
 
@@ -47,7 +34,6 @@ Inspect the resulting configuration file for configuration changes applied to no
 Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
 
 ### Option: `nodes`
-
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status.
 
 Example initial `nodes` list:
@@ -67,16 +53,12 @@ Example initial `nodes` list:
 ```
 
 ### Option: `configurations`
-
-List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`
-
-Any number of `variables` may be defined appropriate for the defined `pattern`.
+List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`.  Any number of `variables` may be defined appropriate for the defined `pattern`.
 
 **Note**: _You must obtain [credentials][kafka-creds] for IBM MessageHub for alpha phase_
-
 ```
   "configurations": [
-    { 
+    {
       "id": "cpuconf",
       "pattern": "cpu2msghub",
       "exchange": "production",
@@ -84,14 +66,15 @@ Any number of `variables` may be defined appropriate for the defined `pattern`.
       "public_key": null,
       "private_key": null,
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }
+        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" },
+        { "key": "MSGHUB_BROKER_URL", "value": "%%MSGHUB_BROKER_URL%%" }
       ],
       "nodes": [
         { "id": "rp1", "device": "test-cpu-1", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp2", "device": "test-cpu-2", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp3", "device": "test-cpu-3", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp4", "device": "test-cpu-4", "token": "Ah@rdP@$$wOoD" }
-      ] 
+      ]
     },
     {
       "id": "sdrconf",
@@ -103,7 +86,7 @@ Any number of `variables` may be defined appropriate for the defined `pattern`.
       ],
       "public_key": null,
       "private_key": null,
-      "nodes": [ 
+      "nodes": [
         { "id": "rp5", "device": "test-sdr-1", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp6", "device": "test-sdr-2", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp7", "device": "test-sdr-3", "token": "Ah@rdP@$$wOoD" },
@@ -114,9 +97,15 @@ Any number of `variables` may be defined appropriate for the defined `pattern`.
 ```
 
 ### Option: `patterns`
+The edge fabric runs _patterns_ which correspond to one or more LINUX containers providing various services.  There are two public patterns in the **IBM** organization which periodically send data an IBM Message Hub (aka Kafka) service _topic_:
 
-List of pattern definitions of `id`, `org`, and `url` for the patterns available in the `exchange`.
++ IBM/cpu2msghub - sends a CPU measurement and GPS location message to your **private** topic
++ IBM/sdr2msghub - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
 
+Both patterns require an API key and list of service broker URL's.
+
++ MSGHUB_API_KEY - a **private** key for each user; may be shared across multiple devices
++ MSGHUB_BROKER_URL - a list of URL for the IBM Message Hub service
 ```
   "patterns": [
     {
@@ -133,9 +122,7 @@ List of pattern definitions of `id`, `org`, and `url` for the patterns available
 ```
 
 ### Option: `exchanges`
-
 List of exchange definitions for `id`, `org`, `url`, and credentials `username` and `password`
-
 ```
   "exchanges": [
     {
@@ -149,11 +136,7 @@ List of exchange definitions for `id`, `org`, `url`, and credentials `username` 
 ```
 
 ### Option: `networks`
-
-List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.
-
-Network configuration is _only_ applied once node has been successfully initialized.
-
+List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  Network configuration is _only_ applied once node has been successfully initialized.
 ```
   "networks": [
     {
