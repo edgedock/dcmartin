@@ -1,6 +1,12 @@
 ## About
 
-This repository contains a sample script to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.
+This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.
+
+The basic installation script `hzn-setup.sh` may be used to install the Open Horizon software:
+
+```
+wget -qO ibm.biz/horizon-setup | bash
+```
 
 Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
