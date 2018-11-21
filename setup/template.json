@@ -45,7 +45,7 @@
     {
       "id": "staging",
       "org": "%%HORIZON_ORG_ID%%",
-      "url": "https://stg.edge-fabric.com/vi",
+      "url": "https://stg.edge-fabric.com/v1",
       "username": "%%EXCHANGE_USERNAME%%",
       "password": "%%EXCHANGE_PASSWORD%%"
     },
