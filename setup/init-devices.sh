@@ -456,8 +456,14 @@ foreach mac ( $macs )
     set ex_username = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "$config"`
     set ex_password = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "$config"`
 
+    # get node status
+    set cmd = 'hzn node list'
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd" | jq '.'`
+    set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
+
     # test if node is configured with pattern
-    set node_status = `echo "$node_state" | jq -r '.exchange.configstate.state'`
+    set node_status = `echo "$node_state" | jq -r '.node.configstate.state'`
     set node_pattern = `echo "$node_state" | jq -r '.pattern'`
 
     # unregister node iff
@@ -506,11 +512,9 @@ foreach mac ( $macs )
 
       # copy pattern registration file to client
       scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
-      # create command to execute on client
-      # set cmd = "hzn register -n ${device}:${token} ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
+      # perform registration
       set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
       if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
-      # perform registration
       set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd}"` )
     endif
 
@@ -521,7 +525,7 @@ foreach mac ( $macs )
       sleep 10
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn node list' | jq '.'`
     end
-    set node_state = ( `echo "$node_state" | jq '.node='"$result" "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
     if ($?DEBUG) echo "DEBUG: ($id): node is configured"
 
     # POLL client for agreementlist information; wait until agreement exists
@@ -532,7 +536,7 @@ foreach mac ( $macs )
       set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'hzn agreement list' | jq '.'`
     end
     # update node state
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.pattern='"$result" "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.pattern='"$result"` )
     if ($?DEBUG) echo "DEBUG: agreement complete: $result" 
 
     ## UPDATE CONFIGURATION
@@ -577,7 +581,7 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "DEBUG: ($id): invoking script ($config_script:t)"
     ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" 'sudo mv '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
     set result = '{ "ssid": "'"${nw_ssid}"'","password":"'"${nw_password}"'"}'
-    set node_state = ( `jq '.nodes[]|select(.id=="'$id'")|.network='"$result" "$config"` )
+    set node_state = ( `echo "$node_state" | jq '.network='"$result"` )
 
     ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
