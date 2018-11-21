@@ -1,27 +1,46 @@
-## About
+# About
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.
 
-The basic installation script `hzn-setup.sh` may be used to install the Open Horizon software:
+**Note**: _You will need an IBM Cloud [account][ibm-registration]
 
+## Setup
+The basic installation script `hzn-setup.sh` may be used to install the Open Horizon software under LINUX.
 ```
 wget -qO ibm.biz/horizon-setup | bash
 ```
+A quick way to get started is to download an Ubuntu [image][http://releases.ubuntu.com/18.04.1/] and start a new virtual machine, e.g. using [VirtualBox][https://www.virtualbox.org/], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
 
-The `init-device.sh` script automates the setup, installation, and configuration of devices.  Instructions for usage are provided below.
+## Patterns
+The edge fabric runs _patterns_ which correspond to one or more LINUX containers providing various services.  There are two public patterns in the **IBM** organization which periodically send data an IBM Message Hub (aka Kafka) service _topic_:
+
++ IBM/cpu2msghub - sends a CPU measurement and GPS location message to your **private** topic
++ IBM/sdr2msghub - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
+
+Both patterns require an API key and list of service broker URL's.
+
++ MSGHUB_API_KEY - a **private** key for each user; may be shared across multiple devices
++ MSGHUB_BROKER_URL - a list of URL for the IBM Message Hub service
+
+You may create and publish your patterns to your organization.  Refer to the [examples][https://github.com/open-horizon/examples] available on GitHub; a work-in-progress for the [Motion][http://motion-project.io/] software as a pattern is being developed [here][https://github.com/dcmartin/open-horizon/tree/master/motion].
+
+## Initialization
+The `init-device.sh` script automates the setup, installation, and configuration of devices.  This script processes a list of `nodes` identified by the `MAC` addresses on the local area network (LAN); Instructions for usage are provided below.
+
+**RECOMMENDED**: Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script.
 
 Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
-
-**Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
 ## Usage
 
 1. Copy the `template.json` file and edit for your environment
-1. Run the `init-devices.sh` script with the name of your configuration file; default is `horizon.json`
+1. Run the `init-devices.sh` script with the name of your configuration file and attached network to scan.  The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.
 ```
-sudo ./init-devices.sh myconfig.json
+sudo ./init-devices.sh myconfig.json 192.168.1.0/24
 ```
-Inspect the resulting configuration file for node state
+Devices discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password; for example, Raspbian LINUX for RaspberryPi uses `pi` and `raspberry` as defaults.
+
+Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
 ## Configuration
 
@@ -47,51 +66,6 @@ Example initial `nodes` list:
   ] 
 ```
 
-Example status of node from list during initialization; state information includes:
-
-+ *ssh* 
-  - `id` for configuration used, including `device` name and `token`
-  - devices have hostname changed, configuration public key authorized, and ssh disabled with password
-+ *software* 
-  - `repository` for installation package, `horizon` version and `command`, `docker` version information
-+ *exchange* 
-  - `id`, `status` of exchange, and `node` list
-
-```
-    { "mac": "B8:27:EB:F7:3A:8C", "id": "rp8",
-      "ssh": { "id": "cpu2msghub@cgiroua", "token": "Ah@rdP@$$wOoD", "device": "test-cpu-1" },
-      "software": {
-        "repository": "testing",
-        "horizon": "2.20.0",
-        "docker": "Docker version 18.09.0, build 4d60db4",
-        "command": "/usr/bin/hzn"
-      },
-      "exchange": {
-        "id": "cgiroua",
-        "status": null,
-        "node": {
-          "id": "00000000c4a26fd9",
-          "organization": null,
-          "pattern": null,
-          "name": null,
-          "token_last_valid_time": "",
-          "token_valid": null,
-          "ha": null,
-          "configstate": { "state": "unconfigured", "last_update_time": "" },
-          "configuration": {
-            "exchange_api": "https://alpha.edge-fabric.com/v1/",
-            "exchange_version": "1.63.0",
-            "required_minimum_exchange_version": "1.63.0",
-            "preferred_exchange_version": "1.63.0",
-            "architecture": "arm",
-            "horizon_version": "2.20.0"
-          },
-          "connectivity": { "firmware.bluehorizon.network": true, "images.bluehorizon.network": true }
-        }
-      }
-    }
-```
-
 ### Option: `configurations`
 
 List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`
@@ -103,9 +77,9 @@ Any number of `variables` may be defined appropriate for the defined `pattern`.
 ```
   "configurations": [
     { 
-      "id": "configuration-1",
+      "id": "cpuconf",
       "pattern": "cpu2msghub",
-      "exchange": "exchange-1",
+      "exchange": "production",
       "network": "PRODUCTION",
       "public_key": null,
       "private_key": null,
@@ -120,9 +94,9 @@ Any number of `variables` may be defined appropriate for the defined `pattern`.
       ] 
     },
     {
-      "id": "configuration-2",
+      "id": "sdrconf",
       "pattern": "sdr2msghub",
-      "exchange": "exchange-1",
+      "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }
@@ -165,9 +139,9 @@ List of exchange definitions for `id`, `org`, `url`, and credentials `username` 
 ```
   "exchanges": [
     {
-      "id": "exchange-1",
+      "id": "production",
       "org": "%%HORIZON_ORG_ID%%",
-      "url": "%%HORIZON_EXCHANGE_URL%%",
+      "url": "https://stg.edge-fabric.com/v1",
       "username": "%%EXCHANGE_USERNAME%%",
       "password": "%%EXCHANGE_PASSWORD%%"
     }
@@ -195,6 +169,110 @@ Network configuration is _only_ applied once node has been successfully initiali
       "password": "0123456789"
     }
   ]
+```
+
+## Output
+
+When the script completes, the `nodes` list is updated with the configurations applied, for example:
+
+```
+    {
+      "mac": "B8:27:EB:F7:3A:8C",
+      "id": "rp8",
+      "ssh": {
+        "id": "cpuconf",
+        "device": "test-cpu-1",
+        "token": "Ah@rdP@$$wOoD"
+      },
+      "software": {
+        "repository": "updates",
+        "horizon": "2.20.1",
+        "docker": "Docker version 18.09.0, build 4d60db4",
+        "command": "/usr/bin/hzn",
+        "distribution": {
+          "id": "raspbian-stretch-lite",
+          "kernel_version": "4.14",
+          "release_date": "2018-11-13",
+          "version": "November 2018"
+        }
+      },
+      "exchange": {
+        "id": "production",
+        "url": "https://alpha.edge-fabric.com/v1",
+        "node": {
+          "dcmartin@us.ibm.com/test-cpu-1": {
+            "lastHeartbeat": "2018-11-21T19:08:50.381Z[UTC]",
+            "msgEndPoint": "",
+            "name": "test-cpu-1",
+            "owner": "dcmartin@us.ibm.com/dcmartin@us.ibm.com",
+            "pattern": "",
+            "publicKey": "",
+            "registeredServices": [],
+            "softwareVersions": null,
+            "token": "********"
+          }
+        },
+        "status": {
+          "dbSchemaVersion": 15,
+          "msg": "Exchange server operating normally",
+          "numberOfAgbotAgreements": 6,
+          "numberOfAgbotMsgs": 1,
+          "numberOfAgbots": 2,
+          "numberOfNodeAgreements": 8,
+          "numberOfNodeMsgs": 0,
+          "numberOfNodes": 20,
+          "numberOfUsers": 28
+        }
+      },
+      "node": {
+        "id": "00000000c4a26fd9",
+        "organization": "dcmartin@us.ibm.com",
+        "pattern": "IBM/cpu2msghub",
+        "name": "00000000c4a26fd9",
+        "token_last_valid_time": "2018-11-21 18:03:20 +0000 UTC",
+        "token_valid": true,
+        "ha": false,
+        "configstate": {
+          "state": "configured",
+          "last_update_time": "2018-11-21 18:03:24 +0000 UTC"
+        },
+        "configuration": {
+          "exchange_api": "https://alpha.edge-fabric.com/v1/",
+          "exchange_version": "1.65.0",
+          "required_minimum_exchange_version": "1.63.0",
+          "preferred_exchange_version": "1.63.0",
+          "architecture": "arm",
+          "horizon_version": "2.20.1"
+        },
+        "connectivity": {
+          "firmware.bluehorizon.network": true,
+          "images.bluehorizon.network": true
+        }
+      },
+      "pattern": [
+        {
+          "name": "Policy for github.com.open-horizon.examples.cpu merged with Policy for github.com.open-horizon.examples.gps merged with cpu2msghub__IBM_arm",
+          "current_agreement_id": "ca92b425dd479835fcdb965d12e492e0d87db3e2233035f3b02e027ad56aeb73",
+          "consumer_id": "IBM/agbot-1",
+          "agreement_creation_time": "2018-11-21 18:03:50 +0000 UTC",
+          "agreement_accepted_time": "2018-11-21 18:03:59 +0000 UTC",
+          "agreement_finalized_time": "2018-11-21 18:04:05 +0000 UTC",
+          "agreement_execution_start_time": "2018-11-21 18:04:14 +0000 UTC",
+          "agreement_data_received_time": "",
+          "agreement_protocol": "Basic",
+          "workload_to_run": {
+            "url": "github.com.open-horizon.examples.cpu2msghub",
+            "org": "IBM",
+            "version": "1.2.5",
+            "arch": "arm"
+          }
+        }
+      ],
+      "network": {
+        "ssid": "TEST",
+        "password": "0123456789"
+      }
+    }
 ```
 
 ## Changelog & Releases
