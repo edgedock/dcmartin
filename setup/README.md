@@ -20,7 +20,7 @@ The `init-device.sh` script automates the setup, installation, and configuration
 
 ## Usage
 
-1. Copy the `template.json` file and edit for your environment
+1. Copy the [`template.json`][template] file and edit for your environment
 1. Run the `init-devices.sh` script with the name of your configuration file and attached network to scan.  The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.
 ```
 sudo ./init-devices.sh myconfig.json 192.168.1.0/24
@@ -296,3 +296,4 @@ David C Martin (github@dcmartin.com)
 [Motion]: http://motion-project.io/
 [here]: https://github.com/dcmartin/open-horizon/tree/master/motion
 [VirtualBox]: https://www.virtualbox.org/
+[template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
