@@ -124,7 +124,6 @@ foreach mac ( $macs )
   set config_security = `echo "$node_state" | jq '.ssh.device!=null'`
   set config_software = `echo "$node_state" | jq '.software!=null'`
   set config_exchange = `echo "$node_state" | jq '.exchange.node!=null'`
-  set config_pattern = `echo "$node_state" | jq '.pattern!=null'`
   set config_network = `echo "$node_state" | jq '.network!=null'`
 
   ## CONFIGURATION KEYS
@@ -229,7 +228,7 @@ foreach mac ( $macs )
       echo "ERROR: ($id) SSH failed; cannot confirm identity" `echo "$node_state" | jq '.ssh'`
       continue
     endif
-    echo "INFO: ($id): SSH configured" `echo "$node_state" | jq '.ssh'`
+    echo "INFO: ($id): SSH configured" `echo "$node_state" | jq -c '.ssh.id'`
   endif
 
   ## CONFIG SECURITY
@@ -270,7 +269,7 @@ foreach mac ( $macs )
       echo "ERROR: ($id) SSH failed; cannot confirm hostname: ${result}" `echo "$node_state" | jq '.ssh'`
       continue
     endif
-    echo "INFO: ($id): SECURITY configured" `echo "$node_state" | jq '.ssh'`
+    echo "INFO: ($id): SECURITY configured" `echo "$node_state" | jq -c '.ssh'`
   endif
 
   ## CONFIG SOFTWARE
@@ -304,7 +303,7 @@ foreach mac ( $macs )
       echo "ERROR: ($id) SOFTWARE failed; cannot confirm command" `echo "$node_state" | jq '.software'`
       continue
     endif
-    echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq '.software'`
+    echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq -c '.software'`
   endif
 
 # hzn exchange node list -o cgiroua@us.ibm.com -u dcmartin@us.ibm.com:betheedge dcm-macbook
@@ -425,7 +424,6 @@ foreach mac ( $macs )
 
     ## UPDATE CONFIGURATION
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
-
     set config_exchange = ( `jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "$config"` )
   endif
   # sanity
@@ -433,135 +431,135 @@ foreach mac ( $macs )
     echo "WARN: ($id): EXCHANGE failed"
     continue
   else
-    echo "INFO: ($id): EXCHANGE configured" `echo "$node_state" | jq '.exchange'`
+    echo "INFO: ($id): EXCHANGE configured" `echo "$node_state" | jq -c '.exchange'`
   endif
 
-  ## CONFIG PATTERN
-  if ($config_pattern != "true") then
-    echo "INFO: ($id): configuring PATTERN"
-    # get pattern
-    set ptid = ( `echo "$conf" | jq -r '.pattern?'` )
-    if ($#ptid == 0 || $ptid == 'null') then
-      echo "ERROR: ($id): pattern not specified in configuration: $conf"
-      continue
-    endif
-    if ($?DEBUG) echo "DEBUG: ($id): pattern identifier $ptid"
-    set pattern = ( `jq '.patterns[]|select(.id=="'$ptid'")' "$config"` )
-    if ($#pattern <= 1) then
-      echo "ERROR: ($id): pattern $ptid not found in patterns"
-      continue
-    endif
+  ##
+  ## CONFIG PATTERN (or reconfigure)
+  ##
 
-    # pattern for registration
-    set pt_id = ( `echo "$pattern" | jq -r '.id'` )
-    set pt_org = ( `echo "$pattern" | jq -r '.org'` )
-    set pt_url = ( `echo "$pattern" | jq -r '.url'` )
-    set pt_vars = ( `echo "$conf" | jq '.variables'` )
-    
-    # get node specifics
-    set ex_id = `echo "$node_state" | jq -r '.exchange.id'`
-    set ex_org = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").org' "$config"`
-    set ex_username = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "$config"`
-    set ex_password = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "$config"`
-
-    # get node status
-    set cmd = 'hzn node list'
-    if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-    set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
-
-    # test if node is configured with pattern
-    set node_status = `echo "$node_state" | jq -r '.node.configstate.state'`
-    set node_pattern = `echo "$node_state" | jq -r '.node.pattern'`
-
-    # unregister node iff
-    if ($node_status == "configured" && $node_pattern == "${pt_org}/${pt_id}") then
-      if ($?DEBUG) echo "DEBUG: ($id): node is configured with pattern ${pt_org}/${pt_id}"
-    else if ($node_status == "configuring" && $node_pattern == "${pt_org}/${pt_id}") then
-      if ($?DEBUG) echo "WARN: ($id): node is configuring with pattern ${pt_org}/${pt_id}"
-    else if ($node_status == "unconfiguring") then
-      if ($?DEBUG) echo "ERROR: ($id): node is unconfiguring"
-      continue
-    else if ($node_status != "unconfigured") then
-      # unregister client
-      set cmd = 'hzn unregister -f'
-      if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-      ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
-
-      # POLL client for node list information; wait until device identifier matches requested
-      set cmd = 'hzn node list'
-      if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-      while ( `echo "$result" | jq '.configstate.state=="unconfigured"'` == false )
-	if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (10): $result"
-	sleep 10
-        if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-	set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-      end
-      set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
-    endif
-
-    # register node iff
-    if (`echo "$node_state" | jq '.node.configstate.state=="unconfigured"'` == true) then
-      if ($?DEBUG) echo "DEBUG: ($id): node is in unconfigured state"
-      # create pattern registration file
-      set input = "$TMP/input.json"
-      echo '{"services": [{"org": "'"${pt_org}"'","url": "'"${pt_url}"'","versionRange": "[0.0.0,INFINITY)","variables": {' > "${input}"
-      # process all variables 
-      set pvs = `echo "${pt_vars}" | jq -r '.[].key'`
-      @ i = 0
-      foreach pv ( ${pvs} )
-        set value = `echo "${pt_vars}" | jq -r '.[]|select(.key=="'"${pv}"'").value'`
-        if ($i) echo ',' >> "${input}"
-        echo '"'"${pv}"'":"'"${value}"'"' >> "${input}"
-        @ i++
-      end
-      echo '}}]}' >> "${input}"
-
-      # copy pattern registration file to client
-      scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
-      # perform registration
-      set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t}"
-      if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
-      set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd} 2> /dev/null"` )
-    endif
-
-    # POLL client for node list information; wait for configured state
-    set cmd = "hzn node list"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-    while ( `echo "$result" | jq '.configstate.state=="configured"'` == false)
-      if ($?DEBUG) echo "DEBUG: ($id): waiting on configuration (10): $result"
-      sleep 10
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-    end
-    set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
-    if ($?DEBUG) echo "DEBUG: ($id): node is configured"
-
-    # POLL client for agreementlist information; wait until agreement exists
-    set cmd = "hzn agreement list"
-    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-    while ( $#result <= 1) 
-      if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (10): $result"
-      sleep 10
-      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
-    end
-    # update node state
-    set node_state = ( `echo "$node_state" | jq '.pattern='"$result"` )
-    if ($?DEBUG) echo "DEBUG: agreement complete: $result" 
-
-    ## UPDATE CONFIGURATION
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
-    set config_pattern = ( `jq '.nodes[]|select(.id=="'$id'").pattern != null' "$config"` )
-  endif
-  # sanity
-  if ($config_pattern != "true") then
-    echo "WARN: ($id): PATTERN failed"
+  echo "INFO: ($id): configuring PATTERN"
+  # get pattern
+  set ptid = ( `echo "$conf" | jq -r '.pattern?'` )
+  if ($#ptid == 0 || $ptid == 'null') then
+    echo "ERROR: ($id): pattern not specified in configuration: $conf"
     continue
-  else
-    echo "INFO: ($id): PATTERN configured" `echo "$node_state" | jq '.pattern'`
+  endif
+  if ($?DEBUG) echo "DEBUG: ($id): pattern identifier $ptid"
+  set pattern = ( `jq '.patterns[]|select(.id=="'$ptid'")' "$config"` )
+  if ($#pattern <= 1) then
+    echo "ERROR: ($id): pattern $ptid not found in patterns"
+    continue
   endif
 
+  # pattern for registration
+  set pt_id = ( `echo "$pattern" | jq -r '.id'` )
+  set pt_org = ( `echo "$pattern" | jq -r '.org'` )
+  set pt_url = ( `echo "$pattern" | jq -r '.url'` )
+  set pt_vars = ( `echo "$conf" | jq '.variables'` )
+  
+  # get node specifics
+  set ex_id = `echo "$node_state" | jq -r '.exchange.id'`
+  set ex_device = ( `echo "$node_state" | jq -r '.ssh.device'` )
+  set ex_token = ( `echo "$node_state" | jq -r '.ssh.token'` )
+  set ex_org = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").org' "$config"`
+  set ex_username = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "$config"`
+  set ex_password = `jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "$config"`
+
+  # get node status
+  set cmd = 'hzn node list'
+  if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
+  set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+  set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
+
+  # test if node is configured with pattern
+  set node_id = `echo "$node_state" | jq -r '.node.id'`
+  set node_status = `echo "$node_state" | jq -r '.node.configstate.state'`
+  set node_pattern = `echo "$node_state" | jq -r '.node.pattern'`
+
+  # unregister node iff
+  if (${node_id} == ${ex_device} && $node_pattern == ${pt_org}/${pt_id} && ( $node_status == "configured" || $node_status == "configuring" )) then
+    if ($?DEBUG) echo "DEBUG: ($id): node ${node_id} is ${node_status} with pattern ${node_pattern}"
+  else if ($node_status == "unconfiguring") then
+    if ($?DEBUG) echo "ERROR: ($id): node ${node_id} (aka ${ex_device}) is unconfiguring; consider reflashing (or remove, purge, update, prune, and reboot)"
+    continue
+  else if (${node_id} != ${ex_device} || $node_status != "unconfigured") then
+    if ($?DEBUG) echo "DEBUG: ($id): unregistering node ${node_id}"
+    # unregister client
+    set cmd = 'hzn unregister -f'
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null"
+
+    # POLL client for node list information; wait until device identifier matches requested
+    set cmd = 'hzn node list'
+    if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+    while ( `echo "$result" | jq '.configstate.state=="unconfigured"'` == false )
+      if ($?DEBUG) echo "DEBUG: ($id): waiting on unregistration (10): $result"
+      sleep 10
+      if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
+      set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+    end
+    set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
+  endif
+
+  # register node iff
+  if (`echo "$node_state" | jq '.node.configstate.state=="unconfigured"'` == true) then
+    # create pattern registration file
+    set input = "$TMP/input.json"
+    echo '{"services": [{"org": "'"${pt_org}"'","url": "'"${pt_url}"'","versionRange": "[0.0.0,INFINITY)","variables": {' > "${input}"
+    # process all variables 
+    set pvs = `echo "${pt_vars}" | jq -r '.[].key'`
+    @ i = 0
+    foreach pv ( ${pvs} )
+      set value = `echo "${pt_vars}" | jq -r '.[]|select(.key=="'"${pv}"'").value'`
+      if ($i) echo ',' >> "${input}"
+      echo '"'"${pv}"'":"'"${value}"'"' >> "${input}"
+      @ i++
+    end
+    echo '}}]}' >> "${input}"
+    if ($?DEBUG) echo "DEBUG: ($id): node ${ex_device} pattern ${pt_org}/${pt_id}: " `jq -c "${input}"`
+
+    # copy pattern registration file to client
+    scp -o "StrictHostKeyChecking false" -i "$private_keyfile" "${input}" "${CLIENT_USERNAME}@${client_ipaddr}:." 
+    # perform registration
+    set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t} -n ${ex_device}:${ex_token}"
+    if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
+    set result = ( `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "${cmd} 2> /dev/null"` )
+  endif
+
+  # POLL client for node list information; wait for configured state
+  set cmd = "hzn node list"
+  set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+  while ( `echo "$result" | jq '.configstate.state=="configured"'` == false)
+    if ($?DEBUG) echo "DEBUG: ($id): waiting on configuration (10): $result"
+    sleep 10
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+  end
+  set node_state = ( `echo "$node_state" | jq '.node='"$result"` )
+  if ($?DEBUG) echo "DEBUG: ($id): node is configured"
+
+  # POLL client for agreementlist information; wait until agreement exists
+  set cmd = "hzn agreement list"
+  set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+  while ( $#result <= 1) 
+    if ($?DEBUG) echo "DEBUG: ($id): waiting on agreement (10): $result"
+    sleep 10
+    set result = `ssh -o "StrictHostKeyChecking false" -i "$private_keyfile" "$CLIENT_USERNAME"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.'`
+  end
+  set node_state = ( `echo "$node_state" | jq '.pattern='"$result"` )
+  if ($?DEBUG) echo "DEBUG: agreement complete: $result" 
+
+  # UPDATE CONFIGURATION
+  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "$config" >! "$TMP/$config:t"; mv -f "$TMP/$config:t" "$config"
+
+  ## DONE w/ PATTERN
+  echo "INFO: ($id): PATTERN configured" `echo "$node_state" | jq -c '.pattern'`
+
+  ##
   ## CONFIG NETWORK
+  ##
+
   if ($config_network != "true") then
     echo "INFO: ($id): configuring NETWORK"
     # get network
@@ -606,7 +604,7 @@ foreach mac ( $macs )
     echo "INFO: ($id): NETWORK configured" `echo "$node_state" | jq -c '.network'`
   endif
 
-  if ($?DEBUG) echo "DEBUG: ($id): KEYS $config_keys SSH $config_ssh SOFTWARE $config_software EXCHANGE $config_network PATTERN $config_pattern NETWORK $config_network"
+  if ($?DEBUG) echo "DEBUG: ($id): node state: $node_state"
 
 end
 
