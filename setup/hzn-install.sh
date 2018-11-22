@@ -24,17 +24,13 @@ if [ "${ARCH}" == "aarch64" ]; then
   ARCH="arm64"
 elif [ "${ARCH}" == "x86_64" ]; then
   ARCH="amd64"
-elif [ "${ARCH}" == "armv7l" ]; then
-  ARCH=$(dpkg --print-architecture)
 else
-  echo "Cannot automagically identify architecture (${ARCH}); options are: arm, arm64, amd64, ppc64el" >&2
-  read -p 'Architecture: ' ARCH
-  if [ -n "${ARCH}" ]; then
-    echo "+++ INFO: Specified ${ARCH}" >&2
-  else
-    echo "!!! ERROR: No architecture defined; exiting" >&2
-    exit 1
-  fi
+  ARCH=$(dpkg --print-architecture)
+fi
+
+if [ -z "${ARCH}" ]; then
+  echo "Cannot automagically identify architecture; options are: arm, arm64, amd64, ppc64el" >&2
+  exit 1
 fi
 
 echo "+++ INFO: Using architecture: ${ARCH}" >&2
@@ -72,7 +68,7 @@ fi
 ###
 
 if [ ! -n "${APT_REPO}" ]; then
-  APT_REPO=testing
+  APT_REPO=updates
   echo "*** WARN: Using default APT_REPO = ${APT_REPO}" >&2
 fi
 
@@ -90,7 +86,7 @@ else
     PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key
     echo "*** WARN: Using default PUBLICKEY_URL = ${PUBLICKEY_URL}" >&2
   fi
-  if [ -s "${APT_LIST}" ]; then
+  if [ -e "${APT_LIST}" ]; then
     echo "*** WARN: Existing Open Horizon ${APT_LIST}; deleting" >&2
     rm -f "${APT_LIST}"
   fi
@@ -142,6 +138,8 @@ else
   echo "*** WARN: The horizon.service is already active; restarting" >&2
   systemctl restart horizon.service >&2
 fi
+# sleep to enable start or restart
+sleep 5
 
 echo '{"repository":"'$APT_REPO'","horizon":"'`hzn version`'","docker":"'`docker --version`'","command":"'`command -v hzn`'"}'
 
