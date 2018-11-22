@@ -1,5 +1,5 @@
 #!/bin/tcsh
-setenv DEBUG
+unsetenv DEBUG
 unsetenv VERBOSE
 
 if ( `whoami` != "root" ) then
