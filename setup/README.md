@@ -4,14 +4,9 @@ This repository contains sample scripts to automatically setup nodes for [Open H
 
 You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub; a work-in-progress for the [Motion][Motion] software as a pattern is being [developed][here].
 
-**Note**: _You will need an IBM Cloud [account][ibm-registration]_
-
 ## Setup
-The basic installation script `hzn-setup.sh` may be used to install the Open Horizon software under LINUX.
-```
-wget -qO ibm.biz/horizon-setup | bash
-```
-A quick way to get started is to download an Ubuntu [image][image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], using that image as the boot CD/DVD.  After logging into the VM, run the command above to install the IBM Edge Fabric (aka Open Horizon).
+
+Please see the Horizon setup instructions at [dcmoh]
 
 ## Initialization
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested for RaspberryPi running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.
@@ -295,5 +290,5 @@ David C Martin (github@dcmartin.com)
 [examples]: https://github.com/open-horizon/examples
 [Motion]: http://motion-project.io/
 [here]: https://github.com/dcmartin/open-horizon/tree/master/motion
-[VirtualBox]: https://www.virtualbox.org/
 [template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
+[dcmoh]: https://github.com/dcmartin/open-horizon/tree/master/README.md
