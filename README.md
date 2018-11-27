@@ -6,6 +6,8 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ## Pre-requisites
 
+A target device or virtual environment is required; either of the following are sufficient.
+
 ### LINUX (Ubuntu) Virtual Machine
 Download an Ubuntu [ubuntu-image][image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device.  **Note** Also install the VirtualBox Extensions Pack.
 
@@ -14,16 +16,18 @@ Download Raspbian [raspbian-image][image]for the RaspberryPi3, flash a 32 Gbyte+
 
 ## Installation
 
-More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
-
 ### Manual installation (easiest)
-For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below *as root* to install Horizon.  The installation script [`hzn-setup.sh`][hznsetup] may be used to install the Horizon software under LINUX.
+For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below as *root* to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
 ```
 curl -fsSL ibm.biz/horizon-setup | bash
 ```
 
 ### Automated installation (for multiple devices)
 If you have a collection of RaspberryPi3 devices and wish to initialize automatically, refer to the [instructions][setup-readme] to using the [`init-devices.sh`][initdev] script the [setup][setupdir] sub-directory of [this][repository] repository.  Automated installation requires the MAC addresses of the devices.
+
+### Detailed installation instructions
+
+More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
 
 ## Usage
 
@@ -48,8 +52,7 @@ Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or R
 ```
 curl -fsSL ibm.biz/hassio-setup | bash
 ```
-
-
+After installation completes, utilize the `Hassio` Add-on Store to include [`dcmartin/hassio-addons`][dcm-addons].  Please refer to each addon's README.md file for details.
 
 ## Changelog & Releases
 
@@ -90,6 +93,7 @@ David C Martin (github@dcmartin.com)
 [setupdir]: https://github.com/dcmartin/open-horizon/tree/master/setup
 [initdev]: https://github.com/dcmartin/open-horizon/blob/master/setup/init-devices.sh
 [oh-github]: http://github.com/open-horizon/
+[dcm-addons]: https://github.com/dcmartin/hassio-addons 
 [hznsetup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
 [VirtualBox]: https://www.virtualbox.org/
 [edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
