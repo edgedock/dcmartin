@@ -52,6 +52,18 @@ curl -fsSL ibm.biz/hassio-setup | bash
 ```
 After installation completes, utilize the `Hassio` Add-on Store to include [`dcmartin/hassio-addons`][dcm-addons].  Please refer to each addon's README.md file for details.
 
+#### HA Configuration
+
+The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration.
+
++ [`sdr2msghub`][sdr2msghub-yaml]
++ [`cpu2msghub`][cpu2msghub-yaml]
+
+# Sample Output
+
+![sdr2msghub sentiment](samples/sdr2msghub_sentiment.png?raw=true "SDR2MSGHUB")
+![cpu2msghub sentiment](samples/cpu2msghub_cpu.png?raw=true "CPU2MSGHUB")
+
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
@@ -66,6 +78,8 @@ based on the following:
 
 David C Martin (github@dcmartin.com)
 
+[sdr2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/sdr2msghub/sdr2msghub.yaml
+[cpu2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/cpu2msghub/cpu2msghub.yaml
 [commits]: https://github.com/dcmartin/open-horizon/commits/master
 [contributors]: https://github.com/dcmartin/open-horizon/graphs/contributors
 [dcmartin]: https://github.com/dcmartin
