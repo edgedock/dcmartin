@@ -13,7 +13,7 @@ Credentials are required to participate; request access on the IBM Applied Scien
 A target device or virtual environment is required; either of the following are sufficient.
 
 ### LINUX (Ubuntu) Virtual Machine
-Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device.  **Note**: Also install the VirtualBox Extensions Pack.
+Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.
 
 ### RaspberryPi3+ with Raspbian Stretch
 Download Raspbian [image][raspbian-image] for the RaspberryPi3, flash a 32 Gbyte+ micro-SD card, insert into a spare Rpi3, connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
