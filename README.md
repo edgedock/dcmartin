@@ -61,8 +61,8 @@ The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML f
 
 # Sample Output
 
-![sdr2msghub sentiment](samples/sdr2msghub_sentiment.png?raw=true "SDR2MSGHUB")
-![cpu2msghub sentiment](samples/cpu2msghub_cpu.png?raw=true "CPU2MSGHUB")
+![sdr2msghub sentiment](https://github.com/dcmartin/hassio-addons/raw/master/sdr2msghub/sdr2msghub_sentiment.png?raw=true "SDR2MSGHUB")
+![cpu2msghub sentiment](https://github.com/dcmartin/hassio-addons/raw/master/cpu2msghub/cpu2msghub_cpu.png?raw=true "CPU2MSGHUB")
 
 ## Changelog & Releases
 
