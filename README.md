@@ -4,11 +4,9 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ## Credentials
 
-**Note**: _You will need an IBM Cloud [account][ibm-registration]_
+**Note:** _You will need an IBM Cloud [account][ibm-registration]_
 
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.
-
-An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
 ## Target device
 
