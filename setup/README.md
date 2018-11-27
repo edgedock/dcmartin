@@ -1,4 +1,4 @@
-# About
+# Open Horizon Setup
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.
 
@@ -6,7 +6,7 @@ You may create and publish your patterns to your organization.  Refer to the [ex
 
 ## Setup
 
-Please see the Horizon setup instructions at [dcmoh]
+Please see the Horizon setup [instructions][dcm-oh]
 
 ## Initialization
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested for RaspberryPi running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.
@@ -29,10 +29,7 @@ Inspect the resulting configuration file for configuration changes applied to no
 Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
 
 ### Option: `nodes`
-A list of nodes identified by MAC address; these entries are changed during initialization to indicate status.
-
-Example initial `nodes` list:
-
+A list of nodes identified by MAC address; these entries are changed during initialization to indicate status.  Example initial `nodes` list:
 ```
   "nodes": [
     { "mac": "B8:27:EB:D0:95:AD", "id": "rp1" },
@@ -94,8 +91,8 @@ List of configuration definitions of `pattern`, `exchange`, `network` for a set 
 ### Option: `patterns`
 The edge fabric runs _patterns_ which correspond to one or more LINUX containers providing various services.  There are two public patterns in the **IBM** organization which periodically send data an IBM Message Hub (aka Kafka) service _topic_:
 
-+ IBM/cpu2msghub - sends a CPU measurement and GPS location message to your **private** topic
-+ IBM/sdr2msghub - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
++ [`cpu2msghub`][cpu-pattern] - sends a CPU measurement and GPS location message to your **private** topic
++ [`sdr2msghub`][sdr-pattern] - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
 
 Both patterns require an API key and list of service broker URL's.
 
@@ -122,10 +119,9 @@ List of exchange definitions for `id`, `org`, `url`, and credentials `username` 
   "exchanges": [
     {
       "id": "production",
-      "org": "%%HORIZON_ORG_ID%%",
+      "org": "<IBM Cloud login email>",
       "url": "https://stg.edge-fabric.com/v1",
-      "username": "%%EXCHANGE_USERNAME%%",
-      "password": "%%EXCHANGE_PASSWORD%%"
+      "password": "<IBM Cloud Platform API key>"
     }
   ]
 ```
@@ -291,4 +287,4 @@ David C Martin (github@dcmartin.com)
 [Motion]: http://motion-project.io/
 [here]: https://github.com/dcmartin/open-horizon/tree/master/motion
 [template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
-[dcmoh]: https://github.com/dcmartin/open-horizon/tree/master/README.md
+[dcm-oh]: https://github.com/dcmartin/open-horizon/tree/master/README.md
