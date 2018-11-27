@@ -33,9 +33,9 @@ More detailed instructions are [available][edge-install].  Installation package 
 
 ### Credentials
 
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][https://console.bluemix.net/iam/#/apikeys] using your IBMid.
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.
 
-An API key will be provided for an IBM sponsored Kafka service during the alpha phase.
+An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
 ### Home Assistant
 
@@ -76,7 +76,7 @@ David C Martin (github@dcmartin.com)
 [watson-nlu]: https://console.bluemix.net/catalog/services/natural-language-understanding
 [watson-stt]: https://console.bluemix.net/catalog/services/speech-to-text
 [edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
-
+[ibm-apikeys]: https://console.bluemix.net/iam/#/apikeys
 [docker]: https://www.docker.com/
 [ha-addons]: https://github.com/hassio-addons
 [hassio-install]: https://www.home-assistant.io/hassio/installation/
