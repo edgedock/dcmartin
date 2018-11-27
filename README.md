@@ -2,9 +2,15 @@
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][oh-github].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
 
+## Credentials
+
 **Note**: _You will need an IBM Cloud [account][ibm-registration]_
 
-## Pre-requisites
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.
+
+An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
+
+## Target device
 
 A target device or virtual environment is required; either of the following are sufficient.
 
@@ -30,12 +36,6 @@ If you have a collection of RaspberryPi3 devices and wish to initialize automati
 More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
 
 ## Usage
-
-### Credentials
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.
-
-An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
 ### Home Assistant
 
