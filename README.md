@@ -23,7 +23,7 @@ Download Raspbian [image][raspbian-image] for the RaspberryPi3, flash a 32 Gbyte
 ### Manual installation (easiest)
 For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below as *root* to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
 ```
-curl -fsSL ibm.biz/horizon-setup | bash
+wget -qO - ibm.biz/horizon-setup | bash
 ```
 
 ### Automated installation (for multiple devices)
@@ -48,7 +48,7 @@ There are two existing demonstration _addons_ for Horizon:
   
 Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or Raspbian RaspberryPi3 using the command line; run the following as root on the VM or Rpi3 (FYI: default login for Raspbian is `pi` with password `raspberry`).
 ```
-curl -fsSL ibm.biz/hassio-setup | bash
+wget -qO - ibm.biz/hassio-setup | bash
 ```
 After installation completes, utilize the `Hassio` Add-on Store to include [`dcmartin/hassio-addons`][dcm-addons].  Please refer to each addon's README.md file for details.
 
