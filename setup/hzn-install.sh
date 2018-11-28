@@ -54,7 +54,7 @@ for CMD in jq curl ssh expect; do
   C=$(command -v $CMD)
   if [ -z "${C}" ]; then
     echo "+++ INFO: Installing ${CMD}" >&2
-    apt-get install -y ${CMD} >&2
+    apt install -y ${CMD} >&2
   fi
 done
 
@@ -78,7 +78,7 @@ fi
 CMD=$(command -v hzn)
 if [ ! -z "${CMD}" ]; then
   echo "*** WARN: Open Horizon already installed as ${CMD}; upgrading" >&2
-  apt-get upgrade -y horizon bluehorizon horizon-cli >&2
+  apt upgrade -y horizon bluehorizon horizon-cli >&2
 else
   if [ ! -n "${APT_LIST}" ]; then
     APT_LIST=/etc/apt/sources.list.d/bluehorizon.list
@@ -100,9 +100,9 @@ else
   echo "deb [arch=${ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
   echo "deb-src [arch=${ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
   echo "+++ INFO: Updating apt(1)" >&2
-  apt-get update -y >&2
+  apt update -y >&2
   echo "+++ INFO: Installing Open Horizon" >&2
-  apt-get install -y horizon bluehorizon horizon-cli >&2
+  apt install -y horizon bluehorizon horizon-cli >&2
   # confirm installation
   if [ -z $(command -v hzn) ]; then
     echo "!!! ERROR: Failed to install horizon; exiting" >&2
