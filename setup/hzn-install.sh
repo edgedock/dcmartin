@@ -24,8 +24,10 @@ if [ "${ARCH}" == "aarch64" ]; then
   ARCH="arm64"
 elif [ "${ARCH}" == "x86_64" ]; then
   ARCH="amd64"
+else if [ "${ARCH}" == "armv7l" ]; then
+  ARCH="arm64"
 else
-  ARCH=$(dpkg --print-architecture)
+  ARCH=$(arch)
 fi
 
 if [ -z "${ARCH}" ]; then
