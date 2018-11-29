@@ -18,23 +18,17 @@
       "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
-        {
-          "key": "MSGHUB_API_KEY",
-          "value": ""
-        },
-        {
-          "key": "MSGHUB_BROKER_URL",
-          "value": "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093"
-        }
+        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" },
+        { "key": "MSGHUB_BROKER_URL", "value": "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093" }
       ],
-      "public_key": null,
-      "private_key": null,
       "nodes": [
         { "id": "rp8", "machine": "rpi3", "device": "test-cpu-1", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp7", "machine": "rpi2", "device": "test-cpu-2", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp3", "machine": "rpi3", "device": "test-cpu-3", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp4", "machine": "rpi3", "device": "test-cpu-4", "token": "Ah@rdP@$$wOoD" }
-      ]
+      ],
+      "public_key": null,
+      "private_key": null
     },
     {
       "id": "sdrconf",
@@ -42,19 +36,16 @@
       "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
-        {
-          "key": "MSGHUB_API_KEY",
-          "value": ""
-        }
+        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }
       ],
-      "public_key": null,
-      "private_key": null,
       "nodes": [
         { "id": "rp5", "machine": "rpi3", "device": "test-sdr-1", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp6", "machine": "rpi3", "device": "test-sdr-2", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp2", "machine": "rpi3", "device": "test-sdr-3", "token": "Ah@rdP@$$wOoD" },
         { "id": "rp1", "machine": "rpi3", "device": "test-sdr-4", "token": "Ah@rdP@$$wOoD" }
-      ]
+      ],
+      "public_key": null,
+      "private_key": null
     }
   ],
   "machines": [
@@ -109,45 +100,27 @@
     }
   ],
   "networks": [
-    {
-      "id": "SITE2",
-      "dhcp": "dynamic",
-      "ssid": "%%WPA2_SSID%%",
-      "password": "%%PKA_PASSWORD%%"
-    },
-    {
-      "id": "PRODUCTION",
-      "dhcp": "dynamic",
-      "ssid": "TEST",
-      "password": "0123456789"
-    }
+    { "id": "SETUP", "dhcp": "dynamic", "ssid": "%%WPA2_SSID%%", "password": "%%PKA_PASSWORD%%" },
+    { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" }
   ],
   "patterns": [
-    {
-      "id": "cpu2msghub",
-      "org": "IBM",
-      "url": "github.com.open-horizon.examples.cpu2msghub"
-    },
-    {
-      "id": "sdr2msghub",
-      "org": "IBM",
-      "url": "github.com.open-horizon.examples.sdr2msghub"
-    }
+    { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
+    { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" }
   ],
   "exchanges": [
     {
       "id": "staging",
-      "org": "cgiroua@us.ibm.com",
+      "org": "dcmartin@us.ibm.com",
       "url": "https://stg.edge-fabric.com/v1",
-      "username": "dcmartin",
-      "password": ""
+      "username": "iamapikey",
+      "password": "%%HZN_EXCHANGE_API_KEY%%"
     },
     {
       "id": "production",
       "org": "dcmartin@us.ibm.com",
       "url": "https://alpha.edge-fabric.com/v1",
       "username": "iamapikey",
-      "password": ""
+      "password": "%%HZN_EXCHANGE_API_KEY%%"
     }
   ]
 }
