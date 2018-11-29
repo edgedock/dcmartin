@@ -236,7 +236,7 @@ foreach mac ( $macs )
     continue
   else
     # test access
-    set result = ( `ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami'` )
+    set result = ( `ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami'` )
     if ($#result == 0 || "$result" != "${client_username}") then
       echo "ERROR: ($id) SSH failed; cannot confirm identity ${client_username}; got ($result):" `echo "$node_state" | jq '.ssh'`
       continue

@@ -60,13 +60,13 @@ for CMD in \
     socat \
     software-properties-common \
 ; do
-  echo "+++ INFO: Installing ${CMD}" >&2
-  apt install -y ${CMD} &> apt.log
+  echo "+++ Installing ${CMD}" >&2
+  apt install -y ${CMD} >> apt.log 2>&1
 done
 
 # install hassio
 echo "[Info] installing HASSIO with ${ARGS}"
-./hassio_install.sh ${ARGS} &> hassio_install.log
+./hassio_install.sh ${ARGS} >> hassio_install.log 2>&1
 
 # copy configuration 
 GITHUB_DIR="https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant"
