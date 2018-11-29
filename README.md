@@ -57,7 +57,14 @@ After installation completes, utilize the `Hassio` Add-on Store to include [`dcm
 
 #### HA Configuration
 
-The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration.
+A **complete** configuration with support for both CPU and SDR patterns, as well as a local Internet test, will be installed, including:
+
++ [configuration.yaml][conf-yaml]
++ [groups.yaml][groups-yaml]
++ [automations.yaml][automations-yaml]
++ [ui-lovelace.yaml][ui-lovelace-yaml]
+
+The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration; these templates may included into the default HA configuration YAML files.
 
 + [`sdr2msghub`][sdr2msghub-yaml]
 + [`cpu2msghub`][cpu2msghub-yaml]
@@ -81,6 +88,10 @@ based on the following:
 
 David C Martin (github@dcmartin.com)
 
+[conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
+[groups-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml
+[automations-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml
+[ui-lovelace-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/ui-lovelace.yaml
 [sdr2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/sdr2msghub/sdr2msghub.yaml
 [cpu2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/cpu2msghub/cpu2msghub.yaml
 [commits]: https://github.com/dcmartin/open-horizon/commits/master
