@@ -258,11 +258,12 @@ foreach mac ( $macs )
     set config_script = "$TMP/config-ssh.sh"
     cat "config-ssh.tmpl" \
       | sed 's|%%DEVICE_NAME%%|'"${device}"'|g' \
+      | sed 's|%%CLIENT_USERNAME%%|'"${client_username}"'|g' \
       | sed 's|%%CLIENT_HOSTNAME%%|'"${client_hostname}"'|g' \
       | sed 's|%%DEVICE_TOKEN%%|'"${token}"'|g' \
       >! "$config_script"
     if ($?DEBUG) echo "DEBUG: ($id): copying SSH script ($config_script)"
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$config_script" "${client_username}@${client_ipaddr}:." 
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$config_script" "${client_username}@${client_ipaddr}:." >& /dev/null
     if ($?DEBUG) echo "DEBUG: ($id): invoking SSH script ($config_script:t)"
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'sudo bash '"$config_script:t"
     ## UPDATE CONFIGURATION
@@ -535,7 +536,7 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "DEBUG: ($id): node ${ex_device} pattern ${pt_org}/${pt_id}: " `jq -c "${input}"`
 
     # copy pattern registration file to client
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." 
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." >& /dev/null
     # perform registration
     set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t} -n ${ex_device}:${ex_token}"
     if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
@@ -603,7 +604,7 @@ foreach mac ( $macs )
       | sed 's|%%WIFI_PASSWORD%%|'"${nw_password}"'|g' \
       >! "$config_script"
     if ($?DEBUG) echo "DEBUG: ($id): copying script ($config_script)"
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$config_script" "${client_username}@${client_ipaddr}:." 
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$config_script" "${client_username}@${client_ipaddr}:." >& /dev/null
     if ($?DEBUG) echo "DEBUG: ($id): invoking script ($config_script:t)"
     set cmd = 'sudo mv -f '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"

@@ -3,11 +3,11 @@ echo '%%DEVICE_NAME%%' > /etc/hostname
 sed -i 's/%%CLIENT_HOSTNAME%%/%%DEVICE_NAME%%/g' /etc/hosts
 hostname %%DEVICE_NAME%%
 
-echo 'spawn passwd' > passwd.exp
+echo 'spawn passwd %%CLIENT_USERNAME%%' > passwd.exp
 echo 'for {} 1 {} { expect {' >> passwd.exp
 echo '  "Enter new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
 echo '  "Retype new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
-echo '  "password updated successfully" { send_user "success" exit }}}' >> passwd.exp
+echo '  "password updated successfully" { send_user "success" ; exit }}}' >> passwd.exp
 
 RESULT=$(expect -f passwd.exp |& egrep success | sed 's/.*success.*/success/g')
 
@@ -18,5 +18,5 @@ echo 'PasswordAuthentication no' >> sshd_config
 echo 'UsePAM no' >> sshd_config
 
 mv sshd_config /etc/ssh/sshd_config
-/etc/init.d/ssh restart
+/etc/init.d/ssh restart 2> /dev/null
 
