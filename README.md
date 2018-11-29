@@ -24,9 +24,9 @@ Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. u
 ## Installation
 
 ### Manual installation (easiest)
-For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below as *root* to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
+For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
 ```
-wget -qO - ibm.biz/horizon-setup | bash
+wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
 
 ### Automated installation (for multiple devices)
@@ -49,15 +49,22 @@ There are two existing demonstration _addons_ for Horizon:
   - Optional: Converts audio received into text using IBM Watson Speech-to-Text (STT) service.
   - Optional: Parses text into language using IBM Natural Language Understanding (NLU) service.
   
-Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or Raspbian RaspberryPi3 using the command line; run the following as root on the VM or Rpi3 (FYI: default login for Raspbian is `pi` with password `raspberry`).
+Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or Raspbian RaspberryPi3; run the command below on the VM or Rpi3 (FYI: default login for Raspbian is `pi` with password `raspberry`).
 ```
-wget -qO - ibm.biz/hassio-setup | bash
+wget -qO - ibm.biz/hassio-setup | sudo bash
 ```
 After installation completes, utilize the `Hassio` Add-on Store to include [`dcmartin/hassio-addons`][dcm-addons].  Please refer to each addon's README.md file for details.
 
 #### HA Configuration
 
-The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration.
+A **complete** configuration with support for both CPU and SDR patterns, as well as a local Internet test, will be installed, including:
+
++ [configuration.yaml][conf-yaml]
++ [groups.yaml][groups-yaml]
++ [automations.yaml][automations-yaml]
++ [ui-lovelace.yaml][ui-lovelace-yaml]
+
+The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration; these templates may included into the default HA configuration YAML files.
 
 + [`sdr2msghub`][sdr2msghub-yaml]
 + [`cpu2msghub`][cpu2msghub-yaml]
@@ -81,6 +88,10 @@ based on the following:
 
 David C Martin (github@dcmartin.com)
 
+[conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
+[groups-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml
+[automations-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml
+[ui-lovelace-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/ui-lovelace.yaml
 [sdr2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/sdr2msghub/sdr2msghub.yaml
 [cpu2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/cpu2msghub/cpu2msghub.yaml
 [commits]: https://github.com/dcmartin/open-horizon/commits/master
