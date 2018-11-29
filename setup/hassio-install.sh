@@ -65,10 +65,14 @@ echo "[Info] installing HASSIO with ${ARGS}"
 
 ./hassio_install.sh ${ARGS}
 
-echo "[Info] copying YAML"
 
-curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml" -o /config/configuration.yaml
-curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml" -o /config/automations.yaml
-curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml" -o /config/groups.yaml
-curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/ui-lovelace.yaml" -o /config/ui-lovelace.yaml
+GITHUB_DIR="https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant"
+CONFIG_DIR="/usr/share/hassio/homeassistant"
+
+echo "[Info] copying YAML into ${CONFIG_DIR} from ${GITHUB_DIR}"
+
+curl -sL "${GITHUB_DIR}/configuration.yaml" -o "${CONFIG_DIR}/configuration.yaml"
+curl -sL "${GITHUB_DIR}/automations.yaml" -o "${CONFIG_DIR}/automations.yaml"
+curl -sL "${GITHUB_DIR}/ui-lovelace.yaml" -o "${CONFIG_DIR}/ui-lovelace.yaml"
+curl -sL "${GITHUB_DIR}/groups.yaml" -o "${CONFIG_DIR}/groups.yaml"
 
