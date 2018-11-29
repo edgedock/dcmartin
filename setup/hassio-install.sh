@@ -23,7 +23,7 @@ ARCH=$(uname -m)
 #    raspberrypi3-64
 #    tinker
 
-# Generate hardware options
+# test architecture options
 case $ARCH in
     "i386" | "i686" | "x86_64")
         ARGS=""
@@ -46,10 +46,9 @@ case $ARCH in
     ;;
 esac
 
-echo "[Info] installing pre-requisites"
-
 # install pre-requisites
-apt install -y \
+echo "[Info] installing pre-requisites"
+for CMD in \
     apparmor-utils \
     apt-transport-https \
     avahi-daemon \
@@ -59,18 +58,20 @@ apt install -y \
     jq \
     network-manager \
     socat \
-    software-properties-common 
+    software-properties-common \
+; do
+  echo "+++ INFO: Installing ${CMD}" >&2
+  apt install -y ${CMD} &> apt.log
+done
 
+# install hassio
 echo "[Info] installing HASSIO with ${ARGS}"
+./hassio_install.sh ${ARGS} &> hassio_install.log
 
-./hassio_install.sh ${ARGS}
-
-
+# copy configuration 
 GITHUB_DIR="https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant"
 CONFIG_DIR="/usr/share/hassio/homeassistant"
-
 echo "[Info] copying YAML into ${CONFIG_DIR} from ${GITHUB_DIR}"
-
 curl -sL "${GITHUB_DIR}/configuration.yaml" -o "${CONFIG_DIR}/configuration.yaml"
 curl -sL "${GITHUB_DIR}/automations.yaml" -o "${CONFIG_DIR}/automations.yaml"
 curl -sL "${GITHUB_DIR}/ui-lovelace.yaml" -o "${CONFIG_DIR}/ui-lovelace.yaml"
