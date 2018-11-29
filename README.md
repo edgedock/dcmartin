@@ -36,7 +36,7 @@ If you have a collection of RaspberryPi3 devices and wish to initialize automati
 
 More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
 
-## Using with Home Assistant
+# Using with Home Assistant
 
 ## About
 
