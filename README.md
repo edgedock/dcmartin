@@ -36,43 +36,40 @@ If you have a collection of RaspberryPi3 devices and wish to initialize automati
 
 More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
 
-## Usage
+## Using with Home Assistant
 
-### Home Assistant
+## About
 
 The [Home-Assistant][ha-home] (HA) open source software provides support for a wide variety of home automation sensors from almost all vendors on the market.  In addition, HA provides an _addon_ capability through its supervisor.  These [addons][ha-addons] provide a wide variety of capabilities, all packaged as [Docker][docker] containers.
 
-There are two existing demonstration _addons_ for Horizon:
+## Installation
 
-1. [cpu2msghub][cpu2msghub-addon]: specifies the IBM published [cpu2msghub][cpu2msghub-pattern] pattern, which sends CPU load from `/sys/proc` and GPS location to a _private_ Kafka topic; optionally listens to the _private_ Kafka topic and publishes a JSON payload to topic `kafka/cpu-load` on designated MQTT service, e.g. `core-mosquitto`
-1. [sdr2msghub][sdr2msghub-addon]: specifies the IBM published [sdr2msghub][sdr2msghub-pattern] pattern, which sends software-defined-radio (SDR) audio and GPS location to a _shared_ Kafka topic; optionally listens to the _shared_ Kafka topic and publishes a JSON payload to topic `kafka/sdr-audio` on designated MQTT service, e.g. `core-mosquitto`
-  - Optional: Converts audio received into text using IBM Watson Speech-to-Text (STT) service.
-  - Optional: Parses text into language using IBM Natural Language Understanding (NLU) service.
-  
 Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or Raspbian RaspberryPi3; run the command below on the VM or Rpi3 (FYI: default login for Raspbian is `pi` with password `raspberry`).
 ```
 wget -qO - ibm.biz/hassio-setup | sudo bash
 ```
-After installation completes, utilize the `Hassio` Add-on Store to include [`dcmartin/hassio-addons`][dcm-addons].  Please refer to each addon's README.md file for details.
-
-#### HA Configuration
-
-A **complete** configuration with support for both CPU and SDR patterns, as well as a local Internet test, will be installed.
+A **complete** example configuration with support for both CPU and SDR patterns is installed using these files:
 
 + [configuration.yaml][conf-yaml]
 + [groups.yaml][groups-yaml]
 + [automations.yaml][automations-yaml]
 + [ui-lovelace.yaml][ui-lovelace-yaml]
 
-Additional `addons` may be installed for this configuration:
+## Required Addons
+
+When the HA service completes, access the Web interface at `http://raspberrypi.local:8123/` (or VM hostname).  Select the three horizontal bars in the top-left corner to display a list of _panel_ items; select  `Hass.io` ![home assistant icon](home-assistant.png), and then `ADD-ON STORE` from the options.  Install and start the following _official_ addons:
 
 + [Configurator][configurator-addon] - Editor for changing configuration files (e.g. as indicated above)
-+ [MQTT][mosquitto-core] - MQTT broker for `core-mosquitto` server identified in `configuration.yaml`; this broker may be changed, for example to another server on the LAN.
++ [Mosquitto broker][mosquitto-core] - MQTT broker identified as `core-mosquitto` in the `configuration.yaml` from above
 
-The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration; these templates may included into the default HA configuration YAML files.
+## Horizon Addons
 
-+ [`sdr2msghub`][sdr2msghub-yaml]
-+ [`cpu2msghub`][cpu2msghub-yaml]
+Add the repository [`https://github.com/dcmartin/hassio-addons`][dcm-addons] to the Add-on Store.  Install and start the following addons (n.b. both require `MSGHUB_API_KEY` to `listen` for Kafka messages):
+
++ [cpu2msghub][cpu2msghub-addon]: specifies the IBM published [cpu2msghub][cpu2msghub-pattern] pattern, which sends CPU load from `/sys/proc` and GPS location to a _private_ Kafka topic; optionally listens to the _private_ Kafka topic and publishes a JSON payload to topic `kafka/cpu-load` on designated MQTT server, e.g. `core-mosquitto`
++ [sdr2msghub][sdr2msghub-addon]: specifies the IBM published [sdr2msghub][sdr2msghub-pattern] pattern, which sends software-defined-radio (SDR) audio and GPS location to a _shared_ Kafka topic; optionally listens to the _shared_ Kafka topic and publishes a JSON payload to topic `kafka/sdr-audio` on designated MQTT server, e.g. `core-mosquitto`
+  - Optional: Converts audio received into text using IBM Watson Speech-to-Text (STT) service.
+  - Optional: Parses text into language using IBM Natural Language Understanding (NLU) service.
 
 # Sample Output
 
