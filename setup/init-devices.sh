@@ -53,7 +53,7 @@ if ($#argv > 1) then
 else
   set net = "192.168.1.0/24"
 endif
-echo "INFO: executing: $0 $config $net" >&! /dev/stderr
+echo "INFO: executing: $0 $config $net" >& /dev/stderr
 
 set TTL = 300 # seconds
 set SECONDS = `date "+%s"`
@@ -320,34 +320,6 @@ foreach mac ( $macs )
     echo "INFO: ($id): SOFTWARE configured" `echo "$node_state" | jq -c '.software'`
   endif
 
-# hzn exchange node list 
-# {
-#   "cgiroua@us.ibm.com/dcm-macbook": {
-#     "lastHeartbeat": "2018-11-20T01:02:58.676Z[UTC]",
-#     "msgEndPoint": "",
-#     "name": "dcm-macbook",
-#     "owner": "cgiroua@us.ibm.com/dcmartin@us.ibm.com",
-#     "pattern": "",
-#     "publicKey": "",
-#     "registeredServices": [],
-#     "softwareVersions": {},
-#     "token": "********"
-#   }
-# }
-
-# hzn exchange status
-# {
-#   "dbSchemaVersion": 13,
-#   "msg": "Exchange server operating normally",
-#   "numberOfAgbotAgreements": 1,
-#   "numberOfAgbotMsgs": 0,
-#   "numberOfAgbots": 2,
-#   "numberOfNodeAgreements": 2,
-#   "numberOfNodeMsgs": 0,
-#   "numberOfNodes": 9,
-#   "numberOfUsers": 21
-# }
-
   ## CONFIG EXCHANGE
   if ($config_exchange != "true") then
     echo "INFO: ($id): configuring EXCHANGE"
@@ -383,10 +355,10 @@ foreach mac ( $macs )
     # force specification of exchange URL
     set cmd = "sudo sed -i 's|HZN_EXCHANGE_URL=.*|HZN_EXCHANGE_URL=${ex_url}|' /etc/default/horizon"
     if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     set cmd = "sudo systemctl restart horizon || false"
     if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     # test for failure status
     if ($status != 0) then
       echo "ERROR: ($id): EXCHANGE failed; $cmd"
@@ -396,11 +368,11 @@ foreach mac ( $macs )
     # create node in exchange (always returns nothing)
     set cmd = "hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
     if ($?VERBOSE) echo "VERBOSE: ($id): executing remote command: $cmd"
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     set result = $status
     while ( $result != 0 )
 	if ($?DEBUG) echo "WARN: ($id): failed command ($result): $cmd"
-        ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+        ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
         set result = $status
     end
 
@@ -498,11 +470,11 @@ foreach mac ( $macs )
     if ($?DEBUG) echo "ERROR: ($id): node ${node_id} (aka ${ex_device}) is unconfiguring; consider reflashing (or remove, purge, update, prune, and reboot)"
     continue
   else if (${node_id} != ${ex_device} || $node_status != "unconfigured") then
-    if ($?DEBUG) echo "DEBUG: ($id): unregistering node ${node_id}"
+    echo "INFO: ($id): unregistering node ${node_id}"
     # unregister client
     set cmd = 'hzn unregister -f'
     if ($?DEBUG) echo "DEBUG: ($id): executing remote command: $cmd"
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
 
     # POLL client for node list information; wait until device identifier matches requested
     set cmd = 'hzn node list'
@@ -540,7 +512,7 @@ foreach mac ( $macs )
     # perform registration
     set cmd = "hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input:t} -n ${ex_device}:${ex_token}"
     if ($?DEBUG) echo "DEBUG: ($id): registering with command: $cmd"
-    set result = ( `ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd} 2> /dev/null"` )
+    set result = ( `ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd} &> /dev/null"` )
   endif
 
   # POLL client for node list information; wait for configured state
@@ -607,7 +579,7 @@ foreach mac ( $macs )
     scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$config_script" "${client_username}@${client_ipaddr}:." >& /dev/null
     if ($?DEBUG) echo "DEBUG: ($id): invoking script ($config_script:t)"
     set cmd = 'sudo mv -f '"$config_script:t"' /etc/wpa_supplicant/wpa_supplicant.conf'
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     set result = '{ "ssid": "'"${nw_ssid}"'","password":"'"${nw_password}"'"}'
     set node_state = ( `echo "$node_state" | jq '.network='"$result"` )
 
