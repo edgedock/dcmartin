@@ -1,13 +1,7 @@
 #!/bin/bash
+
 DEBUG=
 VERBOSE=
-
-if [[  $(whoami) -ne "root"  ]]; then
-  echo "ERROR: Please run as root, e.g. sudo $0 $argv" 
-  exit 1
-else
-  SSH_DIR=$(echo ~${USER}/.ssh)
-fi
 
 ###
 ### default EXCHANGE URL
@@ -28,9 +22,9 @@ fi
 # macOS: x86_64
 
 
-if [[ $MACHTYPE =~ *linux* ]]; then
+if [[ "$MACHTYPE" =~ *linux* ]]; then
   set BASE64_ENCODE='base64 -w 0'
-elif [[ $OSTYPE == "darwin" && $VENDOR == "apple" ]]; then
+elif [[ "$OSTYPE" == "darwin" && "$VENDOR" == "apple" ]]; then
   set BASE64_ENCODE='base64'
 else
   echo "Cannot determine which base64 encoding arguments"
@@ -130,7 +124,7 @@ for mac in ${macs}; do
   config_network=$(echo "$node_state" | jq '.network!=null')
 
   ## CONFIGURATION KEYS
-  if [[ $config_keys -ne 'true' ]]; then
+  if [[ $config_keys != 'true' ]]; then
     # test for existing keys
     if [[ ! -s "$conf_id" && ! -s "${conf_id}.pub" ]]; then
       if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ($id): configuring KEYS for $conf_id"; fi
@@ -154,7 +148,7 @@ for mac in ${macs}; do
     config_keys=$(echo "$conf" | jq '.public_key!=null')
   fi
   # sanity
-  if [[ $config_keys -ne 'true' ]]; then
+  if [[ $config_keys != 'true' ]]; then
     echo "FATAL: ($id): failure to configure keys for $conf_id"
     exit
   else
@@ -209,7 +203,7 @@ for mac in ${macs}; do
   if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): machine = $mid; distribution = $did"; fi
 
   ## CONFIG SSH
-  if [[ $config_ssh -ne "true" ]]; then
+  if [[ $config_ssh != "true" ]]; then
     echo "INFO: ($id): SSH attempting copy-id: $client_ipaddr"
 
     # edit template ssh-copy-id 
@@ -221,8 +215,8 @@ for mac in ${macs}; do
       | sed 's|%%PUBLIC_KEYFILE%%|'"${public_keyfile}"'|g' \
       > "$ssh_copy_id"
     if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): attempting ssh-copy-id ($public_keyfile) to device $id"; fi
-    success=$(expect -f "$ssh_copy_id" |& egrep "success")
-    if [[ "${success}" -ne "success"  ]]; then
+    success=$(expect -f "$ssh_copy_id" | egrep "success")
+    if [[ "${success}" != "success"  ]]; then
       echo "ERROR: ($id) SSH failed; consider re-flashing"
       continue
     fi
@@ -235,13 +229,13 @@ for mac in ${macs}; do
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "$config")
   fi
   # sanity
-  if [[ $config_ssh -ne "true" ]]; then
+  if [[ $config_ssh != "true" ]]; then
     echo "ERROR: ($id): SSH failed"
     continue
   else
     # test access
     result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami')
-    if [[ -z $result || "$result" -ne "${client_username}" ]]; then
+    if [[ -z $result || "$result" != "${client_username}" ]]; then
       echo "ERROR: ($id) SSH failed; cannot confirm identity ${client_username}; got ($result):" $(echo "$node_state" | jq '.ssh')
       continue
     fi
@@ -249,7 +243,7 @@ for mac in ${macs}; do
   fi
 
   ## CONFIG SECURITY
-  if [[ $config_security -ne 'true' ]]; then
+  if [[ $config_security != 'true' ]]; then
     echo "INFO: ($id): SECURITY setting hostname and password"
     # get node configuration specifics
     device=$(echo "$node_conf" | jq -r '.device')
@@ -277,13 +271,13 @@ for mac in ${macs}; do
     config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   fi
   # sanity
-  if [[ $config_security -ne "true" ]]; then
+  if [[ $config_security != "true" ]]; then
     echo "ERROR: ($id): SECURITY failed"
     continue
   else
     # test access
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname')
-    if [[ -z $result || $(echo "$node_state" | jq -r '.ssh.device=="'"$result"'"') -ne 'true' ]]; then
+    if [[ -z $result || $(echo "$node_state" | jq -r '.ssh.device=="'"$result"'"') != 'true' ]]; then
       echo "ERROR: ($id) SSH failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh')
       continue
     fi
@@ -291,7 +285,7 @@ for mac in ${macs}; do
   fi
 
   ## CONFIG SOFTWARE
-  if [[ $config_software -ne "true" ]]; then
+  if [[ $config_software != "true" ]]; then
     echo "INFO: ($id): SOFTWARE installing ${HORIZON_SETUP_URL}"
     # install software
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log' | jq '.')
@@ -311,13 +305,13 @@ for mac in ${macs}; do
     config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "$config")
   fi
   # sanity
-  if [[ $config_software -ne "true" ]]; then
+  if [[ $config_software != "true" ]]; then
     echo "WARN: ($id): SOFTWARE failed"
     continue
   else
     # test access
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn')
-    if [[ -z $result || $(echo "$node_state" | jq -r '.software.command=="'$result'"') -ne 'true' ]]; then
+    if [[ -z $result || $(echo "$node_state" | jq -r '.software.command=="'$result'"') != 'true' ]]; then
       echo "ERROR: ($id) SOFTWARE failed; cannot confirm command" $(echo "$node_state" | jq '.software')
       continue
     fi
@@ -325,7 +319,7 @@ for mac in ${macs}; do
   fi
 
   ## CONFIG EXCHANGE
-  if [[ $config_exchange -ne "true" ]]; then
+  if [[ $config_exchange != "true" ]]; then
     echo "INFO: ($id): configuring EXCHANGE"
     # get exchange
     ex_id=$(echo "$conf" | jq -r '.exchange')
@@ -364,7 +358,7 @@ for mac in ${macs}; do
     if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): executing remote command: $cmd"; fi
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     # test for failure status
-    if [[ $? -ne 0 ]]; then
+    if [[ $? != 0 ]]; then
       echo "ERROR: ($id): EXCHANGE failed; $cmd"
       continue
     fi
@@ -374,7 +368,7 @@ for mac in ${macs}; do
     if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): executing remote command: $cmd"; fi
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     result=$?
-    while [[ $result -ne 0 ]]; do
+    while [[ $result != 0 ]]; do
 	if [ -n "${DEBUG:-}" ]; then echo "WARN: ($id): failed command ($result): $cmd"; fi
         ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
         result=$?
@@ -385,7 +379,7 @@ for mac in ${macs}; do
     if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): executing remote command: $cmd"; fi
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
     result=$?
-    while [[ $result -ne 0 || ! -s "$TMP/henl.json" ]]; do
+    while [[ $result != 0 || ! -s "$TMP/henl.json" ]]; do
       echo "WARN: ($id): EXCHANGE retry; $cmd"
       ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
       result=$?
@@ -401,7 +395,7 @@ for mac in ${macs}; do
     if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: ($id): executing remote command: $cmd"; fi
     ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
     result=$?
-    while [[ $result -ne 0 || ! -s "$TMP/hes.json" ]]; do
+    while [[ $result != 0 || ! -s "$TMP/hes.json" ]]; do
       echo "WARN: ($id): EXCHANGE retry; $cmd"
       ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
       result=$?
@@ -417,7 +411,7 @@ for mac in ${macs}; do
     config_exchange=$(jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "$config")
   fi
   # sanity
-  if [[ $config_exchange -ne "true" ]]; then
+  if [[ $config_exchange != "true" ]]; then
     echo "WARN: ($id): EXCHANGE failed"
     continue
   else
@@ -473,7 +467,7 @@ for mac in ${macs}; do
   elif [[ $node_status == "unconfiguring" ]]; then
     if [ -n "${DEBUG:-}" ]; then echo "ERROR: ($id): node ${node_id} (aka ${ex_device}) is unconfiguring; consider reflashing (or remove, purge, update, prune, and reboot)"; fi
     continue
-  elif [[ ${node_id} -ne ${ex_device} || $node_status -ne "unconfigured" ]]; then
+  elif [[ ${node_id} != ${ex_device} || $node_status != "unconfigured" ]]; then
     echo "INFO: ($id): unregistering node ${node_id}"
     # unregister client
     cmd='hzn unregister -f'
@@ -553,7 +547,7 @@ for mac in ${macs}; do
   ## CONFIG NETWORK
   ##
 
-  if [[ $config_network -ne "true" ]]; then
+  if [[ $config_network != "true" ]]; then
     echo "INFO: ($id): configuring NETWORK"
     # get network
     nwid=$(echo "$conf" | jq -r '.network?')
@@ -590,7 +584,7 @@ for mac in ${macs}; do
     config_network=$(jq '.nodes[]|select(.id=="'$id'").network != null' "$config")
   fi
   # sanity
-  if [[ $config_network -ne "true" ]]; then
+  if [[ $config_network != "true" ]]; then
     echo "WARN: ($id): NETWORK failed"
     continue
   else
