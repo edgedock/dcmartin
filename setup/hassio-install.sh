@@ -8,7 +8,7 @@ chmod 755 ./hassio_install.sh
 
 ARCH=$(uname -m)
 
-# Machine types
+# ARM Machine types
 #    intel-nuc
 #    odroid-c2
 #    odroid-xu
@@ -22,7 +22,6 @@ ARCH=$(uname -m)
 #    raspberrypi3
 #    raspberrypi3-64
 #    tinker
-
 
 # Generate hardware options
 case $ARCH in
@@ -42,10 +41,12 @@ case $ARCH in
         ARGS="-m aarch64"
     ;;
     *)
-        echo "[Error] $ARCH unsupported!"
+        echo "[Error] $ARCH unsupported by this script"
         exit 1
     ;;
 esac
+
+echo "[Info] installing pre-requisites"
 
 # install pre-requisites
 apt install -y \
@@ -60,7 +61,14 @@ apt install -y \
     socat \
     software-properties-common 
 
-echo "[Info] ./hassio_install.sh ${ARGS}"
+echo "[Info] installing HASSIO with ${ARGS}"
 
 ./hassio_install.sh ${ARGS}
+
+echo "[Info] copying YAML"
+
+curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml" -o /config/configuration.yaml
+curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml" -o /config/automations.yaml
+curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml" -o /config/groups.yaml
+curl -sL "https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/ui-lovelace.yaml" -o /config/ui-lovelace.yaml
 
