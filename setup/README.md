@@ -62,10 +62,10 @@ List of configuration definitions of `pattern`, `exchange`, `network` for a set 
         { "key": "MSGHUB_BROKER_URL", "value": "%%MSGHUB_BROKER_URL%%" }
       ],
       "nodes": [
-        { "id": "rp1", "device": "test-cpu-1", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp2", "device": "test-cpu-2", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp3", "device": "test-cpu-3", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp4", "device": "test-cpu-4", "token": "Ah@rdP@$$wOoD" }
+        { "id": "rp1", "device": "test-cpu-1", "token": "foobar" },
+        { "id": "rp2", "device": "test-cpu-2", "token": "foobar" },
+        { "id": "rp3", "device": "test-cpu-3", "token": "foobar" },
+        { "id": "rp4", "device": "test-cpu-4", "token": "foobar" }
       ]
     },
     {
@@ -79,10 +79,10 @@ List of configuration definitions of `pattern`, `exchange`, `network` for a set 
       "public_key": null,
       "private_key": null,
       "nodes": [
-        { "id": "rp5", "device": "test-sdr-1", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp6", "device": "test-sdr-2", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp7", "device": "test-sdr-3", "token": "Ah@rdP@$$wOoD" },
-        { "id": "rp8", "device": "test-sdr-4", "token": "Ah@rdP@$$wOoD" }
+        { "id": "rp5", "device": "test-sdr-1", "token": "foobar" },
+        { "id": "rp6", "device": "test-sdr-2", "token": "foobar" },
+        { "id": "rp7", "device": "test-sdr-3", "token": "foobar" },
+        { "id": "rp8", "device": "test-sdr-4", "token": "foobar" }
       ]
     }
   ]
@@ -120,7 +120,7 @@ List of exchange definitions for `id`, `org`, `url`, and credentials `username` 
     {
       "id": "production",
       "org": "<IBM Cloud login email>",
-      "url": "https://stg.edge-fabric.com/v1",
+      "url": "https://alpha.edge-fabric.com/v1",
       "password": "<IBM Cloud Platform API key>"
     }
   ]
