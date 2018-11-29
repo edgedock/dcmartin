@@ -13,10 +13,13 @@ Credentials are required to participate; request access on the IBM Applied Scien
 A target device or virtual environment is required; either of the following are sufficient.
 
 ### LINUX (Ubuntu) Virtual Machine
-Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.
+Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
 
 ### RaspberryPi3+ with Raspbian Stretch
-Download Raspbian [image][raspbian-image] for the RaspberryPi3, flash a 32 Gbyte+ micro-SD card using [Etcher][etherio], insert into a spare RPi3, connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
+1. Download Raspbian [image][raspbian-image] for the RaspberryPi3 and flash a 32 Gbyte+ micro-SD card.  On macOS use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
+1. Create the file `ssh` in the root directory of the mounted SD-card; on macOS use `touch /Volumes/boot/ssh`.  This step will enable remote access using the `ssh` command with the default login `pi` and password `raspberry`.
+1. Eject the SD-card (e.g. on macOS use `diskutil eject /Volume/boot`).
+1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
 
 ## Installation
 
