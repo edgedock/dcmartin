@@ -9,7 +9,7 @@ echo '  "Enter new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
 echo '  "Retype new UNIX password:" { send "%%DEVICE_TOKEN%%\r" }' >> passwd.exp
 echo '  "password updated successfully" { send_user "success" ; exit }}}' >> passwd.exp
 
-RESULT=$(expect -f passwd.exp |& egrep success)
+RESULT=$(expect -f passwd.exp | egrep success)
 
 if [ -z "${RESULT}" ]; then
   # report failure
@@ -19,7 +19,7 @@ else
   echo 'PasswordAuthentication no' >> sshd_config
   echo 'UsePAM no' >> sshd_config
   mv sshd_config /etc/ssh/sshd_config
-  /etc/init.d/ssh restart 2> /dev/null
+  /etc/init.d/ssh restart &> /dev/null
   # report success
   echo "${RESULT}"
 fi
