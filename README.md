@@ -57,12 +57,17 @@ After installation completes, utilize the `Hassio` Add-on Store to include [`dcm
 
 #### HA Configuration
 
-A **complete** configuration with support for both CPU and SDR patterns, as well as a local Internet test, will be installed, including:
+A **complete** configuration with support for both CPU and SDR patterns, as well as a local Internet test, will be installed.
 
 + [configuration.yaml][conf-yaml]
 + [groups.yaml][groups-yaml]
 + [automations.yaml][automations-yaml]
 + [ui-lovelace.yaml][ui-lovelace-yaml]
+
+Additional `addons` may be installed for this configuration:
+
++ [Configurator][configurator-addon] - Editor for changing configuration files (e.g. as indicated above)
++ [MQTT][mosquitto-core] - MQTT broker for `core-mosquitto` server identified in `configuration.yaml`; this broker may be changed, for example to another server on the LAN.
 
 The HomeAssistant addons for `sdr2msghub` and `cpu2msghub` provide sample YAML files for configuration; these templates may included into the default HA configuration YAML files.
 
@@ -88,6 +93,8 @@ based on the following:
 
 David C Martin (github@dcmartin.com)
 
+[mosquitto-core]: https://github.com/hassio-addons/repository/tree/master/mqtt
+[configurator-addon]: https://www.home-assistant.io/addons/configurator
 [conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
 [groups-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml
 [automations-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml
