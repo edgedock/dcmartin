@@ -141,6 +141,14 @@ fi
 # sleep to enable start or restart
 sleep 5
 
-echo '{"repository":"'$APT_REPO'","horizon":"'`hzn version`'","docker":"'`docker --version`'","command":"'`command -v hzn`'"}'
+hzn_version=$(hzn version | fmt)
+hva=($(echo ${hzn_version}))
+if [[ ${#hva[@]} == 8 ]]; then
+  hzn_version=$(echo "$hzn_version" | awk '{printf("{\"cli\":\"%s\",\"agent\":\"%s\"}\n",$4,$8)}')
+else
+  hzn_version='{"cli":"'$hzn_version'","agent":"unknown"}'
+fi
+
+echo '{"repository":"'$APT_REPO'","horizon":'"$hzn_version"',"docker":"'`docker --version`'","command":"'`command -v hzn`'"}'
 
 exit 0
