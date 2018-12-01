@@ -22,13 +22,10 @@ fi
 # macOS: x86_64
 
 
-if [[ "$MACHTYPE" =~ *linux* ]]; then
-  BASE64_ENCODE='base64 -w 0'
-elif [[ "$OSTYPE" == "darwin" && "$VENDOR" == "apple" ]]; then
+if [[ "$OSTYPE" == "darwin" && "$VENDOR" == "apple" ]]; then
   BASE64_ENCODE='base64'
 else
-  echo "Cannot determine which base64 encoding arguments"
-  exit 1
+  BASE64_ENCODE='base64 -w 0'
 fi
 
 if [[ -n $argv ]]; then
