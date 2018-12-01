@@ -28,8 +28,8 @@ else
   BASE64_ENCODE='base64 -w 0'
 fi
 
-if [[ -n $argv ]]; then
-  config=$argv[1]
+if [[ -n "${1:-}" ]]; then
+  config="${1}"
 else
   config="horizon.json"
 fi
@@ -41,9 +41,9 @@ fi
 ## DISTRIBUTION config
 HORIZON_SETUP_URL=$(jq -r '.setup' "${config}")
 
-# ${#distro[@]}
-if [[ ${#argv[@]} > 1 ]]; then
-  net=$argv[2]
+# NETWORK
+if [[ -n "${2:-}" ]]; then
+  net="${2}"
 else
   net="192.168.1.0/24"
 fi
