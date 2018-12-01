@@ -6,7 +6,7 @@ for {} 1 {} {
       continue
     }
     "ermission denied" {
-      send_error "failure"
+      send_user "failure"
       exit
     }
     "assword:" { 
@@ -17,11 +17,11 @@ for {} 1 {} {
 	  exit
 	}
 	"try again." { 
-	  send_error "failure"
+	  send_user "failure"
 	  exit
 	}
 	"assword:" {
-	  send_error "failure"
+	  send_user "failure"
 	  exit
         }
       }
