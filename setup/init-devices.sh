@@ -64,7 +64,11 @@ fi
 out="${TMP%.*}.$DATE.txt"
 if [[ ! -e "$out" ]]; then
   rm -f "${out%.*}".*.txt
-  sudo nmap -sn -T5 "$net" > "$out"
+  if [[ $(whoami) != "root" ]]; then
+    sudo nmap -sn -T5 "$net" > "$out"
+  else
+    nmap -sn -T5 "$net" > "$out"
+  fi
 fi
 
 if [[ ! -e "$out" ]]; then
