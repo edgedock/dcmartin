@@ -8,6 +8,32 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
+# Setup
+
+1. Start Ubuntu 18 VM or flash Raspbian Stretch (Lite) for RaspberryPi
+1. Run installation scripts for Open Horizon and Home Assistant
+   + [`ibm.biz/horizon-setup`][horizon-setup]
+   + [`ibm.biz/hassio-setup`][hassio-setup]
+1. Connect to Home Assistant on VM or RPi at port 8123 (e.g. `http://raspberrypi.local:8123/`)
+1. Install MQTT addon `Mosquitto` from the HassIO Addon Store (n.b. optionally install `Configurator` addon)
+1. Create a configuration from [template][template] using the _setup_ [instructions][dcm-oh-setup]
+1. Create a IBM Cloudant database named `hzn-config` and copy configutration into new entry
+   + Copy configuration JSON (e.g. use `pbcopy` on _macOS_)
+   + Paste JSON into new record in `hzn-config` database
+   + Record enttry `_id` for `horizon.config` in addon options
+1. Add the [DCMARTIN/hassio-addons][dcm-addons] repository and install the [Horizon Control][horizon-addon] (HC) addon
+1. Configure HC addon
+    + Cloudant credentials
+    + Horizon credentials with `horizon.config` as `hzn-config` entry `_id`
+    + Optional credentials for `Mosquitto` addon (_default_: no `username` or `password`)
+1. Start HC addon (edited)
+
+## Usage
+
+1. Flash SD cards, touch `ssh`, eject SD card
+1. Install uSD card into RPi3/+, power-on
+1. Listen to MQTT topic (options.horizon.org)/(options.device)/start`
+
 ## Target device
 
 A target device or virtual environment is required; either of the following are sufficient.
@@ -90,6 +116,10 @@ based on the following:
 
 David C Martin (github@dcmartin.com)
 
+[horizon-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
+[hassio-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hassio-install.sh
+
+
 [mosquitto-core]: https://github.com/hassio-addons/repository/tree/master/mqtt
 [configurator-addon]: https://www.home-assistant.io/addons/configurator
 [conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
@@ -124,7 +154,6 @@ David C Martin (github@dcmartin.com)
 [initdev]: https://github.com/dcmartin/open-horizon/blob/master/setup/init-devices.sh
 [oh-github]: http://github.com/open-horizon/
 [dcm-addons]: https://github.com/dcmartin/hassio-addons 
-[hznsetup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
 [VirtualBox]: https://www.virtualbox.org/
 [edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
 [ibm-registration]: https://console.bluemix.net/registration/
