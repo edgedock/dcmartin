@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBUG=true
-VERBOSE=
+VERBOSE=true
 
 VENDOR_ID="rpi"
 VENDOR_TAG="Raspberry Pi Foundation"
@@ -305,18 +305,19 @@ for MAC in ${MACS}; do
   if [[ ${config_software} != "true" ]]; then
     # install software
     echo "INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}"
-    #result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log' | jq '.')
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log'
-exit
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
     if [[ -z "${result}" ]]; then
       echo "ERROR: ${id}: SOFTWARE failed; result = $result"
       continue
+    else
+      if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: installation result: $result"; fi
     fi
     # add distribution information
-    result=$(echo "$result" | jq '.|.distribution='"${client_distro}")
+    if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: distribution: ${client_distro}"; fi
+    result=$(echo "$result" | jq '.distribution='"${client_distro}")
     if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: result = $result"; fi
     # update node state
-    node_state=$(echo "$node_state" | jq '.|.software='"$result")
+    node_state=$(echo "$node_state" | jq '.software='"$result")
     if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: node state = $node_state"; fi
     # update configuration file
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
@@ -514,15 +515,14 @@ exit
     echo '{"services": [{"org": "'"${pt_org}"'","url": "'"${pt_url}"'","versionRange": "[0.0.0,INFINITY)","variables": {' > "${input}"
     # process all variables 
     pvs=$(echo "${pt_vars}" | jq -r '.[].key')
-    i=0
-    for pv in ${pvs}; do
+    i=0; for pv in ${pvs}; do
       value=$(echo "${pt_vars}" | jq -r '.[]|select(.key=="'"${pv}"'").value')
-      if [[ $i ]]; then echo ',' >> "${input}"; fi
+      if [[ $i > 0 ]]; then echo ',' >> "${input}"; fi
       echo '"'"${pv}"'":"'"${value}"'"' >> "${input}"
       i=$((i+1))
     done
     echo '}}]}' >> "${input}"
-    if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: node ${ex_device} pattern ${pt_org}/${pt_id}: " $(jq -c "${input}"); fi
+    if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: node ${ex_device}; pattern ${pt_org}/${pt_id}; input" $(cat "${input}"); fi
 
     # copy pattern registration file to client
     scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." &> /dev/null
@@ -550,11 +550,11 @@ exit
   cmd="hzn agreement list"
   while [[ result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.') \
    && $(echo "$result" | jq '.==[]') == "true" ]]; do
-    if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: waiting on agreement [10]: $result"; fi
+    if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: waiting on agreement [10]"; fi
     sleep 10
   done
+  if [ -n "${DEBUG:-}" ]; then echo "DEBUG: agreement complete:" $(echo "${result}" | jq -c '.'); fi
   node_state=$(echo "$node_state" | jq '.pattern='"$result")
-  if [ -n "${DEBUG:-}" ]; then echo "DEBUG: agreement complete: $result" ; fi
 
   # UPDATE CONFIGURATION
   jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
@@ -610,7 +610,7 @@ exit
     echo "INFO: ${id}: NETWORK configured" $(echo "$node_state" | jq -c '.network')
   fi
 
-  if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: node state: $node_state"; fi
+  if [ -n "${DEBUG:-}" ]; then echo "DEBUG: ${id}: node state:" $(echo "${node_state}" | jq -c '.'); fi
 
 done
 
