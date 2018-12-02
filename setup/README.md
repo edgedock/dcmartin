@@ -289,4 +289,4 @@ David C Martin (github@dcmartin.com)
 [hzn-setup]: https://raw.githubusercontent.com/dcmartin/open-horizon/master/setup/hzn-setup.sh
 [image]: http://releases.ubuntu.com/18.04.1/
 [examples]: https://github.com/open-horizon/examples
-
+[template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
