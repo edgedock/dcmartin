@@ -1,7 +1,10 @@
 #!/bin/bash
 
 DEBUG=true
-VERBOSE=true
+VERBOSE=
+
+VENDOR_ID="rpi"
+VENDOR_TAG="Raspberry Pi Foundation"
 
 ###
 ### default EXCHANGE URL
@@ -15,13 +18,7 @@ if [[ ! -e "/usr/local/bin/nmap" && ! -e "/usr/bin/nmap" ]]; then
   exit 1
 fi
 
-# MACHTYPE
-#
-# RPi3: arm-unknown-linux-gnueabihf
-# LINUX VM: x86_64-pc-linux-gnu
-# macOS: x86_64
-
-
+## MACOS is strange
 if [[ "$OSTYPE" == "darwin" && "$VENDOR" == "apple" ]]; then
   BASE64_ENCODE='base64'
 else
@@ -76,26 +73,43 @@ if [[ ! -e "$out" ]]; then
   exit 1
 fi
 
-macs=$(egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/')
-macarray=($(echo ${macs}))
+MACS=$(egrep MAC "$out" | sed 's/.*: \([^ ]*\) .*/\1/')
+MAC_ARRAY=($(echo ${MACS}))
+MAC_COUNT=${#MAC_ARRAY[@]}
+echo "INFO: found ${MAC_COUNT} devices on LAN ${net}"
 
-echo "INFO: found ${#macarray[@]} devices by MAC"
+NODES=$(jq -r '.nodes[].mac' "${config}")
+if [ -z "${NODES}" ]; then
+  echo "WARN: no nodes (MACs) in configuration; using all from ${VENDOR_TAG}"
+  vMACS=$(egrep "${VENDOR_TAG}" "${out}" | awk '{ print $3 }')
+  JSON="["; i=1; for vMAC in vMACS ; do
+    if [ -n "${JSON:-}" ]; then JSON="${JSON}"','; fi
+    JSON="${JSON}"',{"id":"'"${VENDOR_ID}-${i}"'","mac":"'"${vMAC}"'"}'
+    i=$((i+1))
+  done
+  JSON="${JSON}"']'
+  NODES=$(echo "${JSON}" | jq -r '.nodes[].mac')
+fi
+NODE_ARRAY=($(echo ${NODES}))
+NODE_COUNT=${#NODE_ARRAY[@]}
+
+echo "INFO: identified ${NODE_COUNT} nodes in configuration ${config}"
 
 ###
 ### ITERATE OVER ALL MACS on LAN
 ###
 
-for mac in ${macs}; do 
+for MAC in ${MACS}; do 
   # get ipaddr
-  client_ipaddr=$(egrep -B 2 "$mac" "$out" | egrep "Nmap scan" | head -1 | awk '{ print $5 }')
-  # search for device by mac
-  id=$(jq -r '.nodes[]|select(.mac=="'$mac'").id' "${config}")
+  client_ipaddr=$(egrep -B 2 "$MAC" "$out" | egrep "Nmap scan" | head -1 | awk '{ print $5 }')
+  # search for device by MAC
+  id=$(jq -r '.nodes[]|select(.mac=="'$MAC'").id' "${config}")
   if [[ -z "$id" ]]; then
-    if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: NOT FOUND; MAC: $mac; IP: $client_ipaddr"; fi
+    if [ -n "${VERBOSE:-}" ]; then echo "VERBOSE: NOT FOUND; MAC: $MAC; IP: $client_ipaddr"; fi
     continue
   else
     # get ip address from nmap output file
-    echo "INFO: ${id}: FOUND ${id}; MAC: $mac; IP $client_ipaddr"
+    echo "INFO: ${id}: FOUND ${id}; MAC: $MAC; IP $client_ipaddr"
     if [[ -s "${SSH_DIR}/known_hosts" ]]; then
       if [ -n "${DEBUG:-}" ]; then echo "DEBUG ${id}: removing $client_ipaddr from $SSH_DIR/known_hosts"; fi
       egrep -v "${client_ipaddr}" "${SSH_DIR}/known_hosts" > $TMP/known_hosts
