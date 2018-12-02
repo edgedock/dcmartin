@@ -278,6 +278,8 @@ David C Martin (github@dcmartin.com)
 [kafka-creds]: https://console.bluemix.net/services/messagehub/b5f8df99-d3f6-47b8-b1dc-12806d63ae61/?paneId=credentials&new=true&env_id=ibm:yp:us-south&org=51aea963-6924-4a71-81d5-5f8c313328bd&space=f965a097-fcb8-4768-953e-5e86ea2d66b4
 [open-horizon]: https://github.com/open-horizon
 [cpu-pattern]: https://github.com/open-horizon/examples/tree/master/edge/msghub/cpu2msghub
+[sdr-pattern]: https://github.com/open-horizon/examples/tree/master/edge/msghub/sdr2msghub
+
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
 [edge-install]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/adding-devices.html
 [macos-install]: https://github.com/open-horizon/anax/releases
@@ -286,5 +288,4 @@ David C Martin (github@dcmartin.com)
 [examples]: https://github.com/open-horizon/examples
 [Motion]: http://motion-project.io/
 [here]: https://github.com/dcmartin/open-horizon/tree/master/motion
-[template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
-[dcm-oh]: https://github.com/dcmartin/open-horizon/tree/master/README.md
+
