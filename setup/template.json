@@ -1,16 +1,15 @@
 {
-  "setup": "http://ibm.biz/horizon-setup",
-  "nodes": [
-    { "mac": "B8:27:EB:D0:95:AD", "id": "rp1" },
-    { "mac": "B8:27:EB:01:E6:05", "id": "rp2" },
-    { "mac": "B8:27:EB:90:6F:4A", "id": "rp3" },
-    { "mac": "B8:27:EB:BD:1D:F3", "id": "rp4" },
-    { "mac": "B8:27:EB:51:A7:48", "id": "rp5" },
-    { "mac": "B8:27:EB:DD:A0:94", "id": "rp6" },
-    { "mac": "B8:27:EB:7B:F9:FB", "id": "rp7" },
-    { "mac": "B8:27:EB:F7:3A:8C", "id": "rp8-wifi" },
-    { "mac": "B8:27:EB:A2:6F:D9", "id": "rp8" }
+  "setup": "horizon",
+  "setups": [
+    { "id": "horizon", "url": "http://ibm.biz/horizon-setup" },
+    { "id": "hassio", "url": "http://ibm.biz/hassio-setup" }
   ],
+  "vendor": "rpi",
+  "vendors": [
+    { "id":"rpi", "tag": "Raspberry Pi Foundation" },
+    { "id":"vbox", "tag": "Oracle VirtualBox virtual NIC" }
+  ],
+  "nodes": null,
   "configurations": [
     {
       "id": "cpuconf",
@@ -18,17 +17,21 @@
       "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" },
-        { "key": "MSGHUB_BROKER_URL", "value": "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093" }
-      ],
-      "nodes": [
-        { "id": "rp8", "machine": "rpi3", "device": "test-cpu-1", "token": "foobar" },
-        { "id": "rp7", "machine": "rpi2", "device": "test-cpu-2", "token": "foobar" },
-        { "id": "rp3", "machine": "rpi3", "device": "test-cpu-3", "token": "foobar" },
-        { "id": "rp4", "machine": "rpi3", "device": "test-cpu-4", "token": "foobar" }
+        { "key": "MSGHUB_API_KEY", "value": "%%PRIVATE_KAFKA_APIKEY%%" }
       ],
       "public_key": null,
-      "private_key": null
+      "private_key": null,
+      "nodes": [
+        { "id": "rpi-1", "machine": "rpi3", "device": "test-cpu-1", "token": "foobar" },
+        { "id": "rpi-3", "machine": "rpi2", "device": "test-cpu-2", "token": "foobar" },
+        { "id": "rpi-5", "machine": "rpi3", "device": "test-cpu-3", "token": "foobar" },
+        { "id": "rpi-7", "machine": "rpi3", "device": "test-cpu-4", "token": "foobar" },
+        { "id": "rpi-9", "machine": "rpi3", "device": "test-cpu-5", "token": "foobar" },
+        { "id": "rpi-11", "machine": "rpi3", "device": "test-cpu-6", "token": "foobar" },
+        { "id": "rpi-13", "machine": "rpi3", "device": "test-cpu-7", "token": "foobar" },
+        { "id": "rpi-15", "machine": "rpi3", "device": "test-cpu-8", "token": "foobar" },
+        { "id": "rpi-17", "machine": "rpi3", "device": "test-cpu-9", "token": "foobar" }
+      ]
     },
     {
       "id": "sdrconf",
@@ -36,16 +39,21 @@
       "exchange": "production",
       "network": "PRODUCTION",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }
-      ],
-      "nodes": [
-        { "id": "rp5", "machine": "rpi3", "device": "test-sdr-1", "token": "foobar" },
-        { "id": "rp6", "machine": "rpi3", "device": "test-sdr-2", "token": "foobar" },
-        { "id": "rp2", "machine": "rpi3", "device": "test-sdr-3", "token": "foobar" },
-        { "id": "rp1", "machine": "rpi3", "device": "test-sdr-4", "token": "foobar" }
+        { "key": "MSGHUB_API_KEY", "value": "%%SHARED_KAFKA_APIKEY%%" }
       ],
       "public_key": null,
-      "private_key": null
+      "private_key": null,
+      "nodes": [
+        { "id": "rpi-2", "machine": "rpi3", "device": "test-sdr-1", "token": "foobar" },
+        { "id": "rpi-4", "machine": "rpi3", "device": "test-sdr-2", "token": "foobar" },
+        { "id": "rpi-6", "machine": "rpi3", "device": "test-sdr-3", "token": "foobar" },
+        { "id": "rpi-8", "machine": "rpi3", "device": "test-sdr-4", "token": "foobar" },
+        { "id": "rpi-10", "machine": "rpi3", "device": "test-sdr-5", "token": "foobar" },
+        { "id": "rpi-12", "machine": "rpi3", "device": "test-sdr-6", "token": "foobar" },
+        { "id": "rpi-14", "machine": "rpi3", "device": "test-sdr-7", "token": "foobar" },
+        { "id": "rpi-16", "machine": "rpi3", "device": "test-sdr-8", "token": "foobar" },
+        { "id": "rpi-18", "machine": "rpi3", "device": "test-sdr-9", "token": "foobar" }
+      ]
     }
   ],
   "machines": [
@@ -100,7 +108,7 @@
     }
   ],
   "networks": [
-    { "id": "SETUP", "dhcp": "dynamic", "ssid": "%%WPA2_SSID%%", "password": "%%PKA_PASSWORD%%" },
+    { "id": "HOME", "dhcp": "dynamic", "ssid": "CABIN", "password": "4082685470" },
     { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" }
   ],
   "patterns": [
@@ -110,17 +118,17 @@
   "exchanges": [
     {
       "id": "staging",
-      "org": "dcmartin@us.ibm.com",
+      "org": "%%HORIZON_ORG%%",
       "url": "https://stg.edge-fabric.com/v1",
-      "username": "iamapikey",
-      "password": "%%HZN_EXCHANGE_API_KEY%%"
+      "username": "%%HORIZON_STAGING_USERNAME%%",
+      "password": "%%HORIZON_STAGING_PASSWORD"
     },
     {
       "id": "production",
-      "org": "dcmartin@us.ibm.com",
+      "org": "%%IBM_CLOUD_LOGIN_EMAIL%%",
       "url": "https://alpha.edge-fabric.com/v1",
       "username": "iamapikey",
-      "password": "%%HZN_EXCHANGE_API_KEY%%"
+      "password": "%%HORIZON_EXCHANGE_APIKEY%%"
     }
   ]
 }

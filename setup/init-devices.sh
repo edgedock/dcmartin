@@ -171,7 +171,7 @@ for MAC in ${MACS}; do
     continue
   else
     # get ip address from nmap output file
-    echo "--- INFO: ${id}: found at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
+    echo "--- INFO: ${id}: FOUND at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
     # remove from known hosts
     if [ -s "${HOME}/.ssh/known_hosts" ]; then
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: removing $client_ipaddr from ${HOME}/.ssh/known_hosts" &> /dev/stderr; fi
@@ -521,7 +521,7 @@ for MAC in ${MACS}; do
   ## CONFIG PATTERN (or reconfigure)
   ##
 
-  echo "--- INFO: ${id}: configuring PATTERN" &> /dev/stderr
+  echo "--- INFO: ${id}: PATTERN configuring" &> /dev/stderr
   # get pattern
   ptid=$(echo "$conf" | jq -r '.pattern?')
   if [[ -z $ptid || $ptid == 'null' ]]; then
