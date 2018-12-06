@@ -47,21 +47,21 @@ if [ -e "/run/systemd/resolve/resolv.conf" ]; then
   echo "*** WARN: Check your /etc/resolv.conf for link to /run/systemd/resolve/resolv.conf under Ubuntu 18.04" >&2
 fi
 
+# check docker
+CMD=$(command -v docker)
+if [ -z "${CMD}" ]; then
+  echo "*** WARN: Installing docker" >&2
+  wget -qO - get.docker.com | bash -s >&2
+fi
+
 # install pre-requisites
-for CMD in jq curl ssh expect; do
+for CMD in jq curl ssh; do
   C=$(command -v $CMD)
   if [ -z "${C}" ]; then
     echo "+++ INFO: Installing ${CMD}" >&2
     apt install -y ${CMD} >&2
   fi
 done
-
-# check docker
-CMD=$(command -v docker)
-if [ -z "${CMD}" ]; then
-  echo "*** WARN: Installing docker" >&2
-  curl -fsSL "get.docker.com" | sh >&2
-fi
 
 ###
 ### HORIZON
