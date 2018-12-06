@@ -385,7 +385,7 @@ for MAC in ${MACS}; do
   if [[ ${config_software} != "true" ]]; then
     # install software
     echo "--- INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash' 2> /dev/stderr)
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
     if [[ -z "${result}" ]]; then
       echo "*** ERROR: ${id}: SOFTWARE failed; result = $result" &> /dev/stderr
       continue
