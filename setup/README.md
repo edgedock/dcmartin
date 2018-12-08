@@ -314,6 +314,7 @@ David C Martin (github@dcmartin.com)
 [cpu-addon]: https://github.com/dcmartin/hassio-addons/tree/master/cpu2msghub
 [sdr-addon]: https://github.com/dcmartin/hassio-addons/tree/master/sdr2msghub
 [horizon-addon]: https://github.com/dcmartin/hassio-addons/tree/master/horizon
+[ha-home]: https://www.home-assistant.io/
 
 [issue]: https://github.com/dcmartin/open-horizon/setup/issues
 [keepchangelog]: http://keepachangelog.com/en/1.0.0/
