@@ -293,6 +293,15 @@ David C Martin (github@dcmartin.com)
 [contributors]: https://github.com/dcmartin/open-horizon/setup/graphs/contributors
 [releases]: https://github.com/dcmartin/open-horizon/setup/releases
 
+[mosquitto-core]: https://github.com/hassio-addons/repository/tree/master/mqtt
+[configurator-addon]: https://www.home-assistant.io/addons/configurator
+[conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
+[groups-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/groups.yaml
+[automations-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/automations.yaml
+[ui-lovelace-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/ui-lovelace.yaml
+[sdr2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/sdr2msghub/sdr2msghub.yaml
+[cpu2msghub-yaml]: https://github.com/dcmartin/hassio-addons/blob/master/cpu2msghub/cpu2msghub.yaml
+
 [dcmartin]: https://github.com/dcmartin
 [repository]: https://github.com/dcmartin/hassio-addons
 [dcm-oh]: https://github.com/dcmartin/open-horizon
