@@ -8,32 +8,6 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
-# Setup
-
-1. Start Ubuntu 18 VM or flash Raspbian Stretch (Lite) for RaspberryPi
-1. Run installation scripts for Open Horizon and Home Assistant
-   + [`ibm.biz/horizon-setup`][horizon-setup]
-   + [`ibm.biz/hassio-setup`][hassio-setup]
-1. Connect to Home Assistant on VM or RPi at port 8123 (e.g. `http://raspberrypi.local:8123/`)
-1. Install MQTT addon `Mosquitto` from the HassIO Addon Store (n.b. optionally install `Configurator` addon)
-1. Create a configuration from [template][template] using the _setup_ [instructions][dcm-oh-setup]
-1. Create a IBM Cloudant database named `hzn-config` and copy configutration into new entry
-   + Copy configuration JSON (e.g. use `pbcopy` on _macOS_)
-   + Paste JSON into new record in `hzn-config` database
-   + Record enttry `_id` for `horizon.config` in addon options
-1. Add the [DCMARTIN/hassio-addons][dcm-addons] repository and install the [Horizon Control][horizon-addon] (HC) addon
-1. Configure HC addon
-    + Cloudant credentials
-    + Horizon credentials with `horizon.config` as `hzn-config` entry `_id`
-    + Optional credentials for `Mosquitto` addon (_default_: no `username` or `password`)
-1. Start HC addon (edited)
-
-## Usage
-
-1. Flash SD cards, touch `ssh`, eject SD card
-1. Install uSD card into RPi3/+, power-on
-1. Listen to MQTT topic (options.horizon.org)/(options.device)/start`
-
 ## Target device
 
 A target device or virtual environment is required; either of the following are sufficient.
@@ -61,32 +35,6 @@ If you have a collection of RaspberryPi3 devices and wish to initialize automati
 ### Detailed installation instructions
 
 More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
-
-# Using with Home Assistant
-
-## About
-
-The [Home-Assistant][ha-home] (HA) open source software provides support for a wide variety of home automation sensors from almost all vendors on the market.  In addition, HA provides an _addon_ capability through its supervisor.  These [addons][ha-addons] provide a wide variety of capabilities, all packaged as [Docker][docker] containers.
-
-## Installation
-
-Home-Assistant, including the supervisor, can be installed for an Ubuntu VM or Raspbian RaspberryPi3; run the command below on the VM or Rpi3 (FYI: default login for Raspbian is `pi` with password `raspberry`).
-```
-wget -qO - ibm.biz/hassio-setup | sudo bash
-```
-A **complete** example configuration with support for both CPU and SDR patterns is installed using these files:
-
-+ [configuration.yaml][conf-yaml]
-+ [groups.yaml][groups-yaml]
-+ [automations.yaml][automations-yaml]
-+ [ui-lovelace.yaml][ui-lovelace-yaml]
-
-## Required Addons
-
-When the HA service completes, access the Web interface at `http://raspberrypi.local:8123/` (or VM hostname).  Select the three horizontal bars in the top-left corner to display a list of _panel_ items; select  `Hass.io` ![home assistant icon](home-assistant.png), and then `ADD-ON STORE` from the options.  Install and start the following _official_ addons:
-
-+ [Configurator][configurator-addon] - Editor for changing configuration files (e.g. as indicated above)
-+ [Mosquitto broker][mosquitto-core] - MQTT broker identified as `core-mosquitto` in the `configuration.yaml` from above
 
 ## Horizon Addons
 
