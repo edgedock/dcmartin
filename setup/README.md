@@ -293,6 +293,9 @@ David C Martin (github@dcmartin.com)
 [contributors]: https://github.com/dcmartin/open-horizon/setup/graphs/contributors
 [releases]: https://github.com/dcmartin/open-horizon/setup/releases
 
+[horizon-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
+[hassio-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hassio-install.sh
+
 [mosquitto-core]: https://github.com/hassio-addons/repository/tree/master/mqtt
 [configurator-addon]: https://www.home-assistant.io/addons/configurator
 [conf-yaml]: https://raw.githubusercontent.com/dcmartin/hassio-addons/master/horizon/homeassistant/configuration.yaml
