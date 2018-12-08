@@ -1,33 +1,65 @@
 # Open Horizon Setup
 
-This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.
+This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh]
 
-## Setup
+## Open Horizon Clients
+The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and performing the following steps:
 
-Please see the Horizon setup [instructions][dcm-oh]
+1. Flash SD cards, run `flash_usd.sh`, eject SD card
+1. Install uSD card into RPi3/+, power-on
 
-## Initialization
-The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested for RaspberryPi running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.
+# Initialization
+The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Rasberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.
 
-**RECOMMENDED**: _Install personal `ssh` key using `ssh-copy-id` to the target device prior to utilization of script._
+## Initialization template
+The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%` 
 
-## Usage
+## Initialization script
+The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.  Devices specified or discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
-1. Copy the [`template.json`][template] file and edit for your environment
-1. Run the `init-devices.sh` script with the name of your configuration file and attached network to scan.  The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.
+### Manual initialization
+The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line:
 ```
-sudo ./init-devices.sh myconfig.json 192.168.1.0/24
+./init-devices.sh myconfig.json 192.168.1.0/24
 ```
-Devices discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password; for example, Raspbian LINUX for RaspberryPi uses `pi` and `raspberry` as defaults.
 
-Inspect the resulting configuration file for configuration changes applied to nodes discovered.
+### Automated initialization
 
-## Configuration
+Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
-Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
 
-### Option: `nodes`
-A list of nodes identified by MAC address; these entries are changed during initialization to indicate status.  Example initial `nodes` list:
+1. Start Ubuntu 18 VM or flash Raspbian Stretch (Lite) for RaspberryPi
+1. Run installation scripts (as root, on device) for Open Horizon and Home Assistant
+   + [`ibm.biz/horizon-setup`][horizon-setup]
+   + [`ibm.biz/hassio-setup`][hassio-setup]
+1. Connect to Home Assistant on VM or RPi at port 8123 (e.g. `http://raspberrypi.local:8123/`)
+1. Install MQTT addon `Mosquitto` from the HassIO Addon Store (n.b. optionally install `Configurator` addon)
+1. Create a configuration from [template][template] using the _setup_ [instructions][dcm-oh-setup]
+1. Create a IBM Cloudant database named `hzn-config` and copy configutration into new entry
+   + Copy configuration JSON (e.g. use `pbcopy` on _macOS_)
+   + Paste JSON into new record in `hzn-config` database
+   + Record enttry `_id` for `horizon.config` in addon options
+1. Add the [DCMARTIN/hassio-addons][dcm-addons] repository and install the [Horizon Control][horizon-addon] (HC) addon
+1. Configure HC addon
+    + Cloudant credentials
+    + Horizon credentials with `horizon.config` as `hzn-config` entry `_id`
+    + Optional credentials for `Mosquitto` addon (_default_: no `username` or `password`)
+1. Start HC addon
+1. Access HC addon web UI (e.g. `http://raspberrypi.local:9999`)
+1. Observe data flow through Home Assistant UX (e.g. `http://raspberrypi.local:8123`)
+
+A **complete** HomeAssistant configuration with support for both CPU and SDR patterns is installed using these files:
+
++ [configuration.yaml][conf-yaml]
++ [groups.yaml][groups-yaml]
++ [automations.yaml][automations-yaml]
++ [ui-lovelace.yaml][ui-lovelace-yaml]
+
+
+# Template specification
+
+## Option: `nodes`
+A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
 ```
   "nodes": [
     { "mac": "B8:27:EB:D0:95:AD", "id": "rp1" },
@@ -42,7 +74,7 @@ A list of nodes identified by MAC address; these entries are changed during init
   ] 
 ```
 
-### Option: `configurations`
+## Option: `configurations`
 List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`.  Any number of `variables` may be defined appropriate for the defined `pattern`.
 
 **Note**: _You must obtain [credentials][kafka-creds] for IBM MessageHub for alpha phase_
@@ -56,8 +88,7 @@ List of configuration definitions of `pattern`, `exchange`, `network` for a set 
       "public_key": null,
       "private_key": null,
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" },
-        { "key": "MSGHUB_BROKER_URL", "value": "%%MSGHUB_BROKER_URL%%" }
+        { "key": "MSGHUB_API_KEY", "value": "%%MSGHUB_API_KEY%%" }
       ],
       "nodes": [
         { "id": "rp1", "device": "test-cpu-1", "token": "foobar" },
@@ -86,16 +117,15 @@ List of configuration definitions of `pattern`, `exchange`, `network` for a set 
   ]
 ```
 
-### Option: `patterns`
+## Option: `patterns`
 The edge fabric runs _patterns_ which correspond to one or more LINUX containers providing various services.  There are two public patterns in the **IBM** organization which periodically send data an IBM Message Hub (aka Kafka) service _topic_:
 
 + [`cpu2msghub`][cpu-pattern] - sends a CPU measurement and GPS location message to your **private** topic
 + [`sdr2msghub`][sdr-pattern] - sends a software-defined radio (SDR) audio and GPS location message to a **shared** topic
 
-Both patterns require an API key and list of service broker URL's.
+Both patterns require an API key.
 
 + MSGHUB_API_KEY - a **private** key for each user; may be shared across multiple devices
-+ MSGHUB_BROKER_URL - a list of URL for the IBM Message Hub service
 ```
   "patterns": [
     {
@@ -111,7 +141,7 @@ Both patterns require an API key and list of service broker URL's.
   ]
 ```
 
-### Option: `exchanges`
+## Option: `exchanges`
 List of exchange definitions for `id`, `org`, `url`, and credentials `username` and `password`
 ```
   "exchanges": [
@@ -124,7 +154,7 @@ List of exchange definitions for `id`, `org`, `url`, and credentials `username` 
   ]
 ```
 
-### Option: `networks`
+## Option: `networks`
 List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  Network configuration is _only_ applied once node has been successfully initialized.
 ```
   "networks": [
