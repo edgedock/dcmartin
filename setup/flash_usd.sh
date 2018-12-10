@@ -4,7 +4,7 @@ CONFIG="horizon.json"
 DEFAULT_WIFI_SSID="TEST"
 DEFAULT_WIFI_PASSWORD="0123456789"
 
-if [ -z "${1}"]; then
+if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
     echo "[WARN] $0 $$ -- no configuration specified; default found: ${CONFIG}"
   else
