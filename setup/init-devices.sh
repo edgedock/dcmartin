@@ -85,6 +85,7 @@ out="${TMP%.*}.$DATE.txt"
 if [[ ! -s "$out" ]]; then
   rm -f "${out%.*}".*.txt
   if [[ $(whoami) != "root" ]]; then
+    echo "--- INFO: scanning network ${net}" &> /dev/stderr
     sudo nmap -sn -T5 "$net" > "$out"
   else
     nmap -sn -T5 "$net" > "$out"
@@ -275,7 +276,6 @@ for MAC in ${MACS}; do
     exit 1
   fi
 
-
   # get configuration for identified node
   node_conf=$(echo "$conf" | jq '.nodes[]|select(.id=="'"$id"'")')
 
@@ -291,7 +291,15 @@ for MAC in ${MACS}; do
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: machine = $mid; distribution = $did" &> /dev/stderr; fi
 
   ## CONFIG SSH
-  if [[ ${config_ssh} != "true" ]]; then
+  if [ "${config_ssh}" == "true" ]; then
+    # test access
+    result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami') 2> /dev/null
+    if [[ -z "${result}" || "${result}" != "${client_username}" ]]; then
+      echo "*** ERROR: ${id} SSH failed; cannot confirm identity ${client_username}; got: ${result}"
+      continue
+    fi
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
+  else
     # edit template ssh-copy-id 
     ssh_copy_id="$TMP/ssh-copy-id.exp"
     cat "ssh-copy-id.tmpl" \
@@ -302,7 +310,7 @@ for MAC in ${MACS}; do
       > "$ssh_copy_id"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH attempting ssh-copy-id ${ssh_copy_id} to ${client_ipaddr}" &> /dev/stderr; fi
     success=$(expect -f "$ssh_copy_id" 2> /dev/null | egrep "success")
-    if [[ "${success}" != "success"  ]]; then
+    if [ "${success}" != "success"  ]; then
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id} SSH failed ssh-copy-id; checking public key: $public_keyfile" &> /dev/stderr ; fi
       result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname 2> /dev/null')
       if [ -z "${result}" ]; then
@@ -320,18 +328,9 @@ for MAC in ${MACS}; do
     # get new status
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${config}")
   fi
-  # sanity
-  if [[ ${config_ssh} != "true" ]]; then
-    echo "*** ERROR: ${id}: SSH failed" &> /dev/stderr
+  if [ "${config_ssh}" != "true" ]; then
+    echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing" &> /dev/stderr
     continue
-  else
-    # test access
-    result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami')
-    if [[ -z "${result}" || "${result}" != "${client_username}" ]]; then
-      echo "*** ERROR: ${id} SSH failed; cannot confirm identity ${client_username}; got ${result}:" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
-      continue
-    fi
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
   fi
 
   ## CONFIG SECURITY
