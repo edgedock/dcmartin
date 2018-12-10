@@ -1,9 +1,32 @@
 #!/bin/bash
 
-if [ -z ${WIFI_SSID:-} ] || [ -z ${WIFI_PASSWORD} ]; then
-  WIFI_SSID="TEST"
-  WIFI_PASSWORD="0123456789"
+CONFIG="horizon.json"
+DEFAULT_WIFI_SSID="TEST"
+DEFAULT_WIFI_PASSWORD="0123456789"
+
+if [ -z "${1}"]; then
+  if [ -s "${CONFIG}" ]; then
+    echo "[WARN] $0 $$ -- no configuration specified; default found: ${CONFIG}"
+  else
+    echo "[ERROR] $0 $$ -- no configuration specified; no default: ${CONFIG}"
+    exit 1
+  fi
+else
+  if [ ! -s "${1}" ]; then
+    echo "[ERROR] configuration file empty: ${1}"
+    exit 1
+  fi
+  CONFIG="${1}"
+fi
+
+WIFI_SSID=$(jq -r '.networks[0]?|.ssid' "${CONFIG}")
+WIFI_PASSWORD=$(jq -r '.networks[0]?|.password' "${CONFIG}")
+if [ "${WIFI_SSID}" == "null" ] || [ "${WIFI_PASSWORD}" == "null" ]; then
+  WIFI_SSID="${DEFAULT_WIFI_SSID}"
+  WIFI_PASSWORD="${DEFAULT_WIFI_PASSWORD}"
   echo "[WARN] $0 $$ -- no WIFI_SSID or WIFI_PASSWORD defined; using default (${WIFI_SSID}:${WIFI_PASSWORD})"
+else
+  echo "[INFO] $0 $$ -- WIFI_SSID & WIFI_PASSWORD defined; using (${WIFI_SSID}:${WIFI_PASSWORD})"
 fi
 
 ## BOOT VOLUME MOUNT POINT
