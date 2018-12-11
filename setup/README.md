@@ -18,9 +18,29 @@ The Client devices are automatically processed by the Master as they are discove
 1. Install uSD card into RPi3/+, power-on
 
 ## Manual initialization
-The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line:
+The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line; the following is an example list of commands.
 ```
-./init-devices.sh myconfig.json 192.168.1.0/24
+% mkdir ~/gitdir
+% cd ~/gitdir
+% git clone https://github.com/dcmartin/open-horizon
+% cd open-horizon/setup
+% cp template.json horizon.json
+```
+Edit the `horizon.json` file; note mandatory items are marked with `%%`
+```
+% egrep '%%' horizon.json
+```
+Check the configuration using the `chkconfig.sh` script
+```
+% ./chkconfig horizon.json
+```
+Update the SD card with WiFi credentials and SSH access:
+```
+% ./flash_usd.sh
+```
+Insert uSD card into Raspberry Pi, power-on, and run the `init-devices.sh` script
+```
+% ./init-devices.sh
 ```
 
 # Automated initialization
