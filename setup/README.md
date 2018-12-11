@@ -28,11 +28,11 @@ Check the configuration using the `chkconfig.sh` script
 ```
 % ./chkconfig horizon.json
 ```
-Flash SD card with appropriate LINUX distribution and update the SD card with WiFi credentials and SSH access usinf the `flash_usd.sh` script.  Repeat to produce the required number of nodes.
+Flash SD card with appropriate LINUX distribution and update the SD card with WiFi credentials and SSH access using the `flash_usd.sh` script.  Repeat process of flashing distribution and running script to produce the required number of SD cards.
 ```
 % ./flash_usd.sh
 ```
-Insert uSD card into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes.
+Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes.
 ```
 % ./init-devices.sh
 ```
