@@ -3,19 +3,13 @@
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh]
 
 ## Initialization
-The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Rasberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.
+The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Rasberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and preparing an appropriate SD card.
 
 ### Initialization template
 The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%` 
 
 ### Initialization script
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.  Devices specified or discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
-
-### Client preparation
-The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and performing the following steps:
-
-1. Flash SD cards, run `flash_usd.sh`, eject SD card
-1. Install uSD card into RPi3/+, power-on
 
 ## Manual initialization
 The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line; the following is an example list of commands.
@@ -34,11 +28,11 @@ Check the configuration using the `chkconfig.sh` script
 ```
 % ./chkconfig horizon.json
 ```
-Update the SD card with WiFi credentials and SSH access:
+Flash SD card with appropriate LINUX distribution and update the SD card with WiFi credentials and SSH access usinf the `flash_usd.sh` script.  Repeat to produce the required number of nodes.
 ```
 % ./flash_usd.sh
 ```
-Insert uSD card into Raspberry Pi, power-on, and run the `init-devices.sh` script
+Insert uSD card into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes.
 ```
 % ./init-devices.sh
 ```
