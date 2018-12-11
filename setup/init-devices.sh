@@ -197,7 +197,7 @@ for MAC in ${MACS}; do
   # find node state (cannot fail)
   node_state=$(jq '.nodes[]|select(.id=="'$id'")' "${config}")
   if [ -z "${node_state}" ] || [ "${node_state}" == 'null' ]; then
-    echo "*** ERROR ${id}: found no existing node state; continuing" &> /dev/stderr
+    echo "*** ERROR ${id}: found no existing node state; continuing..." &> /dev/stderr
     continue
   fi
 
@@ -314,7 +314,7 @@ for MAC in ${MACS}; do
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id} SSH failed ssh-copy-id; checking public key: $public_keyfile" &> /dev/stderr ; fi
       result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname 2> /dev/null')
       if [ -z "${result}" ]; then
-	echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing" &> /dev/stderr
+	echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
 	continue
       else
         if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: hostname: ${result}" &> /dev/stderr; fi
@@ -329,7 +329,7 @@ for MAC in ${MACS}; do
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${config}")
   fi
   if [ "${config_ssh}" != "true" ]; then
-    echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing" &> /dev/stderr
+    echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
     continue
   fi
 
@@ -357,7 +357,7 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")
     if [ "${result}" != "changed" ]; then
-      echo "*** ERROR: ${id}: SECURITY failed; result ($result) for command $cmd; continuing" &> /dev/stderr
+      echo "*** ERROR: ${id}: SECURITY failed; result ($result) for command $cmd; continuing..." &> /dev/stderr
       continue
     fi
     ## UPDATE CONFIGURATION
@@ -368,7 +368,7 @@ for MAC in ${MACS}; do
   fi
   # sanity
   if [[ ${config_security} != "true" ]]; then
-    echo "*** ERROR: ${id}: SECURITY failed; continuing" &> /dev/stderr
+    echo "*** ERROR: ${id}: SECURITY failed; continuing..." &> /dev/stderr
     continue
   else
     # test access
@@ -553,7 +553,7 @@ for MAC in ${MACS}; do
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
   result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.')
   if [ -z "${result}" ]; then
-    echo "*** ERROR: remote command $cmd returned zero results; continuing" &> /dev/stderr
+    echo "*** ERROR: remote command $cmd returned zero results; continuing..." &> /dev/stderr
     continue
   else
     node_state=$(echo "$node_state" | jq '.node='"$result")
@@ -633,7 +633,7 @@ for MAC in ${MACS}; do
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
   done
   if [ -z "${result}" ] || [ "${results}" == "null" ]; then
-    echo "*** ERROR: ${id}: command $cmd failed; continuing" &> /dev/stderr
+    echo "*** ERROR: ${id}: command $cmd failed; continuing..." &> /dev/stderr
     continue
   fi
   node_state=$(echo "$node_state" | jq '.node='"$result")
