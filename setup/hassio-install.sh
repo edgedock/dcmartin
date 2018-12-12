@@ -3,8 +3,38 @@ if [[ $(whoami) != "root" ]]; then
   echo "Run as root"
   exit 1
 fi
-wget -qO - https://raw.githubusercontent.com/home-assistant/hassio-build/master/install/hassio_install > ./hassio_install.sh
-chmod 755 ./hassio_install.sh
+
+##
+## get installation script
+##
+
+HASSIO_INSTALL="./hassio_install.sh"
+HASSIO_URL="https://raw.githubusercontent.com/home-assistant/hassio-build/master/install/hassio_install"
+
+wget -qO - "${HASSIO_URL}"  > "${HASSIO_INSTALL}"
+if [ ! -s "${HASSIO_INSTALL}" ]; then
+  echo "[Error] cannot access installation script at: ${HASSIO_URL}"
+  exit 1
+fi
+
+# install pre-requisites
+echo "[Info] installing pre-requisites"
+for CMD in \
+    apparmor-utils \
+    apt-transport-https \
+    avahi-daemon \
+    ca-certificates \
+    curl \
+    dbus \
+    jq \
+    network-manager \
+    socat \
+    software-properties-common \
+; do
+  echo "+++ Installing ${CMD}" >&2
+  apt install -y ${CMD} >> apt.log 2>&1
+done
+
 
 ARCH=$(uname -m)
 
@@ -26,7 +56,7 @@ ARCH=$(uname -m)
 # test architecture options
 case $ARCH in
     "i386" | "i686" | "x86_64")
-        ARGS=""
+        ARGS=
     ;;
     "arm")
         ARGS="-m raspberrypi"
@@ -46,24 +76,11 @@ case $ARCH in
     ;;
 esac
 
-# install pre-requisites
-echo "[Info] installing pre-requisites"
-for CMD in \
-    apparmor-utils \
-    apt-transport-https \
-    avahi-daemon \
-    ca-certificates \
-    curl \
-    dbus \
-    jq \
-    network-manager \
-    socat \
-    software-properties-common \
-; do
-  echo "+++ Installing ${CMD}" >&2
-  apt install -y ${CMD} >> apt.log 2>&1
-done
-
 # install hassio
-echo "[Info] installing HASSIO with ${ARGS}"
-./hassio_install.sh ${ARGS} > hassio_install.log 2>&1
+if [ -n "${ARGS}" ]; then
+  echo "[Info] installing HASSIO with (${ARGS}) arguments"
+else
+  echo "[Info] installing HASSIO with NO arguments"
+fi
+
+bash ${HASSIO_INSTALL} ${ARGS} > hassio_install.log 2>&1

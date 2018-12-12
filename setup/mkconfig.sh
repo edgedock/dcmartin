@@ -80,7 +80,7 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
       valid=$(echo "${e}" | jq '.'"${key}"'|contains("%%") == false')
       if [ "${valid}" == "true" ]; then
 	v=$(echo "${e}" | jq -r '.'"${key}")
-	echo -n "[Prompt] For exchange ${cid}, enter value for exchange ${key} [${v}]: "
+	echo -n "[Prompt] For configuration ${cid}, enter value for exchange ${key} [${v}]: "
 	read VALUE
 	if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
       else
