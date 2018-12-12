@@ -44,11 +44,11 @@ Software installation takes a long time, over five (5) minutes on a RaspberryPi3
 # Automated initialization
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
-1. Start Ubuntu 18 VM or flash Raspbian Stretch (Lite) for RaspberryPi
+1. Start Ubuntu 18 AMD64 VM (currently _not_ working on Raspbian Stretch (Lite) for RaspberryPi)
 1. Run installation scripts (as root, on device) for Open Horizon and Home Assistant
    + [`ibm.biz/horizon-setup`][horizon-setup]
    + [`ibm.biz/hassio-setup`][hassio-setup]
-1. Connect to Home Assistant on VM or RPi at port 8123 (e.g. `http://raspberrypi.local:8123/`)
+1. Connect to Home Assistant on VM or RPi at port 8123 (e.g. `http://vmhost.local:8123/`)
 1. Install MQTT addon `Mosquitto` from the HassIO Addon Store (n.b. optionally install `Configurator` addon)
 1. Create a configuration from [template][template] using the _setup_ [instructions][dcm-oh-setup]
 1. Create a IBM Cloudant database named `hzn-config` and copy configutration into new entry
@@ -62,7 +62,7 @@ Automated initialization is provided through a [Home-Assistant][ha-home] addon t
     + Optional credentials for `Mosquitto` addon (_default_: no `username` or `password`)
 1. Start HC addon
 1. Access HC addon web UI (e.g. `http://raspberrypi.local:9999`)
-1. Observe data flow through Home Assistant UX (e.g. `http://raspberrypi.local:8123`)
+1. Observe data flow through Home Assistant UX (e.g. `http://vmhost.local:8123`)
 
 A **complete** HomeAssistant configuration with support for both CPU and SDR patterns is installed using these files:
 
