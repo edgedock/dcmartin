@@ -108,7 +108,7 @@
     }
   ],
   "networks": [
-    { "id": "deault", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
+    { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
     { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "CABIN", "password": "4082685470" }
   ],
   "patterns": [
