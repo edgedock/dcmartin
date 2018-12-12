@@ -14,8 +14,8 @@
     {
       "id": "cpuconf",
       "pattern": "cpu2msghub",
-      "exchange": "production",
-      "network": "PRODUCTION",
+      "exchange": "alpha",
+      "network": "SITE",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%PRIVATE_KAFKA_APIKEY%%" }
       ],
@@ -36,8 +36,8 @@
     {
       "id": "sdrconf",
       "pattern": "sdr2msghub",
-      "exchange": "production",
-      "network": "PRODUCTION",
+      "exchange": "alpha",
+      "network": "SITE",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%SHARED_KAFKA_APIKEY%%" }
       ],
@@ -109,7 +109,7 @@
   ],
   "networks": [
     { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
-    { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "%%PRODUCTION_SSID%%", "password": "%%PRODUCTION_PASSWORD%%" }
+    { "id": "SITE", "dhcp": "dynamic", "ssid": "%%SITE_SSID%%", "password": "%%SITE_PASSWORD%%" }
   ],
   "patterns": [
     { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
@@ -124,7 +124,7 @@
       "password": "%%HORIZON_STAGING_PASSWORD"
     },
     {
-      "id": "production",
+      "id": "alpha",
       "org": "%%IBM_CLOUD_LOGIN_EMAIL%%",
       "url": "https://alpha.edge-fabric.com/v1",
       "username": "iamapikey",
