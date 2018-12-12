@@ -22,27 +22,26 @@ The default configuration file name is `horizon.json` and the default network is
 % cd ~/gitdir
 % git clone https://github.com/dcmartin/open-horizon
 % cd open-horizon/setup
-% cp template.json horizon.json
 ```
-Edit the `horizon.json` file; note mandatory items are marked with `%%`
+Copy and edit the configuration `template.json` using the `mkconfig.sh` script:
 ```
-% egrep '%%' horizon.json
+% ./mkconfig
 ```
 Check the configuration using the `chkconfig.sh` script
 ```
 % ./chkconfig horizon.json
 ```
-Flash SD card with appropriate LINUX distribution and update the SD card with WiFi credentials and SSH access using the `flash_usd.sh` script.  Repeat process of flashing distribution and running script to produce the required number of SD cards.
+Flash SD card with appropriate LINUX distribution *and* update the SD card with WiFi credentials and SSH access using the `flash_usd.sh` script.  Repeat process of flashing distribution and running script to produce the required number of SD cards.
 ```
 % ./flash_usd.sh
 ```
 Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes.
 ```
-% ./init-devices.sh
+% ./init-devices.sh horizon.json 192.168.1.0/24
 ```
+Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient.
 
 # Automated initialization
-
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
 1. Start Ubuntu 18 VM or flash Raspbian Stretch (Lite) for RaspberryPi
