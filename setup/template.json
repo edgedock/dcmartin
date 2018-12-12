@@ -109,7 +109,7 @@
   ],
   "networks": [
     { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
-    { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "CABIN", "password": "4082685470" }
+    { "id": "PRODUCTION", "dhcp": "dynamic", "ssid": "%%PRODUCTION_SSID%%", "password": "%%PRODUCTION_PASSWORD%%" }
   ],
   "patterns": [
     { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
