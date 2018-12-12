@@ -23,14 +23,15 @@ Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. u
 
 ## Installation
 
-### Manual installation (easiest)
+### Manual installation
 For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
+When this installation finishes the device will still need to be registered for a specific pattern.  Refer to the _Horizon Addons_ section below for information on using Home Assistant addons to initiate device patterns and listen for sensor output.
 
-### Automated installation (for multiple devices)
-If you have a collection of RaspberryPi3 devices and wish to initialize automatically, refer to the [instructions][setup-readme] to using the [`init-devices.sh`][initdev] script the [setup][setupdir] sub-directory of [this][repository] repository.  Automated installation requires the MAC addresses of the devices.
+### Automated installation
+An automated installation process is provided in the `setup` directory.  If you have a collection of RaspberryPi3 devices or wish to initialize automatically, refer to the [instructions][setup-readme].
 
 ### Detailed installation instructions
 
