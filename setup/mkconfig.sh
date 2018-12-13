@@ -159,7 +159,7 @@ if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
   exit 1
 fi
 nid=$(echo "${n}" | jq -r '.id')
-echo "+++ SETUP network [${nid}]"
+echo "+++ NETWORK (setup-only) [${nid}]"
 for key in ssid password; do
   valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
   if [ "${valid}" == "true" ]; then

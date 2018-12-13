@@ -381,7 +381,21 @@ for MAC in ${MACS}; do
   fi
 
   ## CONFIG SOFTWARE
-  if [[ ${config_software} != "true" ]]; then
+  if [ "${config_software}" == "true" ]; then
+    # test access
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn')
+    if [ -z "${result}" ] || [ "${result}" != $(echo "${node_state}" | jq -r '.software.command') ]; then
+      echo "+++ WARN : ${id} SOFTWARE failed; cannot confirm command: ${result}" &> /dev/stderr
+      node_state=$(echo "$node_state" | jq '.software=null')
+      # update configuration file
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+      # update software configuration
+      config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${config}")
+    else
+      echo "--- INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
+    fi
+  fi
+  if [ "${config_software}" != "true" ]; then
     # install software
     echo "--- INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
@@ -401,17 +415,9 @@ for MAC in ${MACS}; do
     config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${config}")
   fi
   # sanity
-  if [[ ${config_software} != "true" ]]; then
-    echo "+++ WARN: ${id}: SOFTWARE failed" &> /dev/stderr
+  if [ "${config_software}" != "true" ]; then
+    echo "*** ERROR: ${id}: SOFTWARE failed" &> /dev/stderr
     continue
-  else
-    # test access
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn')
-    if [[ -z $result || $(echo "$node_state" | jq -r '.software.command=="'$result'"') != "true" ]]; then
-      echo "*** ERROR: ${id} SOFTWARE failed; cannot confirm command" $(echo "$node_state" | jq '.software') &> /dev/stderr
-      continue
-    fi
-    echo "--- INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
   fi
 
   ## CONFIG EXCHANGE
