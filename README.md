@@ -24,14 +24,14 @@ Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. u
 ## Installation
 
 ### Manual installation
-For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][hznsetup] is used to install the Horizon software under LINUX.
+For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][horizon-setup] is used to install the Horizon software under LINUX; the short-cut URL is `ibm.biz/horizon-setup`:
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
 When this installation finishes the device will still need to be registered for a specific pattern.  Refer to the _Horizon Addons_ section below for information on using Home Assistant addons to initiate device patterns and listen for sensor output.
 
 ### Automated installation
-An automated installation process is provided in the `setup` directory.  If you have a collection of RaspberryPi3 devices or wish to initialize automatically, refer to the [instructions][setup-readme].
+An automated installation process is provided in the `setup` directory.  If you have a collection of RaspberryPi3 devices or wish to initialize automatically, refer to the [instructions][setup-readme].  There is also a [video][horizon-video-setup] available.
 
 ### Detailed installation instructions
 
@@ -67,6 +67,7 @@ David C Martin (github@dcmartin.com)
 
 [horizon-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
 [hassio-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hassio-install.sh
+[horizon-video-setup]: https://youtu.be/IfR-XY603JY
 [commits]: https://github.com/dcmartin/open-horizon/commits/master
 [contributors]: https://github.com/dcmartin/open-horizon/graphs/contributors
 [dcmartin]: https://github.com/dcmartin
