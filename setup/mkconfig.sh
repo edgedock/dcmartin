@@ -21,6 +21,9 @@ if [ ! -s "${CONFIG}" ]; then
   exit 1
 fi
 
+APIKEY=$(echo apiKey*.json | fmt -1 | sort -r | head -1)
+MSGHUB_APIKEY=$(echo apiKey*.json | fmt -1 | egrep "kafka" | head -1)
+
 cids=$(jq -r '.configurations[]?.id' "${CONFIG}")
 if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
   # echo "[Debug] cids:" $(echo "${cids}" | fmt)
@@ -35,6 +38,7 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     fi
     # echo "[Debug] nodes:" $(echo "${nodes}" | fmt)
 
+    echo "+++ CONFIGURATION ${cid}"
     # process variables
     keys=$(echo "${c}" | jq -r '.variables[]?.key')
     if [ -n "${keys}" ] && [ "${keys}" != "null" ]; then
@@ -43,11 +47,11 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
 	valid=$(echo "${c}" | jq '.variables[]?|select(.key=="'$key'").value|contains("%%") == false')
 	if [ "${valid}" == 'true' ]; then
 	  v=$(echo "${c}" | jq -r '(.variables[]?|select(.key=="'$key'")).value')
-	  echo -n "[Prompt] For configuration ${cid}, enter value for ${key} [${v}]: "
+	  echo -n "[$cid] Enter value for ${key} [" $(echo "${v}" | sed 's|\(...\).*\(...\)|\1***\2|') "]: "
 	  read VALUE
 	  if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
 	else
-	  echo -n "[Prompt] For configuration ${cid}, enter value for ${key}: "
+	  echo -n "[$cid] Enter value for ${key}: "
 	  read VALUE
 	fi
 	c=$(echo "${c}" | jq '(.variables[]|select(.key=="'$key'").value)|="'"${VALUE}"'"')
@@ -78,13 +82,19 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     # echo "[Debug] found exchange:" $(echo "${e}" | jq -c '.')
     for key in org password; do
       valid=$(echo "${e}" | jq '.'"${key}"'|contains("%%") == false')
-      if [ "${valid}" == "true" ]; then
-	v=$(echo "${e}" | jq -r '.'"${key}")
-	echo -n "[Prompt] For configuration ${cid}, enter value for exchange ${key} [${v}]: "
+      if [ "${key}" == "password" ] && [ -s "${APIKEY}" ]; then
+        v=$(jq -r '.apiKey' "${APIKEY}")
+      elif [ "${valid}" == "true" ]; then
+        v=$(echo "${e}" | jq -r '.'"${key}")
+      else
+        v=
+      fi
+      if [ -n "${v}" ]; then
+	echo -n "[$cid] exchange [${eid}]: enter value for ${key} [" $(echo "${v}" | sed 's|\(...\).*\(...\)|\1***\2|') "]: "
 	read VALUE
 	if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
       else
-	echo -n "[Prompt] For configuration ${cid}, enter value for exchange ${key}: "
+	echo -n "[$cid] exchange [${eid}]: enter value for ${key}: "
 	read VALUE
       fi
       e=$(echo "${e}" | jq '.'${key}'="'"${VALUE}"'"')
@@ -121,11 +131,11 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
       valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
       if [ "${valid}" == "true" ]; then
 	v=$(echo "${n}" | jq -r '.'"${key}")
-	echo -n "[Prompt] For configuration ${cid}, network ${nid}, enter value for ${key} [${v}]: "
+	echo -n "[$cid] network [$nid]: enter value for ${key} [${v}]: "
 	read VALUE
 	if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
       else
-	echo -n "[Prompt] For configuration ${cid}, network ${nid}, enter value for ${key}: "
+	echo -n "[$cid] network [$nid]: enter value for ${key}: "
 	read VALUE
       fi
       n=$(echo "${n}" | jq '.'${key}'="'"${VALUE}"'"')
@@ -149,15 +159,16 @@ if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
   exit 1
 fi
 nid=$(echo "${n}" | jq -r '.id')
+echo "+++ SETUP network [${nid}]"
 for key in ssid password; do
   valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
   if [ "${valid}" == "true" ]; then
     v=$(echo "${n}" | jq -r '.'"${key}")
-    echo -n "[Prompt] For network ${nid}, enter value for ${key} [${v}]: "
+    echo -n "[$nid] enter value for ${key} [${v}]: "
     read VALUE
     if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
   else
-    echo -n "[Prompt] For network ${nid}, enter value for ${key}: "
+    echo -n "[$nid] enter value for ${key}: "
     read VALUE
   fi
   n=$(echo "${n}" | jq '.'${key}'="'"${VALUE}"'"')
