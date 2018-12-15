@@ -21,8 +21,8 @@ if [ ! -s "${CONFIG}" ]; then
   exit 1
 fi
 
-APIKEY=$(echo apiKey*.json | fmt -1 | sort -r | head -1)
-MSGHUB_APIKEY=$(echo apiKey*.json | fmt -1 | egrep "kafka" | head -1)
+if [ -s "apiKey.json" ]; then IBMCLOUD_APIKEY=$(jq -r '.apiKey' "apiKey.json"); fi
+if [ -s "apiKey-kafka.json" ]; then KAFKA_APIKEY=$(jq -r '.api_key' "apiKey-kafka.json"); fi
 
 cids=$(jq -r '.configurations[]?.id' "${CONFIG}")
 if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
@@ -82,8 +82,8 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     # echo "??? DEBUG found exchange:" $(echo "${e}" | jq -c '.')
     for key in org password; do
       valid=$(echo "${e}" | jq '.'"${key}"'|contains("%%") == false')
-      if [ "${key}" == "password" ] && [ -s "${APIKEY}" ]; then
-        v=$(jq -r '.apiKey' "${APIKEY}")
+      if [ "${key}" == "password" ] && [ "${valid}" != "true" ] && [ -n "${IBMCLOUD_APIKEY}" ]; then
+        v="${IBMCLOUD_APIKEY}"
       elif [ "${valid}" == "true" ]; then
         v=$(echo "${e}" | jq -r '.'"${key}")
       else
