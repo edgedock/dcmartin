@@ -115,7 +115,7 @@ if [ ! -e "${SSH_FILE}" ]; then
 fi
 echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 # public key setup
-PUBLIC_KEY_FILE="${SSH_FILE}.pub"
+PUBLIC_KEY_FILE="ssh.pub"
 PUBLIC_KEY=$(jq -r '.keys.public' "${CONFIG}")
 if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
   if [ -e "${DEFAULT_PUBLIC_KEY_FILE}" ]; then
@@ -125,12 +125,12 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
     echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_PUBLIC_KEY_FILE}; run ssh-keygen"
     exit 1
   fi
-  sudo cp -f "${PUBLIC_KEY_FILE}" "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
+  sudo cp -f "${PUBLIC_KEY_FILE}" "${SSH_FILE}.pub"
 else
   # write public keyfile
-  echo "${PUBLIC_KEY}" | sudo base64 --decode > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
+  echo "${PUBLIC_KEY}" | sudo base64 --decode > "${SSH_FILE}.pub"
 fi
-echo "--- INFO $0 $$ -- created ${PUBLIC_KEY_FILE} for authorized_hosts"
+echo "--- INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
 
 ## WPA
 # SUPPLICANT
