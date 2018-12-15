@@ -5,9 +5,16 @@ if [ -z $(command -v jq) ]; then
   exit 1
 fi
 
+## MACOS is strange
+if [[ "$OSTYPE" == "darwin" && "$VENDOR" == "apple" ]]; then
+  BASE64_ENCODE='base64'
+else
+  BASE64_ENCODE='base64 -w 0'
+fi
+
 TEMPLATE="template.json"
 CONFIG="horizon.json"
-ID_RSA=~/.ssh/id_rsa
+DEFAULT_KEY_FILE=~/.ssh/id_rsa
 
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
@@ -28,19 +35,19 @@ if [ ! -s "${CONFIG}" ]; then
 fi
 
 if [ $(jq '.keys==null' "${CONFIG}") ]; then
-  if [ -s "${ID_RSA}" ] && [ -s "${ID_RSA}.pub" ]; then
-    echo "+++ WARN $0 $$ -- no keys configured; using default ${ID_RSA}"
+  if [ -s "${DEFAULT_KEY_FILE}" ] && [ -s "${DEFAULT_KEY_FILE}.pub" ]; then
+    echo "+++ WARN $0 $$ -- no keys configured; using default ${DEFAULT_KEY_FILE}"
   else
     echo "+++ WARN $0 $$ -- no SSH credentials; generating.."
     # generate new key
-    ssh-keygen -t rsa -f "$ID_RSA" -N "" &> /dev/null
+    ssh-keygen -t rsa -f "$DEFAULT_KEY_FILE" -N "" &> /dev/null
     # test for success
-    if [ ! -s "$ID_RSA" ] || [ ! -s "$ID_RSA.pub" ]; then
-      echo "*** ERROR: ${id}: failed to create keys $ID_RSA" &> /dev/stderr
+    if [ ! -s "$DEFAULT_KEY_FILE" ] || [ ! -s "$DEFAULT_KEY_FILE.pub" ]; then
+      echo "*** ERROR: ${id}: failed to create keys $DEFAULT_KEY_FILE" &> /dev/stderr
       exit 1
     fi
   fi
-  jq '.keys={"public":"'${BASE64} "${ID_RSA}.pub"'","private":"'${BASE64} "${ID_RSA}"'"}' "${CONFIG}" > "/tmp/$$.json"
+  jq '.keys={"public":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}.pub")'","private":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}")'"}' "${CONFIG}" > "/tmp/$$.json"
   if [ -s "/tmp/$$.json" ]; then
     mv -f "/tmp/$$.json" "${CONFIG}"
     # echo "??? DEBUG updated ${CONFIG}"

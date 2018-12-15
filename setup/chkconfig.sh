@@ -19,7 +19,7 @@ fi
 
 
 VID=$(jq -r '.vendor' "${CONFIG}")
-if [ "${VID}" != 'null' ]; then
+if [ "${VID}" != 'null' ] && [ $(jq -r '.discovery==true' "${CONFIG}") == 'true' ]; then
   echo "--- INFO: discovery on:" $(jq -r '.vendors[]|select(.id=="'$VID'")|.tag' "${CONFIG}")
 fi
 
