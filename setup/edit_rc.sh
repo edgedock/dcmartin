@@ -62,12 +62,12 @@ if [ ! -e "${SDB}" ]; then
   exit 1
 fi
 BOOT_PART=${SDB}1
-if [ ! -e "{BOOT_PART}" ]; then
+if [ ! -e "${BOOT_PART}" ]; then
   echo "*** ERROR $0 $$ -- boot partition not found: ${BOOT_PART}"
   exit 1
 fi
 LINUX_PART=${SDB}2
-if [ ! -e "{LINUX_PART}" ]; then
+if [ ! -e "${LINUX_PART}" ]; then
   echo "*** ERROR $0 $$ -- LINUX partition not found: ${LINUX_PART}"
   exit 1
 fi
@@ -88,8 +88,8 @@ if [ ! -d "${VOL}" ]; then
   echo "+++ WARN $0 $$ -- no mount point specified; found default directory: ${VOL}"
   mkdir -p "${VOL}"
 fi
-BOOT_VOL=${VOL}/boot
-LINUX_VOL=${VOL}/linux
+BOOT_VOL="${VOL}/boot"
+LINUX_VOL="${VOL}/linux"
 # make directories
 mkdir -p "${BOOT_VOL}" "${LINUX_VOL}"
 # test
