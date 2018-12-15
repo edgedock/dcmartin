@@ -86,12 +86,12 @@ else
 fi
 if [ ! -d "${VOL}" ]; then
   echo "+++ WARN $0 $$ -- no mount point specified; found default directory: ${VOL}"
-  mkdir -p "${VOL}"
+  sudo mkdir -p "${VOL}"
 fi
 BOOT_VOL="${VOL}/boot"
 LINUX_VOL="${VOL}/linux"
 # make directories
-mkdir -p "${BOOT_VOL}" "${LINUX_VOL}"
+sudo mkdir -p "${BOOT_VOL}" "${LINUX_VOL}"
 # test
 if [ ! -d "${BOOT_VOL}" ] || [ ! -d "${LINUX_VOL}" ]; then
   echo "*** ERROR $0 $$ -- invalid mount directories: ${BOOT_VOL} & ${LINUX_VOL}"
