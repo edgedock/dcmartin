@@ -30,7 +30,7 @@ else
 fi
 
 # check configuration
-if [ $(chkconfig.sh "${CONFIG}") != "true" ]; then
+if [ $(./chkconfig.sh "${CONFIG}") != "true" ]; then
   echo "*** ERROR $0 $$ -- invalid configuration: ${CONFIG}"
   exit 1
 fi
@@ -127,7 +127,7 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
   fi
 fi
 # write public keyfile
-echo "${PUBLIC_KEY}" | sudo base64 --decode > "${SSH_FILE}.pub"
+echo "${PUBLIC_KEY}" | base64 --decode | tee "${SSH_FILE}.pub" &> /dev/null
 echo "--- INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
 
 ## WPA
