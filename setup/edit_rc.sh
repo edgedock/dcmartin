@@ -30,7 +30,7 @@ else
 fi
 
 # check configuration
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 
 if [ $(${DIR}/chkconfig.sh "${CONFIG}") != "true" ]; then
   echo "*** ERROR $0 $$ -- invalid configuration: ${CONFIG}"
