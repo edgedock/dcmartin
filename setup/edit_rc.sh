@@ -29,14 +29,6 @@ else
   CONFIG="${1}"
 fi
 
-# check configuration
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-
-if [ $(${DIR}/chkconfig.sh "${CONFIG}") != "true" ]; then
-  echo "*** ERROR $0 $$ -- invalid configuration: ${CONFIG}"
-  exit 1
-fi
-
 ## WIFI
 WIFI_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
 WIFI_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
