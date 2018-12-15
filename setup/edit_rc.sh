@@ -128,7 +128,7 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
   sudo cp -f "${PUBLIC_KEY_FILE}" "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
 else
   # write public keyfile
-  echo "${PUBLIC_KEY}" | sudo base64 --decode) > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
+  echo "${PUBLIC_KEY}" | sudo base64 --decode > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
 fi
 echo "--- INFO $0 $$ -- created ${PUBLIC_KEY_FILE} for authorized_hosts"
 
