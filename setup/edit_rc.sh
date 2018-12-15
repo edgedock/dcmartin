@@ -10,7 +10,7 @@ fi
 
 DEFAULT_WIFI_SSID="TEST"
 DEFAULT_WIFI_PASSWORD="0123456789"
-DEFAULT_PUBLIC_KEY_FILE=~/.ssh/id_rsa.pub
+DEFAULT_KEY_FILE=~/.ssh/id_rsa
 
 ## CONFIGURATION
 CONFIG="horizon.json"
@@ -112,11 +112,19 @@ echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 # public key setup
 PUBLIC_KEY=$(jq -r '.keys.public' "${CONFIG}")
 if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
-  if [ -e "${DEFAULT_PUBLIC_KEY_FILE}" ]; then
-    echo "+++ WARN $0 $$ -- no public key; found default ${DEFAULT_PUBLIC_KEY_FILE}"
-    PUBLIC_KEY=$(base64 -w 0 "${DEFAULT_PUBLIC_KEY_FILE}")
+  if [ -s "${DEFAULT_KEY_FILE}.pub" ] && [ -s "${DEFAULT_KEY_FILE}" ]; then
+    echo "+++ WARN $0 $$ -- no configured keys; found default ${DEFAULT_KEY_FILE}"
+    PRIVATE_KEY=$(base64 -w 0 "${DEFAULT_KEY_FILE}")
+    PUBLIC_KEY=$(base64 -w 0 "${DEFAULT_KEY_FILE}.pub")
+    jq '.keys={"public":"'"${PUBLIC_KEY}"'","private":"'"${PRIVATE_KEY}"'"}' "${CONFIG}" > "/tmp/$$.json"
+    if [ -s "/tmp/$$.json" ]; then
+      mv -f "/tmp/$$.json" "${CONFIG}"
+    else
+      echo "*** ERROR $0 $$ -- cannot update ${CONFIG}" &> /dev/stderr
+      exit 1
+    fi
   else
-    echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_PUBLIC_KEY_FILE}; run ssh-keygen"
+    echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_KEY_FILE}.pub; run ssh-keygen" &> /dev/stderr
     exit 1
   fi
 fi
