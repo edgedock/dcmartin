@@ -167,7 +167,7 @@ sudo rmdir "${BOOT_VOL}"
 
 ### LINUX
 
-mount "${LINUX_PART}" "${LINUX_VOL}"
+sudo mount "${LINUX_PART}" "${LINUX_VOL}"
 if [ ! -d "${LINUX_VOL}" ]; then
   echo "*** ERROR $0 $$ -- failed to mount partition ${LINUX_PART} on ${LINUX_VOL}"
   exit 1
