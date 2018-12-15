@@ -150,10 +150,11 @@ if [ ! -s "${WPA_TEMPLATE_FILE}" ]; then
   exit 1
 fi
 # change template
-sed \
+sudo cp -f "${WPA_TEMPLATE_FILE}" "${WPA_SUPPLICANT_FILE}"
+sudo sed -i \
   -e 's|%%WIFI_SSID%%|'"${WIFI_SSID}"'|g' \
   -e 's|%%WIFI_PASSWORD%%|'"${WIFI_PASSWORD}"'|g' \
-  "${WPA_TEMPLATE_FILE}" | sudo cat > "${WPA_SUPPLICANT_FILE}"
+  "${WPA_SUPPLICANT_FILE}"
 if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${WPA_SUPPLICANT_FILE}"
   exit 1
@@ -189,12 +190,13 @@ if [ ! -s "${RC_TEMPLATE_FILE}" ]; then
   exit 1
 fi
 # change template
-sed \
+sudo cp -f ${RC_TEMPLATE_FILE}" "${RC_LOCAL_FILE}"
+sudo sed -i \
   -e 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
   -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
   -e 's|%%DEVICE_TOKEN%%|'"${DEVICE_TOKEN}"'|g' \
   -e 's|%%HORIZON_SETUP_URL%%|'"${HORIZON_SETUP_URL}"'|g' \
-  "${RC_TEMPLATE_FILE}" | sudo cat > "${RC_LOCAL_FILE}"
+  "${RC_LOCAL_FILE}"
 if [ ! -s "${RC_LOCAL_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${RC_LOCAL_FILE}"
   exit 1
