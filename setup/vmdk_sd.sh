@@ -79,7 +79,7 @@ if [ $? != 0 ]; then
 fi
 
 echo "Attaching VMDK file to virtual machine ..."
-VBoxManage storageattach "$vm" --medium $vmdk_file --storagectl SATA --port $port --type hdd
+VBoxManage storageattach "$vm" --medium $vmdk_file --storagectl SATA --port $port --type hdd --hotpluggable on
 if [ $? != 0 ]; then
   echo "*** ERROR $0 $$ -- Could not attach VMDK file to VM. You need to do this manually."
   exit 1
