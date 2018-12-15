@@ -100,7 +100,7 @@ fi
 
 ### BOOT
 
-mount "${BOOT_PART}" "${BOOT_VOL}"
+sudo mount "${BOOT_PART}" "${BOOT_VOL}"
 if [ ! -d "${BOOT_VOL}" ]; then
   echo "*** ERROR $0 $$ -- failed to mount partition ${BOOT_PART} on ${BOOT_VOL}"
   exit 1
@@ -108,7 +108,7 @@ fi
 
 ## SSH ACCESS
 SSH_FILE="${BOOT_VOL}/ssh"
-touch "${SSH_FILE}"
+sudo touch "${SSH_FILE}"
 if [ ! -e "${SSH_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${SSH_FILE}"
   exit 1
@@ -125,10 +125,10 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
     echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_PUBLIC_KEY_FILE}; run ssh-keygen"
     exit 1
   fi
-  cp -f "${PUBLIC_KEY_FILE}" "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
+  sudo cp -f "${PUBLIC_KEY_FILE}" "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
 else
   # write public keyfile
-  echo "${PUBLIC_KEY}" | base64 --decode) > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
+  echo "${PUBLIC_KEY}" | sudo base64 --decode) > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
 fi
 echo "--- INFO $0 $$ -- created ${PUBLIC_KEY_FILE} for authorized_hosts"
 
@@ -150,7 +150,7 @@ if [ ! -s "${WPA_TEMPLATE_FILE}" ]; then
   exit 1
 fi
 # change template
-sed \
+sudo sed \
   -e 's|%%WIFI_SSID%%|'"${WIFI_SSID}"'|g' \
   -e 's|%%WIFI_PASSWORD%%|'"${WIFI_PASSWORD}"'|g' \
   "${WPA_TEMPLATE_FILE}" > "${WPA_SUPPLICANT_FILE}"
@@ -161,8 +161,8 @@ fi
 # SUCCESS
 echo "--- INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created"
 # unmount & remove mount point directory
-umount "${BOOT_VOL}"
-rmdir "${BOOT_VOL}"
+sudo umount "${BOOT_VOL}"
+sudo rmdir "${BOOT_VOL}"
 
 ### LINUX
 
@@ -189,7 +189,7 @@ if [ ! -s "${RC_TEMPLATE_FILE}" ]; then
   exit 1
 fi
 # change template
-sed \
+sudo sed \
   -e 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
   -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
   -e 's|%%DEVICE_TOKEN%%|'"${DEVICE_TOKEN}"'|g' \
@@ -202,7 +202,7 @@ fi
 # SUCCESS
 echo "--- INFO $0 $$ -- ${RC_LOCAL_FILE} created"
 # unmount & remove mount point directory
-umount "${LINUX_VOL}"
-rmdir "${LINUX_VOL}"
+sudo umount "${LINUX_VOL}"
+sudo rmdir "${LINUX_VOL}"
 
 echo "--- INFO $0 $$ -- you may now safely eject disk ${SDB}"
