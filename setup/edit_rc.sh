@@ -190,7 +190,7 @@ if [ ! -s "${RC_TEMPLATE_FILE}" ]; then
   exit 1
 fi
 # change template
-sudo cp -f ${RC_TEMPLATE_FILE}" "${RC_LOCAL_FILE}"
+sudo cp -f "${RC_TEMPLATE_FILE}" "${RC_LOCAL_FILE}"
 sudo sed -i \
   -e 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
   -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
