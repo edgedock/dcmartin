@@ -1,4 +1,7 @@
 {
+  "keys": null,
+  "nodes": null,
+  "discover": true,
   "setup": "horizon",
   "setups": [
     { "id": "horizon", "url": "http://ibm.biz/horizon-setup" },
@@ -9,7 +12,6 @@
     { "id":"rpi", "tag": "Raspberry Pi Foundation" },
     { "id":"vbox", "tag": "Oracle VirtualBox virtual NIC" }
   ],
-  "nodes": null,
   "configurations": [
     {
       "id": "cpuconf",

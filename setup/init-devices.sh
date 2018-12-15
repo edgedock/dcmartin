@@ -115,7 +115,7 @@ else
 fi
 
 # find all devices from specified vendor
-if [ -n "${VENDOR_TAG}" ]; then
+if [ -n "${VENDOR_TAG}" ] && [ $(jq '.discover==true' "${CONFIG}") == 'true' ]; then
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: searching for all from ${VENDOR_TAG}" &> /dev/stderr; fi
   vmacs=$(egrep "${VENDOR_TAG}" "${out}" | awk '{ print $3 }' | sort | uniq)
 fi
@@ -134,7 +134,6 @@ if [ -n "${vmacs}" ]; then
       if [ -n "${DEBUG}" ]; then echo echo "??? DEBUG: node ${vmac} in configuration ${config}" &> /dev/stderr; fi
     fi
   done
-
   if [ -n "${JSON}" ]; then 
     JSON="${JSON}"']'
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: found" $(echo "${JSON}" | jq '.|length') "new ${VENDOR_TAG} nodes" &> /dev/stderr; fi
@@ -202,7 +201,7 @@ for MAC in ${MACS}; do
   fi
 
   ## TEST STATUS
-  config_keys=$(echo "$conf" | jq '.public_key!=null')
+  config_keys=$(echo "$conf" | jq '.public_key!=null and .private_key!=null')
   config_ssh=$(echo "$node_state" | jq '.ssh!=null')
   config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   config_software=$(echo "$node_state" | jq '.software!=null')
@@ -214,12 +213,19 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: configuring KEYS for $conf_id" &> /dev/stderr; fi
     # test for existing keys
     if [[ ! -s "$conf_id" && ! -s "${conf_id}.pub" ]]; then
-      # generate new key
-      ssh-keygen -t rsa -f "$conf_id" -N "" &> /dev/null
-      # test for success
-      if [[ ! -s "$conf_id" || ! -s "$conf_id.pub" ]]; then
-        echo "*** ERROR: ${id}: failed to create key files for $conf_id" &> /dev/stderr
-        exit 1
+      if [ $(jq -r '.keys!=null' "${CONFIG}") == "true" ]; then
+        echo "+++ WARN $0 $$ -- no keys defined for configuration: $conf_id; using configured defaults"
+        jq -r '.keys.private' "${CONFIG}" | base64 --decode > "${conf_id}"
+        jq -r '.keys.public' "${CONFIG}" | base64 --decode > "${conf_id}.pub"
+        chmod 400 "${conf_id}" "${conf_id}.pub"
+      else
+        # generate new key
+        ssh-keygen -t rsa -f "$conf_id" -N "" &> /dev/null
+        # test for success
+        if [[ ! -s "$conf_id" || ! -s "$conf_id.pub" ]]; then
+          echo "*** ERROR: ${id}: failed to create key files for $conf_id" &> /dev/stderr
+          exit 1
+        fi
       fi
     else
       if [ -n "${VERBOSE}" ]; then echo ">>> VERBOSE: ${id}: using existing keys $conf_id" &> /dev/stderr; fi

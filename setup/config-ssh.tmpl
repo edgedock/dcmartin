@@ -11,9 +11,8 @@ echo '  "password updated successfully" { send_user "changed" ; exit }}}' >> pas
 
 if [ -z $(command -v expect) ]; then
   apt install -y expect &> apt.log
-else
-  RESULT=$(expect -f passwd.exp | egrep "changed")
 fi
+RESULT=$(expect -f passwd.exp | egrep "changed")
 
 if [ -z "${RESULT}" ]; then RESULT="failure"; fi
 

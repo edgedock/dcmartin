@@ -1,7 +1,13 @@
 #!/bin/bash
 
+if [ -z $(command -v jq) ]; then
+  echo "*** ERROR $0 $$ -- please install jq"
+  exit 1
+fi
+
 TEMPLATE="template.json"
 CONFIG="horizon.json"
+ID_RSA=~/.ssh/id_rsa
 
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
@@ -19,6 +25,29 @@ fi
 if [ ! -s "${CONFIG}" ]; then
   echo "*** ERROR $0 $$ -- configuration file empty: ${1}" &> /dev/stderr
   exit 1
+fi
+
+if [ $(jq '.keys==null' "${CONFIG}") ]; then
+  if [ -s "${ID_RSA}" ] && [ -s "${ID_RSA}.pub" ]; then
+    echo "+++ WARN $0 $$ -- no keys configured; using default ${ID_RSA}"
+  else
+    echo "+++ WARN $0 $$ -- no SSH credentials; generating.."
+    # generate new key
+    ssh-keygen -t rsa -f "$ID_RSA" -N "" &> /dev/null
+    # test for success
+    if [ ! -s "$ID_RSA" ] || [ ! -s "$ID_RSA.pub" ]; then
+      echo "*** ERROR: ${id}: failed to create keys $ID_RSA" &> /dev/stderr
+      exit 1
+    fi
+  fi
+  jq '.keys={"public":"'${BASE64} "${ID_RSA}.pub"'","private":"'${BASE64} "${ID_RSA}"'"}' "${CONFIG}" > "/tmp/$$.json"
+  if [ -s "/tmp/$$.json" ]; then
+    mv -f "/tmp/$$.json" "${CONFIG}"
+    # echo "??? DEBUG updated ${CONFIG}"
+  else
+    echo "*** ERROR $0 $$ -- failed to update ${CONFIG}; /tmp/$$.json is empty"
+    exit 1
+  fi
 fi
 
 if [ -s "apiKey.json" ]; then IBMCLOUD_APIKEY=$(jq -r '.apiKey' "apiKey.json"); fi
@@ -153,7 +182,7 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
 fi
 
 ## setup network (default)
-n=$(jq '.networks?|first' "${CONFIG}")
+n=$(jq '.networks|first' "${CONFIG}")
 if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
   echo "*** ERROR $0 $$ -- cannot find first network for setup"
   exit 1

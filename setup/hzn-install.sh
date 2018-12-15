@@ -1,7 +1,5 @@
 #!/bin/bash
 
-## BASE
-
 if [ "${VENDOR}" == "apple" ] || [ "${OSTYPE}" == "darwin" ]; then
   echo "You're on a Macintosh; download from https://github.com/open-horizon/anax/releases; exiting" >&2
   exit 1

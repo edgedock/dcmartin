@@ -1,4 +1,16 @@
-#!/bin/sh -e
+#!/bin/bash
+
+## not for macintosh
+if [ "${VENDOR}" == "apple" ] || [ "${OSTYPE}" == "darwin" ]; then
+  echo "You're on a Macintosh; run in VirtualBox Ubuntu18 VM and use vmdk_sd.sh to enable SD card access" >&2
+  exit 1
+fi
+
+### DEFAULTS
+
+DEFAULT_WIFI_SSID="TEST"
+DEFAULT_WIFI_PASSWORD="0123456789"
+DEFAULT_PUBLIC_KEY_FILE=~/.ssh/id_rsa.pub
 
 ## CONFIGURATION
 CONFIG="horizon.json"
@@ -17,12 +29,14 @@ else
   CONFIG="${1}"
 fi
 
-## WIFI
-DEFAULT_WIFI_SSID="TEST"
-DEFAULT_WIFI_PASSWORD="0123456789"
+if [ $(chkconfig "${CONFIG}") != "true" ]; then
+  echo "*** ERROR $0 $$ -- invalid configuration: ${CONFIG}"
+  exit 1
+fi
 
-WIFI_SSID=$(jq -r '.networks[0]?|.ssid' "${CONFIG}")
-WIFI_PASSWORD=$(jq -r '.networks[0]?|.password' "${CONFIG}")
+## WIFI
+WIFI_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
+WIFI_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
 if [ "${WIFI_SSID}" == "null" ] || [ "${WIFI_PASSWORD}" == "null" ]; then
   WIFI_SSID="${DEFAULT_WIFI_SSID}"
   WIFI_PASSWORD="${DEFAULT_WIFI_PASSWORD}"
@@ -58,7 +72,7 @@ if [ ! -e "{LINUX_PART}" ]; then
   exit 1
 fi
 
-## MOUNT VOLUME
+## MOUNT POINT
 VOL=/mnt
 if [ -z "${3}" ]; then
   if [ -d "${VOL}" ]; then
@@ -84,7 +98,8 @@ if [ ! -d "${BOOT_VOL}" ] || [ ! -d "${LINUX_VOL}" ]; then
   exit 1
 fi
 
-# mount boot
+### BOOT
+
 mount "${BOOT_PART}" "${BOOT_VOL}"
 if [ ! -d "${BOOT_VOL}" ]; then
   echo "*** ERROR $0 $$ -- failed to mount partition ${BOOT_PART} on ${BOOT_VOL}"
@@ -98,15 +113,16 @@ if [ ! -e "${SSH_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${SSH_FILE}"
   exit 1
 fi
-
+echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
+# public key setup
 PUBLIC_KEY_FILE="${SSH_FILE}.pub"
 PUBLIC_KEY=$(jq -r '.keys.public' "${CONFIG}")
-if [ -z "${PUBLIC_KEY}" ]; then
-  if [ -e ~/.ssh/id_rsa.pub ]; then
-    echo "+++ WARN $0 $$ -- no public key; found default ~/.ssh/id_rsa.pub"
-    PUBLIC_KEY_FILE=~/.ssh/id_rsa.pub
+if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
+  if [ -e "${DEFAULT_PUBLIC_KEY_FILE}" ]; then
+    echo "+++ WARN $0 $$ -- no public key; found default ${DEFAULT_PUBLIC_KEY_FILE}"
+    PUBLIC_KEY_FILE="${DEFAULT_PUBLIC_KEY_FILE}"
   else
-    echo "*** ERROR $0 $$ -- no public key; no default ~/.ssh/id_rsa.pub"
+    echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_PUBLIC_KEY_FILE}; run ssh-keygen"
     exit 1
   fi
   cp -f "${PUBLIC_KEY_FILE}" "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
@@ -114,7 +130,7 @@ else
   # write public keyfile
   echo "${PUBLIC_KEY}" | base64 --decode) > "${BOOT_VOL}/${PUBLIC_KEY_FILE}"
 fi
-echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
+echo "--- INFO $0 $$ -- created ${PUBLIC_KEY_FILE} for authorized_hosts"
 
 ## WPA
 # SUPPLICANT
@@ -144,10 +160,12 @@ if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
 fi
 # SUCCESS
 echo "--- INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created"
-
+# unmount & remove mount point directory
 umount "${BOOT_VOL}"
+rmdir "${BOOT_VOL}"
 
-# mount linux
+### LINUX
+
 mount "${LINUX_PART}" "${LINUX_VOL}"
 if [ ! -d "${LINUX_VOL}" ]; then
   echo "*** ERROR $0 $$ -- failed to mount partition ${LINUX_PART} on ${LINUX_VOL}"
@@ -183,7 +201,8 @@ if [ ! -s "${RC_LOCAL_FILE}" ]; then
 fi
 # SUCCESS
 echo "--- INFO $0 $$ -- ${RC_LOCAL_FILE} created"
-
+# unmount & remove mount point directory
 umount "${LINUX_VOL}"
+rmdir "${LINUX_VOL}"
 
 echo "--- INFO $0 $$ -- you may now safely eject disk ${SDB}"
