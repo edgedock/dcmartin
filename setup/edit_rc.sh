@@ -29,9 +29,8 @@ else
   CONFIG="${1}"
 fi
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-
-if [ $(${DIR}/chkconfig "${CONFIG}") != "true" ]; then
+# check configuration
+if [ $(chkconfig.sh "${CONFIG}") != "true" ]; then
   echo "*** ERROR $0 $$ -- invalid configuration: ${CONFIG}"
   exit 1
 fi
@@ -117,21 +116,18 @@ if [ ! -e "${SSH_FILE}" ]; then
 fi
 echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 # public key setup
-PUBLIC_KEY_FILE="ssh.pub"
 PUBLIC_KEY=$(jq -r '.keys.public' "${CONFIG}")
 if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
   if [ -e "${DEFAULT_PUBLIC_KEY_FILE}" ]; then
     echo "+++ WARN $0 $$ -- no public key; found default ${DEFAULT_PUBLIC_KEY_FILE}"
-    PUBLIC_KEY_FILE="${DEFAULT_PUBLIC_KEY_FILE}"
+    PUBLIC_KEY=$(base64 -w 0 "${DEFAULT_PUBLIC_KEY_FILE}")
   else
     echo "*** ERROR $0 $$ -- no public key; no default ${DEFAULT_PUBLIC_KEY_FILE}; run ssh-keygen"
     exit 1
   fi
-  sudo cp -f "${PUBLIC_KEY_FILE}" "${SSH_FILE}.pub"
-else
-  # write public keyfile
-  echo "${PUBLIC_KEY}" | sudo base64 --decode > "${SSH_FILE}.pub"
 fi
+# write public keyfile
+echo "${PUBLIC_KEY}" | sudo base64 --decode > "${SSH_FILE}.pub"
 echo "--- INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
 
 ## WPA
