@@ -22,25 +22,28 @@ else
   BASE64_ENCODE='base64 -w 0'
 fi
 
-if [[ -n "${1}" ]]; then
-  config="${1}"
+###
+### CONFIGURATION
+###
+
+if [ -n "${1}" ]; then
+  CONFIG="${1}"
 else
-  config="horizon.json"
+  CONFIG="horizon.json"
 fi
-if [[ ! -s "${config}"  ]]; then
-  echo "Cannot find configuration file" &> /dev/stderr
+if [ ! -s "${CONFIG}" ]; then
+  echo "Cannot find configuration file: ${CONFIG}" &> /dev/stderr
   exit 1
 fi
 
-###
-### DISTRIBUTION config
-###
+DEFAULT_TOKEN=$(jq -r '.default.token' "${CONFIG}")
+DEFAULT_MACHINE=$(jq -r '.default.machine' "${CONFIG}")
 
-SETUP_ID=$(jq -r '.setup' "${config}")
+SETUP_ID=$(jq -r '.setup' "${CONFIG}")
 if [ -n "${SETUP_ID}" ]; then
-  HORIZON_SETUP_URL=$(jq -r '.setups[]|select(.id=="'$SETUP_ID'").url' "${config}")
+  HORIZON_SETUP_URL=$(jq -r '.setups[]|select(.id=="'$SETUP_ID'").url' "${CONFIG}")
   if [ -z "${HORIZON_SETUP_URL}" ]; then
-    echo "*** ERROR: cannot find URL for setup id ${SETUP_ID} in ${config}" &> /dev/stderr
+    echo "*** ERROR: cannot find URL for setup id ${SETUP_ID} in ${CONFIG}" &> /dev/stderr
     exit 1
   fi
 else
@@ -49,15 +52,15 @@ else
 fi
 
 ## VENDOR for auto-discovery
-VENDOR_ID=$(jq -r '.vendor' "${config}")
+VENDOR_ID=$(jq -r '.vendor' "${CONFIG}")
 if [ -n "${VENDOR_ID}" ]; then
-  VENDOR_TAG=$(jq -r '.vendors[]|select(.id=="'"${VENDOR_ID}"'").tag' "${config}")
+  VENDOR_TAG=$(jq -r '.vendors[]|select(.id=="'"${VENDOR_ID}"'").tag' "${CONFIG}")
   if [ -z "${VENDOR_TAG}" ]; then
-    echo "*** ERROR: cannot find tag for vendor id ${VENDOR_ID} in configuration ${config}" &> /dev/stderr
+    echo "*** ERROR: cannot find tag for vendor id ${VENDOR_ID} in configuration ${CONFIG}" &> /dev/stderr
     exit 1
   fi
 else
-  echo "+++ WARN: no vendor specified for auto-discovery in ${config}" &> /dev/stderr
+  echo "+++ WARN: no vendor specified for auto-discovery in ${CONFIG}" &> /dev/stderr
   VENDOR_TAG=
 fi
 
@@ -67,7 +70,7 @@ if [[ -n "${2}" ]]; then
 else
   net="192.168.1.0/24"
 fi
-echo "--- INFO: executing: $0 ${config} $net" &> /dev/stderr
+echo "--- INFO: executing: $0 ${CONFIG} $net" &> /dev/stderr
 
 TTL=300 # seconds
 SECONDS=$(date "+%s")
@@ -103,7 +106,7 @@ MAC_COUNT=${#MAC_ARRAY[@]}
 echo "--- INFO: found ${MAC_COUNT} devices on LAN ${net}" &> /dev/stderr
 
 # get nodes
-NODES=$(jq -r '.nodes[]?.mac' "${config}")
+NODES=$(jq -r '.nodes[]?.mac' "${CONFIG}")
 if [ -z "${NODES}" ] || [ "${NODES}" == 'null' ]; then
   echo "+++ WARN: no nodes in configuration" &> /dev/stderr
   NODE_COUNT=0
@@ -131,21 +134,21 @@ if [ -n "${vmacs}" ]; then
       i=$((i+1))
       JSON="${JSON}"'{"id":"'"${VENDOR_ID}-${i}"'","mac":"'"${vmac}"'"}'
     else
-      if [ -n "${DEBUG}" ]; then echo echo "??? DEBUG: node ${vmac} in configuration ${config}" &> /dev/stderr; fi
+      if [ -n "${DEBUG}" ]; then echo echo "??? DEBUG: node ${vmac} in configuration ${CONFIG}" &> /dev/stderr; fi
     fi
   done
   if [ -n "${JSON}" ]; then 
     JSON="${JSON}"']'
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: found" $(echo "${JSON}" | jq '.|length') "new ${VENDOR_TAG} nodes" &> /dev/stderr; fi
-    jq '.nodes+='"${JSON}" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: updated configuration ${config}" &> /dev/stderr; fi
+    jq '.nodes+='"${JSON}" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: updated configuration ${CONFIG}" &> /dev/stderr; fi
   fi
 else
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: no ${VENDOR_TAG} devices found" &> /dev/stderr ; fi
 fi
 
 # update 
-NODES=$(jq -r '.nodes[]?.mac' "${config}")
+NODES=$(jq -r '.nodes[]?.mac' "${CONFIG}")
 if [ -z "${NODES}" ]; then
   echo "+++ WARN: no nodes (MACs) in configuration" &> /dev/stderr
   NODE_COUNT=0
@@ -155,7 +158,7 @@ else
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: found ${NODE_COUNT} nodes (MACs) in configuration" &> /dev/stderr; fi
 fi
 
-echo "--- INFO: total of ${NODE_COUNT} nodes in configuration ${config}" &> /dev/stderr
+echo "--- INFO: total of ${NODE_COUNT} nodes in configuration ${CONFIG}" &> /dev/stderr
 
 ###
 ### ITERATE OVER ALL MACS on LAN
@@ -165,7 +168,7 @@ for MAC in ${MACS}; do
   # get ipaddr
   client_ipaddr=$(egrep -B 2 "$MAC" "$out" | egrep "Nmap scan" | head -1 | awk '{ print $5 }')
   # search for device by MAC
-  id=$(jq -r '.nodes[]|select(.mac=="'$MAC'").id' "${config}")
+  id=$(jq -r '.nodes[]|select(.mac=="'$MAC'").id' "${CONFIG}")
   if [ -z "$id" ]; then
     if [ -n "${VERBOSE}" ]; then echo ">>> VERBOSE: NOT FOUND; MAC: $MAC; IP: $client_ipaddr" &> /dev/stderr; fi
     continue
@@ -183,7 +186,7 @@ for MAC in ${MACS}; do
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: searching for configuration" &> /dev/stderr; fi
 
   # find configuration which includes device
-  conf=$(jq '.configurations[]|select(.nodes[].id=="'"${id}"'")' "${config}")
+  conf=$(jq '.configurations[]|select(.nodes[].id=="'"${id}"'")' "${CONFIG}")
   if [[ -z "${conf}" || "${conf}" == "null" ]]; then
     echo "*** ERROR: ${id}: Cannot find node configuration for device: $id" &> /dev/stderr
     continue
@@ -194,7 +197,7 @@ for MAC in ${MACS}; do
   fi
 
   # find node state (cannot fail)
-  node_state=$(jq '.nodes[]|select(.id=="'$id'")' "${config}")
+  node_state=$(jq '.nodes[]|select(.id=="'$id'")' "${CONFIG}")
   if [ -z "${node_state}" ] || [ "${node_state}" == 'null' ]; then
     echo "*** ERROR ${id}: found no existing node state; continuing..." &> /dev/stderr
     continue
@@ -213,10 +216,10 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: configuring KEYS for $conf_id" &> /dev/stderr; fi
     # test for existing keys
     if [[ ! -s "$conf_id" && ! -s "${conf_id}.pub" ]]; then
-      if [ $(jq -r '.keys!=null' "${CONFIG}") == "true" ]; then
-        echo "+++ WARN $0 $$ -- no keys defined for configuration: $conf_id; using configured defaults"
-        jq -r '.keys.private' "${CONFIG}" | base64 --decode > "${conf_id}"
-        jq -r '.keys.public' "${CONFIG}" | base64 --decode > "${conf_id}.pub"
+      if [ $(jq -r '.default.keys!=null' "${CONFIG}") == "true" ]; then
+        echo "+++ WARN $0 $$ -- no keys defined for configuration: $conf_id; using configured default"
+        jq -r '.default.keys.private' "${CONFIG}" | base64 --decode > "${conf_id}"
+        jq -r '.default.keys.public' "${CONFIG}" | base64 --decode > "${conf_id}.pub"
         chmod 400 "${conf_id}" "${conf_id}.pub"
       else
         # generate new key
@@ -233,10 +236,10 @@ for MAC in ${MACS}; do
     # save into configuration
     public_key='{ "encoding": "base64", "value": "'$(${BASE64_ENCODE} "${conf_id}.pub")'" }'
 
-    jq '(.configurations[]|select(.id=="'"$conf_id"'").public_key)|='"${public_key}" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+    jq '(.configurations[]|select(.id=="'"$conf_id"'").public_key)|='"${public_key}" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
     private_key='{ "encoding": "base64", "value": "'$(${BASE64_ENCODE} "$conf_id")'" }'
-    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"${private_key}" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
-    conf=$(jq '.configurations[]|select(.nodes[].id=="'$id'")' "${config}")
+    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"${private_key}" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    conf=$(jq '.configurations[]|select(.nodes[].id=="'$id'")' "${CONFIG}")
     # update status
     config_keys=$(echo "$conf" | jq '.public_key!=null')
   else
@@ -287,8 +290,8 @@ for MAC in ${MACS}; do
 
   # get default username and password for distribution associated with machine assigned to node
   mid=$(echo "$node_conf" | jq -r '.machine')
-  did=$(jq -r '.machines[]|select(.id=="'$mid'").distribution' "${config}") 
-  dist=$(jq '.distributions[]|select(.id=="'$did'")' "${config}")
+  did=$(jq -r '.machines[]|select(.id=="'$mid'").distribution' "${CONFIG}") 
+  dist=$(jq '.distributions[]|select(.id=="'$did'")' "${CONFIG}")
   client_hostname=$(echo "$dist" | jq -r '.client.hostname')
   client_username=$(echo "$dist" | jq -r '.client.username')
   client_password=$(echo "$dist" | jq -r '.client.password')
@@ -329,10 +332,10 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: configured with $conf_id public key" &> /dev/stderr; fi
     ## UPDATE CONFIGURATION
     node_state=$(echo "$node_state" | jq '.ssh.id="'"${conf_id}"'"')
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${config}" &> /dev/stderr; fi
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
     # get new status
-    config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${config}")
+    config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${CONFIG}")
   fi
   if [ "${config_ssh}" != "true" ]; then
     echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
@@ -345,9 +348,12 @@ for MAC in ${MACS}; do
     # get node configuration specifics
     device=$(echo "$node_conf" | jq -r '.device')
     token=$(echo "$node_conf" | jq -r '.token')
-    if [[ -z $device || -z $token ]]; then
-      echo "*** ERROR: ${id}: node configuration device or token are unspecified: $node_conf" &> /dev/stderr
+    if [ -z "$device" ]; then
+      echo "*** ERROR: ${id}: node configuration device identifier unspecified: $node_conf" &> /dev/stderr
       continue
+    fi
+    if [ -z "${token}" ]; then
+      token=$(jq -r '.default.token' "${CONFIG}")
     fi
     # create device and token script
     config_script="$TMP/config-ssh.sh"
@@ -368,8 +374,8 @@ for MAC in ${MACS}; do
     fi
     ## UPDATE CONFIGURATION
     node_state=$(echo "$node_state" | jq '.ssh={"id":"'"$conf_id"'","token":"'"${token}"'","device":"'"${device}"'"}')
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${config}" &> /dev/stderr; fi
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
     config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   fi
   # sanity
@@ -394,9 +400,9 @@ for MAC in ${MACS}; do
       echo "+++ WARN : ${id} SOFTWARE failed; cannot confirm command: ${result}" &> /dev/stderr
       node_state=$(echo "$node_state" | jq '.software=null')
       # update configuration file
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
       # update software configuration
-      config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${config}")
+      config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${CONFIG}")
     else
       echo "--- INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
     fi
@@ -416,9 +422,9 @@ for MAC in ${MACS}; do
     # update node state
     node_state=$(echo "$node_state" | jq '.software='"$result")
     # update configuration file
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
     # update software configuration
-    config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${config}")
+    config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${CONFIG}")
   fi
   # sanity
   if [ "${config_software}" != "true" ]; then
@@ -435,7 +441,7 @@ for MAC in ${MACS}; do
       echo "*** ERROR: ${id}: exchange not specified in configuration: $conf" &> /dev/stderr
       continue
     fi
-    exchange=$(jq '.exchanges[]|select(.id=="'$ex_id'")' "${config}")
+    exchange=$(jq '.exchanges[]|select(.id=="'$ex_id'")' "${CONFIG}")
     if [[ -z "${exchange}" || "${exchange}" == null ]]; then
       echo "*** ERROR: ${id}: exchange $ex_id not found in exchanges" &> /dev/stderr
       continue
@@ -517,8 +523,8 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node state:" $(echo "$node_state" | jq -c '.') &> /dev/stderr; fi
 
     ## UPDATE CONFIGURATION
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
-    config_exchange=$(jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "${config}")
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    config_exchange=$(jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "${CONFIG}")
   fi
   # sanity
   if [[ ${config_exchange} != "true" ]]; then
@@ -540,7 +546,7 @@ for MAC in ${MACS}; do
     continue
   fi
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: pattern identifier $ptid" &> /dev/stderr; fi
-  pattern=$(jq '.patterns[]|select(.id=="'$ptid'")' "${config}")
+  pattern=$(jq '.patterns[]|select(.id=="'$ptid'")' "${CONFIG}")
   if [[ -z "${pattern}" || "${pattern}" == "null" ]]; then
     echo "*** ERROR: ${id}: pattern $ptid not found in patterns" &> /dev/stderr
     continue
@@ -556,9 +562,9 @@ for MAC in ${MACS}; do
   ex_id=$(echo "$node_state" | jq -r '.exchange.id')
   ex_device=$(echo "$node_state" | jq -r '.ssh.device')
   ex_token=$(echo "$node_state" | jq -r '.ssh.token')
-  ex_org=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").org' "${config}")
-  ex_username=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "${config}")
-  ex_password=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "${config}")
+  ex_org=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").org' "${CONFIG}")
+  ex_username=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").username' "${CONFIG}")
+  ex_password=$(jq -r '.exchanges[]|select(.id=="'"$ex_id"'").password' "${CONFIG}")
 
   # get node status
   cmd='hzn node list'
@@ -663,7 +669,7 @@ for MAC in ${MACS}; do
   node_state=$(echo "$node_state" | jq '.pattern='"$result")
 
   # UPDATE CONFIGURATION
-  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
+  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
 
   ## DONE w/ PATTERN
   echo "--- INFO: ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
@@ -680,7 +686,7 @@ for MAC in ${MACS}; do
       echo "*** ERROR: ${id}: network not specified in configuration: $conf" &> /dev/stderr
       continue
     fi
-    network=$(jq '.networks[]|select(.id=="'$nwid'")' "${config}")
+    network=$(jq '.networks[]|select(.id=="'$nwid'")' "${CONFIG}")
     if [[ -z "${network}" || "${network}" == "null" ]]; then
       echo "*** ERROR: ${id}: network $nwid not found in network" &> /dev/stderr
       continue
@@ -705,8 +711,8 @@ for MAC in ${MACS}; do
     node_state=$(echo "$node_state" | jq '.network='"$result")
 
     ## UPDATE CONFIGURATION
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${config}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${config}"
-    config_network=$(jq '.nodes[]|select(.id=="'$id'").network != null' "${config}")
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    config_network=$(jq '.nodes[]|select(.id=="'$id'").network != null' "${CONFIG}")
   fi
   # sanity
   if [[ ${config_network} != "true" ]]; then
@@ -720,7 +726,7 @@ for MAC in ${MACS}; do
 
 done
 
-echo $(jq -c '[.nodes[]?|{"node":.node.id,"mac":.mac,"exchange":.exchange?.id,"pattern":.pattern[]?.workload_to_run.url}]' "${config}")
+echo $(jq -c '[.nodes[]?|{"node":.node.id,"mac":.mac,"exchange":.exchange?.id,"pattern":.pattern[]?.workload_to_run.url}]' "${CONFIG}")
 
 if [ -z "${DEBUG}" ]; then rm -fr "$TMP"; fi
 exit 0

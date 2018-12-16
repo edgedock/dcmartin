@@ -1,60 +1,85 @@
 {
-  "keys": null,
-  "nodes": null,
-  "discover": true,
+  "default": {
+    "exchange": "alpha",
+    "machine": "rpi3",
+    "network": null,
+    "configuration": null,
+    "pattern": null,
+    "token": null,
+    "keys": null
+  },
   "setup": "horizon",
+  "vendor": "rpi",
+  "discover": true,
+  "tokens": [ 
+    { "id": "none" },
+    { "id":"token-1", "value": "nowisthetimeforallgoodmen" }, 
+    { "id":"token-2", "value": "longerpasswordsarebetter" }
+  ],
+  "networks": [
+    { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
+    { "id": "none" },
+    { "id": "site-1", "dhcp": "dynamic", "ssid": "%%SITE_SSID%%", "password": "%%SITE_PASSWORD%%" }
+  ],
+  "patterns": [
+    { "id": "none" },
+    { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
+    { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" }
+  ],
   "setups": [
+    { "id": "none" },
     { "id": "horizon", "url": "http://ibm.biz/horizon-setup" },
     { "id": "hassio", "url": "http://ibm.biz/hassio-setup" }
   ],
-  "vendor": "rpi",
   "vendors": [
+    { "id": "none" },
     { "id":"rpi", "tag": "Raspberry Pi Foundation" },
     { "id":"vbox", "tag": "Oracle VirtualBox virtual NIC" }
   ],
   "configurations": [
+    { "id": "none" },
     {
       "id": "cpuconf",
       "pattern": "cpu2msghub",
       "exchange": "alpha",
-      "network": "SITE",
+      "network": "site-1",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%PRIVATE_KAFKA_APIKEY%%" }
       ],
       "public_key": null,
       "private_key": null,
       "nodes": [
-        { "id": "rpi-1", "machine": "rpi3", "device": "test-cpu-1", "token": "foobar" },
-        { "id": "rpi-3", "machine": "rpi2", "device": "test-cpu-2", "token": "foobar" },
-        { "id": "rpi-5", "machine": "rpi3", "device": "test-cpu-3", "token": "foobar" },
-        { "id": "rpi-7", "machine": "rpi3", "device": "test-cpu-4", "token": "foobar" },
-        { "id": "rpi-9", "machine": "rpi3", "device": "test-cpu-5", "token": "foobar" },
-        { "id": "rpi-11", "machine": "rpi3", "device": "test-cpu-6", "token": "foobar" },
-        { "id": "rpi-13", "machine": "rpi3", "device": "test-cpu-7", "token": "foobar" },
-        { "id": "rpi-15", "machine": "rpi3", "device": "test-cpu-8", "token": "foobar" },
-        { "id": "rpi-17", "machine": "rpi3", "device": "test-cpu-9", "token": "foobar" }
+        { "id": "rpi-1", "machine": "rpi3", "device": "test-cpu-1", "token": null },
+        { "id": "rpi-3", "machine": "rpi2", "device": "test-cpu-2", "token": null },
+        { "id": "rpi-5", "machine": "rpi3", "device": "test-cpu-3", "token": null },
+        { "id": "rpi-7", "machine": "rpi3", "device": "test-cpu-4", "token": null },
+        { "id": "rpi-9", "machine": "rpi3", "device": "test-cpu-5", "token": null },
+        { "id": "rpi-11", "machine": "rpi3", "device": "test-cpu-6", "token": null },
+        { "id": "rpi-13", "machine": "rpi3", "device": "test-cpu-7", "token": null },
+        { "id": "rpi-15", "machine": "rpi3", "device": "test-cpu-8", "token": null },
+        { "id": "rpi-17", "machine": "rpi3", "device": "test-cpu-9", "token": null }
       ]
     },
     {
       "id": "sdrconf",
       "pattern": "sdr2msghub",
       "exchange": "alpha",
-      "network": "SITE",
+      "network": "site-1",
       "variables": [
         { "key": "MSGHUB_API_KEY", "value": "%%SHARED_KAFKA_APIKEY%%" }
       ],
       "public_key": null,
       "private_key": null,
       "nodes": [
-        { "id": "rpi-2", "machine": "rpi3", "device": "test-sdr-1", "token": "foobar" },
-        { "id": "rpi-4", "machine": "rpi3", "device": "test-sdr-2", "token": "foobar" },
-        { "id": "rpi-6", "machine": "rpi3", "device": "test-sdr-3", "token": "foobar" },
-        { "id": "rpi-8", "machine": "rpi3", "device": "test-sdr-4", "token": "foobar" },
-        { "id": "rpi-10", "machine": "rpi3", "device": "test-sdr-5", "token": "foobar" },
-        { "id": "rpi-12", "machine": "rpi3", "device": "test-sdr-6", "token": "foobar" },
-        { "id": "rpi-14", "machine": "rpi3", "device": "test-sdr-7", "token": "foobar" },
-        { "id": "rpi-16", "machine": "rpi3", "device": "test-sdr-8", "token": "foobar" },
-        { "id": "rpi-18", "machine": "rpi3", "device": "test-sdr-9", "token": "foobar" }
+        { "id": "rpi-2", "machine": "rpi3", "device": "test-sdr-1", "token": null },
+        { "id": "rpi-4", "machine": "rpi3", "device": "test-sdr-2", "token": null },
+        { "id": "rpi-6", "machine": "rpi3", "device": "test-sdr-3", "token": null },
+        { "id": "rpi-8", "machine": "rpi3", "device": "test-sdr-4", "token": null },
+        { "id": "rpi-10", "machine": "rpi3", "device": "test-sdr-5", "token": null },
+        { "id": "rpi-12", "machine": "rpi3", "device": "test-sdr-6", "token": null },
+        { "id": "rpi-14", "machine": "rpi3", "device": "test-sdr-7", "token": null },
+        { "id": "rpi-16", "machine": "rpi3", "device": "test-sdr-8", "token": null },
+        { "id": "rpi-18", "machine": "rpi3", "device": "test-sdr-9", "token": null }
       ]
     }
   ],
@@ -109,15 +134,8 @@
       }
     }
   ],
-  "networks": [
-    { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
-    { "id": "SITE", "dhcp": "dynamic", "ssid": "%%SITE_SSID%%", "password": "%%SITE_PASSWORD%%" }
-  ],
-  "patterns": [
-    { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
-    { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" }
-  ],
   "exchanges": [
+    { "id": "none" },
     {
       "id": "staging",
       "org": "%%HORIZON_ORG%%",
@@ -132,5 +150,6 @@
       "username": "iamapikey",
       "password": "%%HORIZON_EXCHANGE_APIKEY%%"
     }
-  ]
+  ],
+  "nodes": null
 }

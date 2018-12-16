@@ -1,10 +1,14 @@
 #!/bin/bash
 
 ## change hostname
-if [ $(cat /etc/hostname) != "%%DEVICE_NAME%%" ]; then
-  echo '%%DEVICE_NAME%%' > /etc/hostname
-  sed -i 's|\(.*\)%%CLIENT_HOSTNAME%%|\1%%DEVICE_NAME%% %%CLIENT_HOSTNAME%%|' /etc/hosts
-  hostname "%%DEVICE_NAME%%"
+if [ -n "%%DEVICE_NAME%%" ] && [ "%%DEVICE_NAME%%" != 'null' ]; then
+  if [ $(cat /etc/hostname) != "%%DEVICE_NAME%%" ]; then
+    echo '%%DEVICE_NAME%%' > /etc/hostname
+    sed -i 's|\(.*\)%%CLIENT_HOSTNAME%%|\1%%DEVICE_NAME%% %%CLIENT_HOSTNAME%%|' /etc/hosts
+    hostname "%%DEVICE_NAME%%"
+  fi
+else
+  echo "+++ WARN: $(date) -- no device name specified" >> ~/horizon.log 2>&1
 fi
 
 ## install horizon

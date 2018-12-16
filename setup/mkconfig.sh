@@ -15,39 +15,75 @@ fi
 TEMPLATE="template.json"
 CONFIG="horizon.json"
 DEFAULT_KEY_FILE=~/.ssh/id_rsa
+DEFAULT_MACHINE="rpi3"
+# if [ -n "${HZN_DEFAULT_TOKEN:-} ]; then DEFAULT_TOKEN="${HZN_DEFAULT_TOKEN}"; fi
 
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
-    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
   elif [ -s "${TEMPLATE}" ]; then
-    echo "+++ WARN $0 $$ -- no configuration specified; using template: ${TEMPLATE} for default ${CONFIG}" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- no configuration specified; using template: ${TEMPLATE} for default ${CONFIG}"
     cp -f "${TEMPLATE}" "${CONFIG}"
   else
-    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; no template: ${TEMPLATE}" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; no template: ${TEMPLATE}"
     exit 1
   fi
 else
   CONFIG="${1}"
 fi
 if [ ! -s "${CONFIG}" ]; then
-  echo "*** ERROR $0 $$ -- configuration file empty: ${1}" &> /dev/stderr
+  echo "*** ERROR $0 $$ -- configuration file empty: ${1}"
   exit 1
 fi
 
-if [ $(jq '.keys==null' "${CONFIG}") ]; then
+for def in exchange machine network configuration pattern token; do
+  # echo "??? DEBUG $0 $$ --- (${def})" $(jq -r '.default.'"${def}" "${CONFIG}")
+  while [ $(jq -r '.default.'"${def}"'==null' "${CONFIG}") == 'true' ] || [ $(jq -r '.default.'"${def}"'==""' "${CONFIG}") == 'true' ]; do
+    v=$(jq -r '.default.'"${def}" "${CONFIG}")
+    # echo "??? DEBUG ${def} was ${v}"
+    if [ -z "${v}" ] || [ "${v}" == 'null' ]; then
+      if [ -n "${v}" ]; then 
+        echo -n "${CONFIG} Enter value for default ${def} [${v}]: "
+        read VALUE
+        if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
+      else
+        echo -n "${CONFIG} Enter value for default ${def}: "
+        read VALUE
+      fi
+      # echo "??? DEBUG $0 $$ --- ${def} ${VALUE}:" $(jq -c '.'"${def}s"'[]|select(.id=="'"${VALUE}"'")' "${CONFIG}")
+      if [ -z "${VALUE}" ] || [ -z "$(jq '.'"${def}s"'[]|select(.id=="'"${VALUE}"'")' "${CONFIG}")" ]; then
+        echo "+++ WARN $0 $$ -- no such ${def} with identifier: ${VALUE}; possible values:" $(jq -j '.'"${def}s"'[]|(.id," ")' "${CONFIG}")
+        continue
+      fi
+    fi
+    # echo "??? DEBUG ${def} is now ${VALUE}"
+    jq '.default.'"${def}"'="'"${VALUE}"'"' "${CONFIG}" > "/tmp/$$.json"
+    if [ -s "/tmp/$$.json" ]; then
+      mv -f "/tmp/$$.json" "${CONFIG}"
+      # echo "??? DEBUG updated ${CONFIG}"
+    else
+      echo "*** ERROR $0 $$ -- failed to update ${CONFIG}; /tmp/$$.json is empty"
+      exit 1
+    fi
+    v=$(jq -r '.default.'"${def}" "${CONFIG}")
+  done
+  # echo "??? DEBUG ${def} is:" $(jq -r '.default.'"${def}" "${CONFIG}")
+done
+
+if [ $(jq '.default.keys==null' "${CONFIG}") == 'true' ]; then
   if [ -s "${DEFAULT_KEY_FILE}" ] && [ -s "${DEFAULT_KEY_FILE}.pub" ]; then
-    echo "+++ WARN $0 $$ -- no keys configured; using default ${DEFAULT_KEY_FILE}"
+    echo "+++ WARN $0 $$ -- no default keys configured; using default ${DEFAULT_KEY_FILE}"
   else
     echo "+++ WARN $0 $$ -- no SSH credentials; generating.."
     # generate new key
     ssh-keygen -t rsa -f "$DEFAULT_KEY_FILE" -N "" &> /dev/null
     # test for success
     if [ ! -s "$DEFAULT_KEY_FILE" ] || [ ! -s "$DEFAULT_KEY_FILE.pub" ]; then
-      echo "*** ERROR: ${id}: failed to create keys $DEFAULT_KEY_FILE" &> /dev/stderr
+      echo "*** ERROR: ${id}: failed to create default keys: $DEFAULT_KEY_FILE; use ssh-keygen" &> /dev/stderr
       exit 1
     fi
   fi
-  jq '.keys={"public":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}.pub")'","private":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}")'"}' "${CONFIG}" > "/tmp/$$.json"
+  jq '.default.keys={"public":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}.pub")'","private":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}")'"}' "${CONFIG}" > "/tmp/$$.json"
   if [ -s "/tmp/$$.json" ]; then
     mv -f "/tmp/$$.json" "${CONFIG}"
     # echo "??? DEBUG updated ${CONFIG}"
@@ -57,8 +93,18 @@ if [ $(jq '.keys==null' "${CONFIG}") ]; then
   fi
 fi
 
-if [ -s "apiKey.json" ]; then IBMCLOUD_APIKEY=$(jq -r '.apiKey' "apiKey.json"); fi
-if [ -s "apiKey-kafka.json" ]; then KAFKA_APIKEY=$(jq -r '.api_key' "apiKey-kafka.json"); fi
+if [ -s "apiKey.json" ]; then 
+  echo "+++ WARN $0 $$ -- found exiting apiKey.json file; using for IBM Cloud API key"
+  IBMCLOUD_APIKEY=$(jq -r '.apiKey' "apiKey.json")
+fi
+
+# SERVICE_NAMES=kafka stt nlu nosql
+# for service in ${SERVICE_NAMES}; do
+#  if [ -s "apiKey-${service}.json" ]; then 
+#    echo "+++ WARN $0 $$ -- found exiting apiKey-$(service}.json file; using for ${service} API key"
+#    SERVICE_APIKEYS="${SERVICE_APIKEYS}"$(jq -r '.api_key' "apiKey-${service}.json")
+#  fi
+#done
 
 cids=$(jq -r '.configurations[]?.id' "${CONFIG}")
 if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
@@ -107,12 +153,12 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     # process exchange
     eid=$(echo "${c}" | jq -r '.exchange')
     if [ -z "${eid}" ] || [ "${eid}" == 'null' ]; then
-      echo "*** ERROR $0 $$ -- configuration ${cid}: no exchange: ${eid}" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- configuration ${cid}: no exchange: ${eid}"
       exit 1
     fi
     e=$(jq '.exchanges[]?|select(.id=="'$eid'")' "${CONFIG}")
     if [ -z "${e}" ] || [ "${e}" == 'null' ]; then
-      echo "*** ERROR $0 $$ -- cannot find exchange ${eid} for configuration ${cid}" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- cannot find exchange ${eid} for configuration ${cid}"
       exit 1
     fi
     # echo "??? DEBUG found exchange:" $(echo "${e}" | jq -c '.')
@@ -147,19 +193,19 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     # process pattern
     pattern=$(jq '.patterns[]?|select(.id=="'$(echo "${c}" | jq -r '.pattern')'")' "${CONFIG}")
     if [ -z "${pattern}" ] || [ "${pattern}" == 'null' ]; then
-      echo "*** ERROR $0 $$ -- cannot find pattern for configuration ${cid}" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- cannot find pattern for configuration ${cid}"
       exit 1
     fi
 
     # process network
     nid=$(echo "${c}" | jq -r '.network')
     if [ -z "${nid}" ] || [ "${nid}" == 'null' ]; then
-      echo "*** ERROR $0 $$ -- configuration ${cid}: no network: ${nid}" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- configuration ${cid}: no network: ${nid}"
       exit 1
     fi
     n=$(jq '.networks[]?|select(.id=="'$nid'")' "${CONFIG}")
     if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
-      echo "*** ERROR $0 $$ -- cannot find network ${nid} for configuration ${cid}" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- cannot find network ${nid} for configuration ${cid}"
       exit 1
     fi
     # echo "??? DEBUG found network:" $(echo "${n}" | jq -c '.')

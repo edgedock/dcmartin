@@ -8,8 +8,6 @@ fi
 
 ### DEFAULTS
 
-DEFAULT_WIFI_SSID="TEST"
-DEFAULT_WIFI_PASSWORD="0123456789"
 DEFAULT_KEY_FILE=~/.ssh/id_rsa
 
 ## CONFIGURATION
@@ -23,21 +21,49 @@ if [ -z "${1}" ]; then
   fi
 else
   if [ ! -s "${1}" ]; then
-    echo "*** ERROR configuration file empty: ${1}"
+    echo "*** ERROR $0 $$ -- configuration file empty: ${1}"
     exit 1
   fi
   CONFIG="${1}"
 fi
 
-## WIFI
-WIFI_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
-WIFI_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
-if [ "${WIFI_SSID}" == "null" ] || [ "${WIFI_PASSWORD}" == "null" ]; then
-  WIFI_SSID="${DEFAULT_WIFI_SSID}"
-  WIFI_PASSWORD="${DEFAULT_WIFI_PASSWORD}"
-  echo "+++ WARN $0 $$ -- no WIFI_SSID or WIFI_PASSWORD defined; using default (${WIFI_SSID}:${WIFI_PASSWORD})"
+## NETWORK
+NETWORK=$(jq -r '.default.network' "${CONFIG}")
+if [ -z "${NETWORK}" ] || [ "${NETWORK}" == 'null' ]; then
+  echo "*** ERROR $0 $$ -- no default network; run mkconfig.sh"
+  exit 1
+elif [ -n "$(jq '.networks[]|select(.id=="'${NETWORK}'")' "${CONFIG}")" ]; then
+  NETWORK_SSID=$(jq -r '.networks[]|select(.id=="'${NETWORK}'").ssid' "${CONFIG}")
+  NETWORK_PASSWORD=$(jq -r '.networks[]|select(.id=="'${NETWORK}'").password' "${CONFIG}")
 else
-  echo "--- INFO $0 $$ -- WIFI_SSID & WIFI_PASSWORD defined; using (${WIFI_SSID}:${WIFI_PASSWORD})"
+  echo "*** ERROR $0 $$ -- cannot find network ${NETWORK}; add to ${CONFIG}"
+  exit 1
+fi
+
+## MACHINE
+MACHINE=$(jq -r '.default.machine' "${CONFIG}")
+if [ -z "${MACHINE}" ] || [ "${MACHINE}" == 'null' ]; then
+  echo "*** ERROR $0 $$ -- no default machine; run mkconfig.sh"
+  exit 1
+elif [ -n "$(jq '.machines[]|select(.id=="'${MACHINE}'")' "${CONFIG}")" ]; then
+  CLIENT_USERNAME=$(jq -r '.distributions[]|select(.id=="'$(jq -r '.machines[]|select(.id=="'$MACHINE'").distribution' "${CONFIG}")'").client.username' "${CONFIG}")
+  CLIENT_PASSWORD=$(jq -r '.distributions[]|select(.id=="'$(jq -r '.machines[]|select(.id=="'$MACHINE'").distribution' "${CONFIG}")'").client.password' "${CONFIG}")
+else
+  echo "*** ERROR $0 $$ -- cannot find machine ${MACHINE}; add to ${CONFIG}"
+  exit 1
+fi
+
+## TOKEN
+TOKEN=$(jq -r '.default.token' "${CONFIG}")
+if [ -z "${TOKEN}" ] || [ "${TOKEN}" == 'null' ]; then
+  echo "*** ERROR $0 $$ -- no default token; run mkconfig.sh"
+  exit 1
+elif [ "$(jq '.tokens[]|select(.id=="'"${TOKEN}"'").value' "${CONFIG}")" != "null" ]; then
+  DEVICE_NAME=
+  DEVICE_TOKEN=$(jq -r '.tokens[]|select(.id=="'"${TOKEN}"'").value' "${CONFIG}")
+else
+  echo "*** ERROR $0 $$ -- cannot find value for token ${TOKEN}; add to ${CONFIG}"
+  exit 1
 fi
 
 ## PARTITION
@@ -110,7 +136,7 @@ if [ ! -e "${SSH_FILE}" ]; then
 fi
 echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 # public key setup
-PUBLIC_KEY=$(jq -r '.keys.public' "${CONFIG}")
+PUBLIC_KEY=$(jq -r '.default.keys.public' "${CONFIG}")
 if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
   if [ -s "${DEFAULT_KEY_FILE}.pub" ] && [ -s "${DEFAULT_KEY_FILE}" ]; then
     echo "+++ WARN $0 $$ -- no configured keys; found default ${DEFAULT_KEY_FILE}"
@@ -152,8 +178,8 @@ fi
 # change template
 sudo cp -f "${WPA_TEMPLATE_FILE}" "${WPA_SUPPLICANT_FILE}"
 sudo sed -i \
-  -e 's|%%WIFI_SSID%%|'"${WIFI_SSID}"'|g' \
-  -e 's|%%WIFI_PASSWORD%%|'"${WIFI_PASSWORD}"'|g' \
+  -e 's|%%NETWORK_SSID%%|'"${NETWORK_SSID}"'|g' \
+  -e 's|%%NETWORK_PASSWORD%%|'"${NETWORK_PASSWORD}"'|g' \
   "${WPA_SUPPLICANT_FILE}"
 if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${WPA_SUPPLICANT_FILE}"
