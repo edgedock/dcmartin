@@ -124,7 +124,7 @@ if [ -n "${VENDOR_TAG}" ] && [ $(jq '.discover==true' "${CONFIG}") == 'true' ]; 
 fi
 
 if [ -n "${vmacs}" ]; then
-  if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${VENDOR_TAG} devices found:" $(echo ${vmacs} | fmt -256) &> dev/stderr; fi
+  if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${VENDOR_TAG} devices found:" $(echo ${vmacs} | fmt -256) &> /dev/stderr; fi
   JSON=; for vmac in ${vmacs}; do 
     FOUND=; for NODE in ${NODES}; do
       if [ "${vmac}" == "${NODE}" ]; then FOUND="true"; break; fi
@@ -186,8 +186,8 @@ for MAC in ${MACS}; do
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: searching for configuration" &> /dev/stderr; fi
 
   # find configuration which includes device
-  conf=$(jq '.configurations[]|select(.nodes[].id=="'"${id}"'")' "${CONFIG}")
-  if [[ -z "${conf}" || "${conf}" == "null" ]]; then
+  conf=$(jq '.configurations[]|select(.nodes[]?.id=="'"${id}"'")' "${CONFIG}")
+  if [ -z "${conf}" ] || [ "${conf}" == "null" ]; then
     echo "*** ERROR: ${id}: Cannot find node configuration for device: $id" &> /dev/stderr
     continue
   else
@@ -236,10 +236,10 @@ for MAC in ${MACS}; do
     # save into configuration
     public_key='{ "encoding": "base64", "value": "'$(${BASE64_ENCODE} "${conf_id}.pub")'" }'
 
-    jq '(.configurations[]|select(.id=="'"$conf_id"'").public_key)|='"${public_key}" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    jq '(.configurations[]|select(.id=="'"$conf_id"'").public_key)|='"${public_key}" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     private_key='{ "encoding": "base64", "value": "'$(${BASE64_ENCODE} "$conf_id")'" }'
-    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"${private_key}" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
-    conf=$(jq '.configurations[]|select(.nodes[].id=="'$id'")' "${CONFIG}")
+    jq '(.configurations[]|select(.id=="'$conf_id'").private_key)|='"${private_key}" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
+    conf=$(jq '.configurations[]|select(.nodes[]?.id=="'$id'")' "${CONFIG}")
     # update status
     config_keys=$(echo "$conf" | jq '.public_key!=null')
   else
@@ -333,7 +333,7 @@ for MAC in ${MACS}; do
     ## UPDATE CONFIGURATION
     node_state=$(echo "$node_state" | jq '.ssh.id="'"${conf_id}"'"')
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     # get new status
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${CONFIG}")
   fi
@@ -375,7 +375,7 @@ for MAC in ${MACS}; do
     ## UPDATE CONFIGURATION
     node_state=$(echo "$node_state" | jq '.ssh={"id":"'"$conf_id"'","token":"'"${token}"'","device":"'"${device}"'"}')
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   fi
   # sanity
@@ -400,9 +400,9 @@ for MAC in ${MACS}; do
       echo "+++ WARN : ${id} SOFTWARE failed; cannot confirm command: ${result}" &> /dev/stderr
       node_state=$(echo "$node_state" | jq '.software=null')
       # update configuration file
-      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+      jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
       # update software configuration
-      config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${CONFIG}")
+      config_software=$(jq '.nodes[]?|select(.id=="'$id'").software != null' "${CONFIG}")
     else
       echo "--- INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
     fi
@@ -422,7 +422,7 @@ for MAC in ${MACS}; do
     # update node state
     node_state=$(echo "$node_state" | jq '.software='"$result")
     # update configuration file
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     # update software configuration
     config_software=$(jq '.nodes[]|select(.id=="'$id'").software != null' "${CONFIG}")
   fi
@@ -523,8 +523,8 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node state:" $(echo "$node_state" | jq -c '.') &> /dev/stderr; fi
 
     ## UPDATE CONFIGURATION
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
-    config_exchange=$(jq '.nodes[]|select(.id=="'$id'").exchange.node != null' "${CONFIG}")
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
+    config_exchange=$(jq '.nodes[]?|select(.id=="'$id'").exchange.node != null' "${CONFIG}")
   fi
   # sanity
   if [[ ${config_exchange} != "true" ]]; then
@@ -669,7 +669,7 @@ for MAC in ${MACS}; do
   node_state=$(echo "$node_state" | jq '.pattern='"$result")
 
   # UPDATE CONFIGURATION
-  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
 
   ## DONE w/ PATTERN
   echo "--- INFO: ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
@@ -711,7 +711,7 @@ for MAC in ${MACS}; do
     node_state=$(echo "$node_state" | jq '.network='"$result")
 
     ## UPDATE CONFIGURATION
-    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${config##*/}"; mv -f "$TMP/${config##*/}" "${CONFIG}"
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     config_network=$(jq '.nodes[]|select(.id=="'$id'").network != null' "${CONFIG}")
   fi
   # sanity
