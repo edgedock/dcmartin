@@ -1,14 +1,43 @@
 #!/bin/bash
 
 if [ "${VENDOR}" != "apple" ] && [ "${OSTYPE}" != "darwin" ]; then
-  echo "Run this script on macOS only" >&2
+  echo "This script is for macOS only" >&2
   exit 1
 fi
 
-CONFIG="horizon.json"
-DEFAULT_WIFI_SSID="TEST"
-DEFAULT_WIFI_PASSWORD="0123456789"
+## ETCHER
+ETCHER_DIR="/opt/etcher-cli"
+ETCHER_URL="https://github.com/balena-io/etcher/releases/download/v1.4.8/balena-etcher-cli-1.4.8-darwin-x64.tar.gz"
+ETCHER_CMD="balena-etcher"
 
+ETCHER=$(command -v "${ETCHER_CMD}")
+if [ -z "${ETCHER}" ]; then
+  if [ ! -d "${ETCHER_DIR}" ]; then
+    echo "+++ WARN $0 $$ -- etcher CLI not installed in ${ETCHER_DIR}; installing from ${ETCHER_URL}" &> /dev/stderr
+    mkdir "${ETCHER_DIR}"
+    wget -qO - "${ETCHER_URL}" | ( cd "${ETCHER_DIR}" ; tar xzf - ; mv */* . ; rmdir * ) &> /dev/null
+  fi
+  ETCHER="${ETCHER_DIR}/${ETCHER_CMD}"
+fi
+if [ -z "${ETCHER}" ] || [ ! -e "${ETCHER}" ]; then
+  echo "+++ WARN $0 $$ -- executable ${ETCHER} not found; manually flash SD card; try Etcher at https://www.balena.io/etcher/"
+fi
+
+## BOOT VOLUME MOUNT POINT
+if [ -z "${VOLUME_BOOT:-}" ]; then
+  VOLUME_BOOT="/Volumes/boot"
+else
+  echo "+++ WARN $0 $$ -- non-standard VOLUME_BOOT: ${VOLUME_BOOT}"
+fi
+if [ ! -d "${VOLUME_BOOT}" ]; then
+  echo "*** ERROR $0 $$ -- did not find directory: ${VOLUME_BOOT}"
+  exit 1
+fi
+
+
+## HORIZON CONFIG
+
+CONFIG="horizon.json"
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
     echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
@@ -24,25 +53,18 @@ else
   CONFIG="${1}"
 fi
 
+## WIFI
+
 WIFI_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
 WIFI_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
 if [ "${WIFI_SSID}" == "null" ] || [ "${WIFI_PASSWORD}" == "null" ]; then
-  WIFI_SSID="${DEFAULT_WIFI_SSID}"
-  WIFI_PASSWORD="${DEFAULT_WIFI_PASSWORD}"
-  echo "+++ WARN $0 $$ -- no WIFI_SSID or WIFI_PASSWORD defined; using default (${WIFI_SSID}:${WIFI_PASSWORD})"
-else
-  echo "--- INFO $0 $$ -- WIFI_SSID & WIFI_PASSWORD defined; using (${WIFI_SSID}:${WIFI_PASSWORD})"
-fi
-
-## BOOT VOLUME MOUNT POINT
-if [ -z ${VOLUME_BOOT:-} ]; then
-  VOLUME_BOOT="/Volumes/boot"
-else
-  echo "+++ WARN $0 $$ -- non-standard VOLUME_BOOT: ${VOLUME_BOOT}"
-fi
-if [ ! -d "${VOLUME_BOOT}" ]; then
-  echo "*** ERROR $0 $$ -- did not find directory: ${VOLUME_BOOT}"
+  echo "*** ERROR $0 $$ -- WIFI_SSID or WIFI_PASSWORD undefined; run mkconfig.sh"
   exit 1
+elif [ -z "${WIFI_SSID}" ]; then
+  echo "*** ERROR $0 $$ -- WIFI_SSID blank; run mkconfig.sh"
+  exit 1
+elif [ -z "${WIFI_PASSWORD}" ]; then
+  echo "+++ WARN $0 $$ -- WIFI_PASSWORD is blank"
 fi
 
 ## WPA SUPPLICANT

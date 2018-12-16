@@ -57,7 +57,7 @@ fi
 
 echo "--- INFO: configurations:" $(jq '.configurations[]?.id' "${CONFIG}") &> /dev/stderr
 for config in $(jq -r '.configurations[]?.id' "${CONFIG}"); do
-  echo "--- INFO: ${config}:" $(jq '.configurations[]|select(.id=="'"${config}"'")|.pattern,.exchange,.network,.nodes[].id' "${CONFIG}") &> /dev/stderr
+  echo "--- INFO: ${config}:" $(jq '.configurations[]|select(.id=="'"${config}"'")|.pattern,.exchange,.network,.nodes[]?.id' "${CONFIG}") &> /dev/stderr
 done
 
 echo "--- INFO: exchanges:" $(jq '.exchanges[]?|.id,.url' "${CONFIG}") &> /dev/stderr
