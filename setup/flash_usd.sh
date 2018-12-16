@@ -5,6 +5,23 @@ if [ "${VENDOR}" != "apple" ] && [ "${OSTYPE}" != "darwin" ]; then
   exit 1
 fi
 
+## HORIZON CONFIG
+CONFIG="horizon.json"
+if [ -z "${1}" ]; then
+  if [ -s "${CONFIG}" ]; then
+    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
+  else
+    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; run mkconfig.sh"
+    exit 1
+  fi
+else
+  if [ ! -s "${1}" ]; then
+    echo "*** ERROR configuration file empty: ${1}"
+    exit 1
+  fi
+  CONFIG="${1}"
+fi
+
 ## ETCHER
 ETCHER_DIR="/opt/etcher-cli"
 ETCHER_URL="https://github.com/balena-io/etcher/releases/download/v1.4.8/balena-etcher-cli-1.4.8-darwin-x64.tar.gz"
@@ -32,25 +49,6 @@ fi
 if [ ! -d "${VOLUME_BOOT}" ]; then
   echo "*** ERROR $0 $$ -- did not find directory: ${VOLUME_BOOT}"
   exit 1
-fi
-
-
-## HORIZON CONFIG
-
-CONFIG="horizon.json"
-if [ -z "${1}" ]; then
-  if [ -s "${CONFIG}" ]; then
-    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
-  else
-    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}"
-    exit 1
-  fi
-else
-  if [ ! -s "${1}" ]; then
-    echo "*** ERROR configuration file empty: ${1}"
-    exit 1
-  fi
-  CONFIG="${1}"
 fi
 
 ## WIFI

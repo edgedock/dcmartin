@@ -16,7 +16,7 @@ if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
     echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
   else
-    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}"
+    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; run mkconfig.sh"
     exit 1
   fi
 else

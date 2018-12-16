@@ -1,5 +1,27 @@
 #!/bin/bash
 
+if [ "${VENDOR}" != "apple" ] && [ "${OSTYPE}" != "darwin" ]; then
+  echo "This script is for macOS only" >&2
+  exit 1
+fi
+
+## HORIZON CONFIG
+CONFIG="horizon.json"
+if [ -z "${1}" ]; then
+  if [ -s "${CONFIG}" ]; then
+    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
+  else
+    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; run mkconfig.sh"
+    exit 1
+  fi
+else
+  if [ ! -s "${1}" ]; then
+    echo "*** ERROR configuration file empty: ${1}"
+    exit 1
+  fi
+  CONFIG="${1}"
+fi
+
 if [ -z $(command -v "VBoxManage") ]; then
   echo "*** ERROR $0 $$ -- Virtual Box is not installed"
   exit 1
