@@ -27,7 +27,9 @@ Check the configuration using the `chkconfig.sh` script
 ```
 % ./chkconfig horizon.json
 ```
-Flash SD card with appropriate LINUX distribution *and* update the SD card with WiFi credentials and SSH access using the `flash_usd.sh` script.  Repeat process of flashing distribution and running script to produce the required number of SD cards.
+***Flash SD card*** (e.g. try `http://etcher.io`) with appropriate LINUX distribution (e.g. [Raspbian Stretch Lite][rsl-download]).
+
+When SD card has been flashed, update the boot volume using the `flash_usd.sh` script.  This process specifies WiFi credentials and SSH access   Repeat process of flashing distribution and running script to produce the required number of SD cards.
 ```
 % ./flash_usd.sh
 ```
@@ -387,3 +389,5 @@ David C Martin (github@dcmartin.com)
 
 [ibm-cloud]: http://cloud.ibm.com/
 [ibm-cloud-iam]: https://cloud.ibm.com/iam/
+[rsl-download]: https://downloads.raspberrypi.org/raspbian_lite_latest
+
