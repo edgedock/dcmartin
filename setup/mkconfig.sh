@@ -36,6 +36,38 @@ if [ ! -s "${CONFIG}" ]; then
   exit 1
 fi
 
+if [ $(jq '.discover==true' "${CONFIG}") == true ]; then
+  ## setup network (default)
+  n=$(jq '.networks|first' "${CONFIG}")
+  if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- cannot find first network for setup"
+    exit 1
+  fi
+  nid=$(echo "${n}" | jq -r '.id')
+  echo "!!! SETUP NETWORK (discover is true) [${nid}]"
+  for key in ssid password; do
+    valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
+    if [ "${valid}" == "true" ]; then
+      v=$(echo "${n}" | jq -r '.'"${key}")
+      echo -n "[$nid] enter value for ${key} [${v}]: "
+      read VALUE
+      if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
+    else
+      echo -n "[$nid] enter value for ${key}: "
+      read VALUE
+    fi
+    n=$(echo "${n}" | jq '.'${key}'="'"${VALUE}"'"')
+  done
+  jq '(.networks[]|select(.id=="'$nid'"))|='"${n}" "${CONFIG}" > "/tmp/$$.json"
+  if [ -s "/tmp/$$.json" ]; then
+    mv -f "/tmp/$$.json" "${CONFIG}"
+    # echo "??? DEBUG updated ${CONFIG}"
+  else
+    echo "*** ERROR $0 $$ -- $0 $$ -- failed to update ${CONFIG}; /tmp/$$.json is empty"
+    exit 1
+  fi
+fi
+
 for def in exchange machine network configuration pattern token; do
   # echo "??? DEBUG $0 $$ --- (${def})" $(jq -r '.default.'"${def}" "${CONFIG}")
   while [ $(jq -r '.default.'"${def}"'==null' "${CONFIG}") == 'true' ] || [ $(jq -r '.default.'"${def}"'==""' "${CONFIG}") == 'true' ]; do
@@ -70,17 +102,28 @@ for def in exchange machine network configuration pattern token; do
   # echo "??? DEBUG ${def} is:" $(jq -r '.default.'"${def}" "${CONFIG}")
 done
 
+# check if existing default configuration has keys (exist and non-zero in filesystem)
+if [ $(jq '.default.configuration==null' "${CONFIG}") != 'true' ]; then
+  DEFCONF=$(jq -r '.default.configuration' "${CONFIG}")
+  if [ -s "${DEFCONF}" ] && [ -s "${DEFCONF}.pub" ]; then
+    echo "+++ WARN $0 $$ -- found credentials for default configuration ${DEFCONF}; setting from: ${DEFAULT_KEY_FILE}"
+    DEFAULT_KEY_FILE="${DEFCONF}"
+  fi
+fi
+
 if [ $(jq '.default.keys==null' "${CONFIG}") == 'true' ]; then
   if [ -s "${DEFAULT_KEY_FILE}" ] && [ -s "${DEFAULT_KEY_FILE}.pub" ]; then
     echo "+++ WARN $0 $$ -- no default keys configured; using default ${DEFAULT_KEY_FILE}"
   else
-    echo "+++ WARN $0 $$ -- no SSH credentials; generating.."
+    echo "+++ WARN $0 $$ -- no default credentials ${DEFAULT_KEY_FILE}; generating.."
     # generate new key
     ssh-keygen -t rsa -f "$DEFAULT_KEY_FILE" -N "" &> /dev/null
     # test for success
     if [ ! -s "$DEFAULT_KEY_FILE" ] || [ ! -s "$DEFAULT_KEY_FILE.pub" ]; then
-      echo "*** ERROR: ${id}: failed to create default keys: $DEFAULT_KEY_FILE; use ssh-keygen" &> /dev/stderr
+      echo "*** ERROR: ${id}: failed to create default credentials: $DEFAULT_KEY_FILE; use ssh-keygen" &> /dev/stderr
       exit 1
+    else
+      echo "--- INFO: ${id}: using credentials ${DEFAULT_KEY_FILE}" &> /dev/stderr
     fi
   fi
   jq '.default.keys={"public":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}.pub")'","private":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}")'"}' "${CONFIG}" > "/tmp/$$.json"
@@ -91,6 +134,8 @@ if [ $(jq '.default.keys==null' "${CONFIG}") == 'true' ]; then
     echo "*** ERROR $0 $$ -- failed to update ${CONFIG}; /tmp/$$.json is empty"
     exit 1
   fi
+else
+  echo "--- INFO: ${id}: using credentials from ${CONFIG}:" $(jq -c '.default.keys?|{"publen":.public|length,"prilen":.private|length}' "${CONFIG}") &> /dev/stderr
 fi
 
 if [ -s "apiKey.json" ]; then 
@@ -232,34 +277,4 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     fi
 
   done
-fi
-
-## setup network (default)
-n=$(jq '.networks|first' "${CONFIG}")
-if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
-  echo "*** ERROR $0 $$ -- cannot find first network for setup"
-  exit 1
-fi
-nid=$(echo "${n}" | jq -r '.id')
-echo "--- NETWORK (setup-only) [${nid}]"
-for key in ssid password; do
-  valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
-  if [ "${valid}" == "true" ]; then
-    v=$(echo "${n}" | jq -r '.'"${key}")
-    echo -n "[$nid] enter value for ${key} [${v}]: "
-    read VALUE
-    if [ -z "${VALUE}" ]; then VALUE="${v}"; fi
-  else
-    echo -n "[$nid] enter value for ${key}: "
-    read VALUE
-  fi
-  n=$(echo "${n}" | jq '.'${key}'="'"${VALUE}"'"')
-done
-jq '(.networks[]|select(.id=="'$nid'"))|='"${n}" "${CONFIG}" > "/tmp/$$.json"
-if [ -s "/tmp/$$.json" ]; then
-  mv -f "/tmp/$$.json" "${CONFIG}"
-  # echo "??? DEBUG updated ${CONFIG}"
-else
-  echo "*** ERROR $0 $$ -- $0 $$ -- failed to update ${CONFIG}; /tmp/$$.json is empty"
-  exit 1
 fi
