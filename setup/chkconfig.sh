@@ -32,7 +32,7 @@ fi
 MID=$(jq -r '.default.machine' "${CONFIG}")
 if [ "${MID}" != 'null' ]; then
   if [ $(jq -r '.machines[]|select(.id=="'$MID'")!=null' "${CONFIG}") == 'true' ]; then
-    echo "--- INFO: default machine:" $(jq -r '.machines[]|select(.id=="'$MID'")|.type' "${CONFIG}") &> /dev/stderr
+    echo "$(date '+%T') INFO: default machine:" $(jq -r '.machines[]|select(.id=="'$MID'")|.type' "${CONFIG}") &> /dev/stderr
   else
     echo "+++ ERROR $0 $$ -- invalid default machine ${MID}" &> /dev/stderr
     echo 'false'
@@ -45,7 +45,7 @@ fi
 if [ $(jq -r '.discover==true' "${CONFIG}") == 'true' ]; then
   VID=$(jq -r '.vendor' "${CONFIG}")
   if [ $(jq -r '.vendors[]|select(.id=="'$VID'")!=null' "${CONFIG}") == 'true' ]; then
-    echo "--- INFO: discover default vendor:" $(jq -r '.vendors[]|select(.id=="'$VID'")|.tag' "${CONFIG}") &> /dev/stderr
+    echo "$(date '+%T') INFO: discover default vendor:" $(jq -r '.vendors[]|select(.id=="'$VID'")|.tag' "${CONFIG}") &> /dev/stderr
   else
     echo "+++ ERROR $0 $$ -- invalid discover vendor ${VID}" &> /dev/stderr
     echo 'false'
@@ -55,16 +55,16 @@ else
   echo "+++ WARN: discover default vendor: FALSE" &> /dev/stderr
 fi
 
-echo "--- INFO: configurations:" $(jq '.configurations[]?.id' "${CONFIG}") &> /dev/stderr
+echo "$(date '+%T') INFO: configurations:" $(jq '.configurations[]?.id' "${CONFIG}") &> /dev/stderr
 for config in $(jq -r '.configurations[]?.id' "${CONFIG}"); do
-  echo "--- INFO: ${config}:" $(jq '.configurations[]|select(.id=="'"${config}"'")|.pattern,.exchange,.network,.nodes[]?.id' "${CONFIG}") &> /dev/stderr
+  echo "$(date '+%T') INFO: ${config}:" $(jq '.configurations[]|select(.id=="'"${config}"'")|.pattern,.exchange,.network,.nodes[]?.id' "${CONFIG}") &> /dev/stderr
 done
 
-echo "--- INFO: exchanges:" $(jq '.exchanges[]?|.id,.url' "${CONFIG}") &> /dev/stderr
+echo "$(date '+%T') INFO: exchanges:" $(jq '.exchanges[]?|.id,.url' "${CONFIG}") &> /dev/stderr
 
-echo "--- INFO: setup network:" $(jq '.networks?|first|.id,.ssid,.password' "${CONFIG}") &> /dev/stderr
+echo "$(date '+%T') INFO: setup network:" $(jq '.networks?|first|.id,.ssid,.password' "${CONFIG}") &> /dev/stderr
 
-echo "--- INFO: nodes:" $(jq '.nodes[]?|{"id":.id,"ssh":.ssh.id,"status":{"id":.node.id,"pattern":.node.pattern,"state":.node.configstate.state}}' "${CONFIG}") &> /dev/stderr
+echo "$(date '+%T') INFO: nodes:" $(jq '.nodes[]?|{"id":.id,"ssh":.ssh.id,"status":{"id":.node.id,"pattern":.node.pattern,"state":.node.configstate.state}}' "${CONFIG}") &> /dev/stderr
 
 
 jq '.setup != null and .configurations != null and .exchanges != null and .networks != null and .default.token != null' "${CONFIG}"

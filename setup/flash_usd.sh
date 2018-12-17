@@ -82,7 +82,7 @@ else
   # write public keyfile
   echo $(jq -r '.key.public' "${CONFIG}" | base64 --decode) > "${VOLUME_BOOT}/ssh.pub"
 fi
-echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
+echo "$(date '+%T') INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 
 ## WPA TEMPLATE
 if [ -z "${WPA_TEMPLATE_FILE:-}" ]; then
@@ -106,10 +106,10 @@ if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
 fi
 
 ## SUCCESS
-echo "--- INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created using SSID ${WIFI_SSID}; password ${WIFI_PASSWORD}"
+echo "$(date '+%T') INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created using SSID ${WIFI_SSID}; password ${WIFI_PASSWORD}"
 
 if [ -n $(command -v diskutil) ]; then
-  echo "--- INFO $0 $$ -- ejecting volume ${VOLUME_BOOT}"
+  echo "$(date '+%T') INFO $0 $$ -- ejecting volume ${VOLUME_BOOT}"
   diskutil eject "${VOLUME_BOOT}"
 else
   echo "+++ WARN $0 $$ -- you may now safely eject volume ${VOLUME_BOOT}"

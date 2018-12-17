@@ -12,7 +12,7 @@ fi
 
 if [ -z "${HW_MODE:-}" ]; then
   HW_MODE="g"
-  echo "--- INFO $0 $$ -- no hw_mode specified; using: ${HW_MODE}"
+  echo "$(date '+%T') INFO $0 $$ -- no hw_mode specified; using: ${HW_MODE}"
 fi
 if [ -z "${CHANNEL:-}" ]; then
   case "${HW_MODE}" in
@@ -29,11 +29,11 @@ if [ -z "${CHANNEL:-}" ]; then
       CHANNEL=7
       ;;
   esac
-  echo "--- INFO $0 $$ -- no channel specified; using: ${CHANNEL}"
+  echo "$(date '+%T') INFO $0 $$ -- no channel specified; using: ${CHANNEL}"
 fi
 if [ -z "${SSID:-}" ]; then
   SSID="TEST"
-  echo "--- INFO $0 $$ -- no ssid specified; using: ${SSID}"
+  echo "$(date '+%T') INFO $0 $$ -- no ssid specified; using: ${SSID}"
 fi
 if [ -z "${WPA_PASSPHRASE:-}" ]; then
   WPA_PASSPHRASE="0123456789"
@@ -53,43 +53,43 @@ systemctl stop hostapd
 
 DHCPD_CONF="/etc/dhcpcd.conf"
 if [ -s "${DHCPD_CONF}" ]; then
-  echo "--- INFO $0 $$ -- over-writing existing ${DHCPD_CONF}"
+  echo "$(date '+%T') INFO $0 $$ -- over-writing existing ${DHCPD_CONF}"
 fi
 echo 'denyinterfaces wlan0' > "${DHCPD_CONF}"
 echo 'denyinterfaces eth0' > "${DHCPD_CONF}"
 echo 'interface wlan0' > "${DHCPD_CONF}"
 echo '  static ip_address=192.168.0.1/24' >> "${DHCPD_CONF}"
 echo '  nohook wpa_supplicant' >> "${DHCPD_CONF}"
-echo "--- INFO $0 $$ -- configured DHCP" $(cat ${DHCPD_CONF})
+echo "$(date '+%T') INFO $0 $$ -- configured DHCP" $(cat ${DHCPD_CONF})
 
 DNSMASQ_CONF="/etc/dnsmasq.conf"
 if [ -s "${DNSMASQ_CONF}" ]; then
-  echo "--- INFO $0 $$ -- over-writing existing ${DNSMASQ_CONF}"
+  echo "$(date '+%T') INFO $0 $$ -- over-writing existing ${DNSMASQ_CONF}"
 fi
 echo 'interface=wlan0' > "${DNSMASQ_CONF}"
 echo '  dhcp-range=192.168.0.2,192.168.0.254,255.255.255.0,24h' >> "${DNSMASQ_CONF}"
-echo "--- INFO $0 $$ -- configured DNSMASQ" $(cat ${DNSMASQ_CONF})
+echo "$(date '+%T') INFO $0 $$ -- configured DNSMASQ" $(cat ${DNSMASQ_CONF})
 
 if [ $(brctl show | wc -l) -le 1 ]; then
-  echo "--- INFO $0 $$ -- building bridge br0 to eth0"
+  echo "$(date '+%T') INFO $0 $$ -- building bridge br0 to eth0"
   brctl addbr br0
   brctl addif br0 eth0
 else
-  echo "--- INFO $0 $$ -- existing bridge built" $(brctl show)
+  echo "$(date '+%T') INFO $0 $$ -- existing bridge built" $(brctl show)
 fi
 
 NETWORK_INTERFACES="/etc/network/interfaces"
 if [ -s ${NETWORK_INTERFACES} ]; then
-  echo "--- INFO $0 $$ -- over-writing existing ${NETWORK_INTERFACES}"
+  echo "$(date '+%T') INFO $0 $$ -- over-writing existing ${NETWORK_INTERFACES}"
 fi
 echo 'auto br0' > ${NETWORK_INTERFACES}
 echo 'iface br0 inet manual' >> ${NETWORK_INTERFACES}
 echo 'bridge_ports eth0 wlan0' >> ${NETWORK_INTERFACES}
-echo "--- INFO $0 $$ -- configured NETWORK" $(cat ${NETWORK_INTERFACES})
+echo "$(date '+%T') INFO $0 $$ -- configured NETWORK" $(cat ${NETWORK_INTERFACES})
 
 HOSTAPD_CONF="/etc/hostapd/hostapd.conf"
 if [ -s ${HOSTAPD_CONF} ]; then
-  echo "--- INFO $0 $$ -- over-writing existing ${HOSTAPD_CONF}"
+  echo "$(date '+%T') INFO $0 $$ -- over-writing existing ${HOSTAPD_CONF}"
 fi
 echo 'interface=wlan0' > ${HOSTAPD_CONF}
 echo 'bridge=br0' >> ${HOSTAPD_CONF}
@@ -105,48 +105,48 @@ echo 'wpa_passphrase='"${WPA_PASSPHRASE}" >> ${HOSTAPD_CONF}
 echo 'wpa_key_mgmt=WPA-PSK' >> ${HOSTAPD_CONF}
 echo 'wpa_pairwise=TKIP' >> ${HOSTAPD_CONF}
 echo 'rsn_pairwise=CCMP' >> ${HOSTAPD_CONF}
-echo "--- INFO $0 $$ -- configured hostapd: ${HOSTAPD_CONF}"
+echo "$(date '+%T') INFO $0 $$ -- configured hostapd: ${HOSTAPD_CONF}"
 
 # set default for hostapd
 HOSTAPD_DEFAULT="/etc/default/hostapd"
 echo 'DAEMON_CONF="'"${HOSTAPD_CONF}"'"' > ${HOSTAPD_DEFAULT}
-echo "--- INFO $0 $$ -- over-writing hostapd default:" $(cat ${HOSTAPD_DEFAULT})
+echo "$(date '+%T') INFO $0 $$ -- over-writing hostapd default:" $(cat ${HOSTAPD_DEFAULT})
 
 # reload
-echo "--- INFO $0 $$ -- reloading daemons"
+echo "$(date '+%T') INFO $0 $$ -- reloading daemons"
 systemctl daemon-reload
 
 # start
-echo "--- INFO $0 $$ -- restarting daemons"
+echo "$(date '+%T') INFO $0 $$ -- restarting daemons"
 systemctl restart hostapd
 systemctl restart dnsmasq
 
 # /etc/sysctl.conf
 SYSCTL_CONF="/etc/sysctl.conf"
 if [ -z "$(egrep '^net.ipv4.ip_forward=' "${SYSCTL_CONF}")" ]; then
-  echo "--- INFO $0 $$ -- enabling IPv4 forwarding in ${SYSCTL_CONF}"
+  echo "$(date '+%T') INFO $0 $$ -- enabling IPv4 forwarding in ${SYSCTL_CONF}"
   sed -i 's|.*net.ipv4.ip_forward.*|net.ipv4.ip_forward=1|' "${SYSCTL_CONF}"
 else
-  echo "--- INFO $0 $$ -- existing IPv4 forwarding" $(egrep "^net.ipv4.ip_forward=" ${SYSCTL_CONF})
+  echo "$(date '+%T') INFO $0 $$ -- existing IPv4 forwarding" $(egrep "^net.ipv4.ip_forward=" ${SYSCTL_CONF})
 fi
 
 # /etc/iptables
 IPTABLES_NAT="/etc/iptables.ipv4.nat"
 if [ ! -s "/etc/iptables.ipv4.nat" ]; then
-  echo "--- INFO $0 $$ -- enabling POSTROUTING / MASQUERADE on eth0"
+  echo "$(date '+%T') INFO $0 $$ -- enabling POSTROUTING / MASQUERADE on eth0"
   iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-  echo "--- INFO $0 $$ -- saving iptables to ${IPTABLES_NAT}"
+  echo "$(date '+%T') INFO $0 $$ -- saving iptables to ${IPTABLES_NAT}"
   sh -c "iptables-save > ${IPTABLES_NAT}"
 else
-  echo "--- INFO $0 $$ -- existing ${IPTABLES_NAT}" $(cat ${IPTABLES_NAT})
+  echo "$(date '+%T') INFO $0 $$ -- existing ${IPTABLES_NAT}" $(cat ${IPTABLES_NAT})
 fi
 
 if [ -z "$(egrep "iptables-restore" /etc/rc.local)" ]; then
-  echo "--- INFO $0 $$ -- adding iptables-restore to /etc/rc.local"
+  echo "$(date '+%T') INFO $0 $$ -- adding iptables-restore to /etc/rc.local"
   egrep -v '^exit 0' /etc/rc.local > /tmp/$$.rc
   echo "if [ -s ${IPTABLES_NAT} ]; then iptables-restore < ${IPTABLES_NAT}; fi" >> /tmp/$$.rc
   echo 'exit 0' >> /tmp/$$.rc
   mv -f /tmp/$$.rc /etc/rc.local
 else
-  echo "--- INFO $0 $$ -- iptables-restore present in /etc/rc.local" $(egrep "iptables-restore" /etc/rc.local)
+  echo "$(date '+%T') INFO $0 $$ -- iptables-restore present in /etc/rc.local" $(egrep "iptables-restore" /etc/rc.local)
 fi

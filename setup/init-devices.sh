@@ -70,7 +70,7 @@ if [[ -n "${2}" ]]; then
 else
   net="192.168.1.0/24"
 fi
-echo "--- INFO: executing: $0 ${CONFIG} $net" &> /dev/stderr
+echo "$(date '+%T') INFO: executing: $0 ${CONFIG} $net" &> /dev/stderr
 
 TTL=300 # seconds
 SECONDS=$(date "+%s")
@@ -88,7 +88,7 @@ out="${TMP%.*}.$DATE.txt"
 if [[ ! -s "$out" ]]; then
   rm -f "${out%.*}".*.txt
   if [[ $(whoami) != "root" ]]; then
-    echo "--- INFO: scanning network ${net}" &> /dev/stderr
+    echo "$(date '+%T') INFO: scanning network ${net}" &> /dev/stderr
     sudo nmap -sn -T5 "$net" > "$out"
   else
     nmap -sn -T5 "$net" > "$out"
@@ -103,7 +103,7 @@ fi
 MACS=$(egrep MAC "$out" | awk '{ print $3 }' | sort | uniq)
 MAC_ARRAY=($(echo ${MACS}))
 MAC_COUNT=${#MAC_ARRAY[@]}
-echo "--- INFO: found ${MAC_COUNT} devices on LAN ${net}" &> /dev/stderr
+echo "$(date '+%T') INFO: found ${MAC_COUNT} devices on LAN ${net}" &> /dev/stderr
 
 # get nodes
 NODES=$(jq -r '.nodes[]?.mac' "${CONFIG}")
@@ -158,7 +158,7 @@ else
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: found ${NODE_COUNT} nodes (MACs) in configuration" &> /dev/stderr; fi
 fi
 
-echo "--- INFO: total of ${NODE_COUNT} nodes in configuration ${CONFIG}" &> /dev/stderr
+echo "$(date '+%T') INFO: total of ${NODE_COUNT} nodes in configuration ${CONFIG}" &> /dev/stderr
 
 ###
 ### ITERATE OVER ALL MACS on LAN
@@ -174,7 +174,7 @@ for MAC in ${MACS}; do
     continue
   else
     # get ip address from nmap output file
-    echo "--- INFO: ${id}: FOUND at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: FOUND at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
     # remove from known hosts
     if [ -s "${HOME}/.ssh/known_hosts" ]; then
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: removing $client_ipaddr from ${HOME}/.ssh/known_hosts" &> /dev/stderr; fi
@@ -389,7 +389,7 @@ for MAC in ${MACS}; do
       echo "*** ERROR: ${id} SSH failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
       continue
     fi
-    echo "--- INFO: ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
   fi
 
   ## CONFIG SOFTWARE
@@ -404,12 +404,12 @@ for MAC in ${MACS}; do
       # update software configuration
       config_software=$(jq '.nodes[]?|select(.id=="'$id'").software != null' "${CONFIG}")
     else
-      echo "--- INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
+      echo "$(date '+%T') INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
     fi
   fi
   if [ "${config_software}" != "true" ]; then
     # install software
-    echo "--- INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
     if [[ -z "${result}" ]]; then
       echo "*** ERROR: ${id}: SOFTWARE failed; result = $result" &> /dev/stderr
@@ -434,7 +434,7 @@ for MAC in ${MACS}; do
 
   ## CONFIG EXCHANGE
   if [[ ${config_exchange} != "true" ]]; then
-    echo "--- INFO: ${id}: EXCHANGE configuring" &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: EXCHANGE configuring" &> /dev/stderr
     # get exchange
     ex_id=$(echo "$conf" | jq -r '.exchange')
     if [[ -z $ex_id || "$ex_id" == "null" ]]; then
@@ -476,7 +476,7 @@ for MAC in ${MACS}; do
       echo "*** ERROR: ${id}: EXCHANGE failed; $cmd" &> /dev/stderr
       continue
     else
-      echo "--- INFO: ${id}: EXCHANGE succeeded; $cmd" &> /dev/stderr
+      echo "$(date '+%T') INFO: ${id}: EXCHANGE succeeded; $cmd" &> /dev/stderr
     fi
 
     # create node in exchange (always returns nothing)
@@ -531,14 +531,14 @@ for MAC in ${MACS}; do
     echo "+++ WARN: ${id}: EXCHANGE failed" &> /dev/stderr
     continue
   else
-    echo "--- INFO: ${id}: EXCHANGE configured:" $(echo "$node_state" | jq -c '.exchange.id') &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: EXCHANGE configured:" $(echo "$node_state" | jq -c '.exchange.id') &> /dev/stderr
   fi
 
   ##
   ## CONFIG PATTERN (or reconfigure)
   ##
 
-  echo "--- INFO: ${id}: PATTERN configuring" &> /dev/stderr
+  echo "$(date '+%T') INFO: ${id}: PATTERN configuring" &> /dev/stderr
   # get pattern
   ptid=$(echo "$conf" | jq -r '.pattern?')
   if [[ -z $ptid || $ptid == 'null' ]]; then
@@ -672,14 +672,14 @@ for MAC in ${MACS}; do
   jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
 
   ## DONE w/ PATTERN
-  echo "--- INFO: ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
+  echo "$(date '+%T') INFO: ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
 
   ##
   ## CONFIG NETWORK
   ##
 
   if [[ ${config_network} != "true" ]]; then
-    echo "--- INFO: ${id}: configuring NETWORK" &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: configuring NETWORK" &> /dev/stderr
     # get network
     nwid=$(echo "$conf" | jq -r '.network?')
     if [[ -z $nwid || $nwid == 'null' ]]; then
@@ -719,7 +719,7 @@ for MAC in ${MACS}; do
     echo "+++ WARN: ${id}: NETWORK failed" &> /dev/stderr
     continue
   else
-    echo "--- INFO: ${id}: NETWORK configured" $(echo "$node_state" | jq -c '.network') &> /dev/stderr
+    echo "$(date '+%T') INFO: ${id}: NETWORK configured" $(echo "$node_state" | jq -c '.network') &> /dev/stderr
   fi
 
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node state:" $(echo "${node_state}" | jq -c '.') &> /dev/stderr; fi

@@ -69,7 +69,7 @@ if [ $(jq '.discover==true' "${CONFIG}") == true ]; then
 fi
 
 for def in exchange machine network configuration pattern token; do
-  # echo "??? DEBUG $0 $$ --- (${def})" $(jq -r '.default.'"${def}" "${CONFIG}")
+  # echo "??? DEBUG $0 $$ $(date '+%T') (${def})" $(jq -r '.default.'"${def}" "${CONFIG}")
   while [ $(jq -r '.default.'"${def}"'==null' "${CONFIG}") == 'true' ] || [ $(jq -r '.default.'"${def}"'==""' "${CONFIG}") == 'true' ]; do
     v=$(jq -r '.default.'"${def}" "${CONFIG}")
     # echo "??? DEBUG ${def} was ${v}"
@@ -82,7 +82,7 @@ for def in exchange machine network configuration pattern token; do
         echo -n "${CONFIG} Enter value for default ${def}: "
         read VALUE
       fi
-      # echo "??? DEBUG $0 $$ --- ${def} ${VALUE}:" $(jq -c '.'"${def}s"'[]|select(.id=="'"${VALUE}"'")' "${CONFIG}")
+      # echo "??? DEBUG $0 $$ $(date '+%T') ${def} ${VALUE}:" $(jq -c '.'"${def}s"'[]|select(.id=="'"${VALUE}"'")' "${CONFIG}")
       if [ -z "${VALUE}" ] || [ -z "$(jq '.'"${def}s"'[]|select(.id=="'"${VALUE}"'")' "${CONFIG}")" ]; then
         echo "+++ WARN $0 $$ -- no such ${def} with identifier: ${VALUE}; possible values:" $(jq -j '.'"${def}s"'[]|(.id," ")' "${CONFIG}")
         continue
@@ -123,7 +123,7 @@ if [ $(jq '.default.keys==null' "${CONFIG}") == 'true' ]; then
       echo "*** ERROR: ${id}: failed to create default credentials: $DEFAULT_KEY_FILE; use ssh-keygen" &> /dev/stderr
       exit 1
     else
-      echo "--- INFO: ${id}: using credentials ${DEFAULT_KEY_FILE}" &> /dev/stderr
+      echo "$(date '+%T') INFO: ${id}: using credentials ${DEFAULT_KEY_FILE}" &> /dev/stderr
     fi
   fi
   jq '.default.keys={"public":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}.pub")'","private":"'$(${BASE64_ENCODE} "${DEFAULT_KEY_FILE}")'"}' "${CONFIG}" > "/tmp/$$.json"
@@ -135,7 +135,7 @@ if [ $(jq '.default.keys==null' "${CONFIG}") == 'true' ]; then
     exit 1
   fi
 else
-  echo "--- INFO: ${id}: using credentials from ${CONFIG}:" $(jq -c '.default.keys?|{"publen":.public|length,"prilen":.private|length}' "${CONFIG}") &> /dev/stderr
+  echo "$(date '+%T') INFO: ${id}: using credentials from ${CONFIG}:" $(jq -c '.default.keys?|{"publen":.public|length,"prilen":.private|length}' "${CONFIG}") &> /dev/stderr
 fi
 
 if [ -s "apiKey.json" ]; then 
@@ -165,7 +165,7 @@ if [ -n "${cids}" ] && [ "${cids}" != "null" ]; then
     fi
     # echo "??? DEBUG nodes:" $(echo "${nodes}" | fmt)
 
-    echo "--- CONFIGURATION ${cid}"
+    echo "$(date '+%T') CONFIGURATION ${cid}"
     # process variables
     keys=$(echo "${c}" | jq -r '.variables[]?.key')
     if [ -n "${keys}" ] && [ "${keys}" != "null" ]; then

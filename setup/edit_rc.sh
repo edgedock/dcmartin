@@ -134,7 +134,7 @@ if [ ! -e "${SSH_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${SSH_FILE}"
   exit 1
 fi
-echo "--- INFO $0 $$ -- created ${SSH_FILE} for SSH access"
+echo "$(date '+%T') INFO $0 $$ -- created ${SSH_FILE} for SSH access"
 # public key setup
 PUBLIC_KEY=$(jq -r '.default.keys.public' "${CONFIG}")
 if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
@@ -156,7 +156,7 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
 fi
 # write public keyfile
 echo "${PUBLIC_KEY}" | base64 --decode | tee "${SSH_FILE}.pub" &> /dev/null
-echo "--- INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
+echo "$(date '+%T') INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
 
 ## WPA
 # SUPPLICANT
@@ -186,7 +186,7 @@ if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
   exit 1
 fi
 # SUCCESS
-echo "--- INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created"
+echo "$(date '+%T') INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created"
 # unmount & remove mount point directory
 sudo umount "${BOOT_VOL}"
 sudo rmdir "${BOOT_VOL}"
@@ -228,9 +228,9 @@ if [ ! -s "${RC_LOCAL_FILE}" ]; then
   exit 1
 fi
 # SUCCESS
-echo "--- INFO $0 $$ -- ${RC_LOCAL_FILE} created"
+echo "$(date '+%T') INFO $0 $$ -- ${RC_LOCAL_FILE} created"
 # unmount & remove mount point directory
 sudo umount "${LINUX_VOL}"
 sudo rmdir "${LINUX_VOL}"
 
-echo "--- INFO $0 $$ -- you may now safely eject disk ${SDB}"
+echo "$(date '+%T') INFO $0 $$ -- you may now safely eject disk ${SDB}"
