@@ -7,10 +7,6 @@ This repository contains sample scripts to automatically setup nodes for [Open H
 ## Initialization
 The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Rasberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and preparing an appropriate SD card.
 
-### Initialization template
-The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%` 
-
-### Initialization script
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.  Devices specified or discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
 ## Manual initialization (BETA; works, mostly)
@@ -37,9 +33,9 @@ Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequenc
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
-Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient.
+Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following [log][example-log] for expected output.
 
-# Automated initialization (ALPHA; beware)
+## Automated initialization (ALPHA; beware)
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
 1. Start Ubuntu 18 AMD64 VM (currently _not_ working on Raspbian Stretch (Lite) for RaspberryPi)
@@ -70,6 +66,8 @@ A **complete** HomeAssistant configuration with support for both CPU and SDR pat
 + [ui-lovelace.yaml][ui-lovelace-yaml]
 
 # Template specification
+
+The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
 
 ## Option: `nodes`
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
@@ -215,6 +213,7 @@ drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
 + `passwd.exp` expect pattern was used to change password for the client account (i.e. `pi` on Raspbian)
 + `input.json` is the pattern specified when registering the device as a node on the exchange.
 
+[example-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example.log]
 [example-device-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example-device.log]
 [example-apt-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example-apt.log]
 [example-config-ssh][https://github.com/dcmartin/open-horizon/blob/master/setup/example-congfig.ssh]
