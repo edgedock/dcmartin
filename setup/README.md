@@ -213,12 +213,6 @@ drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
 + `passwd.exp` expect pattern was used to change password for the client account (i.e. `pi` on Raspbian)
 + `input.json` is the pattern specified when registering the device as a node on the exchange.
 
-[example-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example.log]
-[example-device-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example-device.log]
-[example-apt-log][https://github.com/dcmartin/open-horizon/blob/master/setup/example-apt.log]
-[example-config-ssh][https://github.com/dcmartin/open-horizon/blob/master/setup/example-congfig.ssh]
-[example-passwd-exp][https://github.com/dcmartin/open-horizon/blob/master/setup/example-passwd.exp]
-
 ***NOTE***: These files should be deleted for security purposes in production versions of this process.
 
 ## Configuration Updates
@@ -384,3 +378,9 @@ David C Martin (github@dcmartin.com)
 [image]: http://releases.ubuntu.com/18.04.1/
 [examples]: https://github.com/open-horizon/examples
 [template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
+
+[example-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example.log
+[example-device-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-device.log
+[example-apt-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-apt.log
+[example-config-ssh]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-congfig.ssh
+[example-passwd-exp]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-passwd.exp
