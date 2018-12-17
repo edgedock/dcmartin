@@ -37,13 +37,14 @@ Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequenc
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
-When the script has finished (note four devices were configured in twenty minutes), you can inspect the Open Horizon exchange to determine if the nodes were successfully registered via the following command:
+Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following example [log][example-log] for expected output.
+
+When initialization completes, inspect the Open Horizon exchange via the following command:
 ```
 ./lsnodes.sh | jq '.nodes[].id'
 ```
 
-### Output & Access
-Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following example [log][example-log] for expected output .
+## Post-installation device access
 
 After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
 ```
