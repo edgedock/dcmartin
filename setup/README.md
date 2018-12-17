@@ -2,6 +2,8 @@
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh].
 
+You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
+
 *** NOTE: A [video][horizon-video-setup] (3m:30s) is available ***
 
 ## Initialization
@@ -33,7 +35,37 @@ Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequenc
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
-Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following [log][example-log] for expected output.
+
+### Output & Access
+Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following example [log][example-log] for expected output (note four devices were configured in twenty minutes).
+
+After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
+```
+ssh -l pi 192.168.1.180 -i sdrconf
+```
+After accessing a device, a listing of files in the home directory yields the following:
+```
+drwxr-xr-x 3 pi   pi    4096 Dec 17 21:35 .
+drwxr-xr-x 3 root root  4096 Nov 13 13:09 ..
+-rw------- 1 pi   pi      67 Dec 17 21:35 .bash_history
+-rw-r--r-- 1 pi   pi     220 Nov 13 13:09 .bash_logout
+-rw-r--r-- 1 pi   pi    3523 Nov 13 13:09 .bashrc
+-rw-r--r-- 1 pi   pi     675 Nov 13 13:09 .profile
+drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
+-rw-r--r-- 1 pi   pi     180 Dec 17 21:25 .wget-hsts
+-rw-r--r-- 1 root root 20958 Dec 17 21:25 apt.log
+-rw-r--r-- 1 pi   pi     955 Dec 17 21:24 config-ssh.sh
+-rw-r--r-- 1 pi   pi     204 Dec 17 21:28 input.json
+-rw-r--r-- 1 pi   pi    8802 Dec 17 21:28 log
+-rw-r--r-- 1 root root   201 Dec 17 21:24 passwd.exp
+```
++ [`apt.log`][example-apt-log] logged the update and upgrade of existing software components, including Raspbian.
++ [`log`][example-device-log] logged the installation of Open Horizon and required software components, including Docker.
++ [`config-ssh.sh`][example-config-ssh] changed SSH configuration.
++ [`passwd.exp`][example-passwd-exp] changed the password
++ `input.json` is the pattern specified when registering the device as a node on the exchange.
+
+***NOTE***: These files should be deleted for security purposes in production versions of this process.
 
 ## Automated initialization (ALPHA; beware)
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
@@ -88,7 +120,7 @@ A list of nodes identified by MAC address; these entries are changed during init
 ## Option: `configurations`
 List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`.  Any number of `variables` may be defined appropriate for the defined `pattern`.
 
-**Note**: _You must obtain [credentials][kafka-creds] for IBM MessageHub for alpha phase_
+**Note**: _You must obtain credentials for IBM MessageHub for alpha phase_
 ```
   "configurations": [
     {
@@ -153,7 +185,7 @@ Both patterns require an API key.
 ```
 
 ## Option: `exchanges`
-List of exchange definitions for `id`, `org`, `url`, and credentials `username` and `password`
+Identification, location, and credentials for IBM Edge Fabric. Use IBM Cloud login email (e.g. `youremail@yourisp.net`) and an IBM Cloud platform API key for `password`.  Generate an IBM Cloud platform API key [here][ibm-cloud-iam].
 ```
   "exchanges": [
     {
@@ -183,38 +215,6 @@ List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  
     }
   ]
 ```
-
-## Output
-
-After `init-devices.sh` script completes (e.g. [log][example-log]), each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; replace the IP address from the [log][example-log] generated by `init-devices.sh` and use the assigned configuration credentials (e.g. `cpuconf` or `sdrconf` in the `template.json`).
-```
-ssh -l pi 192.168.1.180 -i sdrconf
-```
-
-After installation, each of the devices have the following residuals in the `~/` home directory):
-```
-drwxr-xr-x 3 pi   pi    4096 Dec 17 21:35 .
-drwxr-xr-x 3 root root  4096 Nov 13 13:09 ..
--rw------- 1 pi   pi      67 Dec 17 21:35 .bash_history
--rw-r--r-- 1 pi   pi     220 Nov 13 13:09 .bash_logout
--rw-r--r-- 1 pi   pi    3523 Nov 13 13:09 .bashrc
--rw-r--r-- 1 pi   pi     675 Nov 13 13:09 .profile
-drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
--rw-r--r-- 1 pi   pi     180 Dec 17 21:25 .wget-hsts
--rw-r--r-- 1 root root 20958 Dec 17 21:25 apt.log
--rw-r--r-- 1 pi   pi     955 Dec 17 21:24 config-ssh.sh
--rw-r--r-- 1 pi   pi     204 Dec 17 21:28 input.json
--rw-r--r-- 1 pi   pi    8802 Dec 17 21:28 log
--rw-r--r-- 1 root root   201 Dec 17 21:24 passwd.exp
-```
-+ `apt.log` records the update and upgrade of existing software components, including Raspbian.
-+ `log` records the installation of Open Horizon and required software components, including Docker.
-+ `config-ssh.sh` script performed the SSH configuration of the device.
-+ `passwd.exp` expect pattern was used to change password for the client account (i.e. `pi` on Raspbian)
-+ `input.json` is the pattern specified when registering the device as a node on the exchange.
-
-***NOTE***: These files should be deleted for security purposes in production versions of this process.
-
 ## Configuration Updates
 
 ### NODES
@@ -384,3 +384,6 @@ David C Martin (github@dcmartin.com)
 [example-apt-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-apt.log
 [example-config-ssh]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-congfig.ssh
 [example-passwd-exp]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-passwd.exp
+
+[ibm-cloud]: http://cloud.ibm.com/
+[ibm-cloud-iam]: https://cloud.ibm.com/iam/
