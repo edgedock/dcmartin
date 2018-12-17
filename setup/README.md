@@ -2,18 +2,16 @@
 
 This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh].
 
+You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
+
 *** NOTE: A [video][horizon-video-setup] (3m:30s) is available ***
 
 ## Initialization
 The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Rasberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and preparing an appropriate SD card.
 
-### Initialization template
-The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%` 
-
-### Initialization script
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.  Devices specified or discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
-## Manual initialization
+## Manual initialization (BETA; works, mostly)
 The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line; the following is an example list of commands.
 ```
 % mkdir ~/gitdir
@@ -29,7 +27,9 @@ Check the configuration using the `chkconfig.sh` script
 ```
 % ./chkconfig horizon.json
 ```
-Flash SD card with appropriate LINUX distribution *and* update the SD card with WiFi credentials and SSH access using the `flash_usd.sh` script.  Repeat process of flashing distribution and running script to produce the required number of SD cards.
+***Flash SD card*** (e.g. try `http://etcher.io`) with appropriate LINUX distribution (e.g. [Raspbian Stretch Lite][rsl-download]).
+
+When SD card has been flashed, update the boot volume using the `flash_usd.sh` script.  This process specifies WiFi credentials and SSH access   Repeat process of flashing distribution and running script to produce the required number of SD cards.
 ```
 % ./flash_usd.sh
 ```
@@ -37,9 +37,44 @@ Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequenc
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
-Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient.
+Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following example [log][example-log] for expected output.
 
-# Automated initialization
+When initialization completes, inspect the Open Horizon exchange via the following command:
+```
+./lsnodes.sh | jq '.nodes[].id'
+```
+
+## Post-installation device access
+
+After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
+```
+ssh -l pi 192.168.1.180 -i sdrconf
+```
+After accessing a device, a listing of files in the home directory yields the following:
+```
+drwxr-xr-x 3 pi   pi    4096 Dec 17 21:35 .
+drwxr-xr-x 3 root root  4096 Nov 13 13:09 ..
+-rw------- 1 pi   pi      67 Dec 17 21:35 .bash_history
+-rw-r--r-- 1 pi   pi     220 Nov 13 13:09 .bash_logout
+-rw-r--r-- 1 pi   pi    3523 Nov 13 13:09 .bashrc
+-rw-r--r-- 1 pi   pi     675 Nov 13 13:09 .profile
+drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
+-rw-r--r-- 1 pi   pi     180 Dec 17 21:25 .wget-hsts
+-rw-r--r-- 1 root root 20958 Dec 17 21:25 apt.log
+-rw-r--r-- 1 pi   pi     955 Dec 17 21:24 config-ssh.sh
+-rw-r--r-- 1 pi   pi     204 Dec 17 21:28 input.json
+-rw-r--r-- 1 pi   pi    8802 Dec 17 21:28 log
+-rw-r--r-- 1 root root   201 Dec 17 21:24 passwd.exp
+```
++ [`apt.log`][example-apt-log] logged the update and upgrade of existing software components, including Raspbian.
++ [`log`][example-device-log] logged the installation of Open Horizon and required software components, including Docker.
++ [`config-ssh.sh`][example-config-ssh] changed SSH configuration.
++ [`passwd.exp`][example-passwd-exp] changed the password
++ `input.json` is the pattern specified when registering the device as a node on the exchange.
+
+***NOTE***: These files should be deleted for security purposes in production versions of this process.
+
+## Automated initialization (ALPHA; beware)
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
 1. Start Ubuntu 18 AMD64 VM (currently _not_ working on Raspbian Stretch (Lite) for RaspberryPi)
@@ -71,6 +106,8 @@ A **complete** HomeAssistant configuration with support for both CPU and SDR pat
 
 # Template specification
 
+The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
+
 ## Option: `nodes`
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
 ```
@@ -90,7 +127,7 @@ A list of nodes identified by MAC address; these entries are changed during init
 ## Option: `configurations`
 List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`.  Any number of `variables` may be defined appropriate for the defined `pattern`.
 
-**Note**: _You must obtain [credentials][kafka-creds] for IBM MessageHub for alpha phase_
+**Note**: _You must obtain credentials for IBM MessageHub for alpha phase_
 ```
   "configurations": [
     {
@@ -155,7 +192,7 @@ Both patterns require an API key.
 ```
 
 ## Option: `exchanges`
-List of exchange definitions for `id`, `org`, `url`, and credentials `username` and `password`
+Identification, location, and credentials for IBM Edge Fabric. Use IBM Cloud login email (e.g. `youremail@yourisp.net`) and an IBM Cloud platform API key for `password`.  Generate an IBM Cloud platform API key [here][ibm-cloud-iam].
 ```
   "exchanges": [
     {
@@ -185,10 +222,11 @@ List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  
     }
   ]
 ```
+## Configuration Updates
 
-## Output
+### NODES
 
-When the script completes, the `nodes` list is updated with the configurations applied, for example:
+When the script completes, the `nodes` array is updated with the configurations applied, for example:
 
 ```
     {
@@ -347,3 +385,14 @@ David C Martin (github@dcmartin.com)
 [image]: http://releases.ubuntu.com/18.04.1/
 [examples]: https://github.com/open-horizon/examples
 [template]: https://github.com/dcmartin/open-horizon/blob/master/setup/template.json
+
+[example-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example.log
+[example-device-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-device.log
+[example-apt-log]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-apt.log
+[example-config-ssh]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-congfig.ssh
+[example-passwd-exp]:https://github.com/dcmartin/open-horizon/blob/master/setup/example-passwd.exp
+
+[ibm-cloud]: http://cloud.ibm.com/
+[ibm-cloud-iam]: https://cloud.ibm.com/iam/
+[rsl-download]: https://downloads.raspberrypi.org/raspbian_lite_latest
+
