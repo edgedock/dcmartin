@@ -224,8 +224,18 @@ if [ ! -d "${LINUX_VOL}" ]; then
 fi
 
 # write public keyfile
-echo "${PUBLIC_KEY}" | base64 --decode | sudo tee "/ssh.pub" &> /dev/null
-echo "$(date '+%T') INFO $0 $$ -- created /tmp/ssh.pub for authorized_hosts"
+if [ -n "${PUBLIC_KEY}" ]; then
+  echo "${PUBLIC_KEY}" | base64 --decode | sudo tee "/ssh.pub" &> /dev/null
+  if [ -s "/tmp/ssh.pub" ]; then
+    echo "$(date '+%T') INFO $0 $$ -- created /ssh.pub for authorized_hosts"
+  else
+    echo "*** ERROR $0 $$ -- failed to create /ssh.pub for authorized_hosts"
+    exit 1
+  fi
+else
+  echo "*** ERROR $0 $$ -- no public key"
+  exit 1
+fi
 
 ## RC.LOCAL
 if [ -z "${RC_LOCAL_FILE:-}" ]; then
