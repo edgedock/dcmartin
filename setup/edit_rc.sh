@@ -224,7 +224,7 @@ if [ ! -d "${LINUX_VOL}" ]; then
 fi
 
 # write public keyfile
-echo "${PUBLIC_KEY}" | base64 --decode | tee "/ssh.pub" &> /dev/null
+echo "${PUBLIC_KEY}" | base64 --decode | sudo tee "/ssh.pub" &> /dev/null
 echo "$(date '+%T') INFO $0 $$ -- created /tmp/ssh.pub for authorized_hosts"
 
 ## RC.LOCAL
