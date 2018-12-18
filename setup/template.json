@@ -44,7 +44,7 @@
       "exchange": "alpha",
       "network": "site-1",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%PRIVATE_KAFKA_APIKEY%%" }
+        { "key": "MSGHUB_API_KEY", "value": "TO52pSM0KcKtlOJ2bvRbYHg7SsoTbnB8HX9Vg0hxM0H7ZFgt" }
       ],
       "public_key": null,
       "private_key": null,
@@ -66,7 +66,7 @@
       "exchange": "alpha",
       "network": "site-1",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "%%SHARED_KAFKA_APIKEY%%" }
+        { "key": "MSGHUB_API_KEY", "value": "2R4iaggsRB3EUYLbCcVfTZaE0M0o67UMBlb7BWDsEnxoiX64" }
       ],
       "public_key": null,
       "private_key": null,
