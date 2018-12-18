@@ -6,7 +6,7 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 
 *** NOTE: A [video][horizon-video-setup] (3m:30s) is available ***
 
-## Initialization overview
+# Command-line initialization (BETA; lgtm)
 The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Raspberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and flashing an appropriate SD card.
 
 ### Network considerations
@@ -26,8 +26,7 @@ To construct a setup network and WiFi access point using another RaspberrPi, ple
 + `SSID`: `TEST`
 + `WPA_PASSPHRASE`: `0123456789`
 
-### Manual initialization (BETA; lgtm)
-
+### Initialization process
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; **currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch**.
 
 The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with resulting configuration details.  Devices specified _or discovered_ on the network are configured for `ssh` access after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
@@ -66,7 +65,6 @@ When initialization completes, inspect the Open Horizon exchange via the followi
 ```
 
 ### Post-installation device access
-
 After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
 ```
 ssh -l pi 192.168.1.180 -i sdrconf
