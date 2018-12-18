@@ -181,9 +181,6 @@ if [ -z "${PUBLIC_KEY}" ] || [ "${PUBLIC_KEY}" == "null" ]; then
     exit 1
   fi
 fi
-# write public keyfile
-echo "${PUBLIC_KEY}" | base64 --decode | tee "${SSH_FILE}.pub" &> /dev/null
-echo "$(date '+%T') INFO $0 $$ -- created ${SSH_FILE}.pub for authorized_hosts"
 
 ## WPA
 # SUPPLICANT
@@ -225,6 +222,10 @@ if [ ! -d "${LINUX_VOL}" ]; then
   echo "*** ERROR $0 $$ -- failed to mount partition ${LINUX_PART} on ${LINUX_VOL}"
   exit 1
 fi
+
+# write public keyfile
+echo "${PUBLIC_KEY}" | base64 --decode | tee "/ssh.pub" &> /dev/null
+echo "$(date '+%T') INFO $0 $$ -- created /tmp/ssh.pub for authorized_hosts"
 
 ## RC.LOCAL
 if [ -z "${RC_LOCAL_FILE:-}" ]; then
