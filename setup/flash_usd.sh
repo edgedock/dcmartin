@@ -22,13 +22,53 @@ else
   CONFIG="${1}"
 fi
 
+## DISTRIBUTION
+if [ -z "${DISTRIBUTION}" ]; then
+  DM=$(jq -r '.default.machine' ${CONFIG})
+  if [ -z "${DM}" ] || [ "${DM}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- no default machine in ${CONFIG}; run mkconfig.sh"
+    exit 1
+  fi
+  DD=$(jq -r '.machines[]|select(.id=="'$DM'").distribution' ${CONFIG})
+  if [ -z "${DD}" ] || [ "${DD}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- no distribution for machine ${DM}; run mkconfig.sh"
+    exit 1
+  fi
+  DU=$(jq -r '.distributions[]|select(.id=="'$DD'").url' ${CONFIG})
+  if [ -z "${DU}" ] || [ "${DU}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- no URL for distribution ${DD}; edit ${CONFIG}"
+    exit 1
+  fi
+  DZ="${DD}.zip"
+  if [ ! -s "${DZ}" ]; then
+    echo "$(date '+%T') INFO -- ${DZ} not found; downloading from ${DU}"
+    wget -qO "${DZ}" "${DU}"
+    if [ ! -s "${DZ}" ]; then
+      echo "+++ WARN $0 $$ -- failed to download ${DZ}; flash manually"
+      DISTRIBUTION=
+    else
+      DISTRIBUTION="${DZ}"
+      echo "$(date '+%T') INFO $0 $$ -- downloaded distribution ${DISTRIBUTION}"
+    fi
+  fi  
+elif [ ! -s "${DISTRIBUTION}" ]; then
+  echo "+++ WARN $0 $$ -- could not find ${DISTRIBUTION}"
+  DISTRIBUTION=
+else
+  echo "$(date '+%T') INFO $0 $$ -- using distribution ${DISTRIBUTION}"
+fi
+
 ## ETCHER
 ETCHER_DIR="/opt/etcher-cli"
-ETCHER_URL="https://github.com/balena-io/etcher/releases/download/v1.4.8/balena-etcher-cli-1.4.8-darwin-x64.tar.gz"
 ETCHER_CMD="balena-etcher"
+if [ "${VENDOR}" != "apple" ] && [ "${OSTYPE}" != "darwin" ]; then
+  ETCHER_URL=
+else
+  ETCHER_URL="https://github.com/balena-io/etcher/releases/download/v1.4.8/balena-etcher-cli-1.4.8-darwin-x64.tar.gz"
+fi
 
 ETCHER=$(command -v "${ETCHER_CMD}")
-if [ -z "${ETCHER}" ]; then
+if [ -z "${ETCHER}" ] && [ -n "${ETCHER_URL}" ]; then
   if [ ! -d "${ETCHER_DIR}" ]; then
     echo "+++ WARN $0 $$ -- etcher CLI not installed in ${ETCHER_DIR}; installing from ${ETCHER_URL}" &> /dev/stderr
     mkdir "${ETCHER_DIR}"
@@ -37,7 +77,7 @@ if [ -z "${ETCHER}" ]; then
   ETCHER="${ETCHER_DIR}/${ETCHER_CMD}"
 fi
 if [ -z "${ETCHER}" ] || [ ! -e "${ETCHER}" ]; then
-  echo "+++ WARN $0 $$ -- executable ${ETCHER} not found; manually flash SD card; try Etcher at https://www.balena.io/etcher/"
+  echo "+++ WARN $0 $$ -- ${ETCHER_CMD} not configured for this platform"
 fi
 
 ## BOOT VOLUME MOUNT POINT
@@ -47,7 +87,7 @@ else
   echo "+++ WARN $0 $$ -- non-standard VOLUME_BOOT: ${VOLUME_BOOT}"
 fi
 if [ ! -d "${VOLUME_BOOT}" ]; then
-  echo "*** ERROR $0 $$ -- did not find directory: ${VOLUME_BOOT}"
+  echo "*** ERROR $0 $$ -- did not find directory: ${VOLUME_BOOT}; flash the SD card manually"
   exit 1
 fi
 
