@@ -225,11 +225,11 @@ fi
 
 # write public keyfile
 if [ -n "${PUBLIC_KEY}" ]; then
-  echo "${PUBLIC_KEY}" | sudo base64 --decode -o "/ssh.pub" &> /dev/null
-  if [ -s "/tmp/ssh.pub" ]; then
-    echo "$(date '+%T') INFO $0 $$ -- created /ssh.pub for authorized_hosts"
+  echo "${PUBLIC_KEY}" | base64 --decode | sudo tee "${LINUX_VOL}/ssh.pub" &> /dev/null
+  if [ -s "${LINUX_VOL}/ssh.pub" ]; then
+    echo "$(date '+%T') INFO $0 $$ -- created ${LINUX_VOL}/ssh.pub for authorized_hosts"
   else
-    echo "*** ERROR $0 $$ -- failed to create /ssh.pub for authorized_hosts"
+    echo "*** ERROR $0 $$ -- failed to create ${LINUX_VOL}/ssh.pub for authorized_hosts"
     exit 1
   fi
 else
