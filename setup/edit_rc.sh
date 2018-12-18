@@ -33,7 +33,7 @@ if [ -z "${SETUP}" ] || [ "${SETUP}" == 'null' ]; then
   echo "*** ERROR $0 $$ -- no setup; edit ${CONFIG}"
   exit 1
 fi
-HORIZON_SETUP_URL=$(jq '.setups[]?|select(.id=="'${SETUP}'").url' "${CONFIG}")
+HORIZON_SETUP_URL=$(jq -r '.setups[]?|select(.id=="'${SETUP}'").url' "${CONFIG}")
 if [ -z "${HORIZON_SETUP_URL}" ] || [ "${HORIZON_SETUP_URL}" == 'null' ]; then
   echo "*** ERROR $0 $$ -- cannot find setup ${SU}; edit ${CONFIG}"
   exit 1
@@ -65,14 +65,15 @@ elif [ -n "$(jq '.machines[]|select(.id=="'${MACHINE}'")' "${CONFIG}")" ]; then
   fi
   CLIENT_USERNAME=$(jq -r '.distributions[]|select(.id=="'$DID'").client.username' "${CONFIG}")
   CLIENT_PASSWORD=$(jq -r '.distributions[]|select(.id=="'$DID'").client.password' "${CONFIG}")
-  if [ -z "${CLIENT_USERNAME} ] || [ -z "${CLIENT_PASSWORD} ]; then
-    echo "*** ERROR $0 $$ -- empty client username or password; edit ${CONFIG}"
+  CLIENT_HOSTNAME=$(jq -r '.distributions[]|select(.id=="'$DID'").client.hostname' "${CONFIG}")
+  if [ -z "${CLIENT_USERNAME} ] || [ -z "${CLIENT_PASSWORD} ] || [ -z "${CLIENT_HOSTNAME}" ]; then
+    echo "*** ERROR $0 $$ -- empty client hostname, username, or password; edit ${CONFIG}"
     exit 1
-  elif [ "${CLIENT_USERNAME}" == 'null' ] || [ "${CLIENT_PASSWORD}" == 'null' ]; then
-    echo "*** ERROR $0 $$ -- null client username or password; edit ${CONFIG}"
+  elif [ "${CLIENT_USERNAME}" == 'null' ] || [ "${CLIENT_PASSWORD}" == 'null' ] || [ "${CLIENT_HOSTNAME}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- null client hostname, username, or password; edit ${CONFIG}"
     exit 1
   else
-    echo "$(date '+%T') INFO -- using client username: ${CLIENT_USERNAME}; password: ${CLIENT_PASSWORD}"
+    echo "$(date '+%T') INFO -- using client hostname: ${CLIENT_HOSTNAME}; username: ${CLIENT_USERNAME}; password: ${CLIENT_PASSWORD}"
   fi
 else
   echo "*** ERROR $0 $$ -- cannot find machine ${MACHINE}; add to ${CONFIG}"
@@ -245,6 +246,7 @@ fi
 sudo cp -f "${RC_TEMPLATE_FILE}" "${RC_LOCAL_FILE}"
 sudo sed -i \
   -e 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
+  -e 's|%%CLIENT_HOSTNAME%%|'"${CLIENT_HOSTNAME}"'|g' \
   -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
   -e 's|%%DEVICE_TOKEN%%|'"${DEVICE_TOKEN}"'|g' \
   -e 's|%%HORIZON_SETUP_URL%%|'"${HORIZON_SETUP_URL}"'|g' \
