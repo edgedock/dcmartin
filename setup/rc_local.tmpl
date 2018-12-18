@@ -8,18 +8,18 @@ if [ -n "%%DEVICE_NAME%%" ] && [ "%%DEVICE_NAME%%" != 'null' ]; then
     hostname "%%DEVICE_NAME%%"
   fi
 else
-  echo "+++ WARN: $(date) -- no device name specified" >> ~/horizon.log 2>&1
+  echo "+++ WARN: $(date) -- no device name specified" >> /horizon.log 2>&1
 fi
 
 ## install horizon
 if [ -z $(command -v hzn) ]; then
-  wget -qO - "%%HORIZON_SETUP_URL%%" | bash &> ~/horizon.log
+  wget -qO - "%%HORIZON_SETUP_URL%%" | bash &> /horizon.log
 fi
 
 if [ $(hzn node list | jq '.id==null') != "true" ]; then
-  echo "+++ WARN: $(date) -- horizon not configured" >> ~/horizon.log 2>&1
+  echo "+++ WARN: $(date) -- horizon not configured" >> /horizon.log 2>&1
 else
-  echo "--- INFO: $(date) -- horizon configured:" $(hzn node list | jq -c '.') >> ~/horizon.log 2>&1
+  echo "--- INFO: $(date) -- horizon configured:" $(hzn node list | jq -c '.') >> /horizon.log 2>&1
 fi
 
 ## SSH
@@ -57,7 +57,7 @@ if [ -s /ssh.pub ] && [ ! -s "${KEYS}" ]; then
     /etc/init.d/ssh restart &> /dev/null
   fi
 elif [ ! -s "/ssh.pub" ]; then
-  echo "+++ WARN: $(date) -- SSH already configured; removing /ssh.pub" >> ~/horizon.log 2>&1
+  echo "+++ WARN: $(date) -- SSH already configured; removing /ssh.pub" >> /horizon.log 2>&1
   rm -f "/ssh.pub"
 fi
 
