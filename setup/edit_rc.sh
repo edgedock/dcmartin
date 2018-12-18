@@ -208,6 +208,8 @@ sudo sed -i \
 if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${WPA_SUPPLICANT_FILE}"
   exit 1
+else
+  echo "$(date '+%T') INFO -- created ${WPA_SUPPLICANT_FILE}:" $(cat "${WPA_SUPPLICANT_FILE}")
 fi
 # SUCCESS
 echo "$(date '+%T') INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created"
