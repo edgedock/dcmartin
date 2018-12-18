@@ -41,14 +41,21 @@ if [ -z "${DISTRIBUTION}" ]; then
   fi
   DZ="${DD}.zip"
   if [ ! -s "${DZ}" ]; then
-    echo "$(date '+%T') INFO -- ${DZ} not found; downloading from ${DU}"
-    wget -qO "${DZ}" "${DU}"
-    if [ ! -s "${DZ}" ]; then
-      echo "+++ WARN $0 $$ -- failed to download ${DZ}; flash manually"
-      DISTRIBUTION=
+    DISTRIBUTION=
+    echo -n "PROMPT: $DZ not found; download ${DD} distribution? [no]: "
+    read VALUE
+    if [ -z "${VALUE}" ]; then VALUE='no'; fi
+    if [ "${VALUE}" == 'yes' ]; then
+      echo "$(date '+%T') INFO -- downloading ${DZ} from ${DU}"
+      wget -qO "${DZ}" "${DU}"
+      if [ ! -s "${DZ}" ]; then
+        echo "+++ WARN $0 $$ -- failed to download ${DZ}; flash manually"
+      else
+        DISTRIBUTION="${DZ}"
+        echo "$(date '+%T') INFO $0 $$ -- downloaded distribution ${DISTRIBUTION}"
+      fi
     else
-      DISTRIBUTION="${DZ}"
-      echo "$(date '+%T') INFO $0 $$ -- downloaded distribution ${DISTRIBUTION}"
+      echo "+++ WARN $0 $$ -- no distribution; flash manually"
     fi
   fi  
 elif [ ! -s "${DISTRIBUTION}" ]; then
