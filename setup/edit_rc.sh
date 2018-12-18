@@ -27,12 +27,24 @@ else
   CONFIG="${1}"
 fi
 
+## SETUP
+SETUP=$(jq -r '.setup' ${CONFIG})
+if [ -z "${SETUP}" ] || [ "${SETUP}" == 'null' ]; then
+  echo "*** ERROR $0 $$ -- no setup; edit ${CONFIG}"
+  exit 1
+fi
+HORIZON_SETUP_URL=$(jq '.setups[]?|select(.id=="'${SETUP}'").url' "${CONFIG}")
+if [ -z "${HORIZON_SETUP_URL}" ] || [ "${HORIZON_SETUP_URL}" == 'null' ]; then
+  echo "*** ERROR $0 $$ -- cannot find setup ${SU}; edit ${CONFIG}"
+  exit 1
+fi
+
 ## NETWORK
 NETWORK=$(jq -r '.default.network' "${CONFIG}")
 if [ -z "${NETWORK}" ] || [ "${NETWORK}" == 'null' ]; then
   echo "*** ERROR $0 $$ -- no default network; run mkconfig.sh"
   exit 1
-elif [ -n "$(jq '.networks[]|select(.id=="'${NETWORK}'")' "${CONFIG}")" ]; then
+elif [ -n "$(jq '.networks[]?|select(.id=="'${NETWORK}'")' "${CONFIG}")" ]; then
   NETWORK_SSID=$(jq -r '.networks[]|select(.id=="'${NETWORK}'").ssid' "${CONFIG}")
   NETWORK_PASSWORD=$(jq -r '.networks[]|select(.id=="'${NETWORK}'").password' "${CONFIG}")
 else
