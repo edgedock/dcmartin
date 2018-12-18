@@ -58,8 +58,22 @@ if [ -z "${MACHINE}" ] || [ "${MACHINE}" == 'null' ]; then
   echo "*** ERROR $0 $$ -- no default machine; run mkconfig.sh"
   exit 1
 elif [ -n "$(jq '.machines[]|select(.id=="'${MACHINE}'")' "${CONFIG}")" ]; then
-  CLIENT_USERNAME=$(jq -r '.distributions[]|select(.id=="'$(jq -r '.machines[]|select(.id=="'$MACHINE'").distribution' "${CONFIG}")'").client.username' "${CONFIG}")
-  CLIENT_PASSWORD=$(jq -r '.distributions[]|select(.id=="'$(jq -r '.machines[]|select(.id=="'$MACHINE'").distribution' "${CONFIG}")'").client.password' "${CONFIG}")
+  DID=$(jq -r '.machines[]|select(.id=="'$MACHINE'").distribution' "${CONFIG}")
+  if [ -z "${DID}" ] || [ "${DID}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- cannot find distribution ${DID}; add to ${CONFIG}"
+    exit 1
+  fi
+  CLIENT_USERNAME=$(jq -r '.distributions[]|select(.id=="'$DID'").client.username' "${CONFIG}")
+  CLIENT_PASSWORD=$(jq -r '.distributions[]|select(.id=="'$DID'").client.password' "${CONFIG}")
+  if [ -z "${CLIENT_USERNAME} ] || [ -z "${CLIENT_PASSWORD} ]; then
+    echo "*** ERROR $0 $$ -- empty client username or password; edit ${CONFIG}"
+    exit 1
+  elif [ "${CLIENT_USERNAME}" == 'null' ] || [ "${CLIENT_PASSWORD}" == 'null' ]; then
+    echo "*** ERROR $0 $$ -- null client username or password; edit ${CONFIG}"
+    exit 1
+  else
+    echo "$(date '+%T') INFO -- using client username: ${CLIENT_USERNAME}; password: ${CLIENT_PASSWORD}"
+  fi
 else
   echo "*** ERROR $0 $$ -- cannot find machine ${MACHINE}; add to ${CONFIG}"
   exit 1
