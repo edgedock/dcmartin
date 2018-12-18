@@ -9,7 +9,9 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 ## Initialization
 The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Raspberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and preparing an appropriate SD card.
 
-The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch.  The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with their resulting configuration.  Devices specified or discovered on the network are configured for `ssh` access with PKI for each configuration after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
+The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; **currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch**.
+
+The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with resulting configuration details.  Devices specified _or discovered_ on the network are configured for `ssh` access after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
 ## Manual initialization (BETA; works, mostly)
 The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line; the following is an example list of commands.
@@ -19,13 +21,15 @@ The default configuration file name is `horizon.json` and the default network is
 % git clone https://github.com/dcmartin/open-horizon
 % cd open-horizon/setup
 ```
-Copy and edit the configuration `template.json` using the `mkconfig.sh` script:
+Run the `mkconfig.sh` script to customize configuration for local environment; by _default_ **`horizon.json`** file will be created from the `template.json` file.  **CUSTOM**: Copy the template, e.g. `cp template.json test-config-1.json`, and provide file name as argument to all scripts.
+
 ```
 % ./mkconfig
 ```
-Check the configuration using the `chkconfig.sh` script
+
+Check the configuration using the `chkconfig.sh` script; if `horizon.json` exists, it will be used; alternative may be specified.
 ```
-% ./chkconfig horizon.json
+% ./chkconfig
 ```
 ***Flash SD card*** (e.g. try `http://etcher.io`) with appropriate LINUX distribution (e.g. [Raspbian Stretch Lite][rsl-download]).
 
@@ -33,7 +37,7 @@ When SD card has been flashed, update the boot volume using the `flash_usd.sh` s
 ```
 % ./flash_usd.sh
 ```
-Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes.
+Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes; change the network specification appropriately (e.g. ###.###.###.0/24, network dependent).
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
@@ -104,9 +108,33 @@ A **complete** HomeAssistant configuration with support for both CPU and SDR pat
 + [automations.yaml][automations-yaml]
 + [ui-lovelace.yaml][ui-lovelace-yaml]
 
-# Template specification
+# Template reference
 
-The initialization template provide the specifics for devices and patterns; devices can be specified by MAC address (n.b. see **Options: nodes**) or will be automatically discovered based (n.b. see **Options: vendor**).  Copy and edit the `template.json` file for your environment.  Values are highlighted as `%%VALUE%%`
+The initialization template provide the specifics for device initialization.  The `mkconfig.sh` script should be used to change attributes associated with configurations specified in the `template.json` file.  Additional modifications of the configuration may be done to change initialization characteristics.  Please read the section below for further information.
+
+## Option: `networks`
+List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  The first network is _always_ the **default** network used for device initialization.  Additional networks are for configured device deployment, e.g. in a home, office, or oil rig.  The non-default network configuration is _only_ applied once node has been successfully initialized.
+```
+  "networks": [
+    {
+      "id": "default",
+      "dhcp": "dynamic",
+      "ssid": "TEST",
+      "password": "0123456789"
+    },
+    {
+      "id": "site-1",
+      "dhcp": "dynamic",
+      "ssid": "%%WIFI_SSID%%",
+      "password": "%%WIFI_PASSWORD%%"
+    }
+  ]
+```
+To construct a suitable WiFi access point from a RaspberrPi, please refer to the [`rpi-bridge.sh`][rpi-bridge-script] script.  This script will convert fresh Rasbian Stretch Lite device into a wireless access point; environment variable defaults:
++ `HW_MODE`: `g`
++ `CHANNEL`: `8`
++ `SSID`: `TEST`
++ `WPA_PASSPHRASE`: `0123456789`
 
 ## Option: `nodes`
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
@@ -204,24 +232,6 @@ Identification, location, and credentials for IBM Edge Fabric. Use IBM Cloud log
   ]
 ```
 
-## Option: `networks`
-List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  Network configuration is _only_ applied once node has been successfully initialized.
-```
-  "networks": [
-    {
-      "id": "setup",
-      "dhcp": "dynamic",
-      "ssid": "%%WIFI_SSID%%",
-      "password": "%%WIFI_PASSWORD%%"
-    },
-    {
-      "id": "PRODUCTION",
-      "dhcp": "dynamic",
-      "ssid": "TEST",
-      "password": "0123456789"
-    }
-  ]
-```
 ## Configuration Updates
 
 ### NODES
