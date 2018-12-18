@@ -27,16 +27,19 @@ if [ -z $(command -v "VBoxManage") ]; then
   exit 1
 fi
 
-dev_node="/dev/disk2"
-if [ -n "${1}" ]; then
-  dev_node="${1}"
+dev_node=$(df | egrep "/Volumes/boot" | awk '{ print $1 }' | sed 's|disk\([0-9]\)*s.*|disk\1|')
+if [ -n "${2}" ]; then
+  dev_node="${2}"
 fi
 # check if the first parameter points to a filename that looks like a
-if  [[ $dev_node != /dev/disk? ]] ; then
-  echo "*** ERROR $0 $$ -- Device $dev_node does not start with /dev/disk, but it should."
+if [ -z "${dev_node}" ]; then
+  echo "*** ERROR $0 $$ -- Unspecified device; retry: $0 ${CONFIG} /dev/disk#"
   exit 1
 elif [ ! -e "${dev_node}" ]; then
   echo "*** ERROR $0 $$ -- Device $dev_node does not exist"
+  exit 1
+elif  [[ $dev_node != /dev/disk? ]] ; then
+  echo "*** ERROR $0 $$ -- Device $dev_node does not start with /dev/disk, but it should."
   exit 1
 fi
 
@@ -44,7 +47,7 @@ vm="horizon"
 if [ -n "${2}" ]; then
   vm="${2}"
 fi
-if [ $(VBoxManage showvminfo "$vm" &> /dev/null) != 0 ]; then
+if [ "$(VBoxManage showvminfo ${vm}| egrep '^Name' | awk '{ print $2 }')" != "${vm}" ]; then
   echo "*** ERROR $0 $$ -- cannot find VirtualBox VM with name: ${vm}"
   exit 1
 fi
@@ -101,7 +104,7 @@ if [ $? != 0 ]; then
 fi
 
 echo "Attaching VMDK file to virtual machine ..."
-VBoxManage storageattach "$vm" --medium $vmdk_file --storagectl SATA --port $port --type hdd --hotpluggable on
+VBoxManage storageattach "$vm" --medium $vmdk_file --storagectl SATA --port $port --type hdd #--hotpluggable on
 if [ $? != 0 ]; then
   echo "*** ERROR $0 $$ -- Could not attach VMDK file to VM. You need to do this manually."
   exit 1

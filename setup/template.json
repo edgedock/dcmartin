@@ -124,7 +124,7 @@
       "release_date": "2018-11-13",
       "version": "November 2018",
       "release_notes": "http://downloads.raspberrypi.org/raspbian/release_notes.txt",
-      "url": "http://director.downloads.raspberrypi.org/rasbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip",
+      "url": "http://director.downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip",
       "type": "debian",
       "client": {
         "hostname": "raspberrypi",
