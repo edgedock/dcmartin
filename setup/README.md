@@ -6,14 +6,32 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 
 *** NOTE: A [video][horizon-video-setup] (3m:30s) is available ***
 
-## Initialization
-The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Raspberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and preparing an appropriate SD card.
+## Initialization overview
+The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Raspberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and flashing an appropriate SD card.
+
+### Network considerations
+A separate setup network may be utilized to improve security while devices have default login credentials.  The configuration provides the first `network` defined for device initialization; in the template provided:
+```
+  "networks": [
+    {
+      "id": "default",
+      "dhcp": "dynamic",
+      "ssid": "TEST",
+      "password": "0123456789"
+    },
+```
+To construct a setup network and WiFi access point using another RaspberrPi, please refer to the [`rpi-bridge.sh`][rpi-bridge-script] script.  This script will convert fresh Rasbian Stretch Lite device into a wireless access point using environment variables with the follwing defaults (n.b. change values, e.g. `export CHANNEL=7`, prior to execution):
++ `HW_MODE`: `g`
++ `CHANNEL`: `8`
++ `SSID`: `TEST`
++ `WPA_PASSPHRASE`: `0123456789`
+
+### Manual initialization (BETA; lgtm)
 
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; **currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch**.
 
 The script processes a list of `nodes` identified by the `MAC` addresses, updating the node entries with resulting configuration details.  Devices specified _or discovered_ on the network are configured for `ssh` access after initial login with distribution username and password.  Inspect the resulting configuration file for configuration changes applied to nodes discovered.
 
-## Manual initialization (BETA; works, mostly)
 The default configuration file name is `horizon.json` and the default network is `192.168.1.0/24`.  The initialization script may be invoked from the command-line; the following is an example list of commands.
 ```
 % mkdir ~/gitdir
@@ -26,7 +44,6 @@ Run the `mkconfig.sh` script to customize configuration for local environment; b
 ```
 % ./mkconfig
 ```
-
 Check the configuration using the `chkconfig.sh` script; if `horizon.json` exists, it will be used; alternative may be specified.
 ```
 % ./chkconfig
@@ -48,7 +65,7 @@ When initialization completes, inspect the Open Horizon exchange via the followi
 ./lsnodes.sh | jq '.nodes[].id'
 ```
 
-## Post-installation device access
+### Post-installation device access
 
 After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
 ```
@@ -78,7 +95,7 @@ drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
 
 ***NOTE***: These files should be deleted for security purposes in production versions of this process.
 
-## Automated initialization (ALPHA; beware)
+# Automated initialization (ALPHA; beware)
 Automated initialization is provided through a [Home-Assistant][ha-home] addon that executes the initialization script periodically and updates a Cloudant database with processed clients.
 
 1. Start Ubuntu 18 AMD64 VM (currently _not_ working on Raspbian Stretch (Lite) for RaspberryPi)
@@ -130,11 +147,6 @@ List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  
     }
   ]
 ```
-To construct a suitable WiFi access point from a RaspberrPi, please refer to the [`rpi-bridge.sh`][rpi-bridge-script] script.  This script will convert fresh Rasbian Stretch Lite device into a wireless access point; environment variable defaults:
-+ `HW_MODE`: `g`
-+ `CHANNEL`: `8`
-+ `SSID`: `TEST`
-+ `WPA_PASSPHRASE`: `0123456789`
 
 ## Option: `nodes`
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
@@ -405,4 +417,4 @@ David C Martin (github@dcmartin.com)
 [ibm-cloud]: http://cloud.ibm.com/
 [ibm-cloud-iam]: https://cloud.ibm.com/iam/
 [rsl-download]: https://downloads.raspberrypi.org/raspbian_lite_latest
-
+[rpi-bridge-script]: https://github.com/dcmartin/open-horizon/blob/master/setup/rpi-bridge.sh
