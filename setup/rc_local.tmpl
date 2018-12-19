@@ -11,7 +11,7 @@ if [ -z $(command -v hzn) ]; then
 fi
 
 DEVICE_NAME="%%DEVICE_NAME%%"
-if [ $(hzn node list | jq '.id==null') != "true" ]; then
+if [ $(hzn node list | jq '.id==null') == "true" ]; then
   echo "+++ WARN: $(date) -- horizon not configured" >> /horizon.log 2>&1
   DEVICE_NAME=
 elif [ -z "${DEVICE_NAME}" ] || [ "${DEVICE_NAME}" == 'null' ]; then
@@ -40,7 +40,7 @@ if [ -s /ssh.pub ] && [ ! -s "${KEYS}" ]; then
   RESULT=$(expect -f /passwd.exp | egrep "changed")
   if [ "${RESULT}" != "changed" ]; then
     # report failure
-    echo "failure"
+    echo "*** ERROR: $(date) -- could not change passwd" >> /horizon.log 2>&1
   else
     # report success
     echo "${RESULT}"
@@ -51,8 +51,8 @@ if [ -s /ssh.pub ] && [ ! -s "${KEYS}" ]; then
     mv /sshd_config /etc/ssh/sshd_config
     /etc/init.d/ssh restart &> /dev/null
   fi
-elif [ -s "/ssh.pub" ]; then
-  echo "+++ WARN: $(date) -- SSH not configured" >> /horizon.log 2>&1
+elif [ -s "${KEYS}" ]; then
+  echo "+++ WARN: $(date) -- SSH already configured" >> /horizon.log 2>&1
 elif [ ! -s "/ssh.pub" ]; then
   echo "*** ERROR: $(date) -- no authorized key in /ssh.pub" >> /horizon.log 2>&1
 fi
