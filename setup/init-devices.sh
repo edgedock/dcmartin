@@ -302,13 +302,16 @@ for MAC in ${MACS}; do
   ## CONFIG SSH
   if [ "${config_ssh}" == "true" ]; then
     # test access
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: testing access with ${private_keyfile}" &> /dev/stderr; fi
     result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami') 2> /dev/null
     if [[ -z "${result}" || "${result}" != "${client_username}" ]]; then
-      echo "*** ERROR: ${id} SSH failed; cannot confirm identity ${client_username}; got: ${result}"
-      continue
+      echo "*** ERROR: ${id} SSH failed; cannot confirm identity ${client_username}; re-starting SSH configuration"
+      config_ssh=false
+    else
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH access successful for ${client_username}; result= $result" &> /dev/stderr; fi
     fi
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
-  else
+  fi
+  if [ "${config_ssh}" != 'true' ]; then
     # edit template ssh-copy-id 
     ssh_copy_id="$TMP/ssh-copy-id.exp"
     cat "ssh-copy-id.tmpl" \
@@ -326,10 +329,10 @@ for MAC in ${MACS}; do
 	echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
 	continue
       else
-        if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: hostname: ${result}" &> /dev/stderr; fi
+        if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: SSH hostname: ${result}" &> /dev/stderr; fi
       fi
     fi
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: configured with $conf_id public key" &> /dev/stderr; fi
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: SSH configured with $conf_id public key" &> /dev/stderr; fi
     ## UPDATE CONFIGURATION
     node_state=$(echo "$node_state" | jq '.ssh.id="'"${conf_id}"'"')
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
@@ -340,9 +343,21 @@ for MAC in ${MACS}; do
   if [ "${config_ssh}" != "true" ]; then
     echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
     continue
+  else
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
   fi
 
   ## CONFIG SECURITY
+  if [[ ${config_security} == "true" ]]; then
+    # test access
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname')
+    if [[ -z $result || $(echo "$node_state" | jq -r '.ssh.device=="'"$result"'"') != "true" ]]; then
+      echo "*** ERROR: ${id} SECURITY failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
+      config_security=false
+    else
+      echo "$(date '+%T') INFO: ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
+    fi
+  fi
   if [[ ${config_security} != "true" ]]; then
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SECURITY setting hostname and password" &> /dev/stderr ; fi
     # get node configuration specifics
@@ -378,18 +393,11 @@ for MAC in ${MACS}; do
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   fi
-  # sanity
-  if [[ ${config_security} != "true" ]]; then
-    echo "*** ERROR: ${id}: SECURITY failed; continuing..." &> /dev/stderr
+  if [ "${config_security}" != "true" ]; then
+    echo "*** ERROR: ${id} SECURITY failed; consider reflashing; continuing..." &> /dev/stderr
     continue
   else
-    # test access
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname')
-    if [[ -z $result || $(echo "$node_state" | jq -r '.ssh.device=="'"$result"'"') != "true" ]]; then
-      echo "*** ERROR: ${id} SSH failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
-      continue
-    fi
-    echo "$(date '+%T') INFO: ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SECURITY configured:" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr ; fi
   fi
 
   ## CONFIG SOFTWARE
