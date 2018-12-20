@@ -699,8 +699,8 @@ for MAC in ${MACS}; do
     # create wpa_supplicant.conf
     config_script="$TMP/wpa_supplicant.conf"
     cat "wpa_supplicant.tmpl" \
-      | sed 's|%%WIFI_SSID%%|'"${nw_ssid}"'|g' \
-      | sed 's|%%WIFI_PASSWORD%%|'"${nw_password}"'|g' \
+      | sed 's|%%NETWORK_SSID%%|'"${nw_ssid}"'|g' \
+      | sed 's|%%NETWORK_PASSWORD%%|'"${nw_password}"'|g' \
       > "${config_script}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: copying script ${config_script}" &> /dev/stderr; fi
     scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null

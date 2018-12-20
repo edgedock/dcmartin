@@ -19,7 +19,7 @@
   "networks": [
     { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
     { "id": "none" },
-    { "id": "site-1", "dhcp": "dynamic", "ssid": "%%SITE_SSID%%", "password": "%%SITE_PASSWORD%%" }
+    { "id": "site-1", "dhcp": "dynamic", "ssid": "%%NETWORK_SSID%%", "password": "%%NETWORK_PASSWORD%%" }
   ],
   "patterns": [
     { "id": "none" },

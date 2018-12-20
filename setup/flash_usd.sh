@@ -100,16 +100,16 @@ fi
 
 ## WIFI
 
-WIFI_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
-WIFI_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
-if [ "${WIFI_SSID}" == "null" ] || [ "${WIFI_PASSWORD}" == "null" ]; then
-  echo "*** ERROR $0 $$ -- WIFI_SSID or WIFI_PASSWORD undefined; run mkconfig.sh"
+NETWORK_SSID=$(jq -r '.networks|first|.ssid' "${CONFIG}")
+NETWORK_PASSWORD=$(jq -r '.networks|first|.password' "${CONFIG}")
+if [ "${NETWORK_SSID}" == "null" ] || [ "${NETWORK_PASSWORD}" == "null" ]; then
+  echo "*** ERROR $0 $$ -- NETWORK_SSID or NETWORK_PASSWORD undefined; run mkconfig.sh"
   exit 1
-elif [ -z "${WIFI_SSID}" ]; then
-  echo "*** ERROR $0 $$ -- WIFI_SSID blank; run mkconfig.sh"
+elif [ -z "${NETWORK_SSID}" ]; then
+  echo "*** ERROR $0 $$ -- NETWORK_SSID blank; run mkconfig.sh"
   exit 1
-elif [ -z "${WIFI_PASSWORD}" ]; then
-  echo "+++ WARN $0 $$ -- WIFI_PASSWORD is blank"
+elif [ -z "${NETWORK_PASSWORD}" ]; then
+  echo "+++ WARN $0 $$ -- NETWORK_PASSWORD is blank"
 fi
 
 ## WPA SUPPLICANT
@@ -144,8 +144,8 @@ fi
 
 # change template
 sed \
-  -e 's|%%WIFI_SSID%%|'"${WIFI_SSID}"'|g' \
-  -e 's|%%WIFI_PASSWORD%%|'"${WIFI_PASSWORD}"'|g' \
+  -e 's|%%NETWORK_SSID%%|'"${NETWORK_SSID}"'|g' \
+  -e 's|%%NETWORK_PASSWORD%%|'"${NETWORK_PASSWORD}"'|g' \
   "${WPA_TEMPLATE_FILE}" > "${WPA_SUPPLICANT_FILE}"
 if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${WPA_SUPPLICANT_FILE}"
@@ -153,7 +153,7 @@ if [ ! -s "${WPA_SUPPLICANT_FILE}" ]; then
 fi
 
 ## SUCCESS
-echo "$(date '+%T') INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created using SSID ${WIFI_SSID}; password ${WIFI_PASSWORD}"
+echo "$(date '+%T') INFO $0 $$ -- ${WPA_SUPPLICANT_FILE} created using SSID ${NETWORK_SSID}; password ${NETWORK_PASSWORD}"
 
 if [ -n $(command -v diskutil) ]; then
   echo "$(date '+%T') INFO $0 $$ -- ejecting volume ${VOLUME_BOOT}"
