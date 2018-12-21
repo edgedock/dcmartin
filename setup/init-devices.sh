@@ -362,13 +362,14 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SECURITY setting hostname and password" &> /dev/stderr ; fi
     # get node configuration specifics
     device=$(echo "$node_conf" | jq -r '.device')
-    token=$(echo "$node_conf" | jq -r '.token')
     if [ -z "$device" ]; then
       echo "*** ERROR: ${id}: node configuration device identifier unspecified: $node_conf" &> /dev/stderr
       continue
     fi
-    if [ -z "${token}" ]; then
-      token=$(jq -r '.default.token' "${CONFIG}")
+    token=$(echo "$node_conf" | jq -r '.token')
+    if [ -z "${token}" ] || [ "${token}" == 'null' ]; then
+      token=$(jq -r '.tokens[]|select(.id=="'${DEFAULT_TOKEN}'").token' "${CONFIG}")
+      echo "+++ WARN : ${id} invalid token for $device; using default token: ${DEFAULT_TOKEN}" &> /dev/stderr
     fi
     # create device and token script
     config_script="$TMP/config-ssh.sh"
