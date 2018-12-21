@@ -59,10 +59,9 @@ for config in $(jq -r '.configurations[]?.id' "${CONFIG}"); do
   if [ $(jq -r '[.configurations[]|select(.id=="'$config'").nodes[]?.token==null]|unique[]==true' "${CONFIG}") ]; then
     for node in $(jq -r '.configurations[]|select(.id=="'$config'").nodes[]?.id' "${CONFIG}"); do
       if [ $(jq -r '.configurations[]|select(.id=="'$config'").nodes[]|select(.id=="'$node'").token==null' "${CONFIG}") == 'true' ]; then
-        echo "+++ WARN $0 $$ -- invalid token for node ${node} in configuration ${config}" &> /dev/stderr
+        echo "+++ WARN $0 $$ -- invalid token for node ${node} in configuration ${config}; using default:" $(jq -r '.default.token' "${CONFIG}") &> /dev/stderr
       fi
     done
-    result='false'
   fi
 done
 
