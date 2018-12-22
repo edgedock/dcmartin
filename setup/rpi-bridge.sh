@@ -10,6 +10,11 @@ if [ $(whoami) != "root" ]; then
   exit 1
 fi
 
+if [ -z "${DNS_NAMESERVERS:-}" ]; then
+  DNS_NAMESERVERS="9.9.9.9"
+  echo "$(date '+%T') INFO $0 $$ -- no DNS name-servers specified; using: ${DNS_NAMESERVERS}"
+fi
+
 if [ -z "${HW_MODE:-}" ]; then
   HW_MODE="g"
   echo "$(date '+%T') INFO $0 $$ -- no hw_mode specified; using: ${HW_MODE}"
@@ -85,6 +90,7 @@ fi
 echo 'auto br0' > ${NETWORK_INTERFACES}
 echo 'iface br0 inet manual' >> ${NETWORK_INTERFACES}
 echo 'bridge_ports eth0 wlan0' >> ${NETWORK_INTERFACES}
+echo 'dns-nameservers' "${DNS_NAMESERVERS}" >> ${NETWORK_INTERFACES}
 echo "$(date '+%T') INFO $0 $$ -- configured NETWORK" $(cat ${NETWORK_INTERFACES})
 
 HOSTAPD_CONF="/etc/hostapd/hostapd.conf"
