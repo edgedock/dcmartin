@@ -735,7 +735,7 @@ for MAC in ${MACS}; do
 
 done
 
-echo $(jq -c '[.nodes[]?|{"node":.node.id,"mac":.mac,"exchange":.exchange?.id,"pattern":.pattern[]?.workload_to_run.url}]' "${CONFIG}")
+echo $(jq -c '[.nodes[]?|{"id":.node.id,"mac":.mac,"exchange":.exchange?.id,"pattern":.pattern[]?.workload_to_run.url}]' "${CONFIG}")
 
 if [ -z "${DEBUG}" ]; then rm -fr "$TMP"; fi
 exit 0
