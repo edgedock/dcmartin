@@ -182,6 +182,10 @@ for MAC in ${MACS}; do
       mv -f $TMP/known_hosts ${HOME}/.ssh/known_hosts
     fi
   fi
+  ## UPDATE CONFIGURATION
+  node_state=$(echo "$node_state" | jq '.ipv4="'"${client_ipaddr}"'"')
+  if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
+  jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
 
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: searching for configuration" &> /dev/stderr; fi
 
