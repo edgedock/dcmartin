@@ -183,7 +183,7 @@ for MAC in ${MACS}; do
     fi
   fi
   ## UPDATE CONFIGURATION
-  node_state=$(jq '.nodes[]|select(.id=="'${id}'")' "${CONFIG}") | jq '.ipv4="'"${client_ipaddr}"'"')
+  node_state=$(jq '.nodes[]?|select(.id=="'${id}'")' "${CONFIG}" | jq '.ipv4="'"${client_ipaddr}"'"')
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
   jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
 
