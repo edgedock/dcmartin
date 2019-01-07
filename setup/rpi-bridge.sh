@@ -45,9 +45,19 @@ if [ -z "${WPA_PASSPHRASE:-}" ]; then
   echo "+++ WARN $0 $$ -- no passphrase specified; using: ${WPA_PASSPHRASE}"
 fi
 
-for pr in hostapd dnsmasq brctl; do
+for pr in hostapd dnsmasq brctl nslookup; do
   if [ -z $(command -v "${pr}") ]; then
-    if [[ "${pr}" ==  "brctl" ]]; then package="bridge-utils"; else package="${pr}"; fi
+    case "${pr}" in
+      "brctl")
+        package="bridge-utils"
+        ;;
+      "nslookup")
+        package="dnsutils"
+        ;;
+      *)
+        package="${pr}"
+        ;;
+    esac
     echo "+++ WARN $0 $$ -- installing ${package}"
     apt install -y "${package}" &> /dev/null
   fi
