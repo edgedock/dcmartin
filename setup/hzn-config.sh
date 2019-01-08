@@ -13,26 +13,26 @@ else
 fi
 
 TEMPLATE="template.json"
-CONFIG="horizon.json"
+CONFIG_FILE="horizon.json"
 
 if [ -z "${1}" ]; then
-  if [ -s "${CONFIG}" ]; then
-    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"
+  if [ -s "${CONFIG_FILE}" ]; then
+    echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG_FILE}"
   elif [ -s "${TEMPLATE}" ]; then
-    echo "+++ WARN $0 $$ -- no configuration specified; using template: ${TEMPLATE} for default ${CONFIG}"
-    cp -f "${TEMPLATE}" "${CONFIG}"
+    echo "+++ WARN $0 $$ -- no configuration specified; using template: ${TEMPLATE} for default ${CONFIG_FILE}"
+    cp -f "${TEMPLATE}" "${CONFIG_FILE}"
   else
-    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG}; no template: ${TEMPLATE}"
+    echo "*** ERROR $0 $$ -- no configuration specified; no default: ${CONFIG_FILE}; no template: ${TEMPLATE}"
     exit 1
   fi
 else
-  CONFIG="${1}"
+  CONFIG_FILE="${1}"
 fi
-if [ ! -s "${CONFIG}" ]; then
+if [ ! -s "${CONFIG_FILE}" ]; then
   echo "*** ERROR $0 $$ -- configuration file empty: ${1}"
   exit 1
 else
-  echo "??? DEBUG $0 $$ -- configuration file: ${CONFIG}"
+  echo "??? DEBUG $0 $$ -- configuration file: ${CONFIG_FILE}"
 fi
 
 for svc in kafka stt nlu nosql; do
@@ -79,69 +79,30 @@ echo ${SVC_API_KEYS} | jq
 
 exit
 
-HORIZON_CLOUDANT_URL=$(jq -r '.apikey' apiKey-nosql.json)
-HORIZON_CONFIG_DB='hzn-config'
-HORIZON_CONFIG_NAME=$(hostname)
+CONFIG_DB='hzn-config'
+CONFIG_NAME=$(hostname)
+CLOUDANT_URL=$(echo "${SVC_API_KEYS}" | jq -r '.nosql.url')
 
-    # find configuration entry
-    URL="${HORIZON_CLOUDANT_URL}/${HORIZON_CONFIG_DB}/${HORIZON_CONFIG_NAME}"
+# find configuration entry
+URL="${CLOUDANT_URL}/${CONFIG_DB}/${CONFIG_NAME}"
 
-    VALUE=$(curl -sL "${URL}")
-    if [ "$(echo "${VALUE}" | jq '._id?=="'${HORIZON_CONFIG_NAME}'"')" != "true" ]; then
-      hass.log.fatal "Found no configuration ${HORIZON_CONFIG_NAME}"
-      hass.die
-    fi
-    REV=$(echo "${VALUE}" | jq -r '._rev?')
-    if [[ "${REV}" != "null" && ! -z "${REV}" ]]; then
-      hass.log.debug "Found prior configuration ${HORIZON_CONFIG_NAME}; revision ${REV}"
-      URL="${URL}?rev=${REV}"
-    fi
-    hass.log.info $(date) "Retrieved configuration ${HORIZON_CONFIG_NAME} with ${REV}"
-    # make file
-    HORIZON_CONFIG_FILE="${CONFIG_DIR}/${HORIZON_CONFIG_NAME}.json"
-    echo "${VALUE}" | jq '.' > "${HORIZON_CONFIG_FILE}"
-    if [ ! -s "${HORIZON_CONFIG_FILE}" ]; then
-      hass.log.fatal "Invalid addon configuration: ${VALUE}"
-      hass.die
-    fi
-    hass.log.debug $(date) "Configuration file: ${HORIZON_CONFIG_FILE}"
+VALUE=$(curl -sL "${URL}")
+if [ "$(echo "${VALUE}" | jq '._id?=="'${CONFIG_NAME}'"')" != "true" ]; then
+  echo "Found no existing configuration ${CONFIG_NAME}"
+else
+  REV=$(echo "${VALUE}" | jq -r '._rev?')
+  if [[ "${REV}" != "null" && ! -z "${REV}" ]]; then
+    echo "Found prior configuration ${CONFIG_NAME}; revision ${REV}"
+    URL="${URL}?rev=${REV}"
+  fi
+  echo $(date) "Existing configuration ${CONFIG_NAME} with ${REV}"
+fi
 
-    NODES=$(${SCRIPT_DIR}/${LSNODES} "${HORIZON_CONFIG_FILE}")
-    hass.log.debug $(date) "Nodes:" $(echo "${NODES}" | jq -c '.nodes[].id')
+RESULT=$(curl -sL "${URL}" -X PUT -d '@'"${CONFIG_FILE}")
 
-    ## copy configuration
-    cp -f "${HORIZON_CONFIG_FILE}" "${HORIZON_CONFIG_FILE}.$$"
-    ## EVALUATE
-    hass.log.info $(date) "${SCRIPT} on ${HORIZON_CONFIG_FILE}.$$ for ${HOST_LAN}; logging to ${SCRIPT_LOG}"
-    RESULT=$(cd "${SCRIPT_DIR}" && ${SCRIPT_DIR}/${SCRIPT} "${HORIZON_CONFIG_FILE}.$$" "${HOST_LAN}" 2>> "${SCRIPT_LOG}" || true)
-    hass.log.info $(date) "Executed ${SCRIPT_DIR}/${SCRIPT} returns:" $(echo "${RESULT}")
-    if [ -n "${RESULT}" ]; then
-      RESULT=$(echo "${RESULT}" | jq '{"nodes":.,"date":'$(date +%s)',"org":"'${HORIZON_ORGANIZATION}'","device":"'${HORIZON_DEVICE_NAME}'","configuration":"'${HORIZON_CONFIG_NAME}'"}')
-      hass.log.debug $(date) "Posting result to ${HORIZON_ORGANIZATION}/${HORIZON_DEVICE_NAME}/${SCRIPT}/result" $(echo "${RESULT}" | jq -c '.')
-      mosquitto_pub -r -q 2 -h "${MQTT_HOST}" -p "${MQTT_PORT}" -t "${HORIZON_ORGANIZATION}/${HORIZON_DEVICE_NAME}/${HORIZON_CONFIG_NAME}/result" -m "${RESULT}"
-    fi
-    if [ -s "${HORIZON_CONFIG_FILE}.$$" ]; then
-      DIFF=$(diff "${HORIZON_CONFIG_FILE}" "${HORIZON_CONFIG_FILE}.$$" | wc -c || true)
-      if [[ ${DIFF} > 0 ]]; then
-        # update configuration
-        hass.log.info $(date) "Configuration ${HORIZON_CONFIG_NAME} bytes changed: ${DIFF}; updating database"
-        RESULT=$(curl -sL "${URL}" -X PUT -d '@'"${HORIZON_CONFIG_FILE}.$$")
-        if [ "$(echo "${RESULT}" | jq '.ok?')" != "true" ]; then
-          hass.log.warning $(date) "Update configuration ${HORIZON_CONFIG_NAME} failed; ${HORIZON_CONFIG_FILE}.$$" $(echo "${RESULT}" | jq '.error?')
-        else
-          hass.log.debug $(date) "Update configuration ${HORIZON_CONFIG_NAME} succeeded:" $(echo "${RESULT}" | jq -c '.')
-        fi
-        hass.log.info $(date) "Updated configuration: ${HORIZON_CONFIG_NAME}"
-        mv -f "${HORIZON_CONFIG_FILE}.$$" "${HORIZON_CONFIG_FILE}"
-        if [ -s "${HORIZON_CONFIG_FILE}" ]; then
-          RESULT=$(jq '.org="'${HORIZON_ORGANIZATION}'"|.device="'${HORIZON_DEVICE_NAME}'"|.configuration="'${HORIZON_CONFIG_NAME}'"' "${HORIZON_CONFIG_FILE}")
-          mosquitto_pub -r -q 2 -h "${MQTT_HOST}" -p "${MQTT_PORT}" -t "${HORIZON_ORGANIZATION}/${HORIZON_DEVICE_NAME}/${HORIZON_CONFIG_NAME}/status" -m "${RESULT}"
-        fi
-      else
-        hass.log.info $(date) "No updates: ${HORIZON_CONFIG_NAME}"
-      fi
-    else
-      hass.log.fatal $(date) "Failed ${SCRIPT} processing; zero-length result; ${SCRIPT_LOG} from host ${HOST_IPADDR}" $(cat "${SCRIPT_LOG}")
-      hass.die
-    fi
+if [ "$(echo "${RESULT}" | jq '.ok?')" != "true" ]; then
+  echo $(date) "Update configuration ${CONFIG_NAME} failed; ${CONFIG_FILE}" $(echo "${RESULT}" | jq '.error?')
+else
+  echo $(date) "Update configuration ${CONFIG_NAME} succeeded:" $(echo "${RESULT}" | jq -c '.')
+fi
 
