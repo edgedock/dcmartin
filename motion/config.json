@@ -1,8 +1,9 @@
 {
   "name": "Motion",
-  "url": "https://github.com/dcmartin/open-horizon",
-  "version": "0.0.1",
   "slug": "motion",
+  "org": "dcmartin@us.ibm.com",
+  "url": "https://github.com/dcmartin/open-horizon/motion",
+  "version": "0.0.1",
   "description": "Motion addon from LINUX package https://motion-project.github.io/",
   "startup": "before",
   "boot": "auto",
@@ -57,7 +58,7 @@
       "jobid": ""
     },
     "mqtt": {
-      "host": "core-mosquitto",
+      "host": "mqtt.dcmartin.com",
       "port": 1883
     },
     "cameras": [

@@ -7,8 +7,8 @@ for PS in ${PORTS_SOURCE}; do
   PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'/tcp")|.value' "${CONFIG}")
   OPTIONS="${OPTIONS:-}"' --publish='"${PS}"':'"${PE}"
 done
-echo $OPTIONS
-VOLUME=$(pwd)
-#
-docker run -d --name ${DOCKER_NAME} ${OPTIONS} --volume "${VOLUME}"':/outside' "${DOCKER_TAG}"
+if [ -z "${VOLUME:-}" ]; then VOLUME="$(pwd)/data"; fi
+if [ ! -d "${VOLUME}" ]; then mkdir -p "${VOLUME}"; fi
+jq '.options' ${CONFIG} > ${VOLUME}/options.json
+docker run -d --name ${DOCKER_NAME} ${OPTIONS} --volume "${VOLUME}"':/data' "${DOCKER_TAG}"
 
