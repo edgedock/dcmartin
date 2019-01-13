@@ -57,34 +57,17 @@ ARG BUILD_REF
 ARG BUILD_VERSION
 
 RUN apk add --no-cache \
-  apache2 \
-  apache2-utils \
-  bc \
   coreutils \
-  curl \
-  dateutils \
-  findutils \
-  ffmpeg@edge \
-  motion@edge \
-  gawk \
-  imagemagick \
-  inotify-tools \
-  jq \
-  mosquitto-clients \
-  python3 \
-  tcsh \
-  git
+  socat
 
 # Copy root file-system
 COPY rootfs /
 
 # environment
 ENV CONFIG_PATH /data/options.json
-ENV MOTION_CONF /etc/motion/motion.conf
 
 # Ports for motion (control and stream)
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 5433
 
 CMD [ "/usr/bin/run.sh" ]
 
@@ -96,8 +79,8 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    io.hass.name="MOTION" \
-    io.hass.description="Motion package as addon w/ support for image classification" \ 
+    io.hass.name="HAL" \
+    io.hass.description="Hardware abstraction layer (HAL) for device: USB, CPU, PCI" \ 
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \

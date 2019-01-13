@@ -33,16 +33,17 @@ default: all
 all:	build run check
 
 build:	service.json build.json
-	docker build --build-arg BUILD_FROM=$(BUILD_FROM) .
+	docker build --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
-run:
-	docker-run.sh "${DOCKER_NAME}" "${DOCKER_TAG}" 2> docker-run.out
+run:	stop 
+	-docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+
+stop:
+	-docker stop $(DOCKER_TAG)
+	-docker rm -f $(DOCKER_NAME)
 
 check:
 	curl -sSL http://localhost:$(SERVICE_PORT)
-
-stop:
-	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 docker-push: build
 	: $${DOCKER_TAG:?}
@@ -50,7 +51,8 @@ docker-push: build
 
 service.json: service.tmpl config.json build.json
 	# : $${SERVICE_ORG:?} $${SERVICE_NAME:?} $${SERVICE_DOMAIN:?} $${DOCKER_HUB_ID:?} $${SERVICE_VERSION:?}
-	jq '.|.org="$(SERVICE_ORG)"|.label="$(SERVICE_NAME) for $(ARCH)"|.url="$(SERVICE_DOMAIN)/service-$(SERVICE_NAME)"|.version="$(SERVICE_VERSION)"|.arch="$(ARCH)"|.deployment.services.motion.image="$(DOCKER_HUB_ID)/$(ARCH)_$(SERVICE_NAME):$(SERVICE_VERSION)"' service.tmpl > service.json
+	sed -e "s|%%DOCKER_HUB_ID%%|$(DOCKER_HUB_ID)|g" -e "s|%%SERVICE_ORG%%|$(SERVICE_ORG)|g" -e "s|%%SERVICE_NAME%%|$(SERVICE_NAME)|g" -e "s|%%SERVICE_DOMAIN%%|$(SERVICE_DOMAIN)|g" -e "s|%%SERVICE_VERSION%%|$(SERVICE_VERSION)|g" -e "s|%%ARCH%%|$(ARCH)|g" service.tmpl > service.json
+	# jq '.|.org="$(SERVICE_ORG)"|.label="$(SERVICE_NAME) for $(ARCH)"|.url="$(SERVICE_DOMAIN)/service-$(SERVICE_NAME)"|.version="$(SERVICE_VERSION)"|.arch="$(ARCH)"|.deployment.services.motion.image="$(DOCKER_HUB_ID)/$(ARCH)_$(SERVICE_NAME):$(SERVICE_VERSION)"' service.tmpl > service.json
 
 # Create/update the metadata in the exchange for this service
 publish-service: build service.json

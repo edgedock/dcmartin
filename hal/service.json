@@ -1,0 +1,20 @@
+{
+  "org": "dcmartin@us.ibm.com",
+  "label": "HAL",
+  "description": "REST API for hardware abstraction layer: CPU, PCI, USB",
+  "public": true,
+  "documentation": "https://github.com/dcmartin/open-horizon/hal/README.md",
+  "url": "https://github.com/dcmartin/open-horizon/hal",
+  "version": "0.0.1",
+  "arch": "amd64",
+  "sharable": "singleton",
+  "requiredServices": [],
+  "userInput": [],
+  "deployment": {
+    "services": {
+      "hal": {
+        "image": "dcmartin@us.ibm.com/amd64_hal:0.0.1"
+      }
+    }
+  }
+}
