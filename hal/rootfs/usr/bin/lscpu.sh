@@ -1,5 +1,6 @@
 #!/bin/bash
 if [ -z $(command -v "lscpu") ]; then
+  echo '{"lscpu":null}'
   exit 1
 fi
 echo -n '{"lscpu":['
@@ -11,3 +12,4 @@ lscpu | while read -r; do
   echo -n "${VALUE}"
 done
 echo ']}'
+exit 0

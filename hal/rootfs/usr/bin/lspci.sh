@@ -1,5 +1,6 @@
 #!/bin/bash
 if [ -z $(command -v "lspci") ]; then
+  echo '{"lspci":null}'
   exit 1
 fi
 echo -n '{"lspci":['
@@ -34,3 +35,4 @@ lspci -mm -nn | sed 's| "|,"|g' | sed 's| -[^ ,]*||g' | while read -r; do
   echo -n '}'
 done
 echo ']}'
+exit 0

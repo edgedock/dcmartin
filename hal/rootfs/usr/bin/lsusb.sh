@@ -1,5 +1,6 @@
 #!/bin/bash
 if [ -z $(command -v "lsusb") ]; then
+  echo '{"lsusb":null}'
   exit 1
 fi
 echo -n '{"lsusb":['
@@ -14,3 +15,4 @@ lsusb | while read -r; do
   echo -n "${VALUE}"
 done
 echo ']}'
+exit 0
