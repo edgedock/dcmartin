@@ -58,6 +58,7 @@ ARG BUILD_VERSION
 
 RUN apk add --no-cache \
   coreutils \
+  lshw \
   socat
 
 # Copy root file-system
