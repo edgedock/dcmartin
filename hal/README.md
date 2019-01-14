@@ -13,7 +13,7 @@ Other Horizon services can use the `hal` service by requiring it in its own serv
 ### **API:** 
 
 ```
-http://hal:54331/
+http://hal:8585/
 ```
 ---
 
