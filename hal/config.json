@@ -1,10 +1,12 @@
 {
   "name": "HAL",
   "slug": "hal",
+  "docker": "dcmartin",
   "org": "dcmartin@us.ibm.com",
   "url": "https://github.com/dcmartin/open-horizon/hal",
   "version": "0.0.1",
-  "description": "Conversion of lsusb, lscpu, lspci into JSON",
+  "privileged": true,
+  "description": "Conversion of lsusb, lscpu, lspci, lsblk into JSON",
   "startup": "before",
   "boot": "auto",
   "arch": [
@@ -16,10 +18,10 @@
   "privileged": [
     "SYS_ADMIN"
   ],
-  "webui": "http://[HOST]:[PORT:54331]/",
+  "webui": "http://[HOST]:[PORT:8585]/",
   "timeout": 90,
   "ports": {
-    "54331/tcp": 54331
+    "8585/tcp": 8585 
   },
   "options": {
     "log_level": "info"
