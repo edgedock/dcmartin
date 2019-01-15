@@ -1,13 +1,8 @@
-# Open Horizon Setup
+# Network Installation
 
-This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh].
-
-You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
-
-*** NOTE: A [video][horizon-video-setup] (3m:30s) is available ***
-
-# Command-line initialization (BETA; lgtm)
 The initialization process works through a Master/Client pattern; the Master will scan the LAN for new Client devices from specified vendor, e.g. `Raspberry Pi Foundation`, and utilize the [template][template]) to install both Open Horizon as well as the indicated pattern.  The Client devices are automatically processed by the Master as they are discovered on the local-area-network (LAN).  Client devices are prepared by choosing a standard LINUX distribution, e.g. Rasbpian Stretch Lite, and flashing an appropriate SD card.
+
+** NOTE: A [video][horizon-video-setup] (3m:30s) is available **
 
 ### Network considerations
 A separate setup network may be utilized to improve security while devices have default login credentials.  The configuration provides the first `network` defined for device initialization; in the template provided:
