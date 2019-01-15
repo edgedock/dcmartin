@@ -6,11 +6,11 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 
 # System Installation
 
-System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][editrc] instructions.
+System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][system] instructions.
 
 # Network Installation
 
-Installations can be performed over the network when devices are discovered.  This technique is suitable for early-adopters. Please refer to [these][setup] instructions.
+Installations can be performed over the network when devices are discovered.  This technique is suitable for early-adopters. Please refer to [these][network] instructions.
 
 ## Changelog & Releases
 
@@ -38,6 +38,6 @@ David C Martin (github@dcmartin.com)
 [edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
 [examples]: https://github.com/open-horizon/examples
 [ibm-cloud]: http://cloud.ibm.com/
-[editrc]: https://github.com/dcmartin/open-horizon/tree/master/setup/EDITRC.md
-[setup]: https://github.com/dcmartin/open-horizon/tree/master/setup/SETUP.md
+[system]: https://github.com/dcmartin/open-horizon/tree/master/setup/SYSTEM.md
+[network]: https://github.com/dcmartin/open-horizon/tree/master/setup/NETWORK.md
 [keepchangelog]: http://keepachangelog.com/en/1.0.0/
