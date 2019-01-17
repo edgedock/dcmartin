@@ -1,15 +1,47 @@
-# Open Horizon Setup
+# System Installation
 
-This repository contains sample scripts to automatically setup nodes for [Open Horizon][open-horizon] as provided in the IBM Cloud.  Detailed [documentation][edge-fabric] for the IBM Cloud Edge Fabric is available on-line.  A Slack [channel][edge-slack] is also available.  You may create and publish your patterns to your organization.  Refer to the [examples][examples] available on GitHub.  Please see DCMARTIN/open-horizon [instructions][dcm-oh].
+System installation modifies the operating system boot sequence to install the Open Horizon software.
+The `editrc.sh` script modifies the `/etc/rc.local` file to include additional commands to install the Open Horizon software.
 
-You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
+Steps in the process:
+1. Clone this [repository][repository] and change to that directory
+1. Create a new configuration file using the `mkconfig.sh` script
+1. Check configuration using `chkconfig.sh`
+1. Insert and flash a uSD card with operating system image
+1. Run the `editrc.sh` script to mount the uSD card, modify the operating system files, and unmount
+1. Eject the uSD card; duplicate as necessary
 
-# Basic Installation
+For each device insert the uSD card and provide power and networking; software installation is tested at boot.
+If the requisite `hzn` command is not found, devices will download and install all software; devices are then ready for pattern registration.
 
-A basic device installation modifies the operating system image boot sequence to install the Open Horizon software.
+** NOTE: A [video][horizon-video-setup] (2m:22s) is available **
 
-1. Flash uSD card with operating system image
-1. Run `mkconfig.sh` to configure installation defaults:
+## Defaults
+
+Default values for installation are required and may be changed using `mkconfig.sh`; these include:
+
++ `exchange` - the URL of the Open Horizon exchange; default `alpha`
++ `machine` - the machine type; default `rpi3`
++ `network` - the WiFi network to which the device should attach at boot; default `none`
++ `configuration` - the default configuration; default `none`
++ `pattern` - the default pattern; default `none`
++ `token` - the default device token; default `none`
++ `keys` including both `public` and `private` (for use with SSH access)
+
+Public and private keys are identified from the default `configuration`; if there is no default configuration, the user's SSH RSA credentials are used: `~/.ssh/id_rsa`.
+If no keys can be found, new keys are generated using `ssh-keygen`.
+
+## Setups
+
+A URL for the shell script is defined in the configuration file (aka `horizon.json`) as part of the `setup` component; the default `url` is `http://ibm.biz/horizon-setup`.
+An alternative script can be defined by either modifying the configuration to indicate an alternative `url` or providing a local `path` to the script.
+```
+  "setups": [
+    { "id": "none" },
+    { "id": "horizon", "path": "hzn-install.sh", "url": "http://ibm.biz/horizon-setup" },
+    { "id": "hassio", "path": "hassio-install.sh", "url": "http://ibm.biz/hassio-setup" }
+  ]
+```
 
 ## Changelog & Releases
 
@@ -32,6 +64,7 @@ David C Martin (github@dcmartin.com)
 
 [horizon-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hzn-install.sh
 [hassio-setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/hassio-install.sh
+[horizon-video-setup]: https://youtu.be/G7-CzOzzSUo
 
 [dcmartin]: https://github.com/dcmartin
 [repository]: https://github.com/dcmartin/open-horizon

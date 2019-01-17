@@ -3,7 +3,7 @@
 ## not for macintosh
 if [ "${VENDOR}" == "apple" ] || [ "${OSTYPE}" == "darwin" ]; then
   echo "You're on a Macintosh; run in VirtualBox Ubuntu18 VM and use vmdk_sd.sh to enable SD card access" >&2
-  exit 1
+#  exit 1
 fi
 
 ### DEFAULTS

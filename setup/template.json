@@ -10,7 +10,7 @@
   },
   "setup": "horizon",
   "vendor": "rpi",
-  "discover": true,
+  "discover": false,
   "tokens": [ 
     { "id": "none" },
     { "id":"token-1", "value": "nowisthetimeforallgoodmen" }, 
@@ -28,8 +28,8 @@
   ],
   "setups": [
     { "id": "none" },
-    { "id": "horizon", "url": "http://ibm.biz/horizon-setup" },
-    { "id": "hassio", "url": "http://ibm.biz/hassio-setup" }
+    { "id": "horizon", "path": "hzn-install.sh", "url": "http://ibm.biz/horizon-setup" },
+    { "id": "hassio", "path": "hassio-install.sh", "url": "http://ibm.biz/hassio-setup" }
   ],
   "vendors": [
     { "id": "none" },
