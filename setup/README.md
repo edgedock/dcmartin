@@ -18,7 +18,7 @@ Installations can be performed over the network when devices are discovered.  Th
 A target device or virtual environment is required; either of the following are sufficient.
 
 ### LINUX (Ubuntu) Virtual Machine
-Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][VirtualBox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
+Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
 
 ### RaspberryPi3+ with Raspbian Stretch
 1. Download Raspbian [image][raspbian-image] for the RaspberryPi3 and flash a 32 Gbyte+ micro-SD card.  On macOS use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
@@ -100,3 +100,4 @@ David C Martin (github@dcmartin.com)
 [setupdir]: https://github.com/dcmartin/open-horizon/tree/master/setup
 [system]: https://github.com/dcmartin/open-horizon/tree/master/setup/SYSTEM.md
 [ubuntu-image]: http://releases.ubuntu.com/18.04.1/
+[virtualbox]: http://www.virtualbox.org/
