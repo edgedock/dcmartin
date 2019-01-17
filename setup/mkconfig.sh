@@ -36,7 +36,14 @@ if [ ! -s "${CONFIG}" ]; then
   exit 1
 fi
 
-if [ $(jq '.discover==true' "${CONFIG}") == true ]; then
+V=$(jq '.discover?' "${CONFIG}")
+if [ -z "${V}" ] || [ "${V}" == null ]; then V="false"; fi
+while [[ "${DISCOVERY:-}" != "true" && "${DISCOVERY:-}" != "false" ]]; do
+  echo -n "Network discovery (true/false) [${V}]: "
+  read VALUE
+  if [ -z "${VALUE}" ]; then DISCOVERY="${V}"; else DISCOVERY="${VALUE}"; fi
+done
+if [ "${DISCOVERY}" == 'true' ]; then
   ## setup network (default)
   n=$(jq '.networks|first' "${CONFIG}")
   if [ -z "${n}" ] || [ "${n}" == 'null' ]; then
@@ -44,7 +51,7 @@ if [ $(jq '.discover==true' "${CONFIG}") == true ]; then
     exit 1
   fi
   nid=$(echo "${n}" | jq -r '.id')
-  echo "!!! SETUP NETWORK (discover is true) [${nid}]"
+  echo "!!! SETUP NETWORK [${nid}]"
   for key in ssid password; do
     valid=$(echo "${n}" | jq '.'"${key}"'|contains("%%") == false')
     if [ "${valid}" == "true" ]; then

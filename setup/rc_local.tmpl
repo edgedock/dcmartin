@@ -7,7 +7,10 @@ fi
 
 # install horizon
 if [ -z $(command -v hzn) ]; then
-  wget -qO - "%%HORIZON_SETUP_URL%%" | bash &> /horizon.log
+  if [ ! -s "/%%HORIZON_SCRIPT%%" ]; then
+    wget -qO "/%%HORIZON_SCRIPT%%" "%%HORIZON_SETUP_URL%%" 
+  fi
+  bash "/%%HORIZON_SCRIPT%%" &> /horizon.log
 fi
 
 DEVICE_NAME="%%DEVICE_NAME%%"

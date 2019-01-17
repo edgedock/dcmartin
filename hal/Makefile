@@ -13,6 +13,11 @@ LABEL := $(shell jq -r '.label' service.json)
 VERSION := $(shell jq -r '.version' service.json)
 PORT := 8585 # this should be defined in service.json
 
+PRIVATE_KEY_FILE := ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
+PUBLIC_KEY_FILE := ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
+export HZN_EXCHANGE_USER_AUTH ?= "iamapikey:${IBMCLOUD_PLATFORM_APIKEY}"
+
+
 ## docker
 DOCKER_HUB_ID ?= dcmartin
 DOCKER_NAME ?= $(ARCH)_$(LABEL)
@@ -42,7 +47,7 @@ docker-push: build
 
 # Create/update the metadata in the exchange for this service
 publish-service: build service.json
-	: $${HZN_EXCHANGE_USER_AUTH:?} $${PRIVATE_KEY_FILE:?} $${PUBLIC_KEY_FILE:?}   # this verifies these env vars are set
+	# : $${HZN_EXCHANGE_USER_AUTH:?} $${PRIVATE_KEY_FILE:?} $${PUBLIC_KEY_FILE:?}   # this verifies these env vars are set
 	hzn exchange service publish -k $$PRIVATE_KEY_FILE -K $$PUBLIC_KEY_FILE -f service.json
 
 clean:

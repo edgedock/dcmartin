@@ -4,7 +4,7 @@ The initialization process works through a Master/Client pattern; the Master wil
 
 ** NOTE: A [video][horizon-video-setup] (3m:30s) is available **
 
-### Network considerations
+### Separate setup network
 A separate setup network may be utilized to improve security while devices have default login credentials.  The configuration provides the first `network` defined for device initialization; in the template provided:
 ```
   "networks": [
@@ -15,11 +15,12 @@ A separate setup network may be utilized to improve security while devices have 
       "password": "0123456789"
     },
 ```
-To construct a setup network and WiFi access point using another RaspberrPi, please refer to the [`rpi-bridge.sh`][rpi-bridge-script] script.  This script will convert fresh Rasbian Stretch Lite device into a wireless access point using environment variables with the follwing defaults (n.b. change values, e.g. `export CHANNEL=7`, prior to execution):
-+ `HW_MODE`: `g`
-+ `CHANNEL`: `8`
-+ `SSID`: `TEST`
-+ `WPA_PASSPHRASE`: `0123456789`
+### Build a setup network 
+To construct a setup network and WiFi access point using another RaspberryPi, please refer to the [`rpi-bridge.sh`][rpi-bridge-script] script.  This script will convert fresh Rasbian Stretch Lite device into a wireless access point using environment variables with the follwing defaults; change values appropriately prior to execution):
++ `export HW_MODE=g`
++ `export CHANNEL=8`
++ `export SSID=TEST`
++ `export WPA_PASSPHRASE=0123456789`
 
 ### Initialization process
 The `init-devices.sh` script automates the setup, installation, and configuration of multiple devices; **currently this script has been tested with configuration for client RaspberryPi devices running Raspbian Stretch**.

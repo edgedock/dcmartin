@@ -1,6 +1,6 @@
 {
   "org": "dcmartin@us.ibm.com",
-  "label": "motion",
+  "label": "motion for amd64",
   "description": "Provides motion-project.io as service",
   "documentation": "https://github.com/dcmartin/open-horizon/motion/README.md",
   "url": "com.github.dcmartin.open-horizon.motion",
@@ -9,6 +9,12 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
+        {
+            "url": "github.com.dcmartin.open-horizon.hal",
+            "org": "dcmartin@us.ibm.com",
+            "version": "0.0.1",
+            "arch": "amd64"
+        },
         {
             "url": "github.com.open-horizon.examples.cpu",
             "org": "IBM",
@@ -24,21 +30,56 @@
   ],
   "userInput": [
         {
-            "name": "MSGHUB_API_KEY",
-            "label": "",
+            "name": "CONFIG_GROUP",
+            "label": "group name for configuration",
+            "type": "string",
+            "defaultValue": "motion"
+        },
+        {
+            "name": "MQTT_HOST",
+            "label": "IP or FQDN for mqtt host",
+            "type": "string",
+            "defaultValue": "horizon.dcmartin.com"
+        },
+        {
+            "name": "MQTT_PORT",
+            "label": "port number",
+            "type": "int",
+            "defaultValue": "1883"
+        },
+        {
+            "name": "MQTT_USERNAME",
+            "label": "username",
             "type": "string",
             "defaultValue": ""
         },
         {
-            "name": "VERBOSE",
-            "label": "log everything that happens",
+            "name": "MQTT_PASSWORD",
+            "label": "password",
             "type": "string",
-            "defaultValue": "0"
+            "defaultValue": ""
+        },
+        {
+            "name": "LOG_LEVEL",
+            "label": "specify logging level",
+            "type": "string",
+            "defaultValue": "info"
+        },
+        {
+            "name": "DEBUG",
+            "label": "debug on/off",
+            "type": "boolean",
+            "defaultValue": "false"
         }
   ],
   "deployment": {
     "services": {
       "motion": {
+        "environment": [
+           "ADDON_NAME=motion",
+           "MQTT_HOST=horizon.dcmartin.com",
+           "MQTT_PORT=1883"
+        ],
         "image": "dcmartin/amd64_motion:0.0.1",
         "privileged": true,
         "devices": [
@@ -48,6 +89,7 @@
     }
   },
   "ports": {
-    "8585/tcp": 8585
+    "8080/tcp": 8080,
+    "8081/tcp": 8081
   }
 }

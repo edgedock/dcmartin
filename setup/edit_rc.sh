@@ -239,6 +239,22 @@ else
   exit 1
 fi
 
+## hzn-setup.sh
+if [ -z "${HORIZON_SCRIPT:-}" ]; then
+  HORIZON_SCRIPT="hzn-setup.sh"
+else
+  echo "+++ WARN $0 $$ -- non-standard HORIZON_SCRIPT: ${HORIZON_SCRIPT}"
+fi
+HORIZON_SCRIPT_FILE="${LINUX_VOL}/${HORIZON_SCRIPT}"
+# get setup script
+wget -qO "${HORIZON_SCRIPT_FILE}" "${HORIZON_SETUP_URL}"
+# test
+if [ ! -s "${HORIZON_SCRIPT_FILE}" ]; then
+  echo "+++ WARN $0 $$ -- could not create: ${HORIZON_SCRIPT_FILE}; will attempt at boot"
+else
+  chmod 755 "${HORIZON_SCRIPT_FILE}"
+fi
+
 ## RC.LOCAL
 if [ -z "${RC_LOCAL_FILE:-}" ]; then
   RC_LOCAL_FILE="${LINUX_VOL}/etc/rc.local"
@@ -262,6 +278,7 @@ sudo sed -i \
   -e 's|%%CLIENT_HOSTNAME%%|'"${CLIENT_HOSTNAME}"'|g' \
   -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
   -e 's|%%DEVICE_TOKEN%%|'"${DEVICE_TOKEN}"'|g' \
+  -e 's|%%HORIZON_SCRIPT%%|'"${HORIZON_SCRIPT}"'|g' \
   -e 's|%%HORIZON_SETUP_URL%%|'"${HORIZON_SETUP_URL}"'|g' \
   "${RC_LOCAL_FILE}"
 if [ ! -s "${RC_LOCAL_FILE}" ]; then
