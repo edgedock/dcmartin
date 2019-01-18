@@ -53,7 +53,7 @@ if [ -z "${CMD}" ]; then
 fi
 
 # install pre-requisites
-for CMD in jq curl ssh; do
+for CMD in jq curl ssh socat; do
   C=$(command -v $CMD)
   if [ -z "${C}" ]; then
     echo "+++ INFO: Installing ${CMD}" >&2

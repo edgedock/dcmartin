@@ -20,7 +20,7 @@ fi
 DEVICE_NAME=$(hzn node list | jq -r '.name?')
 if [ -z "${DEVICE_NAME}" ] || [ "${DEVICE_NAME}" == 'null' ]; then
   echo "+++ WARN: $(date) -- node list has no name; broadcasting horizon node id" >> /horizon.log 2>&1
-  socat-node-id.sh &> /dev/stderr &
+  ./socat-node-id.sh
 else
   echo "--- INFO: $(date) -- horizon node created; device name: ${DEVICE_NAME}" 2>&1
 fi

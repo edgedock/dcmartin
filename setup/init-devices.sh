@@ -405,6 +405,11 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SECURITY configured:" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr ; fi
   fi
 
+  ## COPY SOCAT
+  for script in socat-node-id.sh node-id.sh; do
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+  done
+
   ## CONFIG SOFTWARE
   if [ "${config_software}" == "true" ]; then
     # test access
@@ -444,6 +449,10 @@ for MAC in ${MACS}; do
     echo "*** ERROR: ${id}: SOFTWARE failed" &> /dev/stderr
     continue
   fi
+
+  ## Start SOCAT
+  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" './socat-node-id.sh')
+  
 
   ## CONFIG EXCHANGE
   if [[ ${config_exchange} != "true" ]]; then
