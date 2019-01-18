@@ -76,9 +76,7 @@
     "services": {
       "motion": {
         "environment": [
-           "ADDON_NAME=motion",
-           "MQTT_HOST=horizon.dcmartin.com",
-           "MQTT_PORT=1883"
+           "PATTERN=motion"
         ],
         "image": "dcmartin/amd64_motion:0.0.1",
         "privileged": true,

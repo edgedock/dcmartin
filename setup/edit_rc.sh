@@ -276,17 +276,28 @@ sudo cp -f "${RC_TEMPLATE_FILE}" "${RC_LOCAL_FILE}"
 sudo sed -i \
   -e 's|%%CLIENT_USERNAME%%|'"${CLIENT_USERNAME}"'|g' \
   -e 's|%%CLIENT_HOSTNAME%%|'"${CLIENT_HOSTNAME}"'|g' \
-  -e 's|%%DEVICE_NAME%%|'"${DEVICE_NAME}"'|g' \
   -e 's|%%DEVICE_TOKEN%%|'"${DEVICE_TOKEN}"'|g' \
   -e 's|%%HORIZON_SCRIPT%%|'"${HORIZON_SCRIPT}"'|g' \
   -e 's|%%HORIZON_SETUP_URL%%|'"${HORIZON_SETUP_URL}"'|g' \
   "${RC_LOCAL_FILE}"
+# test
 if [ ! -s "${RC_LOCAL_FILE}" ]; then
   echo "*** ERROR $0 $$ -- could not create: ${RC_LOCAL_FILE}"
   exit 1
 fi
 # SUCCESS
 echo "$(date '+%T') INFO $0 $$ -- ${RC_LOCAL_FILE} created"
+
+## SOCAT & NODE-ID
+sudo cp -f "socat-node-id.sh" "/socat-node-id.sh"
+sudo cp -f "node-id.sh" "/node-id.sh"
+if [ ! -s "/socat-node-id.sh" ] || [ ! -s "/node-id.sh" ];; then
+  echo "*** ERROR $0 $$ -- could not create /socat-node-id.sh or /node-id.sh"
+  exit 1
+fi
+# SUCCESS
+echo "$(date '+%T') INFO $0 $$ -- /socat-node-id.sh and /node-id.sh created"
+
 # unmount & remove mount point directory
 sudo umount "${LINUX_VOL}"
 sudo rmdir "${LINUX_VOL}"

@@ -1,0 +1,37 @@
+{
+  "label": "label",
+  "description": "description",
+  "public": true,
+  "services": [
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "amd64",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm64",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    }
+  ]
+}

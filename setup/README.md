@@ -47,10 +47,6 @@ Add the repository [`https://github.com/dcmartin/hassio-addons`][dcm-addons] to 
 ![sdr2msghub sentiment](https://github.com/dcmartin/hassio-addons/raw/master/sdr2msghub/sdr2msghub_sentiment.png?raw=true "SDR2MSGHUB")
 ![cpu2msghub sentiment](https://github.com/dcmartin/hassio-addons/raw/master/cpu2msghub/cpu2msghub_cpu.png?raw=true "CPU2MSGHUB")
 
-# Further information
-
-More detailed instructions are [available][edge-install].  Installation package for macOS is also [available][macos-install]
-
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format

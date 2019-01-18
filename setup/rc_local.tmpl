@@ -4,23 +4,25 @@
 if [ -z $(command -v expect) ]; then
   apt install -y expect &> /apt.log
 fi
+if [ -z $(command -v socat) ]; then
+  apt install -y socat &> /apt.log
+fi
 
 # install horizon
 if [ -z $(command -v hzn) ]; then
+  # probably should have a checksum or just re-retrieve every time; could be corrupted
   if [ ! -s "/%%HORIZON_SCRIPT%%" ]; then
     wget -qO "/%%HORIZON_SCRIPT%%" "%%HORIZON_SETUP_URL%%" 
   fi
   bash "/%%HORIZON_SCRIPT%%" &> /horizon.log
 fi
 
-DEVICE_NAME="%%DEVICE_NAME%%"
-if [ $(hzn node list | jq '.id==null') == "true" ]; then
-  echo "+++ WARN: $(date) -- horizon not configured" >> /horizon.log 2>&1
-  DEVICE_NAME=
-elif [ -z "${DEVICE_NAME}" ] || [ "${DEVICE_NAME}" == 'null' ]; then
-  DEVICE_NAME=$(hzn node list | jq -r '.id')
+DEVICE_NAME=$(hzn node list | jq -r '.name?')
+if [ -z "${DEVICE_NAME}" ] || [ "${DEVICE_NAME}" == 'null' ]; then
+  echo "+++ WARN: $(date) -- node list has no name; broadcasting horizon node id" >> /horizon.log 2>&1
+  socat-node-id.sh &> /dev/stderr &
 else
-  echo "--- INFO: $(date) -- horizon configured; device name: ${DEVICE_NAME}" 2>&1
+  echo "--- INFO: $(date) -- horizon node created; device name: ${DEVICE_NAME}" 2>&1
 fi
 
 ## SSH

@@ -9,10 +9,26 @@
   "public": true,
   "sharable": "multiple",
   "requiredServices": [],
-  "userInput": [],
+  "userInput": [
+        {
+            "name": "LOG_LEVEL",
+            "label": "specify logging level",
+            "type": "string",
+            "defaultValue": "info"
+        },
+        {
+            "name": "DEBUG",
+            "label": "debug on/off",
+            "type": "boolean",
+            "defaultValue": "false"
+        }
+  ],
   "deployment": {
     "services": {
       "hal": {
+        "environment": [
+           "SERVICE=hal"
+        ],
         "image": "dcmartin/amd64_hal:0.0.1",
         "privileged": true
       }
@@ -20,11 +36,5 @@
   },
   "ports": {
     "8585/tcp": 8585 
-  },
-  "options": {
-    "log_level": "info"
-  },
-  "schema": {
-    "log_level": "match(^(trace|debug|info|notice|warning|error|fatal)$)"
   }
 }
