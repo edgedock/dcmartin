@@ -1,6 +1,6 @@
 {
-  "label": "label",
-  "description": "description",
+  "label": "motion",
+  "description": "motion as a pattern",
   "public": true,
   "services": [
     {
