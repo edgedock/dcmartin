@@ -70,9 +70,6 @@ COPY rootfs /
 # environment
 ENV CONFIG_PATH /data/options.json
 
-# Ports for motion (control and stream)
-EXPOSE 5433
-
 CMD [ "/usr/bin/run.sh" ]
 
 # Build arugments
