@@ -80,9 +80,9 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    io.hass.name="HAL" \
-    io.hass.description="Hardware abstraction layer (HAL) for device: USB, CPU, PCI" \ 
-    io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
-    io.hass.version=${BUILD_VERSION} \
+    io.horizon.name="HAL" \
+    io.horizon.description="Hardware abstraction layer (HAL) for device: USB, CPU, PCI" \ 
+    io.horizon.arch="${BUILD_ARCH}" \
+    io.horizon.type="service" \
+    io.horizon.version=${BUILD_VERSION} \
     maintainer="David C Martin <github@dcmartin.com>"

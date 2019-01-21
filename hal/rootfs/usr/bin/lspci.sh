@@ -13,21 +13,24 @@ fi
 
 COLS=$(awk -F, 'END { print NF }' /tmp/lspci.$$)
 
-echo -n '{"lspci":'
+echo -n '{"lspci":['
 cat /tmp/lspci.$$ | while read -r; do
   if [ -n "${VAL:-}" ]; then echo -n ','; fi
 
   echo -n '{'
   SLOT=$(echo "$REPLY" | awk -F, '{ print $1 }')
   echo -n '"slot": "'$SLOT'"'
-  if [ "${COLS}" == "4" ]; then
+  if [ "${COLS}" == "6" ]; then
     VAL=$(echo "$REPLY" | awk -F, '{ print $2 }' | sed 's|"Class \(.*\)"|"device_class_id": "\1"|')
     if [ "${VAL}" != "${REPLY}" ]; then echo -n ','"${VAL}"; fi
-    VAL=$(echo "$REPLY" | awk -F, '{ printf("\"vendor_class_id\":\"%s\"", $3) }')
-    echo -n ','"${VAL}"
-    VAL=$(echo "$REPLY" | awk -F, '{ printf("\"device_id\":\"%s\", $4) }')
-    echo -n ','"${VAL}"
-  elif [ "${COLS}" == "6" ]; then
+    VAL=$(echo "$REPLY" | awk -F, '{ print $3 }' | sed 's|"\(.*\)"|"vendor_class_id": "\1"|')
+    if [ "${VAL}" != "${REPLY}" ]; then echo -n ','"${VAL}"; fi
+    VAL=$(echo "$REPLY" | awk -F, '{ print $4 }' | sed 's|"\(.*\)"|"device_id": "\1"|')
+    if [ "${VAL}" != "${REPLY}" ]; then echo -n ','"${VAL}"; fi
+    VAL=$(echo "$REPLY" | awk -F, '{ print $5 }' | sed 's|"\(.*\)"|"vendor_id": "\1"|')
+    if [ "${VAL}" != "${REPLY}" ]; then echo -n ','"${VAL}"; fi
+
+  elif [ "${COLS}" == "11" ]; then
     VMM=$(lspci -vmm | egrep -A 5 "$SLOT")
     VAL=$(echo "$VMM" | egrep "Rev:" | sed 's|.*Rev:[ \t]*\([^ \t]*\).*|\1|')
     if [ -n "${VAL}" ]; then echo -n ',''"revision": "'$VAL'"'; fi
@@ -49,7 +52,7 @@ cat /tmp/lspci.$$ | while read -r; do
   fi
   echo -n '}'
 done
-echo '}'
+echo ']}'
 
 rm -f /tmp/lspci.$$
 exit 0
