@@ -3,7 +3,7 @@ ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's
 BUILD_ARCH=$(shell arch)
 
 ## BUILD
-BUILD_FROM=$(shell jq -r ".build_from.${ARCH}" build.json)
+BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
 ## SERVICE
 ORG=$(shell jq -r '.org' service.json)
