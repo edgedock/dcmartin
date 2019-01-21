@@ -33,8 +33,5 @@
         "privileged": true
       }
     }
-  },
-  "ports": {
-    "8585/tcp": 8585 
   }
 }

@@ -33,7 +33,8 @@ build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: stop 
-	docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
+	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
+	docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 $(DOCKER_TAG)
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
