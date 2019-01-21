@@ -48,7 +48,8 @@ push: build
 	docker push ${DOCKER_TAG}
 
 publish:
-	hzn --verbose exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service.json -o ${ORG} -u iamapikey:${APIKEY}
+	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
+	hzn --verbose exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
 
 clean:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
