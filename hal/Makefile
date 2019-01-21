@@ -1,5 +1,6 @@
 ## ARCHITECTURE
 ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
+BUILD_ARCH=$(shell arch)
 
 ## BUILD
 BUILD_FROM=$(shell jq -r ".build_from.${ARCH}" build.json)
@@ -30,7 +31,7 @@ default: all
 all: build run check
 
 build: build.json service.json
-	docker build --build-arg BUILD_ARCH=$(ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
+	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: stop 
 	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
