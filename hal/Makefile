@@ -7,8 +7,10 @@ BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
 ## SERVICE
 ORG=$(shell jq -r '.org' service.json)
+URL=$(shell jq -r '.url' service.json)
 LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)
+SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
 
 ## TEST PORT
 PORT=8585
@@ -49,7 +51,12 @@ push: build
 
 publish:
 	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
-	hzn --verbose exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
+	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
+
+verify:
+	# "dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.hal_0.0.1_arm64"
+	hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
 clean:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
