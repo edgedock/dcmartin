@@ -5,4 +5,5 @@ TIME=$(cat /tmp/image.$$.out | egrep "Predicted" | sed 's/.*Predicted in \([^ ]*
 if [ -z "${TIME}" ]; then TIME=0; fi
 PERSONS=$(cat /tmp/image.$$.out | egrep '^person' | wc -l)
 NODEID=$(hostname)
-echo '{"devid":"'${NODEID}'","date":'$(date +%s)',"time":'${TIME}',"person":'${PERSONS}'}'
+IMAGE=$(base64 -w 0 -i predictions.jpg)
+echo '{"devid":"'${NODEID}'","date":'$(date +%s)',"time":'${TIME}',"person":'${PERSONS}',"image":"'${IMAGE}'"}'
