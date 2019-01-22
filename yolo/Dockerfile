@@ -1,42 +1,29 @@
-ARG BUILD_FROM=alpine:3.8
+ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM
 
-# Environment variables
-ENV \
-    HOME="/root" \
-    LANG="C.UTF-8" \
-    PS1="$(whoami)@$(hostname):$(pwd)$ " \
-    TERM="xterm"
+ENV LANG C.UTF-8
 
-# Set shell
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+  curl \
+  build-essential \
+  socat \
+  fswebcam \
+  jq \
+  git
 
-# Install base system
-RUN \
-    set -o pipefail \
-    \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
-    \
-    && apk add --no-cache \
-        apk-tools \
-        bash \
-        curl \
-        jq \
-        coreutils \
-        lshw \
-        socat \
-    && rm -f -r \
-        /tmp/*
-
-# Copy root file-system
+# Copy rootts
 COPY rootfs /
 
 CMD [ "/usr/bin/run.sh" ]
 
-# Build arguments
+# Build darknet
+RUN \
+    cd /darknet \
+    \
+    && make
+
+# Build arugments
 ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
