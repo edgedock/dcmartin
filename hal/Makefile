@@ -54,8 +54,9 @@ publish:
 	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
 
 verify:
-	# "dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.hal_0.0.1_arm64"
+	# should return 'true'
 	hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
 clean:
