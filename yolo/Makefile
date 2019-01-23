@@ -37,14 +37,16 @@ build: build.json service.json
 
 run: stop 
 	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
-	docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 $(DOCKER_TAG)
+	docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check:	
 	sleep 2
-	curl -sSL "http://localhost:$(PORT)" | jq -c '.'
+	curl -sSL "http://localhost:$(PORT)" -o check.json
+	jq -c '.image="[redacted]"' check.json
+	jq -r '.image' check.json | base64 --decode > check.jpg
 
 push: build
 	docker push ${DOCKER_TAG}
