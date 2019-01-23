@@ -1,6 +1,6 @@
 ARG BUILD_FROM=ubuntu:bionic
 
-FROM $BUILD_FROM
+FROM $BUILD_FROM as darknet
 
 ENV LANG C.UTF-8
 
@@ -12,10 +12,8 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
   jq \
   git
 
-# Copy rootts
-COPY rootfs /
-
-CMD [ "/usr/bin/run.sh" ]
+# Copy darknet
+COPY rootfs/darknet /darknet
 
 # Build darknet
 RUN \
@@ -23,7 +21,17 @@ RUN \
     \
     && make
 
-# Build arugments
+FROM darknet
+
+# Copy compiled darknet
+COPY --from=darknet /darknet /darknet
+
+# Copy usr
+COPY rootfs/usr /usr
+
+CMD [ "/usr/bin/run.sh" ]
+
+# Build arguments
 ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
