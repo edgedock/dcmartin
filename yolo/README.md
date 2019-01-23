@@ -10,7 +10,7 @@ Other Horizon services can require the `yolo` service through service tag:
 
 1. Intel/AMD 64-bit: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo_0.0.1_amd64`
 1. ARMv7x32: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo_0.0.1_arm`
-1. ARMv8x64: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo_0.0.1_aarch`
+1. ARMv8x64: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo_0.0.1_arm64`
 
 ## RESTful API
 
