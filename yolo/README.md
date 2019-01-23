@@ -19,12 +19,15 @@ This service provisions an HTTP-only interface on port 80 and may be referred to
 ```
 % curl -s http://yolo:80/
 {
- "devid":"8d9e4867086b",
- "date":1548209378,
- "time":2.368214,
- "person":4,
- "image":"<BASE64_JPEG>",
- "mock":"true"
+  "devid": "069c30609fd8",
+  "date": 1548280505,
+  "time": 4.309698,
+  "person": 4,
+  "width": 2592,
+  "height": 1944,
+  "scale": "320x240",
+  "mock": "true",
+  "image": "<BASE64_JPEG>"
 }
 ```
 
