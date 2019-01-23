@@ -13,7 +13,7 @@ VERSION=$(shell jq -r '.version' service.json)
 SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
 
 ## TEST PORT
-PORT=8585
+PORT=8586
 
 ## KEYS
 PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
