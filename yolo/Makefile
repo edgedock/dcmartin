@@ -69,6 +69,7 @@ test: build
 	hzn dev service start
 
 clean:
+	rm -f check.json check.jpg service-${ARCH}.json
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
