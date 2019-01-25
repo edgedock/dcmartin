@@ -39,7 +39,7 @@
       "name": "MSGHUB_APIKEY",
       "label": "message hub API key",
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": null 
     },
     {
       "name": "MSGHUB_BROKER",
@@ -79,5 +79,8 @@
   },
   "tmpfs": {
     "size": 32
+  },
+  "ports": {
+    "8587/tcp": 80
   }
 }

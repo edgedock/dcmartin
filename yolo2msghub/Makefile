@@ -37,8 +37,8 @@ build: build.json service.json
 
 run: stop 
 	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
-	# docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
-	docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
+	# docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
+	docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
