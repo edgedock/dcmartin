@@ -36,7 +36,7 @@ build:	service.json build.json
 	docker build --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run:	stop 
-	-docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 stop:
 	-docker stop $(DOCKER_TAG)

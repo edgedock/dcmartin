@@ -64,8 +64,7 @@ if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_D
 
 ## do MQTT
 if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  set post_pictures = `jq -r '.post_pictures' "$MOTION_JSON_FILE"`
-  if ( $post_pictures == "on" ) then
+  if ( $MOTION_POST_PICTURES == "on" ) then
     # POST IMAGE 
     set MQTT_TOPIC = "$MOTION_DEVICE_DB/$MOTION_DEVICE_NAME/$CN/image"
     mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "$MOTION_MQTT_PORT" -t "$MQTT_TOPIC" -f "$IF"
