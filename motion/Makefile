@@ -1,67 +1,76 @@
-###
-### MAKEFILE FOR HORIZON SERVICE
-###
+## ARCHITECTURE
+ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
+BUILD_ARCH=$(shell arch)
 
-##
-## architecture
-##
-SYSTEM_ARCH := $(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
-export ARCH ?= $(SYSTEM_ARCH)
+## BUILD
+BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
-##
-## build
-##
-BUILD_FROM = $(shell jq -r ".build_from.${ARCH}" build.json)
+## SERVICE
+ORG=$(shell jq -r '.org' service.json)
+URL=$(shell jq -r '.url' service.json)
+LABEL=$(shell jq -r '.label' service.json)
+VERSION=$(shell jq -r '.version' service.json)
+SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
 
-##
-## configuration
-##
-SERVICE_ORG := $(shell jq -r '.org' config.json)
-SERVICE_NAME := $(shell jq -r '.slug' config.json)
-SERVICE_VERSION := $(shell jq -r '.version' config.json)
-SERVICE_DOMAIN := $(shell jq -r '.url' config.json)
-SERVICE_PORT := $(shell jq -r '.ports|to_entries|first|.value' config.json)
+## TEST PORT
+PORT=8587
 
+## KEYS
+PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
+PUBLIC_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
+APIKEY_JSON=../apiKey.json
 
-DOCKER_HUB_ID ?= dcmartin
-DOCKER_NAME ?= $(ARCH)_$(SERVICE_NAME)
-DOCKER_TAG ?= $(DOCKER_HUB_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
+## IBM CLOUD PLATFORM API KEY
+APIKEY=$(shell jq -r '.apiKey' ${APIKEY_JSON})
+
+## docker
+DOCKER_HUB_ID=dcmartin
+DOCKER_NAME=$(ARCH)_$(LABEL)
+DOCKER_TAG=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(VERSION)
 
 default: all
 
+all: build run check
 
-all:	build run check
+build: build.json service.json
+	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
-build:	service.json build.json
-	docker build --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
-
-run:	stop 
-	-docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+run: stop 
+	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
+	docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
 
 stop:
-	-docker stop $(DOCKER_TAG)
-	-docker rm -f $(DOCKER_NAME)
+	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
-check:
-	curl -sSL http://localhost:$(SERVICE_PORT)
+check:	
+	sleep 2
+	curl -sSL "http://localhost:$(PORT)" -o check.json
+	jq -c '.image="[redacted]"' check.json
+	jq -r '.image' check.json | base64 --decode > check.jpg
 
-docker-push: build
-	: $${DOCKER_TAG:?}
-	docker push $(DOCKER_TAG)
+push: build
+	docker push ${DOCKER_TAG}
 
-service.json: service.tmpl config.json build.json
-	# : $${SERVICE_ORG:?} $${SERVICE_NAME:?} $${SERVICE_DOMAIN:?} $${DOCKER_HUB_ID:?} $${SERVICE_VERSION:?}
-	sed -e "s|%%DOCKER_HUB_ID%%|$(DOCKER_HUB_ID)|g" -e "s|%%SERVICE_ORG%%|$(SERVICE_ORG)|g" -e "s|%%SERVICE_NAME%%|$(SERVICE_NAME)|g" -e "s|%%SERVICE_DOMAIN%%|$(SERVICE_DOMAIN)|g" -e "s|%%SERVICE_VERSION%%|$(SERVICE_VERSION)|g" -e "s|%%ARCH%%|$(ARCH)|g" service.tmpl > service.json
-	# jq '.|.org="$(SERVICE_ORG)"|.label="$(SERVICE_NAME) for $(ARCH)"|.url="$(SERVICE_DOMAIN)/service-$(SERVICE_NAME)"|.version="$(SERVICE_VERSION)"|.arch="$(ARCH)"|.deployment.services.motion.image="$(DOCKER_HUB_ID)/$(ARCH)_$(SERVICE_NAME):$(SERVICE_VERSION)"' service.tmpl > service.json
+publish: build
+	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
+	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
 
-# Create/update the metadata in the exchange for this service
-publish-service: build service.json
-	: $${HZN_EXCHANGE_USER_AUTH:?} $${PRIVATE_KEY_FILE:?} $${PUBLIC_KEY_FILE:?}   # this verifies these env vars are set
-	# hzn exchange service publish -k $$PRIVATE_KEY_FILE -K $$PUBLIC_KEY_FILE -f horizon/service.definition.json
-	hzn exchange service publish -k $$PRIVATE_KEY_FILE -K $$PUBLIC_KEY_FILE -f service.json
+verify:
+	# should return 'true'
+	hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	# should return 'All signatures verified'
+	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
+
+test: build
+	export HZN_EXCHANGE_URL=$(hzn node list | jq -r '.configuration.exchange_api')
+	hzn dev service new test 
+	cp -f service-${ARCH}.json test/service.definition.json
+	cp -f userinput.json test/userinput.json
+	hzn dev service start
 
 clean:
+	rm -f check.json check.jpg service-${ARCH}.json
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
-.PHONY: default all build run check stop publish publish-service clean
+.PHONY: default all build run check stop push publish verify clean

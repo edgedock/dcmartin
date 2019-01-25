@@ -1,6 +1,6 @@
 {
   "org": "dcmartin@us.ibm.com",
-  "label": "motion for amd64",
+  "label": "motion",
   "description": "Provides motion-project.io as service",
   "documentation": "https://github.com/dcmartin/open-horizon/motion/README.md",
   "url": "com.github.dcmartin.open-horizon.motion",
