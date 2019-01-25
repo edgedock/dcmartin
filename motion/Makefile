@@ -30,7 +30,6 @@ DOCKER_TAG=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(VERSION)
 
 default: all
 
-<<<<<<< HEAD
 all: build run check
 
 build: build.json service.json
@@ -38,11 +37,8 @@ build: build.json service.json
 
 run: stop 
 	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
+	# docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 	docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
-=======
-run:	stop 
-	docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
->>>>>>> 51320096ff8014248d29dae2c2ca58e7cbaaee88
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
