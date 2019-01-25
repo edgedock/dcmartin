@@ -22,10 +22,12 @@ RUN \
     && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
     && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
     && apk add --no-cache \
+  	bash \
   	bc \
   	curl \
   	dateutils \
   	jq \
+	socat \
   	mosquitto-clients \
   	tcsh \
     \

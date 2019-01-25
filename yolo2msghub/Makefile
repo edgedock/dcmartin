@@ -46,8 +46,6 @@ stop:
 check:	
 	sleep 2
 	curl -sSL "http://localhost:$(PORT)" -o check.json
-	jq -c '.image="[redacted]"' check.json
-	jq -r '.image' check.json | base64 --decode > check.jpg
 
 push: build
 	docker push ${DOCKER_TAG}
