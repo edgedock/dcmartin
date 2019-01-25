@@ -1,0 +1,17 @@
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.com.dcmartin.open-horizon.motion",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "YOLO_PERIOD": 90,
+        "MSGHUB_APIKEY": "",
+        "MSGHUB_BROKER": "",
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    }
+  ]
+}

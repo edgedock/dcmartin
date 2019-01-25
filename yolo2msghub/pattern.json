@@ -1,0 +1,37 @@
+{
+  "label": "yolo2msghub",
+  "description": "yolo2msghub as a pattern",
+  "public": true,
+  "services": [
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "amd64",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm64",
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
+    }
+  ]
+}
