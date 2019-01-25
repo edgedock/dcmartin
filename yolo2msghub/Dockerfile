@@ -1,45 +1,23 @@
-ARG BUILD_FROM=alpine:3.8
+ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM
 
-# Environment variables
-ENV \
-    HOME="/root" \
-    LANG="C.UTF-8" \
-    PS1="$(whoami)@$(hostname):$(pwd)$ " \
-    TERM="xterm"
+ENV LANG C.UTF-8
 
-ARG BUILD_ARCH=amd64
+RUN apt-get update 
 
-# Set shell
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+RUN apt-get install -q -y --no-install-recommends \
+  curl \
+  socat \
+  kafkacat \
+  jq 
 
-# Install base system
-RUN \
-    set -o pipefail \
-    \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
-    && apk add --no-cache \
-  	bash \
-  	bc \
-  	curl \
-  	dateutils \
-  	jq \
-	socat \
-  	mosquitto-clients \
-  	tcsh \
-    \
-    && rm -f -r \
-        /tmp/*
-
-# Copy root file-system
+# Copy usr
 COPY rootfs /
 
 CMD [ "/usr/bin/run.sh" ]
 
-# Build arugments
+# Build arguments
 ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
@@ -48,8 +26,8 @@ ARG BUILD_VERSION
 # Labels
 LABEL \
     com.github.dcmartin.open-horizon.name="YOLO2MSGHUB" \
-    com.github.dcmartin.open-horizon.description="Send YOLO to Kafka" \ 
+    com.github.dcmartin.open-horizon.description="Send YOLO to IBM MessageHub" \ 
     com.github.dcmartin.open-horizon.arch="${BUILD_ARCH}" \
     com.github.dcmartin.open-horizon.type="pattern" \
-    com.github.dcmartin.open-horizon.version=${BUILD_VERSION} \
+    com.github.dcmartin.open-horizon.version="${BUILD_VERSION}" \
     maintainer="David C Martin <github@dcmartin.com>"
