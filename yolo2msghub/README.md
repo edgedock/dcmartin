@@ -1,6 +1,6 @@
 # YOLO2MSGHUB service & pattern
 
-Sens YOLO as-a-service ReSTful API to MSGHUB
+Sends YOLO as-a-service ReSTful API to MSGHUB
 
 This service pattern takes no input values; periodically calls the `yolo` service and sends the result to IBM MessageHub
 
