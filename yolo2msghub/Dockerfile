@@ -21,39 +21,19 @@ RUN \
     && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
     && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
     && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
+    && apk add --no-cache \
+  	bc \
+  	curl \
+  	dateutils \
+  	jq \
+  	mosquitto-clients \
+  	tcsh \
     \
     && rm -f -r \
         /tmp/*
 
-RUN apk add --no-cache \
-  apache2 \
-  apache2-utils \
-  bc \
-  coreutils \
-  curl \
-  dateutils \
-  findutils \
-  ffmpeg@edge \
-  motion@edge \
-  gawk \
-  imagemagick \
-  inotify-tools \
-  jq \
-  mosquitto-clients \
-  python3 \
-  tcsh \
-  git
-
 # Copy root file-system
 COPY rootfs /
-
-# environment
-ENV CONFIG_PATH /data/options.json
-ENV MOTION_CONF /etc/motion/motion.conf
-
-# Ports for motion (control and stream)
-EXPOSE 8080
-EXPOSE 8081
 
 CMD [ "/usr/bin/run.sh" ]
 
@@ -65,9 +45,9 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    io.hass.name="MOTION" \
-    io.hass.description="Motion package as addon w/ support for image classification" \ 
-    io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
-    io.hass.version=${BUILD_VERSION} \
+    com.github.dcmartin.open-horizon.name="YOLO2MSGHUB" \
+    com.github.dcmartin.open-horizon.description="Send YOLO to Kafka" \ 
+    com.github.dcmartin.open-horizon.arch="${BUILD_ARCH}" \
+    com.github.dcmartin.open-horizon.type="pattern" \
+    com.github.dcmartin.open-horizon.version=${BUILD_VERSION} \
     maintainer="David C Martin <github@dcmartin.com>"
