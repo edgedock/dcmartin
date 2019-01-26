@@ -47,6 +47,7 @@ stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check:	
+	rm -f check.json
 	sleep 2
 	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.hostname!=null' check.json
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TMP
+if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+
 if [ -z "${MSGHUB_BROKER}" ]; then echo "*** ERROR $0 $$ -- environment variable undefined: MSGHUB_BROKER; exiting" &> /dev/stderr; exit 1; fi
 if [ -z "${MSGHUB_APIKEY}" ]; then echo "*** ERROR $0 $$ -- environment variable undefined: MSGHUB_APIKEY; exiting" &> /dev/stderr; exit 1; fi
 
@@ -13,6 +16,7 @@ while true; do
   URL=${GPS_URL} && OUT=$(curl -fqsSL "${URL}"); if [ ! -z "${OUT}" ]; then GPS=$(echo "${OUT}" | jq); else GPS='null'; fi
 
   OUTPUT='{"date":'$(date +%s)',"yolo":'${YOLO}',"cpu":'${CPU}',"gps":'${GPS}'}'
+  echo "${OUTPUT}" > ${TMP}/output.json
   if [ $(command -v kafkacat) ]; then
     echo "${OUTPUT}" \
       | kafkacat \
