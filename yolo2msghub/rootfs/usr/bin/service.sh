@@ -16,7 +16,7 @@ if [ ! -z $(command -v "${HZN_PATTERN:-}.sh" ) ]; then
     BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
   fi
   if [ -s ${TMP}/output.json ]; then OUT=$(jq '.' ${TMP}/output.json); else OUT='null'; fi
-  BODY=$(echo "${BODY}" | jq '.output='"${OUT}")
+  BODY=$(echo "${BODY}" | jq '.'${HZN_PATTERN}'='"${OUT}")
 fi
 HTTP="HTTP/1.1 200 OK\r\n${HEADERS}\r\n\r\n${BODY}\r\n"
 
