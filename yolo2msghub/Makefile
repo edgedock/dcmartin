@@ -15,9 +15,6 @@ LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)
 SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
 
-## TEST PORT
-PORT=8587
-
 ## KEYS
 PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
 PUBLIC_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
@@ -30,6 +27,7 @@ APIKEY=$(shell jq -r '.apiKey' ${APIKEY_JSON})
 DOCKER_HUB_ID=dcmartin
 DOCKER_NAME=$(ARCH)_$(LABEL)
 DOCKER_TAG=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(VERSION)
+DOCKER_PORT=$(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
 
 default: all
 
@@ -39,22 +37,20 @@ build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: stop 
-	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
-	# docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
 	./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
-check:	
+check: service.json
 	rm -f check.json
-	sleep 2
-	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.' check.json
+	sleep 3
+	curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
 push: build
 	docker push ${DOCKER_TAG}
 
-publish: build
+publish: build test
 	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:${APIKEY}
 
 verify: publish
@@ -63,15 +59,17 @@ verify: publish
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
-service-${ARCH}.json: service.json
-
-test: build
-	rm -fr test
+test: service.json userinput.json
+	rm -fr test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
 	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
+
+depend:
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+
+start: depend
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
@@ -79,4 +77,4 @@ clean:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
-.PHONY: default all build run check stop push publish verify clean
+.PHONY: default all build run check stop push publish verify clean depend start
