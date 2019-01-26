@@ -36,7 +36,7 @@ if [ $(jq '.tmpfs!=null' "${SERVICE}") == 'true' ]; then
   TS=$(jq -r '.tmpfs.size' ${SERVICE})
   if [ -z "${TS}" ] || [ "${TS}" == 'null' ]; then 
     echo "+++ WARN $0 $$ -- temporary filesystem; no size specified; defaulting to 8 Mbytes"
-    TS=8
+    TS=4096000
   fi
   # destination
   TD=$(jq -r '.tmpfs.destination' ${SERVICE})
