@@ -2,6 +2,9 @@
 ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
 BUILD_ARCH=$(shell arch)
 
+## HZN
+HEU=$(shell hzn node list | jq -r '.configuration.exchange_api') 
+
 ## BUILD
 BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
@@ -50,8 +53,7 @@ check:
 push: build
 	docker push ${DOCKER_TAG}
 
-publish: build
-	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
+publish: build service-${ARCH}.json
 	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
 
 verify:
@@ -60,12 +62,17 @@ verify:
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
-test: build
-	export HZN_EXCHANGE_URL=$(hzn node list | jq -r '.configuration.exchange_api')
-	hzn dev service new test 
+service-${ARCH}.json: service.json
+	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
+
+test: build service-${ARCH}.json
+	rm -fr test/
+	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service new -o "${ORG}" --directory=test/
 	cp -f service-${ARCH}.json test/service.definition.json
 	cp -f userinput.json test/userinput.json
-	hzn dev service start
+	export HZN_EXCHANGE_URL="${HEU}" && hzn dev dependency fetch --directory=test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
+	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service verify --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service start --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json
