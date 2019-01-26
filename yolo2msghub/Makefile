@@ -70,9 +70,9 @@ test: build service-${ARCH}.json
 	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service new -o "${ORG}" --directory=test/
 	cp -f service-${ARCH}.json test/service.definition.json
 	cp -f userinput.json test/userinput.json
-	export HZN_EXCHANGE_URL="${HEU}" && hzn dev dependency fetch --directory=test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
-	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service verify --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
-	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service start --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch --directory=test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json
