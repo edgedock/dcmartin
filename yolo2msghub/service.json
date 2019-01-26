@@ -5,7 +5,7 @@
   "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo2msghub",
   "version": "0.0.1",
-  "arch": "amd64",
+  "arch": "{arch}",
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
@@ -13,19 +13,19 @@
       "url": "github.com.dcmartin.open-horizon.yolo",
       "org": "dcmartin@us.ibm.com",
       "version": "0.0.1",
-      "arch": "amd64"
+      "arch": "{arch}"
     },
     {
       "url": "github.com.open-horizon.examples.cpu",
       "org": "IBM",
       "version": "1.2.2",
-      "arch": "amd64"
+      "arch": "{arch}"
     },
     {
       "url": "github.com.open-horizon.examples.gps",
       "org": "IBM",
       "version": "2.0.5",
-      "arch": "amd64"
+      "arch": "{arch}"
     }
   ],
   "userInput": [
@@ -72,7 +72,7 @@
         "environment": [
           "PATTERN=yolo2msghub"
         ],
-        "image": "dcmartin/amd64_yolo2msghub:0.0.1",
+        "image": "dcmartin/{arch}_yolo2msghub:0.0.1",
         "privileged": false
       }
     }

@@ -49,31 +49,30 @@ stop:
 check:	
 	rm -f check.json
 	sleep 2
-	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.hostname!=null' check.json
+	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.' check.json
 
 push: build
 	docker push ${DOCKER_TAG}
 
-publish: build service-${ARCH}.json
-	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
+publish: build
+	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:${APIKEY}
 
-verify:
+verify: publish
 	# should return 'true'
 	hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
 service-${ARCH}.json: service.json
-	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
 
-test: build service-${ARCH}.json
-	rm -fr test/
-	export HZN_EXCHANGE_URL="${HEU}" && hzn dev service new -o "${ORG}" --directory=test/
-	cp -f service-${ARCH}.json test/service.definition.json
+test: build
+	rm -fr test
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
+	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch --directory=test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start --directory=test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json

@@ -2,6 +2,9 @@
 ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
 BUILD_ARCH=$(shell arch)
 
+## HZN
+HEU=$(shell hzn node list | jq -r '.configuration.exchange_api') 
+
 ## BUILD
 BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
@@ -37,36 +40,39 @@ build: build.json service.json
 
 run: stop 
 	# docker run -d --name $(DOCKER_NAME) --publish=$(PORT):80 --volume `pwd`':/data' $(DOCKER_TAG)
-	docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
+	# docker run -d --name $(DOCKER_NAME) --privileged --publish=$(PORT):80 $(DOCKER_TAG)
+	./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 stop:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check:	
+	rm -f check.json
 	sleep 2
-	curl -sSL "http://localhost:$(PORT)" -o check.json
-	jq -c '.image="[redacted]"' check.json
-	jq -r '.image' check.json | base64 --decode > check.jpg
+	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.' check.json
 
 push: build
 	docker push ${DOCKER_TAG}
 
 publish: build
-	jq '.|.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json > service-${ARCH}.json
-	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f service-${ARCH}.json -o ${ORG} -u iamapikey:${APIKEY}
+	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:${APIKEY}
 
-verify:
+verify: publish
 	# should return 'true'
 	hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
+service-${ARCH}.json: service.json
+
 test: build
-	export HZN_EXCHANGE_URL=$(hzn node list | jq -r '.configuration.exchange_api')
-	hzn dev service new test 
-	cp -f service-${ARCH}.json test/service.definition.json
+	rm -fr test
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
+	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
-	hzn dev service start
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json

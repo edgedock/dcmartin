@@ -5,33 +5,39 @@
   "documentation": "https://github.com/dcmartin/open-horizon/yolo/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo",
   "version": "0.0.1",
-  "arch": "amd64",
+  "arch": "{arch}",
   "public": true,
   "sharable": "multiple",
   "requiredServices": [],
   "userInput": [
-        {
-            "name": "LOG_LEVEL",
-            "label": "specify logging level",
-            "type": "string",
-            "defaultValue": "info"
-        },
-        {
-            "name": "DEBUG",
-            "label": "debug on/off",
-            "type": "boolean",
-            "defaultValue": "false"
-        }
+    {
+      "name": "LOG_LEVEL",
+      "label": "specify logging level",
+      "type": "string",
+      "defaultValue": "info"
+    },
+    {
+      "name": "DEBUG",
+      "label": "debug on/off",
+      "type": "boolean",
+      "defaultValue": "false"
+    }
   ],
   "deployment": {
     "services": {
       "yolo": {
         "environment": [
-           "SERVICE=yolo"
+          "SERVICE=yolo"
         ],
-        "image": "dcmartin/amd64_yolo:0.0.1",
+        "image": "dcmartin/{arch}_yolo:0.0.1",
         "privileged": true
       }
     }
+  },
+  "tmpfs": {
+    "size": 32
+  },
+  "ports": {
+    "8586/tcp": 80
   }
 }
