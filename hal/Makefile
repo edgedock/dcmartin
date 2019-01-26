@@ -50,7 +50,7 @@ check: service.json
 push: build
 	docker push ${DOCKER_TAG}
 
-publish: build
+publish: build test
 	hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:${APIKEY}
 
 verify: publish
@@ -59,10 +59,8 @@ verify: publish
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
-service-${ARCH}.json: service.json
-
 test: build
-	rm -fr test
+	rm -fr test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
 	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
