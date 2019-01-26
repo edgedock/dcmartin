@@ -48,7 +48,7 @@ stop:
 
 check:	
 	sleep 2
-	curl -sSL "http://localhost:$(PORT)" -o check.json
+	curl -sSL "http://localhost:$(PORT)" -o check.json && jq '.hostname!=null' check.json
 
 push: build
 	docker push ${DOCKER_TAG}
