@@ -23,7 +23,7 @@ LABEL=$(jq -r '.label' "${SERVICE}")
 
 ## input
 if [ -z "${USERINPUT:-}" ]; then USERINPUT="userinput.json"; fi
-if [ ! -s "${USERINPUT}" ]; then echo "+++ WARN $0 $$ -- cannot locate ${SERVICE}; continuing"; fi
+if [ ! -s "${USERINPUT}" ]; then echo "+++ WARN $0 $$ -- cannot locate ${USERINPUT}; continuing"; fi
 
 ## privileged
 if [ $(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").privileged==true' "${SERVICE}") ]; then
