@@ -1,6 +1,6 @@
-# `yolo` - Hardware Abstration Layer service
+# `yolo` - You Only Look Once service
 
-Provides hardware information as micro-service; updates periodically (default `60` seconds or 1 minute).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+Provides entity count information as micro-service; updates periodically (default `0` seconds).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Architecture
 
