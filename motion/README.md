@@ -1,6 +1,6 @@
-# `motion` - Wide-Area-Network monitoring service
+# `motion` - Motion detection using motion-project.io
 
-Monitors Internet access information as micro-service; updates periodically (default `1800` seconds or 15 minutes).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+Monitors attached camera and provides motion detection information as micro-service.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Architecture
 
@@ -43,7 +43,13 @@ This service may be published to an Open Horizon exchange for an organization.  
 
 ## Node registration
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
-+ `MOTION_PERIOD` - seconds between updates; defaults to `1800` seconds (15 minutes)
++ `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `127.0.0.1`
++ `MOTION_MQTT_PORT` - port #; defaults to `1883`
++ `MOTION_MQTT_USERNAME` - MQTT username; no default; required; ignored if no security
++ `MOTION_MQTT_PASSWORD` - MQTT password; no default; required; ignored if no security
++ `MOTION_POST_PICTURES` - post pictures; default `off`; options include `on`, `best`, and `center`
++ `MOTION_LOG_LEVEL` - level of logging for motion; default `2`
++ `MOTION_LOG_TYPE` - type of logging for motion; default `all`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 ### Example registration
 ```
