@@ -27,7 +27,7 @@ There are sample services available:
 There are sample patterns available:
 
 1. `yolo2msghub` - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
-1. `motion2mqtt` - Packages `motion` service as a _pattern_
+1. `motion-detect-camera` - Packages `motion`,`cpu`,`hal`,`gps` services as a _pattern_ (TBD)
 
 # Further Information 
 
