@@ -1,4 +1,4 @@
-# `wan` -- Wide-Area-Network monitoring service
+# `wan` - Wide-Area-Network monitoring service
 
 Monitors Internet access information as [Open Horizon][open-horizon] service; updates periodically (default `1800` seconds or 15 minutes).
 
@@ -18,17 +18,17 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 
 Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
 
-+ `org` -- `dcmartin@us.ibm.com/wan`
-+ `url` -- `com.github.dcmartin.open-horizon.wan`
-+ `version` -- `0.0.1`
++ `org` - `dcmartin@us.ibm.com/wan`
++ `url` - `com.github.dcmartin.open-horizon.wan`
++ `version` - `0.0.1`
 
 ## Architecture
 
 This service supports the following architectures:
 
-+ `arm` -- RaspberryPi (armhf)
-+ `amd64` -- AMD/Intel 64-bit (x86-64)
-+ `arm64` -- nVidia TX2 (aarch)
++ `arm` - RaspberryPi (armhf)
++ `amd64` - AMD/Intel 64-bit (x86-64)
++ `arm64` - nVidia TX2 (aarch)
 
 ### Copy
 
