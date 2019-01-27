@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.com.dcmartin.open-horizon.motion",
+      "url": "com.github.dcmartin.open-horizon.motion",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "MOTION_DEVICE_DB": "debug",

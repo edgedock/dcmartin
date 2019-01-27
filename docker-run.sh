@@ -70,7 +70,7 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
   for NAME in ${NAMES}; do
     DV=$(jq -r '.userInput[]|select(.name=="'$NAME'").defaultValue' ${SERVICE})
     if [ -s "${USERINPUT}" ]; then
-      VAL=$(jq -r '.services[]|select(.url=="'"${URL}"'").variables|to_entries[]|select(.key=="'"${NAME}"'").value' ${USERINPUT})
+      VAL=$(jq -r '.services[]|select(.url=="'${URL}'").variables|to_entries[]|select(.key=="'${NAME}'").value' ${USERINPUT})
       if [ -n "${VAL}" ] && [ "${VAL}" != 'null' ] && [ "${VAL}" != '' ]; then 
         DV=${VAL};
       elif [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then

@@ -33,7 +33,7 @@ default: all
 
 all: build run check
 
-build: Dockerfile build.json service.json
+build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: stop 
@@ -44,7 +44,6 @@ stop:
 
 check: service.json
 	rm -f check.json
-	sleep 2
 	curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
 push: build
@@ -59,13 +58,17 @@ verify: publish
 	# should return 'All signatures verified'
 	hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
 
-test: build
+test: service.json userinput.json
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
 	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
+
+depend:
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+
+start: depend
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
 
 clean:
@@ -73,4 +76,4 @@ clean:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
-.PHONY: default all build run check stop push publish verify clean
+.PHONY: default all build run check stop push publish verify clean depend start

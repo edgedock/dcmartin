@@ -29,42 +29,12 @@
     }
   ],
   "userInput": [
-    {
-      "name": "YOLO_PERIOD",
-      "label": "update interval",
-      "type": "int",
-      "defaultValue": "90"
-    },
-    {
-      "name": "MSGHUB_APIKEY",
-      "label": "message hub API key",
-      "type": "string",
-      "defaultValue": null 
-    },
-    {
-      "name": "MSGHUB_BROKER",
-      "label": "message hub broker list",
-      "type": "string",
-      "defaultValue": "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093"
-    },
-    {
-      "name": "YOLO_ENTITY",
-      "label": "entity to seek, default person",
-      "type": "string",
-      "defaultValue": "person"
-    },
-    {
-      "name": "LOG_LEVEL",
-      "label": "specify logging level",
-      "type": "string",
-      "defaultValue": "info"
-    },
-    {
-      "name": "DEBUG",
-      "label": "debug on/off",
-      "type": "boolean",
-      "defaultValue": "false"
-    }
+    { "name": "YOLO_PERIOD", "label": "update interval", "type": "int", "defaultValue": "0" },
+    { "name": "YOLO_ENTITY", "label": "entity to seek, default person", "type": "string", "defaultValue": "person" },
+    { "name": "MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },
+    { "name": "MSGHUB_BROKER", "label": "message hub broker list", "type": "string", "defaultValue": "kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093,kafka05-prod02.messagehub.services.us-south.bluemix.net:9093" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
   ],
   "deployment": {
     "services": {

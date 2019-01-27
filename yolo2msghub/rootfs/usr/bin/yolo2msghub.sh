@@ -14,7 +14,7 @@ while true; do
   for SERVICE in $SERVICES; do
     URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${SERVICE}'").url')
     if [ ! -z "${URL}" ]; then
-      OUT=$(curl -fqsSL "${URL}")
+      OUT=$(curl -fqsSL "${URL}" | jq '.'"${SERVICE}"'?')
     fi
     if [ -z "${OUT:-}" ]; then
       OUT='null'
