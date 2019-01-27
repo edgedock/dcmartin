@@ -12,6 +12,23 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]
 
+# Services
+
+There are sample services available:
+
+1. `cpu` -  CPU usage as a percentage
+1. `wan` -  Wide Area Network information
+1. `hal` -  Hardware Abstraction Layer information
+1. `yolo` -  Entity recognition and counting
+1. `motion` - Motion detection and image capture
+
+# Patterns
+
+There are sample patterns available:
+
+1. `yolo2msghub` - Sends `yolo` payloads to a Kafka broker
+1. `motion2mqtt` - Send `motion` payloads to a MQTT broker
+
 # Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
