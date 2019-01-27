@@ -20,14 +20,14 @@ There are sample services available:
 1. `wan` -  Wide Area Network information
 1. `hal` -  Hardware Abstraction Layer information
 1. `yolo` -  Entity recognition and counting
-1. `motion` - Motion detection and image capture
+1. `motion` - Motion detection, image capture, and publish to a MQTT broker
 
 # Patterns
 
 There are sample patterns available:
 
-1. `yolo2msghub` - Sends `yolo` payloads to a Kafka broker
-1. `motion2mqtt` - Send `motion` payloads to a MQTT broker
+1. `yolo2msghub` - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
+1. `motion2mqtt` - Packages `motion` service as a _pattern_
 
 # Further Information 
 
