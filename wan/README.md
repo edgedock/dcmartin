@@ -112,10 +112,10 @@ Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service
 ```
 % make verify
 # should return 'true'
-hzn exchange service list -o dcmartin@us.ibm.com -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A | jq '.|to_entries[]|select(.value=="'"dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.wan_0.0.1_amd64"'")!=null'
+hzn exchange service list -o {org} -u iamapikey:{apikey} | jq '.|to_entries[]|select(.value=="'"{org}/{url}_{version}_{arch}"'")!=null'
 true
 # should return 'All signatures verified'
-hzn exchange service verify --public-key-file ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem -o dcmartin@us.ibm.com -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A ""dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.wan_0.0.1_amd64""
+hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
 All signatures verified
 ```
 ## About Open Horizon
