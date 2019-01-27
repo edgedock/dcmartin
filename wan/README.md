@@ -30,19 +30,15 @@ This service supports the following architectures:
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
 
-### Copy
+## How To
 
-Copy repository, edit `service.json` for your organization; `build`, `test`, and `publish` targets for `make`; see below:
+Copy this [repository][repository], change to the `wan` directory, edit the [`service.json`][service-json]; then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
 % git clone http://github.com/dcmartin/open-horizon .
-```
-
-### Build
-```
-% cd ~/gitdir/open-horizon/wan
+% cd open-horizon/wan
 % make
 ...
 {
@@ -54,11 +50,9 @@ Copy repository, edit `service.json` for your organization; `build`, `test`, and
   "wan": null
 }
 ```
-The `wan` value will initially be `null` until the service completes its initial execution.  Subsequent tests should return a completed payload.
-
-### Test
+The `wan` value will initially be `null` until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
 ```
-% curl -sSL 'http://localhost:'8581
+% curl -sSL http://localhost:8581
 {
   "hostname": "4d1438b77650-172017000007",
   "org": "dcmartin@us.ibm.com",
@@ -105,15 +99,20 @@ The `wan` value will initially be `null` until the service completes its initial
   }
 }
 ```
-
-### Publish
+## Publishing
+The **make** targets for `publish` and `verify` make the service and its container available for node registration.
 ```
 % make publish
-```
-
-### Verify
-```
-% make verify
+...
+Using 'dcmartin/amd64_wan@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_wan:0.0.1'
+Creating com.github.dcmartin.open-horizon.wan_0.0.1_amd64 in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
+# should return 'true'
+hzn exchange service list -o dcmartin@us.ibm.com -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A | jq '.|to_entries[]|select(.value=="'"dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.wan_0.0.1_amd64"'")!=null'
+true
+# should return 'All signatures verified'
+hzn exchange service verify --public-key-file ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem -o dcmartin@us.ibm.com -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A ""dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.wan_0.0.1_amd64""
+All signatures verified
 ```
 
 # About Open Horizon
@@ -150,6 +149,9 @@ based on the following:
 
 [userinput]: https://github.com/dcmartin/open-horizon/blob/master/wan/userinput.json
 [service-json]: https://github.com/dcmartin/open-horizon/blob/master/wan/service.json
+[build-json]: https://github.com/dcmartin/open-horizon/blob/master/wan/build.json
+[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/wan/Dockerfile
+
 
 [dcmartin]: https://github.com/dcmartin
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
