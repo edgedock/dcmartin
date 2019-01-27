@@ -6,6 +6,7 @@
       "url": "com.github.dcmartin.open-horizon.motion",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
+        "MOTION_TIMEZONE": "America/Los_Angeles",
         "MOTION_DEVICE_DB": "debug",
         "MOTION_DEVICE_NAME": "test",
         "MOTION_MQTT_HOST": "192.168.1.40",

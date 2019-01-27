@@ -13,6 +13,8 @@ else
   echo "+++ WARN $0 $$ -- cannot locate time zone information: ${ZONEINFO}" &> /dev/stderr
 fi
 
+echo '{"timezone": "'$MOTION_TIMEZONE'"}' > ${TMP}/${HZN_PATTERN}.json
+
 mkdir -p ${TMP}/motion
 ln -s ${TMP}/motion /var/lib/motion 
 

@@ -38,7 +38,8 @@ RUN apk add --no-cache \
   mosquitto-clients \
   motion@edge \
   socat \
-  tcsh
+  tcsh \
+  tzdata
 
 # Copy root file-system
 COPY rootfs /
