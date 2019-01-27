@@ -72,13 +72,13 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
     if [ -s "${USERINPUT}" ]; then
       VAL=$(jq -r '.services[]|select(.url=="'"${URL}"'").variables|to_entries[]|select(.key=="'"${NAME}"'").value' ${USERINPUT})
       if [ -n "${VAL}" ] && [ "${VAL}" != 'null' ] && [ "${VAL}" != '' ]; then 
-        DV="${VAL}";
+        DV=${VAL};
       elif [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
         echo "*** ERROR $0 $$ -- value NOT defined for required: ${NAME}; edit ${USERINPUT}; exiting"
         exit 1
       fi
     fi
-    OPTIONS="${OPTIONS:-}"' -e '"${NAME}"'="'"${DV}"'"'
+    OPTIONS="${OPTIONS:-}"' -e '"${NAME}"'='"${DV}"
   done
 else
   echo "+++ WARN $0 $$ -- no inputs"
