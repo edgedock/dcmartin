@@ -2,9 +2,23 @@
 
 Monitors Internet access information as [Open Horizon][open-horizon] service; updates periodically (default `1800` seconds or 15 minutes).
 
-## REGISTRATION
+## Open Horizon
 
-Nodes should _register_ pattern `dcmartin@us.ibm.com/wan` with `url` of `com.github.dcmartin.open-horizon.wan`, version `0.0.1` for their architecture.
+This service provides a LINUX container for the `wan` microservce.  This container may be run locally using Docker as well as published to an [_Open Horizon_][open-horizon] exchange and any Docker registry.
+
+### Node registration
+
+Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].
+```
+% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
+```
+### Service publishing
+
+Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
+
++ `org` -- `dcmartin@us.ibm.com/wan`
++ `url` -- `com.github.dcmartin.open-horizon.wan`
++ `version` -- `0.0.1`
 
 ## Architecture
 
@@ -19,15 +33,15 @@ This service supports the following architectures:
 Copy repository, edit `service.json` for your organization; `build`, `test`, and `publish` targets for `make`; see below:
 
 ```
-**%** mkdir ~/gitdir
-**%** cd ~/gitdir
-**%** git clone http://github.com/dcmartin/open-horizon .
+% mkdir ~/gitdir
+% cd ~/gitdir
+% git clone http://github.com/dcmartin/open-horizon .
 ```
 
 ### Build
 ```
-**%** cd ~/gitdir/open-horizon/wan
-**%** make
+% cd ~/gitdir/open-horizon/wan
+% make
 ...
 {
   "hostname": "4d1438b77650-172017000007",
@@ -42,7 +56,7 @@ The `wan` value will initially be `null` until the service completes its initial
 
 ### Test
 ```
-**%** curl -sSL 'http://localhost:'8581
+% curl -sSL 'http://localhost:'8581
 {
   "hostname": "4d1438b77650-172017000007",
   "org": "dcmartin@us.ibm.com",
@@ -92,15 +106,15 @@ The `wan` value will initially be `null` until the service completes its initial
 
 ### Publish
 ```
-**%** make publish
+% make publish
 ```
 
 ### Verify
 ```
-**%** make verify
+% make verify
 ```
 
-# Open Horizon
+# About Open Horizon
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
 
@@ -131,6 +145,9 @@ based on the following:
 ## Authors & contributors
 
 [David C Martin][dcmartin] (github@dcmartin.com)
+
+[userinput]: https://github.com/dcmartin/open-horizon/blob/master/wan/userinput.json
+[service-json]: https://github.com/dcmartin/open-horizon/blob/master/wan/service.json
 
 [dcmartin]: https://github.com/dcmartin
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
