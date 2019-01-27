@@ -6,6 +6,8 @@ Monitors Internet access information as [Open Horizon][open-horizon] service; up
 
 This service provides a LINUX container for the `wan` microservce.  This container may be run locally using Docker as well as published to an [_Open Horizon_][open-horizon] exchange and any Docker registry.
 
+## Use
+
 ### Node registration
 
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].
@@ -28,7 +30,7 @@ This service supports the following architectures:
 + `amd64` -- AMD/Intel 64-bit (x86-64)
 + `arm64` -- nVidia TX2 (aarch)
 
-## Use
+### Copy
 
 Copy repository, edit `service.json` for your organization; `build`, `test`, and `publish` targets for `make`; see below:
 
