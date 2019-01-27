@@ -3,21 +3,29 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-if [ -z "${MSGHUB_BROKER}" ]; then echo "*** ERROR $0 $$ -- environment variable undefined: MSGHUB_BROKER; exiting" &> /dev/stderr; exit 1; fi
-if [ -z "${MSGHUB_APIKEY}" ]; then echo "*** ERROR $0 $$ -- environment variable undefined: MSGHUB_APIKEY; exiting" &> /dev/stderr; exit 1; fi
+JSON='[{"name": "yolo", "url": "http://yolo:80/v1/person" },{"name":"cpu","url":"http://cpu:8347/v1/cpu"},{"name":"gps","url":"http://gps:31779/v1/gps/location"}]'
 
-YOLO_URL="http://yolo:80/v1/person"
-CPU_URL="http://cpu:8347/v1/cpu"
-GPS_URL="http://gps:31779/v1/gps/location"
+SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
 
 while true; do
-  URL=${YOLO_URL} && OUT=$(curl -fqsSL "${URL}"); if [ ! -z "${OUT}" ]; then YOLO=$(echo "${OUT}" | jq); else YOLO='null'; fi
-  URL=${CPU_URL} && OUT=$(curl -fqsSL "${URL}"); if [ ! -z "${OUT}" ]; then CPU=$(echo "${OUT}" | jq); else CPU='null'; fi
-  URL=${GPS_URL} && OUT=$(curl -fqsSL "${URL}"); if [ ! -z "${OUT}" ]; then GPS=$(echo "${OUT}" | jq); else GPS='null'; fi
 
-  OUTPUT='{"date":'$(date +%s)',"yolo":'${YOLO}',"cpu":'${CPU}',"gps":'${GPS}'}'
-  echo "${OUTPUT}" > ${TMP}/output.json
-  if [ $(command -v kafkacat) ]; then
+  # make output
+  OUTPUT='{"date":'$(date +%s)
+  for SERVICE in $SERVICES; do
+    URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${SERVICE}'").url')
+    if [ ! -z "${URL}" ]; then
+      OUT=$(curl -fqsSL "${URL}")
+    fi
+    if [ -z "${OUT:-}" ]; then
+      OUT='null'
+    fi
+    OUTPUT="${OUTPUT:-}"',"'${SERVICE}'":'"${OUT}"
+  done
+  OUTPUT="${OUTPUT}"'}'
+  echo "${OUTPUT}" > "${TMP}/${HZN_PATTERN}.json"
+
+  # send output
+  if [ $(command -v kafkacat) ] && [ ! -z "${MSGHUB_BROKER}" ] && [ ! -z "${MSGHUB_APIKEY}" ]; then
     echo "${OUTPUT}" \
       | kafkacat \
           -P \
@@ -27,9 +35,13 @@ while true; do
           -X sasl.mechanisms=PLAIN \
           -X sasl.username=iamapikey \
           -X sasl.password="${MSGHUB_APIKEY}" \
-          -t "yolo/${HZN_DEVICE_ID}"
+          -t "${HZN_PATTERN}/${HZN_DEVICE_ID}"
   else
-    echo "${OUTPUT}" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- kafka invalid; output = ${OUTPUT}" &> /dev/stderr
   fi
+
+  # wait until 
+  sleep 60
+
 done
 

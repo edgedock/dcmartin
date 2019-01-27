@@ -40,7 +40,7 @@ while true; do
   PERSONS=$(egrep '^person' "${OUT}" | wc -l)
   # capture annotated image as BASE64 encoded string
   IMAGE=$(base64 -w 0 -i predictions.jpg)
-  echo '{"devid":"'${HZN_NODE_ID}'","date":'$(date +%s)',"time":'${TIME}',"person":'${PERSONS}',"width":'${WIDTH}',"height":'${HEIGHT}',"scale":"'${SCALE}'","mock":"'${MOCK}'","image":"'${IMAGE}'"}' > ${TMP}/output.json
+  echo '{"date":'$(date +%s)',"time":'${TIME}',"person":'${PERSONS}',"width":'${WIDTH}',"height":'${HEIGHT}',"scale":"'${SCALE}'","mock":"'${MOCK}'","image":"'${IMAGE}'"}' > ${TMP}/${HZN_PATTERN}.json
   rm -f "${JPG}" "${OUT}" predictions.jpg
 done
 
