@@ -38,7 +38,6 @@ RUN apk add --no-cache \
   mosquitto-clients \
   motion@edge \
   socat \
-  python3 \
   tcsh
 
 # Copy root file-system
