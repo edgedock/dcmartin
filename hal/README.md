@@ -1,6 +1,6 @@
-# `hal` - Wide-Area-Network monitoring service
+# `hal` - Hardware Abstration Layer service
 
-Monitors Internet access information as micro-service; updates periodically (default `1800` seconds or 15 minutes).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+Provides hardware information as micro-service; updates periodically (default `60` seconds or 1 minute).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Architecture
 
