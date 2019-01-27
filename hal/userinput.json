@@ -6,6 +6,7 @@
       "url": "com.github.com.dcmartin.open-horizon.hal",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
+        "HAL_PERIOD": 60,
         "LOG_LEVEL": "info",
         "DEBUG": true
       }
