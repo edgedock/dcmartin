@@ -1,4 +1,4 @@
-# Wide-Area-Network (WAN) monitoring service
+# Wide-Area-Network (`wan`) monitoring service
 
 Monitors Internet access information as [Open Horizon][open-horizon] service; updates periodically (default `1800` seconds or 15 minutes).
 
