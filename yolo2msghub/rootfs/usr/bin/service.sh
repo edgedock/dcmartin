@@ -1,5 +1,7 @@
 #!/bin/bash
 
+### UBUNTU
+
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
@@ -18,7 +20,7 @@ HOSTNAME="$(hostname)-${IPADDR}"
 BODY='{"hostname":"'${HOSTNAME}'","org":"'${HZN_ORGANIZATION:-null}'","pattern":"'${HZN_PATTERN:-null}'","device":"'${HZN_DEVICE_ID:-null}'"}'
 
 if [ ! -z "${HZN_PATTERN:-}" ]; then
-  PID=$(ps | grep "${HZN_PATTERN:-}.sh" | grep -v grep | awk '{ print $1 }')
+  PID=$(ps | grep "${HZN_PATTERN:-}.sh" | grep -v grep | awk '{ print $1 }' | head -1)
   if [ -z "${PID}" ]; then PID=0; fi
   BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
 fi
