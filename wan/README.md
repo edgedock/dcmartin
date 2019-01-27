@@ -2,22 +2,6 @@
 
 Monitors Internet access information as micro-service; updates periodically (default `1800` seconds or 15 minutes).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
-## Use
-
-### Node registration
-
-Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].
-```
-% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
-```
-### Service publishing
-
-Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
-
-+ `org` - `dcmartin@us.ibm.com/wan`
-+ `url` - `com.github.dcmartin.open-horizon.wan`
-+ `version` - `0.0.1`
-
 ## Architecture
 
 This service supports the following architectures:
@@ -26,7 +10,7 @@ This service supports the following architectures:
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
 
-## How To
+## How To Use
 
 Copy this [repository][repository], change to the `wan` directory, edit the [`service.json`][service-json]; then use the **make** command; see below:
 
@@ -95,6 +79,24 @@ The `wan` value will initially be `null` until the service completes its initial
   }
 }
 ```
+
+# Open Horizon
+
+This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
+
+## Node registration
+Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].
+```
+% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
+```
+## Organization
+
+Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
+
++ `org` - `dcmartin@us.ibm.com/wan`
++ `url` - `com.github.dcmartin.open-horizon.wan`
++ `version` - `0.0.1`
+
 ## Publishing
 The **make** targets for `publish` and `verify` make the service and its container available for node registration.
 ```
@@ -110,8 +112,7 @@ true
 hzn exchange service verify --public-key-file ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem -o dcmartin@us.ibm.com -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A ""dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.wan_0.0.1_amd64""
 All signatures verified
 ```
-
-# About Open Horizon
+## About Open Horizon
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
 
