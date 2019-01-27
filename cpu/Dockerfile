@@ -45,8 +45,8 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.open-horizon.name="HAL" \
-    com.github.open-horizon.description="Provide hardware abstraction layer information as JSON; includes lspci,lsusb,lsblk,lscpu,lshw" \ 
+    com.github.open-horizon.name="CPU" \
+    com.github.open-horizon.description="Provide CPU percentage" \ 
     com.github.open-horizon.arch="${BUILD_ARCH}" \
     com.github.open-horizon.type="service" \
     com.github.open-horizon.version="${BUILD_VERSION}" \

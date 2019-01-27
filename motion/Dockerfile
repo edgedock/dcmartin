@@ -9,8 +9,6 @@ ENV \
     PS1="$(whoami)@$(hostname):$(pwd)$ " \
     TERM="xterm"
 
-ARG BUILD_ARCH=amd64
-
 # Set shell
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -26,34 +24,25 @@ RUN \
         /tmp/*
 
 RUN apk add --no-cache \
-  apache2 \
-  apache2-utils \
+  bash \
   bc \
   coreutils \
   curl \
   dateutils \
-  findutils \
   ffmpeg@edge \
-  motion@edge \
+  findutils \
   gawk \
+  git \
   imagemagick \
-  inotify-tools \
   jq \
   mosquitto-clients \
+  motion@edge \
+  socat \
   python3 \
-  tcsh \
-  git
+  tcsh
 
 # Copy root file-system
 COPY rootfs /
-
-# environment
-ENV CONFIG_PATH /data/options.json
-ENV MOTION_CONF /etc/motion/motion.conf
-
-# Ports for motion (control and stream)
-EXPOSE 8080
-EXPOSE 8081
 
 CMD [ "/usr/bin/run.sh" ]
 
@@ -65,9 +54,9 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    io.hass.name="MOTION" \
-    io.hass.description="Motion package as addon w/ support for image classification" \ 
-    io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
-    io.hass.version=${BUILD_VERSION} \
+    com.github.open-horizon.name="MOTION" \
+    com.github.open-horizon.description="Provide motion as-a-service on /dev/video0" \ 
+    com.github.open-horizon.arch="${BUILD_ARCH}" \
+    com.github.open-horizon.type="service" \
+    com.github.open-horizon.version="${BUILD_VERSION}" \
     maintainer="David C Martin <github@dcmartin.com>"

@@ -1,14 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-echo $(date) "$0 $*" >&2
+if [ ! -z "${HZN_PATTERN}" ] && [ ! -z $(command -v "${HZN_PATTERN:-}.sh" ) ]; then
+  ${HZN_PATTERN}.sh &
+else
+  echo "*** ERROR $0 $$ -- environment variable HZN_PATTERN: ${HZN_PATTERN}; command:" $(command -v "${HZN_PATTERN}.sh") &> /dev/stderr
+fi
 
-###
-### START MOTION
-###
-
-if [ -n "${MOTION_LOG_LEVEL}" ]; then MOTION_LOG_LEVEL=2; fi
-
-if [ -n "${MOTION_LOG_TYPE}" ]; then MOTION_LOG_TYPE="all"; fi
-
-# start motion
-motion -b -d ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr
+socat TCP4-LISTEN:80,fork EXEC:service.sh

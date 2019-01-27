@@ -8,13 +8,14 @@
       "variables": {
         "MOTION_DEVICE_DB": "debug",
         "MOTION_DEVICE_NAME": "test",
-        "MOTION_MQTT_HOST": "127.0.0.1",
+        "MOTION_MQTT_HOST": "192.168.1.40",
         "MOTION_MQTT_PORT": 1883,
-        "MOTION_MQTT_USERNAME": "",
-        "MOTION_MQTT_PASSWORD": "",
+        "MOTION_MQTT_USERNAME": "test",
+        "MOTION_MQTT_PASSWORD": "test",
         "MOTION_POST_PICTURES": "off",
         "MOTION_LOG_LEVEL": 6,
         "MOTION_LOG_TYPE": "all",
+        "LOG_LEVEL": "info",
         "DEBUG": true
       }
     }
