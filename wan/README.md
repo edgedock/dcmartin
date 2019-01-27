@@ -1,10 +1,6 @@
 # `wan` - Wide-Area-Network monitoring service
 
-Monitors Internet access information as [Open Horizon][open-horizon] service; updates periodically (default `1800` seconds or 15 minutes).
-
-## Open Horizon
-
-This service provides a LINUX container for the `wan` microservce.  This container may be run locally using Docker as well as published to an [_Open Horizon_][open-horizon] exchange and any Docker registry.
+Monitors Internet access information as micro-service; updates periodically (default `1800` seconds or 15 minutes).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Use
 
