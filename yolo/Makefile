@@ -44,7 +44,6 @@ stop:
 
 check: service.json
 	rm -f check.json
-	sleep 3
 	curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
 push: build

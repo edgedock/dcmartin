@@ -33,7 +33,7 @@ default: all
 
 all: build run check
 
-build: build.json service.json
+build: Dockerfile build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: stop 

@@ -10,18 +10,10 @@
   "sharable": "multiple",
   "requiredServices": [],
   "userInput": [
-    {
-      "name": "LOG_LEVEL",
-      "label": "specify logging level",
-      "type": "string",
-      "defaultValue": "info"
-    },
-    {
-      "name": "DEBUG",
-      "label": "debug on/off",
-      "type": "boolean",
-      "defaultValue": "false"
-    }
+    { "name": "YOLO_PERIOD", "label": "seconds between updates", "type": "int", "defaultValue": "0" },
+    { "name": "YOLO_ENTITY", "label": "entity to count", "type": "string", "defaultValue": "person" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
   ],
   "deployment": {
     "services": {

@@ -6,6 +6,8 @@
       "url": "com.github.dcmartin.open-horizon.yolo",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
+        "YOLO_PERIOD": 0,
+        "YOLO_ENTITY": "person",
         "LOG_LEVEL": "info",
         "DEBUG": false
       }
