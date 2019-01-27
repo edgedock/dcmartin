@@ -12,7 +12,7 @@ This service supports the following architectures:
 
 ## How To Use
 
-Copy this [repository][repository], change to the `wan` directory, edit the [`service.json`][service-json]; then use the **make** command; see below:
+Copy this [repository][repository], change to the `wan` directory, then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
