@@ -47,7 +47,7 @@ Copy this [repository][repository], change to the `yolo` directory, then use the
 
 This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
 
-## Node registration
+## User Input (options)
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
 + `YOLO_ENTITY` - entity to count; defaults to `person`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`

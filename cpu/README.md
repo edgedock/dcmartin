@@ -38,7 +38,7 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
 
 This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
 
-## Node registration
+## User Input (options)
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
 + `CPU_PERIOD` - seconds between updates; defaults to `1800` seconds (15 minutes)
 + `CPU_INTERVAL` - seconds between CPU test; defaults to `1` second

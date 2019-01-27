@@ -42,7 +42,7 @@ Copy this [repository][repository], change to the `hal` directory, then use the 
 
 This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
 
-## Node registration
+## User Input (options)
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
 + `HAL_PERIOD` - seconds between updates; defaults to `1800` seconds (15 minutes)
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
