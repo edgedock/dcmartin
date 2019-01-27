@@ -50,7 +50,7 @@ else
   goto done
 endif
 
-set dir = "${MOTION_DATA_DIR}/${CN}"
+set dir = "/var/lib/motion/${CN}"
 
 if ($?USE_MQTT && $?VERBOSE) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","date":'$NOW'}'
 if ($?VERBOSE) echo "$0:t $$ -- processing $dir for camera $CN event $EN date $NOW" >& /dev/stderr

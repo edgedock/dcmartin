@@ -14,6 +14,7 @@
         { "url": "github.com.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" }
   ],
   "userInput": [
+        { "name": "MOTION_TIMEZONE", "label": "database and group name for devices", "type": "string", "defaultValue": "GMT" },
         { "name": "MOTION_DEVICE_DB", "label": "database and group name for devices", "type": "string", "defaultValue": "motion" },
         { "name": "MOTION_DEVICE_NAME", "label": "name of device", "type": "string", "defaultValue": "testcam" },
         { "name": "MOTION_MQTT_HOST", "label": "IP or FQDN for mqtt host", "type": "string", "defaultValue": null },

@@ -51,7 +51,7 @@ set SN = `echo "$ID" | sed 's/.*-..-\(.*\).*/\1/'`
 
 set NOW = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" "$TS"`
 
-if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","data":"'$MOTION_DATA_DIR'","camera":"'$CN'","time":'$NOW'}'
+if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","camera":"'$CN'","time":'$NOW'}'
 
 ## create JSON
 set IJ = "$IF:r.json"

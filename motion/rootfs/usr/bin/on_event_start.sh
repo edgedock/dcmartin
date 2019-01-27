@@ -45,7 +45,7 @@ set TS = "${YR}${MO}${DY}${HR}${MN}${SC}"
 # in seconds
 set NOW = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" "${TS}"`
 
-set dir = "${MOTION_DATA_DIR}/${CN}"
+set dir = "/var/lib/motion/${CN}"
 
 set EJ = "${dir}/${TS}-${EN}.json"
 
