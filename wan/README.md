@@ -1,8 +1,8 @@
 # Wide-Area-Network (WAN) monitoring service
 
-Monitors Internet access information; updates periodically (default `1800` seconds).
+Monitors Internet access information as [Open Horizon][open-horizon] service; updates periodically (default `1800` seconds or 15 minutes).
 
-# REGISTRATION
+## REGISTRATION
 
 Nodes should _register_ pattern `dcmartin@us.ibm.com/wan` with `url` of `com.github.dcmartin.open-horizon.wan`, version `0.0.1` for their architecture.
 
