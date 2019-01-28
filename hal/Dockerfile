@@ -22,6 +22,7 @@ RUN \
     \
     && apk add --no-cache \
         apk-tools \
+        util-linux \
         bash \
         curl \
         jq \

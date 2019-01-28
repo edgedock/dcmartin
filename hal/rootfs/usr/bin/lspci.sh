@@ -3,7 +3,7 @@ if [ -z $(command -v "lspci") ]; then
   echo '{"lspci":null}'
   exit 1
 fi
-lspci -mm -nn | sed 's| "|,"|g' | sed 's| -[^ ,]*||g' > /tmp/lspci.$$
+lspci -mm -nn | sed 's| "|,"|g' | sed 's| -[^ ,]*||g' > /tmp/lspci.$$ 2> /dev/null
 
 if [[ $(wc -l "/tmp/lspci.$$" | awk '{ print $1 }') == 0 ]]; then
   rm -f /tmp/lspci.$$
@@ -31,7 +31,7 @@ cat /tmp/lspci.$$ | while read -r; do
     if [ "${VAL}" != "${REPLY}" ]; then echo -n ','"${VAL}"; fi
 
   elif [ "${COLS}" == "11" ]; then
-    VMM=$(lspci -vmm | egrep -A 5 "$SLOT")
+    VMM=$(lspci -vmm 2> /dev/null | egrep -A 5 "$SLOT")
     VAL=$(echo "$VMM" | egrep "Rev:" | sed 's|.*Rev:[ \t]*\([^ \t]*\).*|\1|')
     if [ -n "${VAL}" ]; then echo -n ',''"revision": "'$VAL'"'; fi
     VAL=$(echo "$VMM" | egrep "ProgIf" | sed 's|.*ProgIf:[ \t]*\([^ \t]*\).*|\1|')

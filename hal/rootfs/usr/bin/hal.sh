@@ -8,6 +8,14 @@ CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',
 echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
 
 while true; do
-  echo "${CONFIG}" | jq '.date='$(date +%s)'|.lshw='$(lshw.sh|jq '.lshw')'|.lsusb='$(lsusb.sh|jq '.lsusb?')'|.lscpu='$(lscpu.sh|jq '.lscpu?')'|.lspci='$(lspci.sh|jq '.lspci?')'|.lsblk='$(lsblk.sh|jq '.lsblk?') > "${TMP}/${HZN_PATTERN}.json"
-  sleep ${HAL_PERIOD)
+  OUTPUT="${CONFIG}"
+  for ls in lshw lsusb lscpu lspci lsblk; do
+    OUT="$(${ls}.sh | jq '.'${ls}'?')"
+    if [ ${DEBUG:-} == 'true' ]; then echo "${ls} == ${OUT}" &> /dev/stderr; fi
+    if [ -z "${OUT:-}" ]; then OUT=null; fi
+    OUTPUT=$(echo "$OUTPUT" | jq '.'${ls}'='"${OUT}")
+    if [ ${DEBUG:-} == 'true' ]; then echo "OUTPUT == ${OUTPUT}" &> /dev/stderr; fi
+  done
+  echo "${OUTPUT}" > "${TMP}/${HZN_PATTERN}.json"
+  sleep ${HAL_PERIOD}
 done

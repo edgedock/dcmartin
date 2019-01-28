@@ -4,7 +4,7 @@ if [ -z $(command -v "lsusb") ]; then
   exit 1
 fi
 echo -n '{"lsusb":['
-lsusb | while read -r; do
+lsusb 2> /dev/null | while read -r; do
   BUS=$(echo "$REPLY" | sed 's|^Bus \([^ ]*\) .*|\1|')
   DID=$(echo "$REPLY" | sed 's|.*Device \([^:]*\):.*|\1|')
   DBN=$(echo "$REPLY" | sed 's|.*ID \([^:]*\):.*|\1|')
