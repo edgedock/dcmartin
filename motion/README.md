@@ -22,15 +22,30 @@ Copy this [repository][repository], change to the `motion` directory, then use t
 % make
 ...
 {
-  "hostname": "4d1438b77650-172017000007",
+  "hostname": "544720549bbf-172017000003",
   "org": "dcmartin@us.ibm.com",
   "pattern": "motion",
   "device": "newman-amd64_motion",
-  "pid": 10,
-  "motion": null
+  "pid": 8,
+  "motion": {
+    "log_level": "info",
+    "debug": "true",
+    "date": 1548700891,
+    "db": "debug",
+    "name": "test",
+    "timezone": "America/Los_Angeles",
+    "mqtt": {
+      "host": "192.168.1.40",
+      "port": "1883",
+      "username": "test",
+      "password": "test"
+    },
+    "post": "center"
+  }
 }
+
 ```
-The `motion` value will initially be `null` until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
+The `motion` value will initially be incomplete until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
 ```
 % curl -sSL http://localhost:8583
 {
