@@ -1,10 +1,8 @@
 #!/bin/tcsh
 
-setenv DEBUG
-setenv VERBOSE
 setenv USE_MQTT
 
-if ($?VERBOSE) echo "$0:t $$ -- START" `date` >& /dev/stderr
+if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
@@ -45,11 +43,11 @@ set TS = "${YR}${MO}${DY}${HR}${MN}${SC}"
 # in seconds
 set NOW = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" "${TS}"`
 
-set dir = "/var/lib/motion/${CN}"
+set dir = "/var/lib/motion"
 
 set EJ = "${dir}/${TS}-${EN}.json"
 
-if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","start":'$NOW',"timestamp":"'"$TS"'","json":"'"$EJ"'"}'
+if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","start":'$NOW',"timestamp":"'"$TS"'","json":"'"$EJ"'"}'
 
 echo '{"device":"'${MOTION_DEVICE_NAME}'","camera":"'${CN}'","event":"'${EN}'","start":'$NOW'}' >! "${EJ}"
 
@@ -60,4 +58,4 @@ endif
 
 done:
 
-if ($?VERBOSE) echo "$0:t $$ -- END" `date` >& /dev/stderr
+if ($?DEBUG) echo "$0:t $$ -- END" `date` >& /dev/stderr

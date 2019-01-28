@@ -13,10 +13,11 @@ else
   echo "+++ WARN $0 $$ -- cannot locate time zone information: ${ZONEINFO}" &> /dev/stderr
 fi
 
-echo '{"timezone": "'$MOTION_TIMEZONE'"}' > ${TMP}/${HZN_PATTERN}.json
+echo '{"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":"'${MOTION_MQTT_PORT}'","username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"post":"'${MOTION_POST_PICTURES}'"}' > ${TMP}/${HZN_PATTERN}.json
 
 mkdir -p ${TMP}/motion
-ln -s ${TMP}/motion /var/lib/motion 
+rm -fr /var/lib/motion
+ln -s ${TMP}/motion /var/lib
 
 # start motion
 motion -b -n ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr
