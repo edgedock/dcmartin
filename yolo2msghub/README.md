@@ -6,10 +6,10 @@ Provides _pattern_ of services to send YOLO classified image entity counts to Ka
 
 This _pattern_ utilizes the following micro-services:
 
-[`yolo`][yolo-service] - captures images from camera and counts specified entity
-[`hal`][hal-service] - provides hardware inventory layer API for client
-[`cpu`][cpu-service] - provides CPU percentage API for client
-[`wan`][wan-service] - provides wide-area-network information API for client
++ [`yolo`][yolo-service] - captures images from camera and counts specified entity
++ [`hal`][hal-service] - provides hardware inventory layer API for client
++ [`cpu`][cpu-service] - provides CPU percentage API for client
++ [`wan`][wan-service] - provides wide-area-network information API for client
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal
