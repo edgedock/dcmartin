@@ -16,6 +16,12 @@ check:
 	  $(MAKE) -C $$dir $@; \
 	done
 
+remove:
+	for dir in $(SERVICES); do \
+	  $(MAKE) -C $$dir $@; \
+	done
+
+
 clean:
 	for dir in $(SERVICES); do \
 	  $(MAKE) -C $$dir $@; \

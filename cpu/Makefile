@@ -36,10 +36,10 @@ all: build run check
 build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
-run: stop 
+run: remove
 	./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
-stop:
+remove:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check: service.json
@@ -64,12 +64,15 @@ test: service.json userinput.json
 	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
 
-depend:
+depend: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 
-start: depend
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+start: depend stop
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
+
+stop:
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json

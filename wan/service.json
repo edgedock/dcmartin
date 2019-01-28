@@ -7,7 +7,7 @@
   "version": "0.0.1",
   "arch": "{arch}",
   "public": true,
-  "sharable": "multiple",
+  "sharable": "singleton",
   "requiredServices": [],
   "userInput": [
         { "name": "WAN_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "1800" },
