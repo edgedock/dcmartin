@@ -73,12 +73,11 @@ start: remove publish depend stop
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
 	curl -sSL 'http://localhost:'${SERVICE_PORT} -o start.json && jq '.' start.json
 
-stop:
+stop: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
 
-clean:
+clean: remove stop
 	rm -fr test/ check.json check.jpg service-${ARCH}.json
-	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 .PHONY: default all build run check stop push publish verify clean depend start
