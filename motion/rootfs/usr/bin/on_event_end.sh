@@ -365,7 +365,7 @@ if ($#IF && -s "$IF" && $?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
   if ($?DEBUG) echo "$0:t $$ -- Posting file $IF to host $MOTION_MQTT_HOST topic $MQTT_TOPIC" >& /dev/stderr
 else
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"post":"'"${MOTION_POST_PICTURES}"'","topic":"'"$MQTT_TOPIC"'","image":"'${IF}'"}'
-  if ($?DEBUG) echo "$0:t $$ -- No file specified to post; $IF" >& /dev/stderr
+  if ($?DEBUG) echo "$0:t $$ -- No file specified to post" >& /dev/stderr
 endif
 
 ##
@@ -420,10 +420,10 @@ endif
 
 done:
   if ($?jsons) then
-    rm -f "$jsons"
+    rm -f $jsons
   endif
   if ($?jpgs) then
-    rm -f "$jpgs"
+    rm -f $jpgs
   endif
   if ($?tmpdir) then
     rm -fr $tmpdir
