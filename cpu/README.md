@@ -22,14 +22,35 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
 % make
 ...
 {
-  "hostname": "19fbc292b074-172017000005",
+  "hostname": "7c5bdc815fb1-172017000003",
   "org": "dcmartin@us.ibm.com",
   "pattern": "cpu",
-  "device": "davidsimac.local-amd64_cpu",
-  "pid": 8,
+  "device": "test-cpu-2-arm_cpu",
+  "pid": 9,
   "cpu": {
-    "date": 1548620466,
-    "percent": 1.99
+    "log_level": "info",
+    "debug": "false",
+    "date": 1548702244,
+    "period": 60,
+    "interval": 1
+  }
+}
+```
+The `cpu` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
+```
+{
+  "hostname": "7c5bdc815fb1-172017000003",
+  "org": "dcmartin@us.ibm.com",
+  "pattern": "cpu",
+  "device": "test-cpu-2-arm_cpu",
+  "pid": 9,
+  "cpu": {
+    "log_level": "info",
+    "debug": "false",
+    "date": 1548702245,
+    "period": 60,
+    "interval": 1,
+    "percent": 49.26
   }
 }
 ```
