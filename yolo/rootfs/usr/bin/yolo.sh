@@ -43,7 +43,7 @@ while true; do
   COUNT=$(egrep '^'"${YOLO_ENTITY}" "${OUT}" | wc -l)
   # capture annotated image as BASE64 encoded string
   IMAGE=$(base64 -w 0 -i predictions.jpg)
-  echo "${CONFIG}" | jq '.date='$(date +%s)'.|time='${TIME}'.|count='${COUNT}'.|width='${WIDTH}'.|height='${HEIGHT}'.|scale="'${SCALE}'".|mock="'${MOCK}'".|image="'${IMAGE}'"' > ${TMP}/${HZN_PATTERN}.json
+  echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/${HZN_PATTERN}.json
   rm -f "${JPG}" "${OUT}" predictions.jpg
 
   sleep ${YOLO_PERIOD}
