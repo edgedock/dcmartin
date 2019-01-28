@@ -16,18 +16,25 @@ Refer to these [instructions][setup].  Installation package for macOS is also [a
 
 There are sample services available:
 
-1. `cpu` -  CPU usage as a percentage
-1. `wan` -  Wide Area Network information
-1. `hal` -  Hardware Abstraction Layer information
-1. `yolo` -  Entity recognition and counting
-1. `motion` - Motion detection, image capture, and publish to a MQTT broker
+1. [`cpu`][cpu-service] -  CPU usage as a percentage
+1. [`wan`][wan-service] -  Wide Area Network information
+1. [`hal`][hal-service] -  Hardware Abstraction Layer information
+1. [`yolo`][yolo-service] -  Entity recognition and counting
+
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan
 
 # Patterns
 
 There are sample patterns available:
 
-1. `yolo2msghub` - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
-1. `motion-detect-camera` - Packages `motion`,`cpu`,`hal`,`gps` services as a _pattern_ (TBD)
+1. [`yolo2msghub`][yolo2msgub-pattern] - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
+1. [`motion`][motion-pattern] - Motion detection, image capture, and publish to a MQTT broker
+
+[yolo2msghub-pattern]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub
+[motion-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion
 
 # Further Information 
 
