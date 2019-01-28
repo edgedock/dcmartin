@@ -17,7 +17,7 @@ Copy this [repository][repository], change to the `yolo` directory, then use the
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
-% git clone http://github.com/dcmartin/open-horizon .
+% git clone http://github.com/dcmartin/open-horizon
 % cd open-horizon/yolo
 % make
 ...

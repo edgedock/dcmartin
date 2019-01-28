@@ -17,7 +17,7 @@ Copy this [repository][repository], change to the `motion` directory, then use t
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
-% git clone http://github.com/dcmartin/open-horizon .
+% git clone http://github.com/dcmartin/open-horizon
 % cd open-horizon/motion
 % make
 ...
