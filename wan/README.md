@@ -22,29 +22,36 @@ Copy this [repository][repository], change to the `wan` directory, then use the 
 % make
 ...
 {
-  "hostname": "4d1438b77650-172017000007",
+  "hostname": "8a1dc0372e86-172017000005",
   "org": "dcmartin@us.ibm.com",
   "pattern": "wan",
-  "device": "newman-amd64_wan",
-  "pid": 10,
-  "wan": null
+  "device": "test-cpu-2-arm_wan",
+  "pid": 9,
+  "wan": {
+    "log_level": "info",
+    "debug": "false",
+    "date": 1548701992,
+    "period": 1800
+  }
 }
 ```
-The `wan` value will initially be `null` until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
+The `wan` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
 ```
-% curl -sSL http://localhost:8581
 {
-  "hostname": "4d1438b77650-172017000007",
+  "hostname": "8a1dc0372e86-172017000005",
   "org": "dcmartin@us.ibm.com",
   "pattern": "wan",
-  "device": "newman-amd64_wan",
-  "pid": 10,
+  "device": "test-cpu-2-arm_wan",
+  "pid": 9,
   "wan": {
-    "date": 1548614576,
+    "log_level": "info",
+    "debug": "false",
+    "date": 1548702028,
+    "period": 1800,
     "speedtest": {
-      "download": 290682338.9753496,
-      "upload": 8137848.183276349,
-      "ping": 16.524,
+      "download": 4890441.312717636,
+      "upload": 7495721.486184587,
+      "ping": 19.113,
       "server": {
         "url": "http://sjc.speedtest.net/speedtest/upload.php",
         "lat": "37.3041",
@@ -57,11 +64,11 @@ The `wan` value will initially be `null` until the service completes its initial
         "url2": "http://sjc2.speedtest.net/speedtest/upload.php",
         "host": "sjc.host.speedtest.net:8080",
         "d": 7.476714842887551,
-        "latency": 16.524
+        "latency": 19.113
       },
-      "timestamp": "2019-01-27T18:42:34.474127Z",
-      "bytes_sent": 10731520,
-      "bytes_received": 364044952,
+      "timestamp": "2019-01-28T18:59:59.103913Z",
+      "bytes_sent": 9617408,
+      "bytes_received": 9593604,
       "share": null,
       "client": {
         "ip": "67.164.104.198",
