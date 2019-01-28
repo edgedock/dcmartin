@@ -28,6 +28,14 @@
         "environment": [
           "PATTERN=yolo2msghub"
         ],
+        "devices": null,
+        "binds": null,
+        "specific_ports": [
+          {
+            "HostPort": "7001/tcp",
+            "HostIP": "0.0.0.0"
+          }
+        ],
         "image": "dcmartin/{arch}_yolo2msghub:0.0.1",
         "privileged": false
       }
