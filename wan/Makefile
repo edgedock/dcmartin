@@ -9,11 +9,12 @@ HEU=$(shell hzn node list | jq -r '.configuration.exchange_api')
 BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
 ## SERVICE
-ORG=$(shell jq -r '.org' service.json)
+ORG?=$(shell jq -r '.org' service.json)
 URL=$(shell jq -r '.url' service.json)
 LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)
 SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
+SERVICE_PORT=$(shell jq -r '.deployment.services.'${LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
 
 ## KEYS
 PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
@@ -29,9 +30,9 @@ DOCKER_NAME=$(ARCH)_$(LABEL)
 DOCKER_TAG=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(VERSION)
 DOCKER_PORT=$(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
 
-default: all
+default: run check
 
-all: build run check
+all: publish verify start validate
 
 build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
@@ -68,15 +69,15 @@ depend: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 
-start: depend stop
+start: remove publish depend stop
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
+	curl -sSL 'http://localhost:'${SERVICE_PORT} -o start.json && jq '.' start.json
 
-stop:
+stop: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
 
-clean:
-	rm -f check.json check.jpg service-${ARCH}.json
-	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
+clean: remove stop
+	rm -fr test/ check.json check.jpg service-${ARCH}.json
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 .PHONY: default all build run check stop push publish verify clean depend start
