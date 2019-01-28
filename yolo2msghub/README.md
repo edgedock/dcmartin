@@ -95,10 +95,23 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
       }
     ],
     "date": 1548705396,
-    "yolo": { <redacted> },
-    "hal": { <redacted> },
-    "cpu": { <redacted> },
-    "wan": { <redacted> }
+    "yolo": {
+    "log_level": "info",
+    "debug": "false",
+    "date": 1548705878,
+    "period": 0,
+    "entity": "person",
+    "time": 41.135097,
+    "count": 0,
+    "width": 320,
+    "height": 240,
+    "scale": "320x240",
+    "mock": "false",
+    "image": "<redacted>"
+  },
+    "hal": {"log_level":"info","debug":"false","date":1548701599,"period":60,"lshw":{"id":"6f8d7dbd61da","class":"system","claimed":true,"description":"Computer","product":"Raspberry Pi 3 Model B Plus Rev 1.3","serial":"000000005770a507","width":32,"children":[{"id":"core","class":"bus","claimed":true,"description":"Motherboard","physid":"0","capabilities":{"raspberrypi_3-model-b-plus":true,"brcm_bcm2837":true},"children":[{"id":"cpu:0","class":"processor","claimed":true,"description":"CPU","product":"cpu","physid":"0","businfo":"cpu@0","units":"Hz","size":1400000000,"capacity":1400000000,"capabilities":{"cpufreq":"CPU Frequency scaling"}},{"id":"cpu:1","class":"processor","disabled":true,"claimed":true,"description":"CPU","product":"cpu","physid":"1","businfo":"cpu@1","units":"Hz","size":1400000000,"capacity":1400000000,"capabilities":{"cpufreq":"CPU Frequency scaling"}},{"id":"cpu:2","class":"processor","disabled":true,"claimed":true,"description":"CPU","product":"cpu","physid":"2","businfo":"cpu@2","units":"Hz","size":1400000000,"capacity":1400000000,"capabilities":{"cpufreq":"CPU Frequency scaling"}},{"id":"cpu:3","class":"processor","disabled":true,"claimed":true,"description":"CPU","product":"cpu","physid":"3","businfo":"cpu@3","units":"Hz","size":1400000000,"capacity":1400000000,"capabilities":{"cpufreq":"CPU Frequency scaling"}},{"id":"memory","class":"memory","claimed":true,"description":"System memory","physid":"4","units":"bytes","size":972234752}]},{"id":"network","class":"network","claimed":true,"description":"Ethernet interface","physid":"1","logicalname":"eth0","serial":"02:42:ac:11:00:04","units":"bit/s","size":10000000000,"configuration":{"autonegotiation":"off","broadcast":"yes","driver":"veth","driverversion":"1.0","duplex":"full","ip":"172.17.0.4","link":"yes","multicast":"yes","port":"twisted pair","speed":"10Gbit/s"},"capabilities":{"ethernet":true,"physical":"Physical interface"}}]},"lsusb":[{"bus_number":"001","device_id":"001","device_bus_number":"1d6b","manufacture_id":"Bus 001 Device 001: ID 1d6b:0002","manufacture_device_name":"Bus 001 Device 001: ID 1d6b:0002"},{"bus_number":"001","device_id":"003","device_bus_number":"0424","manufacture_id":"Bus 001 Device 003: ID 0424:2514","manufacture_device_name":"Bus 001 Device 003: ID 0424:2514"},{"bus_number":"001","device_id":"002","device_bus_number":"0424","manufacture_id":"Bus 001 Device 002: ID 0424:2514","manufacture_device_name":"Bus 001 Device 002: ID 0424:2514"},{"bus_number":"001","device_id":"005","device_bus_number":"0424","manufacture_id":"Bus 001 Device 005: ID 0424:7800","manufacture_device_name":"Bus 001 Device 005: ID 0424:7800"},{"bus_number":"001","device_id":"004","device_bus_number":"1415","manufacture_id":"Bus 001 Device 004: ID 1415:2000","manufacture_device_name":"Bus 001 Device 004: ID 1415:2000"}],"lscpu":{"Architecture":"armv7l","Byte Order":"Little Endian","CPU(s)":"4","On-line CPU(s) list":"0-3","Thread(s) per core":"1","Core(s) per socket":"4","Socket(s)":"1","Vendor ID":"ARM","Model":"4","Model name":"Cortex-A53","Stepping":"r0p4","CPU max MHz":"1400.0000","CPU min MHz":"600.0000","BogoMIPS":"89.60","Flags":"half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32"},"lspci":null,"lsblk":[{"name":"mmcblk0","maj:min":"179:0","rm":"0","size":"29.7G","ro":"0","type":"disk","mountpoint":null,"children":[{"name":"mmcblk0p1","maj:min":"179:1","rm":"0","size":"43.9M","ro":"0","type":"part","mountpoint":null},{"name":"mmcblk0p2","maj:min":"179:2","rm":"0","size":"29.7G","ro":"0","type":"part","mountpoint":"/etc/hosts"}]}]},
+    "cpu": {"log_level":"info","debug":"false","date":1548706059,"period":60,"interval":1,"percent":62.59},
+    "wan": {"log_level":"info","debug":"false","date":1548705696,"period":1800,"speedtest":{"download":4902775.066290534,"upload":7378550.674441272,"ping":17.986,"server":{"url":"http://speedtest.sjc.sonic.net/speedtest/upload.php","lat":"37.3041","lon":"-121.8727","name":"San Jose, CA","country":"United States","cc":"US","sponsor":"Sonic.net, Inc.","id":"17846","host":"speedtest.sjc.sonic.net:8080","d":7.476714842887551,"latency":17.986},"timestamp":"2019-01-28T20:01:02.277115Z","bytes_sent":9519104,"bytes_received":12411456,"share":null,"client":{"ip":"67.164.104.198","lat":"37.2458","lon":"-121.8306","isp":"Comcast Cable","isprating":"3.7","rating":"0","ispdlavg":"0","ispulavg":"0","loggedin":"0","country":"US"}}}
   }
 }
 ```
