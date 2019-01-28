@@ -5,12 +5,15 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 JSON='[{"name": "yolo", "url": "http://yolo:80/v1/person" },{"name":"cpu","url":"http://cpu:8347/v1/cpu"},{"name":"gps","url":"http://gps:31779/v1/gps/location"}]'
 
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","services":'${JSON}'}'
+echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
+
 SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
 
 while true; do
 
   # make output
-  OUTPUT='{"date":'$(date +%s)
+  OUTPUT=$(echo "${CONFIG}" | jq '.date='$(date +%s)
   for SERVICE in $SERVICES; do
     URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${SERVICE}'").url')
     if [ ! -z "${URL}" ]; then
@@ -22,6 +25,7 @@ while true; do
     OUTPUT="${OUTPUT:-}"',"'${SERVICE}'":'"${OUT}"
   done
   OUTPUT="${OUTPUT}"'}'
+
   echo "${OUTPUT}" > "${TMP}/${HZN_PATTERN}.json"
 
   # send output
@@ -39,9 +43,6 @@ while true; do
   else
     echo "+++ WARN $0 $$ -- kafka invalid; output = ${OUTPUT}" &> /dev/stderr
   fi
-
-  # wait until 
-  sleep 60
 
 done
 

@@ -6,6 +6,9 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 if [ -z "${CPU_INTERVAL}" ]; then CPU_INTERVAL=1; fi
 if [ -z "${CPU_PERIOD}" ]; then CPU_PERIOD=60; fi
 
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
+echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
+
 while true; do
 
   # https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
@@ -20,6 +23,6 @@ while true; do
   PERCENT=$(echo "scale=2; 100 * (($CT2 - $CT1) - ($CI2 - $CI1)) / ($CT2 - $CT1)" | bc -l)
   if [ -z "${PERCENT}" ]; then PERCENT=null; fi
 
-  echo '{"date":'$(date +%s)',"percent":'${PERCENT}'}' > "${TMP}/${HZN_PATTERN}.json"
+  echo "${CONFIG}" | jq '.date='$(date +%s)'|.percent='${PERCENT} > "${TMP}/${HZN_PATTERN}.json"
   sleep ${CPU_PERIOD}
 done
