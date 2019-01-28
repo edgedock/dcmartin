@@ -3,7 +3,7 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-JSON='[{"name": "yolo", "url": "http://yolo:80/v1/person" },{"name":"cpu","url":"http://cpu:8347/v1/cpu"},{"name":"gps","url":"http://gps:31779/v1/gps/location"}]'
+JSON='[{"name": "yolo", "url": "http://yolo:80" },{"name": "hal", "url": "http://hal:80" },{"name":"cpu","url":"http://cpu:80"},{"name":"wan","url":"http://wan:80"}]'
 
 CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","services":'${JSON}'}'
 echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
@@ -13,20 +13,22 @@ SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
 while true; do
 
   # make output
-  OUTPUT=$(echo "${CONFIG}" | jq '.date='$(date +%s)
+  OUTPUT=$(echo "${CONFIG}" | jq '.date='$(date +%s))
   for SERVICE in $SERVICES; do
     URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${SERVICE}'").url')
     if [ ! -z "${URL}" ]; then
       OUT=$(curl -fqsSL "${URL}" | jq '.'"${SERVICE}"'?')
     fi
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${SERVICE} returns ${OUT}" &> /dev/stderr; fi
     if [ -z "${OUT:-}" ]; then
       OUT='null'
     fi
-    OUTPUT="${OUTPUT:-}"',"'${SERVICE}'":'"${OUT}"
+    OUTPUT=$(echo "${OUTPUT:-}" | jq '.'"${SERVICE}"'='"${OUT}")
   done
-  OUTPUT="${OUTPUT}"'}'
 
   echo "${OUTPUT}" > "${TMP}/${HZN_PATTERN}.json"
+
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- output: ${OUTPUT}" &> /dev/stderr; fi
 
   # send output
   if [ $(command -v kafkacat) ] && [ ! -z "${MSGHUB_BROKER}" ] && [ ! -z "${MSGHUB_APIKEY}" ]; then
@@ -41,7 +43,7 @@ while true; do
           -X sasl.password="${MSGHUB_APIKEY}" \
           -t "${HZN_PATTERN}/${HZN_DEVICE_ID}"
   else
-    echo "+++ WARN $0 $$ -- kafka invalid; output = ${OUTPUT}" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- kafka invalid" &> /dev/stderr
   fi
 
 done
