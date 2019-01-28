@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBUG=true
+DEBUG=
 VERBOSE=
 
 ###
@@ -330,7 +330,7 @@ for MAC in ${MACS}; do
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id} SSH failed ssh-copy-id; checking public key: $public_keyfile" &> /dev/stderr ; fi
       result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname 2> /dev/null')
       if [ -z "${result}" ]; then
-	echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
+	echo "*** ERROR: ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
 	continue
       else
         if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: SSH hostname: ${result}" &> /dev/stderr; fi
@@ -345,7 +345,7 @@ for MAC in ${MACS}; do
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${CONFIG}")
   fi
   if [ "${config_ssh}" != "true" ]; then
-    echo "*** ERROR: ${id} SSH failed; consider reflashing; continuing..." &> /dev/stderr
+    echo "*** ERROR: ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
     continue
   else
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
@@ -400,15 +400,20 @@ for MAC in ${MACS}; do
   fi
   if [ "${config_security}" != "true" ]; then
     echo "*** ERROR: ${id} SECURITY failed; consider reflashing; continuing..." &> /dev/stderr
+    ################# UPDATE CONFIGURATION #######################
+    node_state=$(echo "$node_state" | jq -c '.ssh=null|.security=null')
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
   else
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SECURITY configured:" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr ; fi
   fi
 
   ## COPY SOCAT
-  for script in socat-node-id.sh node-id.sh; do
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
-  done
+  if [ ! -z "${SOCAT_LISTENER}" ]; then
+    for script in socat-node-id.sh node-id.sh; do
+      scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+    done
+  fi
 
   ## CONFIG SOFTWARE
   if [ "${config_software}" == "true" ]; then
@@ -609,6 +614,8 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: node ${node_id} is ${node_status} with pattern ${node_pattern}" &> /dev/stderr; fi
   elif [[ $node_status == "unconfiguring" ]]; then
     echo "*** ERROR: ${id}: node ${node_id} aka ${ex_device} is unconfiguring; consider reflashing or remove, purge, update, prune, and reboot" &> /dev/stderr
+    ################# UPDATE CONFIGURATION #######################
+    jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
   elif [[ ${node_id} != ${ex_device} || $node_status != "unconfigured" ]]; then
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: unregistering node ${node_id}" &> /dev/stderr ; fi
@@ -694,6 +701,7 @@ for MAC in ${MACS}; do
   done
   if [[ i > 10 ]]; then
     echo "*** ERROR: ${id}: agreement never established; consider re-flashing" &> /dev/stderr
+    ################# UPDATE CONFIGURATION #######################
     continue
   fi
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: agreement complete:" $(echo "${result}" | jq -c '.') &> /dev/stderr; fi
