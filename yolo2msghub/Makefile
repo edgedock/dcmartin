@@ -14,6 +14,7 @@ URL=$(shell jq -r '.url' service.json)
 LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)
 SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
+SERVICE_PORT=$(shell jq -r '.deployment.services.'${LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
 
 ## KEYS
 PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
@@ -68,14 +69,15 @@ depend: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 
-start: publish depend stop
+start: remove publish depend stop
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
+	curl -sSL 'http://localhost:'${SERVICE_PORT} -o start.json && jq '.' start.json
 
 stop:
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
 
 clean:
-	rm -f check.json check.jpg service-${ARCH}.json
+	rm -fr test/ check.json check.jpg service-${ARCH}.json
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
