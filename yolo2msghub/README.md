@@ -116,10 +116,6 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
 }
 ```
 
-## Example
-
-![mock-output.jpg](mock-output.jpg?raw=true "YOLO")
-
 # Open Horizon
 
 This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
