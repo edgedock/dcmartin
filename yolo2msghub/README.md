@@ -115,7 +115,6 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
   }
 }
 ```
-Example payloads are shown in the [`yolo`][yolo-service],[`hal`][hal-service],[`cpu`][cpu-service], and [`wan`][wan-service] services **README** files.
 
 ## Example
 
