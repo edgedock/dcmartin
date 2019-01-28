@@ -26,45 +26,84 @@ This service supports the following architectures:
 
 ## How To Use
 
-Copy this [repository][repository], change to the `yolo` directory, then use the **make** command; see below:
+Copy this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
 % git clone http://github.com/dcmartin/open-horizon .
-% cd open-horizon/yolo
+% cd open-horizon/yolo2msghub
 % make
 ...
 {
-  "hostname": "c2ceb8a68871-172017000002",
+  "hostname": "a60b406943d4-172017000007",
   "org": "dcmartin@us.ibm.com",
-  "pattern": "yolo",
-  "device": "davidsimac.local-amd64_yolo",
-  "pid": 7,
-  "yolo": null
+  "pattern": "yolo2msghub",
+  "device": "davidsimac.local-amd64_yolo2msghub",
+  "pid": 8,
+  "yolo2msghub": {
+    "log_level": "info",
+    "debug": "false",
+    "services": [
+      {
+        "name": "yolo",
+        "url": "http://yolo:80"
+      },
+      {
+        "name": "hal",
+        "url": "http://hal:80"
+      },
+      {
+        "name": "cpu",
+        "url": "http://cpu:80"
+      },
+      {
+        "name": "wan",
+        "url": "http://wan:80"
+      }
+    ]
+  }
 }
 ```
-The initial call to the service will return `null` for the `yolo` attribute until the service has completed its initial execution; subsequent calls should return a complete payload; see below:
+The `yolo` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
 ```
 {
-  "hostname": "30f977daac44-172017000002",
+  "hostname": "a60b406943d4-172017000007",
   "org": "dcmartin@us.ibm.com",
-  "pattern": "yolo",
-  "device": "test-cpu-2-arm_yolo",
-  "pid": 9,
-  "yolo": {
-    "date": 1548695016,
-    "time": 37.676646,
-    "entity": "person",
-    "count": 0,
-    "width": 320,
-    "height": 240,
-    "scale": "320x240",
-    "mock": "false",
-    "image": "<redacted>"
+  "pattern": "yolo2msghub",
+  "device": "davidsimac.local-amd64_yolo2msghub",
+  "pid": 8,
+  "yolo2msghub": {
+    "log_level": "info",
+    "debug": "false",
+    "services": [
+      {
+        "name": "yolo",
+        "url": "http://yolo:80"
+      },
+      {
+        "name": "hal",
+        "url": "http://hal:80"
+      },
+      {
+        "name": "cpu",
+        "url": "http://cpu:80"
+      },
+      {
+        "name": "wan",
+        "url": "http://wan:80"
+      }
+    ],
+    "date": 1548705396,
+    "yolo": { <redacted> },
+    "hal": { <redacted> },
+    "cpu": { <redacted> },
+    "wan": { <redacted> }
+  }
 }
-
 ```
+Example payloads are shown in the [`yolo`][yolo-service],[`hal`][hal-service],[`cpu`][cpu-service], and [`wan`][wan-service] services **README** files.
+
 ## Example
 
 ![mock-output.jpg](mock-output.jpg?raw=true "YOLO")
@@ -86,8 +125,8 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 
 Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
 
-+ `org` - `dcmartin@us.ibm.com/yolo`
-+ `url` - `com.github.dcmartin.open-horizon.yolo`
++ `org` - `dcmartin@us.ibm.com/yolo2msghub`
++ `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
 ## Publishing
@@ -95,8 +134,8 @@ The **make** targets for `publish` and `verify` make the service and its contain
 ```
 % make publish
 ...
-Using 'dcmartin/amd64_yolo@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_yolo:0.0.1'
-Creating com.github.dcmartin.open-horizon.yolo_0.0.1_amd64 in the exchange...
+Using 'dcmartin/amd64_yolo2msghub@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_yolo2msghub:0.0.1'
+Creating com.github.dcmartin.open-horizon.yolo2msghub_0.0.1_amd64 in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
 ```
 ```
@@ -140,10 +179,10 @@ based on the following:
 
 [David C Martin][dcmartin] (github@dcmartin.com)
 
-[userinput]: https://github.com/dcmartin/open-horizon/blob/master/yolo/userinput.json
-[service-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo/service.json
-[build-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo/build.json
-[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/yolo/Dockerfile
+[userinput]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/userinput.json
+[service-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
+[build-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/build.json
+[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/Dockerfile
 
 
 [dcmartin]: https://github.com/dcmartin
