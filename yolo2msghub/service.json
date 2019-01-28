@@ -9,10 +9,10 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    { "url": "github.com.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
-    { "url": "github.com.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
-    { "url": "github.com.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
-    { "url": "github.com.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" }
+    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
+    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
+    { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" },
+    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": "{arch}" }
   ],
   "userInput": [
     { "name": "YOLO_PERIOD", "label": "update interval", "type": "int", "defaultValue": "0" },
