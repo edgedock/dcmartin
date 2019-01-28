@@ -689,10 +689,13 @@ for MAC in ${MACS}; do
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
     i=$((i+1))
     if [[ i > 10 ]]; then
-      echo "*** ERROR: ${id}: agreement never established; consider re-flashin" &> /dev/stderr
-      continue
+      break
     fi
   done
+  if [[ i > 10 ]]; then
+    echo "*** ERROR: ${id}: agreement never established; consider re-flashing" &> /dev/stderr
+    continue
+  fi
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: agreement complete:" $(echo "${result}" | jq -c '.') &> /dev/stderr; fi
   node_state=$(echo "$node_state" | jq '.pattern='"$result")
 
