@@ -122,7 +122,7 @@ This service may be published to an Open Horizon exchange for an organization.  
 
 ## User Input (options)
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
-+ `YOLO2MSGHUB_PORT` - port for access; default 8585
++ `YOLO2MSGHUB_PORT` - port for access; default 8587 
 + `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
 + `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
 + `YOLO_ENTITY` - entity to count; defaults to `person`
