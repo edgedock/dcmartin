@@ -9,7 +9,7 @@ HEU=$(shell hzn node list | jq -r '.configuration.exchange_api')
 BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
 ## SERVICE
-ORG=$(shell jq -r '.org' service.json)
+ORG?=$(shell jq -r '.org' service.json)
 URL=$(shell jq -r '.url' service.json)
 LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)

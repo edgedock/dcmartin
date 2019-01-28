@@ -66,10 +66,12 @@ test: service.json userinput.json
 
 depend: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	# export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 
 start: depend
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	# export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/ -u "${ORG}/iamapikey:${APIKEY}"
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
 
 clean:
 	rm -f check.json check.jpg service-${ARCH}.json
