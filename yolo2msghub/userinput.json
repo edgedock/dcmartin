@@ -6,8 +6,9 @@
       "url": "com.github.dcmartin.open-horizon.yolo2msghub",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
+        "YOLO_ENTITY": "person",
+        "YOLO_PERIOD": 0,
         "MSGHUB_APIKEY": "2R4iaggsRB3EUYLbCcVfTZaE0M0o67UMBlb7BWDsEnxoiX64",
-        "MSGHUB_BROKER": "",
         "LOG_LEVEL": "info",
         "DEBUG": false
       }
