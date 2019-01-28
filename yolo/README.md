@@ -27,17 +27,29 @@ Copy this [repository][repository], change to the `yolo` directory, then use the
   "pattern": "yolo",
   "device": "davidsimac.local-amd64_yolo",
   "pid": 7,
-  "yolo": {
-    "date": 1548620718,
-    "time": 2.494935,
-    "person": 4,
-    "width": 0,
-    "height": 0,
-    "scale": "320x240",
-    "mock": "true",
-    "image": _redacted_
-  }
+  "yolo": null
 }
+```
+The initial call to the service will return `null` for the `yolo` attribute until the service has completed its initial execution; subsequent calls should return a complete payload; see below:
+```
+{
+  "hostname": "30f977daac44-172017000002",
+  "org": "dcmartin@us.ibm.com",
+  "pattern": "yolo",
+  "device": "test-cpu-2-arm_yolo",
+  "pid": 9,
+  "yolo": {
+    "date": 1548695016,
+    "time": 37.676646,
+    "entity": "person",
+    "count": 0,
+    "width": 320,
+    "height": 240,
+    "scale": "320x240",
+    "mock": "false",
+    "image": "<redacted>"
+}
+
 ```
 ## Example
 
