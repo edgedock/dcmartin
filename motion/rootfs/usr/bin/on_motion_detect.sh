@@ -1,8 +1,6 @@
 #!/bin/bash
-echo "+++ BEGIN: ${0##*/}: $*" $(date) >& /dev/stderr
 
-DEBUG=true
-# VERBOSE=true
+if [ "${VERBOSE:-}" == 'true' ]; then echo "+++ BEGIN: ${0##*/}: $*" $(date) >& /dev/stderr; fi
 
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
@@ -17,7 +15,6 @@ DEBUG=true
 
 # on_motion_detected on_motion_detect.sh %$ %v %Y %m %d %H %M %S
 
-
 # get arguments
 CAMERA_NAME="${1}"
 EVENT="${2}"
@@ -28,4 +25,4 @@ HOUR="${6}"
 MINUTE="${7}"
 SECOND="${8}"
 
-echo "+++ END: ${0##*/}: $*" $(date) >& /dev/stderr
+if [ "${VERBOSE:-}" == 'true' ]; then echo "+++ END: ${0##*/}: $*" $(date) >& /dev/stderr; fi

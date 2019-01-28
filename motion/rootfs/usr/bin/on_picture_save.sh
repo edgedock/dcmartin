@@ -1,9 +1,8 @@
 #!/bin/tcsh
-setenv DEBUG
-setenv VERBOSE
-unsetenv USE_MQTT
 
-if ($?VERBOSE) echo "$0:t $$ -- START" `date` >& /dev/stderr
+setenv USE_MQTT
+
+if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
@@ -51,7 +50,7 @@ set SN = `echo "$ID" | sed 's/.*-..-\(.*\).*/\1/'`
 
 set NOW = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" "$TS"`
 
-if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","camera":"'$CN'","time":'$NOW'}'
+if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","camera":"'$CN'","time":'$NOW'}'
 
 ## create JSON
 set IJ = "$IF:r.json"
@@ -60,7 +59,7 @@ set JSON = '{"device":"'$MOTION_DEVICE_NAME'","camera":"'"$CN"'","type":"jpeg","
 
 echo "$JSON" > "$IJ"
 
-if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","json":"'"$IJ"'","image":'"$JSON"'}'
+if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","json":"'"$IJ"'","image":'"$JSON"'}'
 
 ## do MQTT
 if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
@@ -79,6 +78,6 @@ endif
 ##
 
 done:
-  if ($?VERBOSE) echo "$0:t $$ -- END" `date` >& /dev/stderr
-  if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","info":"END"}'
+  if ($?DEBUG) echo "$0:t $$ -- END" `date` >& /dev/stderr
+  if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","info":"END"}'
   exit

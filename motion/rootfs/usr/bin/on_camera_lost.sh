@@ -1,10 +1,8 @@
 #!/bin/tcsh
 
-setenv DEBUG
-setenv VERBOSE
 setenv USE_MQTT
 
-if ($?VERBOSE) echo "$0:t $$ -- START" `date` >& /dev/stderr
+if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
@@ -40,7 +38,7 @@ set TS = "${YR}${MO}${DY}${HR}${MN}${SC}"
 # get time
 set NOW = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" "$TS"`
 
-if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","camera":"'$CN'","time":'$NOW'}'
+if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","camera":"'$CN'","time":'$NOW'}'
 
 ## do MQTT
 if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
@@ -60,5 +58,5 @@ endif
 ##
 
 done:
-  if ($?VERBOSE && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"VERBOSE":"'$0:t'","pid":"'$$'","info":"END"}'
-  if ($?VERBOSE) echo "$0:t $$ -- END" `date` >& /dev/stderr
+  if ($?DEBUG && $?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":"'$$'","info":"END"}'
+  if ($?DEBUG) echo "$0:t $$ -- END" `date` >& /dev/stderr
