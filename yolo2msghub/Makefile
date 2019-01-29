@@ -15,6 +15,7 @@ LABEL=$(shell jq -r '.label' service.json)
 VERSION=$(shell jq -r '.version' service.json)
 SERVICE_TAG="${ORG}/${URL}_${VERSION}_${ARCH}"
 SERVICE_PORT=$(shell jq -r '.deployment.services.'${LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
+requiredServices=$(shell jq -j '.requiredServices|to_entries[]|.value.url," "' service.json)
 
 ## KEYS
 PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
@@ -62,12 +63,11 @@ verify: publish
 test: service.json userinput.json
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
-	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
+	jq '.arch="'${ARCH}'"|.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
-	jq -c '{"requiredServices":[.requiredServices|to_entries[]|.value.url]}' test/service.definition.json
 
 depend: test
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
+	export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:${APIKEY} && ./mkdepend.sh test/
 
 start: remove stop publish depend
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
