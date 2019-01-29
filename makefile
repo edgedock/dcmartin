@@ -19,6 +19,16 @@ build:
 	  $(MAKE) -C $$dir $@; \
 	done
 
+check:
+	for dir in $(SERVICES); do \
+	  $(MAKE) -C $$dir $@; \
+	done
+
+run:
+	for dir in $(SERVICES); do \
+	  $(MAKE) -C $$dir $@; \
+	done
+
 remove:
 	for dir in $(SERVICES); do \
 	  $(MAKE) -C $$dir $@; \

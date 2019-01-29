@@ -72,7 +72,6 @@ depend: test
 start: remove stop publish depend
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
-	curl -sSL 'http://localhost:'${SERVICE_PORT} -o check.json && jq '.' check.json
 
 stop: test
 	-export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/

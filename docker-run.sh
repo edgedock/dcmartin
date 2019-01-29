@@ -36,7 +36,6 @@ fi
 if [ -z "${USERINPUT:-}" ]; then USERINPUT="userinput.json"; fi
 if [ ! -s "${USERINPUT}" ]; then echo "+++ WARN $0 $$ -- cannot locate ${USERINPUT}; continuing"; fi
 
-
 # temporary file-system
 if [ $(jq '.tmpfs!=null' "${SERVICE}") == 'true' ]; then 
   # size
