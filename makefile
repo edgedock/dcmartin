@@ -8,7 +8,7 @@
 
 ORG = dcmartin@us.ibm.com
 URL = com.github.dcmartin.open-horizon
-DOCKER_ID = dcmartin
+DOCKER_ID = $(shell whoami)
 
 ##
 ## things NOT TO change
