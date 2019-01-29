@@ -45,22 +45,10 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
     "log_level": "info",
     "debug": "false",
     "services": [
-      {
-        "name": "yolo",
-        "url": "http://yolo:80"
-      },
-      {
-        "name": "hal",
-        "url": "http://hal:80"
-      },
-      {
-        "name": "cpu",
-        "url": "http://cpu:80"
-      },
-      {
-        "name": "wan",
-        "url": "http://wan:80"
-      }
+      { "name": "yolo", "url": "http://yolo:80" },
+      { "name": "hal", "url": "http://hal:80" },
+      { "name": "cpu", "url": "http://cpu:80" },
+      { "name": "wan", "url": "http://wan:80" }
     ]
   }
 }
