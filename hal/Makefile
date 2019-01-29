@@ -64,14 +64,15 @@ test: service.json userinput.json
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${ORG}" -d test
 	jq '.deployment.services.'${LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s|{arch}|${ARCH}|g" > test/service.definition.json
 	cp -f userinput.json test/userinput.json
+	jq -c '{"requiredServices":[.requiredServices|to_entries[]|.value.url]}' test/service.definition.json
 
 depend: test
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev dependency fetch -d test/ --org "${ORG}" --url "${URL}" -u ${ORG}/iamapikey:${APIKEY}
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 
-start: remove publish depend stop
+start: remove stop publish depend
+	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d test/
-	curl -sSL 'http://localhost:'${SERVICE_PORT} -o start.json && jq '.' start.json
+	curl -sSL 'http://localhost:'${SERVICE_PORT} -o check.json && jq '.' check.json
 
 stop: test
 	-export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
