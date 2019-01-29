@@ -78,6 +78,9 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
   }
 }
 ```
+## Example
+
+![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
 
 # Open Horizon
 
