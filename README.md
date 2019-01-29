@@ -19,6 +19,7 @@ sudo apt install -y git make
 mkdir ~/gitdir
 cd ~/gitdir
 git clone http://github.com/dcmartin/open-horizon
+cd open-horizon
 make
 ```
 
