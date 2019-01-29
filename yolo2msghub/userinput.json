@@ -11,7 +11,7 @@
         "YOLO_PERIOD": 0,
         "LOCALHOST_PORT": 8587,
         "LOG_LEVEL": "info",
-        "DEBUG": true 
+        "DEBUG": false
       }
     }
   ]

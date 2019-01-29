@@ -30,7 +30,7 @@ DOCKER_NAME=$(ARCH)_$(LABEL)
 DOCKER_TAG=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(VERSION)
 DOCKER_PORT=$(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
 
-default: run check
+default: build run check
 
 all: publish verify start validate
 
@@ -74,10 +74,10 @@ start: remove publish depend stop
 	curl -sSL 'http://localhost:'${SERVICE_PORT} -o start.json && jq '.' start.json
 
 stop: test
-	export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
+	-export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d test/
 
 clean: remove stop
-	rm -fr test/ check.json check.jpg service-${ARCH}.json
+	rm -fr test/ check.*
 	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 .PHONY: default all build run check stop push publish verify clean depend start

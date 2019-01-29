@@ -5,7 +5,7 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 JSON='[{"name": "yolo", "url": "http://yolo:80" },{"name": "hal", "url": "http://hal:80" },{"name":"cpu","url":"http://cpu:80"},{"name":"wan","url":"http://wan:80"}]'
 
-CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","services":'${JSON}',"port":'${YOLO2MSGHUB_PORT}'}'
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","services":'${JSON}'}'
 echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
 
 SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
@@ -17,9 +17,8 @@ while true; do
   for SERVICE in $SERVICES; do
     URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${SERVICE}'").url')
     if [ ! -z "${URL}" ]; then
-      OUT=$(curl -fqsSL "${URL}" | jq '.'"${SERVICE}"'?')
+      OUT=$(curl -sSL "${URL}" 2> /dev/null | jq '.'"${SERVICE}")
     fi
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${SERVICE} returns ${OUT}" &> /dev/stderr; fi
     if [ -z "${OUT:-}" ]; then
       OUT='null'
     fi
