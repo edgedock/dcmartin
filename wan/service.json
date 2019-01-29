@@ -18,7 +18,7 @@
     "services": {
       "wan": {
         "environment": [
-           "SERVICE=wan"
+           "SERVICE_LABEL=wan"
         ],
         "image": "dcmartin/{arch}_wan:0.0.1",
         "privileged": true

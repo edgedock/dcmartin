@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ ! -z "${SERVICE}" ] && [ ! -z $(command -v "${SERVICE:-}.sh" ) ]; then
-  ${SERVICE}.sh &
+if [ ! -z "${SERVICE_LABEL}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then
+  ${SERVICE_LABEL}.sh &
 else
-  echo "*** ERROR $0 $$ -- environment variable SERVICE: ${SERVICE}; command:" $(command -v "${SERVICE}.sh") &> /dev/stderr
+  echo "*** ERROR $0 $$ -- environment variable SERVICE_LABEL: ${SERVICE_LABEL}; command:" $(command -v "${SERVICE_LABEL}.sh") &> /dev/stderr
 fi
 
 if [ -z "${LOCALHOST_PORT:-}" ]; then 

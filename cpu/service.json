@@ -19,7 +19,7 @@
     "services": {
       "cpu": {
         "environment": [
-           "SERVICE=cpu"
+           "SERVICE_LABEL=cpu"
         ],
         "image": "dcmartin/{arch}_cpu:0.0.1",
         "privileged": true

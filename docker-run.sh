@@ -20,16 +20,22 @@ fi
 if [ -z "${SERVICE:-}" ]; then SERVICE="service.json"; fi
 if [ ! -s "${SERVICE}" ]; then echo "*** ERROR $0 $$ -- Cannot locate service configuration ${SERVICE}; exiting"; exit 1; fi
 LABEL=$(jq -r '.label' "${SERVICE}")
-OPTIONS="${OPTIONS:-}"' -e SERVICE='"${LABEL}"
+
+## privileged
+if [ $(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").privileged==true' "${SERVICE}") == 'true' ]; then
+  OPTIONS="${OPTIONS:-}"' --privileged'
+fi
+
+## environment
+EVARS=$(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").value.environment?' "${SERVICE}")
+if [ "${EVARS}" != 'null' ]; then
+  OPTIONS="${OPTIONS:-} $(echo "${EVARS}" | jq -r '.[]' | while read -r; do T="-e ${REPLY}"; echo "${T}"; done)"
+fi
 
 ## input
 if [ -z "${USERINPUT:-}" ]; then USERINPUT="userinput.json"; fi
 if [ ! -s "${USERINPUT}" ]; then echo "+++ WARN $0 $$ -- cannot locate ${USERINPUT}; continuing"; fi
 
-## privileged
-if [ $(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").privileged==true' "${SERVICE}") ]; then
-  OPTIONS="${OPTIONS:-}"' --privileged'
-fi
 
 # temporary file-system
 if [ $(jq '.tmpfs!=null' "${SERVICE}") == 'true' ]; then 

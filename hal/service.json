@@ -18,7 +18,7 @@
     "services": {
       "hal": {
         "environment": [
-           "SERVICE=hal"
+           "SERVICE_LABEL=hal"
         ],
         "image": "dcmartin/{arch}_hal:0.0.1",
         "privileged": true

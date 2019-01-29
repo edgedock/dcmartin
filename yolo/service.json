@@ -19,7 +19,7 @@
     "services": {
       "yolo": {
         "environment": [
-          "SERVICE=yolo"
+          "SERVICE_LABEL=yolo"
         ],
         "image": "dcmartin/{arch}_yolo:0.0.1",
         "privileged": true
