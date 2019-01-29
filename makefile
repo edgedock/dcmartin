@@ -14,7 +14,7 @@ $(PATTERNS):
 $(SERVICES):
 	$(MAKE) ORG=$(ORG) -C $@
 
-check:
+build:
 	for dir in $(SERVICES); do \
 	  $(MAKE) -C $$dir $@; \
 	done

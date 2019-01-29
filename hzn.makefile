@@ -18,8 +18,8 @@ SERVICE_PORT=$(shell jq -r '.deployment.services.'${LABEL}'.specific_ports?|firs
 requiredServices=$(shell jq -j '.requiredServices|to_entries[]|.value.url," "' service.json)
 
 ## KEYS
-PRIVATE_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key
-PUBLIC_KEY_FILE=../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
+PRIVATE_KEY_FILE=$(wildcard ../IBM-*.key)
+PUBLIC_KEY_FILE=$(wildcard ../IBM-*.pem)
 APIKEY_JSON=../apiKey.json
 
 ## IBM CLOUD PLATFORM API KEY

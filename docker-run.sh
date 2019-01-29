@@ -20,6 +20,7 @@ fi
 if [ -z "${SERVICE:-}" ]; then SERVICE="service.json"; fi
 if [ ! -s "${SERVICE}" ]; then echo "*** ERROR $0 $$ -- Cannot locate service configuration ${SERVICE}; exiting"; exit 1; fi
 LABEL=$(jq -r '.label' "${SERVICE}")
+OPTIONS="${OPTIONS:-}"' -e SERVICE='"${LABEL}"
 
 ## input
 if [ -z "${USERINPUT:-}" ]; then USERINPUT="userinput.json"; fi
@@ -27,7 +28,7 @@ if [ ! -s "${USERINPUT}" ]; then echo "+++ WARN $0 $$ -- cannot locate ${USERINP
 
 ## privileged
 if [ $(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").privileged==true' "${SERVICE}") ]; then
-  OPTIONS="${OPTION:-}"' --privileged'
+  OPTIONS="${OPTIONS:-}"' --privileged'
 fi
 
 # temporary file-system
