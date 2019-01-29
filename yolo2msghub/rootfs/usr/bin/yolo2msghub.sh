@@ -46,5 +46,7 @@ while true; do
     echo "+++ WARN $0 $$ -- kafka invalid" &> /dev/stderr
   fi
 
+  if [ "${DEBUG:-}" == 'true' ]; then sleep 300; fi
+
 done
 
