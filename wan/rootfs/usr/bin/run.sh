@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ ! -z "${HZN_PATTERN}" ] && [ ! -z $(command -v "${HZN_PATTERN:-}.sh" ) ]; then
-  ${HZN_PATTERN}.sh &
+if [ ! -z "${SERVICE}" ] && [ ! -z $(command -v "${SERVICE:-}.sh" ) ]; then
+  ${SERVICE}.sh &
 else
-  echo "*** ERROR $0 $$ -- environment variable HZN_PATTERN: ${HZN_PATTERN}; command:" $(command -v "${HZN_PATTERN}.sh") &> /dev/stderr
+  echo "*** ERROR $0 $$ -- environment variable SERVICE: ${SERVICE}; command:" $(command -v "${SERVICE}.sh") &> /dev/stderr
 fi
 
 if [ -z "${LOCALHOST_PORT:-}" ]; then 

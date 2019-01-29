@@ -15,7 +15,7 @@ if [ -z "${YOLO_ENTITY:-}" ]; then YOLO_ENTITY=person; fi
 if [ -z "${DARKNET:-}" ]; then DARKNET="/darknet"; else echo "** WARNING: DARKNET from environment: ${DARKNET}" &> /dev/stderr; fi
 
 CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'"}'
-echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
+echo "${CONFIG}" > ${TMP}/${SERVICE}.json
 
 cd ${DARKNET}
 while true; do
@@ -43,7 +43,7 @@ while true; do
   COUNT=$(egrep '^'"${YOLO_ENTITY}" "${OUT}" | wc -l)
   # capture annotated image as BASE64 encoded string
   IMAGE=$(base64 -w 0 -i predictions.jpg)
-  echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/${HZN_PATTERN}.json
+  echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/${SERVICE}.json
   rm -f "${JPG}" "${OUT}" predictions.jpg
 
   sleep ${YOLO_PERIOD}

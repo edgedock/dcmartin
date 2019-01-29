@@ -5,7 +5,7 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 if [ -z "${HAL_PERIOD:-}" ]; then HAL_PERIOD=60; fi
 CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${HAL_PERIOD}'}'
-echo "${CONFIG}" > ${TMP}/${HZN_PATTERN}.json
+echo "${CONFIG}" > ${TMP}/${SERVICE}.json
 
 while true; do
   OUTPUT="${CONFIG}"
@@ -16,6 +16,6 @@ while true; do
     OUTPUT=$(echo "$OUTPUT" | jq '.'${ls}'='"${OUT}")
     if [ ${DEBUG:-} == 'true' ]; then echo "OUTPUT == ${OUTPUT}" &> /dev/stderr; fi
   done
-  echo "${OUTPUT}" > "${TMP}/${HZN_PATTERN}.json"
+  echo "${OUTPUT}" > "${TMP}/${SERVICE}.json"
   sleep ${HAL_PERIOD}
 done

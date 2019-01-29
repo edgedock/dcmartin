@@ -56,10 +56,6 @@ else
 fi
 
 # pre-defined inputs
-HZN_PATTERN=$(jq -r '.label' ${SERVICE})
-OPTIONS="${OPTIONS:-}"' -e HZN_PATTERN='"${HZN_PATTERN}"
-HZN_ORGANIZATION=$(jq -r '.org' ${SERVICE})
-OPTIONS="${OPTIONS:-}"' -e HZN_ORGANIZATION='"${HZN_ORGANIZATION}"
 HZN_DEVICE_ID=$(hostname)-${DOCKER_NAME}
 OPTIONS="${OPTIONS:-}"' -e HZN_DEVICE_ID='"${HZN_DEVICE_ID}"
 

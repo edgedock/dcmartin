@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### ALPINE
+### UBUNTU
 
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
@@ -8,27 +8,25 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 # Get the currect CPU consumption, then construct the HTTP response message
 HEADERS="Content-Type: application/json; charset=ISO-8859-1"
 
-# HOSTNAME
-HOSTNAME=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
-if [ "${DEBUG:-}" == 'true' ]; then echo "HOSTNAME: ${HOSTNAME}" &> /dev/stderr; fi
-HOSTNAME="$(hostname)-${HOSTNAME}"
-if [ "${DEBUG:-}" == 'true' ]; then echo "HOSTNAME: ${HOSTNAME}" &> /dev/stderr; fi
-BODY='{"hostname":"'${HOSTNAME}'","org":"'${HZN_ORGANIZATION:-null}'","pattern":"'${HZN_PATTERN:-null}'","device":"'${HZN_DEVICE_ID:-null}'"}'
-if [ "${DEBUG:-}" == 'true' ]; then echo "BODY: ${BODY}" &> /dev/stderr; fi
+# UBUNTU
+IPADDR=$(hostname -I | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
 
-# PID
-if [ ! -z "${HZN_PATTERN:-}" ]; then
-  PID=$(ps | grep "${HZN_PATTERN:-}.sh" | grep -v grep | awk '{ print $1 }' | head -1)
-  if [ "${DEBUG:-}" == 'true' ]; then echo "PID: ${PID}" &> /dev/stderr; fi
-  if [ -z "${PID}" ]; then PID=null; fi
+HOSTNAME="$(hostname)-${IPADDR}"
+BODY='{"hostname":"'${HOSTNAME}'","service":"'${SERVICE:-null}'","device":"'${HZN_DEVICE_ID:-null}'"}'
+
+IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
+HOSTNAME="$(hostname)-${IPADDR}"
+
+BODY='{"hostname":"'${HOSTNAME}'","service":"'${SERVICE:-null}'","device":"'${HZN_DEVICE_ID:-null}'"}'
+
+if [ ! -z "${SERVICE:-}" ]; then
+  PID=$(ps | grep "${SERVICE:-}.sh" | grep -v grep | awk '{ print $1 }' | head -1)
+  if [ -z "${PID}" ]; then PID=0; fi
   BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
 fi
-if [ "${DEBUG:-}" == 'true' ]; then echo "BODY: ${BODY}" &> /dev/stderr; fi
 
-# output
-if [ -s ${TMP}/${HZN_PATTERN}.json ]; then OUT=$(jq '.' ${TMP}/${HZN_PATTERN}.json); else OUT='null'; fi
-BODY=$(echo "${BODY}" | jq '.'${HZN_PATTERN}'='"${OUT}")
-if [ "${DEBUG:-}" == 'true' ]; then echo "BODY: ${BODY}" &> /dev/stderr; fi
+if [ -s ${TMP}/${SERVICE}.json ]; then OUT=$(jq '.' ${TMP}/${SERVICE}.json); else OUT='null'; fi
+BODY=$(echo "${BODY}" | jq '.'${SERVICE}'='"${OUT}")
 
 HTTP="HTTP/1.1 200 OK\r\n${HEADERS}\r\n\r\n${BODY}\r\n"
 

@@ -39,7 +39,7 @@ build: build.json service.json
 	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: remove
-	./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 remove:
 	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
@@ -67,7 +67,7 @@ test: service.json userinput.json
 	cp -f userinput.json test/userinput.json
 
 depend: test
-	export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:${APIKEY} && ./mkdepend.sh test/
+	export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:${APIKEY} && ../mkdepend.sh test/
 
 start: remove stop publish depend
 	export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d test/

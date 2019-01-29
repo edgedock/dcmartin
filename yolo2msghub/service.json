@@ -27,7 +27,7 @@
     "services": {
       "yolo2msghub": {
         "environment": [
-          "PATTERN=yolo2msghub"
+          "SERVICE=yolo2msghub"
         ],
         "devices": null,
         "binds": null,
