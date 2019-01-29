@@ -1,12 +1,15 @@
 ## ORG
 ORG = dcmartin@us.ibm.com
 
-## services
 SERVICES = cpu hal wan yolo
+PATTTERNS = yolo2msghub motion
 
-default: all
+default: $(SERVICES)
 
-all: $(SERVICES)
+all: $(SERVICES) $(PATTERNS)
+
+$(PATTERNS):
+	$(MAKE) ORG=$(ORG) -C $@
 
 $(SERVICES):
 	$(MAKE) ORG=$(ORG) -C $@
@@ -37,5 +40,4 @@ verify:
 	  $(MAKE) ORG=$(ORG) -C $$dir $@; \
 	done
 
-
-.PHONY: $(SERVICES) default all build run check stop push publish verify clean depend start
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean depend start
