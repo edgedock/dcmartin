@@ -5,7 +5,7 @@
   "documentation": "https://github.com/dcmartin/open-horizon/yolo/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo",
   "version": "0.0.1",
-  "arch": "{arch}",
+  "arch": null,
   "public": true,
   "sharable": "singleton",
   "requiredServices": [],
@@ -21,7 +21,10 @@
         "environment": [
           "SERVICE_LABEL=yolo"
         ],
-        "image": "dcmartin/{arch}_yolo:0.0.1",
+        "devices": [
+          "/dev/video0:/dev/video0"
+        ],
+        "image": null,
         "privileged": true
       }
     }

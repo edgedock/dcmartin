@@ -5,7 +5,7 @@
   "documentation": "https://github.com/dcmartin/open-horizon/hal/README.md",
   "url": "com.github.dcmartin.open-horizon.hal",
   "version": "0.0.1",
-  "arch": "{arch}",
+  "arch": null,
   "public": true,
   "sharable": "singleton",
   "requiredServices": [],
@@ -20,7 +20,7 @@
         "environment": [
            "SERVICE_LABEL=hal"
         ],
-        "image": "dcmartin/{arch}_hal:0.0.1",
+        "image": null,
         "privileged": true
       }
     }

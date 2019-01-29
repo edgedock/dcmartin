@@ -31,6 +31,12 @@ build:
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
+push:
+	for dir in $(ALL); do \
+	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
+	done
+
+
 check:
 	for dir in $(ALL); do \
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \

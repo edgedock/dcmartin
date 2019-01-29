@@ -5,7 +5,7 @@
   "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo2msghub",
   "version": "0.0.1",
-  "arch": "{arch}",
+  "arch": null,
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
@@ -37,7 +37,7 @@
             "HostIP": "0.0.0.0"
           }
         ],
-        "image": "dcmartin/{arch}_yolo2msghub:0.0.1",
+        "image": null,
         "privileged": false
       }
     }
