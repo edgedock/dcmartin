@@ -12,6 +12,16 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]
 
+```
+wget -qO - ibm.biz/horizon-setup | sudo bash
+sudo addgroup $(whoami) docker
+sudo apt install -y git make
+mkdir ~/gitdir
+cd ~/gitdir
+git clone http://github.com/dcmartin/open-horizon
+make
+```
+
 # Services
 
 There are sample services available:
