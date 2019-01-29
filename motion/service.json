@@ -24,6 +24,10 @@
         { "name": "MOTION_POST_PICTURES", "label": "post pictures; on, off, center, best", "type": "boolean", "defaultValue": "best" },
         { "name": "MOTION_LOG_LEVEL", "label": "specify motion logging level", "type": "int", "defaultValue": "2" },
         { "name": "MOTION_LOG_TYPE", "label": "specify motion logging type", "type": "string", "defaultValue": "all" },
+        { "name": "HAL_PERIOD", "label": "localhost port", "type": "int", "defaultValue": "300" },
+        { "name": "WAN_PERIOD", "label": "localhost port", "type": "int", "defaultValue": "3600" },
+        { "name": "CPU_PERIOD", "label": "localhost port", "type": "int", "defaultValue": "60" },
+        { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8583" },
         { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
         { "name": "DEBUG", "label": "debug; true or false", "type": "boolean", "defaultValue": "false" }
   ],
@@ -31,7 +35,7 @@
     "services": {
       "motion": {
         "environment": [
-           "SERVICE=motion"
+           "PATTERN=motion"
         ],
         "image": "dcmartin/amd64_motion:0.0.1",
         "privileged": true,
@@ -45,6 +49,6 @@
     "size": 32767000 
   },
   "ports": {
-    "8583/tcp": 80
+    "8583/tcp": 8583
   }
 }
