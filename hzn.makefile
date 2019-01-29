@@ -28,7 +28,7 @@ KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 APIKEY = $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json),)
 
 ## docker
-DOCKER_ID = $(if $(DOCKER_ID),$(DOCKER_ID),$(whoami))
+DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
 DOCKER_NAME = $(ARCH)_$(SERVICE_LABEL)
 DOCKER_TAG = $(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
@@ -77,6 +77,10 @@ start: remove stop publish depend
 
 stop: test
 	-export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d test/
+
+pattern: publish pattern.json
+	export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${ORG}" -u iamapikey:${APIKEY} -f pattern.json -p ${SERVICE_LABEL} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	
 
 clean: remove stop
 	rm -fr test/ check.*
