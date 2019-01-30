@@ -1,6 +1,10 @@
 # `yolo2msghub` - Send entity recognition counts to Kafka
 
-Provides _pattern_ of services to send YOLO classified image entity counts to Kafka; updates as often as underlying services provide.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+Send YOLO classified image entity counts to Kafka; updates as often as underlying services provide.
+This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+
+### About Open Horizon
+Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.  Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]. Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
 ## Status
 
@@ -163,24 +167,6 @@ export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange patter
 Updating yolo2msghub in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
 ```
-## About Open Horizon
-
-Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
-
-## Credentials
-
-**Note:** _You will need an IBM Cloud [account][ibm-registration]_
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
-
-# Setup
-
-Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]
-
-# Further Information
-
-Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
-
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
@@ -199,8 +185,6 @@ based on the following:
 [service-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
 [build-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/build.json
 [dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/Dockerfile
-
-
 [dcmartin]: https://github.com/dcmartin
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
 [edge-install]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/adding-devices.html
