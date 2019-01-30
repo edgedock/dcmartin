@@ -35,7 +35,7 @@ Copy this [repository][repository], change to the `wan` directory, then use the 
   }
 }
 ```
-The `wan` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
+The `wan` payload will be incomplete until the service initiates; subsequent `make check` will return complete; see below:
 ```
 {
   "hostname": "8a1dc0372e86-172017000005",
