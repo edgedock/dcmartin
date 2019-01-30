@@ -12,39 +12,38 @@
   "vendor": "rpi",
   "discover": false,
   "tokens": [ 
-    { "id": "none" },
     { "id":"token-1", "value": "nowisthetimeforallgoodmen" }, 
-    { "id":"token-2", "value": "longerpasswordsarebetter" }
+    { "id":"token-2", "value": "longerpasswordsarebetter" },
+    { "id": "none" }
   ],
   "networks": [
     { "id": "default", "dhcp": "dynamic", "ssid": "TEST", "password": "0123456789" },
-    { "id": "none" },
-    { "id": "site-1", "dhcp": "dynamic", "ssid": "%%NETWORK_SSID%%", "password": "%%NETWORK_PASSWORD%%" }
+    { "id": "site-1", "dhcp": "dynamic", "ssid": "%%NETWORK_SSID%%", "password": "%%NETWORK_PASSWORD%%" },
+    { "id": "none" }
   ],
   "patterns": [
-    { "id": "none" },
     { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
-    { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" }
+    { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" },
+    { "id": "none" }
   ],
   "setups": [
-    { "id": "none" },
     { "id": "horizon", "path": "hzn-install.sh", "url": "http://ibm.biz/horizon-setup" },
-    { "id": "hassio", "path": "hassio-install.sh", "url": "http://ibm.biz/hassio-setup" }
+    { "id": "hassio", "path": "hassio-install.sh", "url": "http://ibm.biz/hassio-setup" },
+    { "id": "none" }
   ],
   "vendors": [
-    { "id": "none" },
     { "id":"rpi", "tag": "Raspberry Pi Foundation" },
-    { "id":"vbox", "tag": "Oracle VirtualBox virtual NIC" }
+    { "id":"vbox", "tag": "Oracle VirtualBox virtual NIC" },
+    { "id": "none" }
   ],
   "configurations": [
-    { "id": "none" },
     {
       "id": "cpuconf",
       "pattern": "cpu2msghub",
       "exchange": "alpha",
-      "network": "site-1",
+      "network": "none",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "TO52pSM0KcKtlOJ2bvRbYHg7SsoTbnB8HX9Vg0hxM0H7ZFgt" }
+        { "key": "MSGHUB_API_KEY", "value": null }
       ],
       "public_key": null,
       "private_key": null,
@@ -64,9 +63,9 @@
       "id": "sdrconf",
       "pattern": "sdr2msghub",
       "exchange": "alpha",
-      "network": "site-1",
+      "network": "none",
       "variables": [
-        { "key": "MSGHUB_API_KEY", "value": "2R4iaggsRB3EUYLbCcVfTZaE0M0o67UMBlb7BWDsEnxoiX64" }
+        { "key": "MSGHUB_API_KEY", "value": null }
       ],
       "public_key": null,
       "private_key": null,
@@ -81,7 +80,8 @@
         { "id": "rpi-16", "machine": "rpi3", "device": "test-sdr-8", "token": null },
         { "id": "rpi-18", "machine": "rpi3", "device": "test-sdr-9", "token": null }
       ]
-    }
+    },
+    { "id": "none" }
   ],
   "machines": [
     { "id": "rpi3", "type": "raspberrypi3", "arch": "armhf", "distribution": "raspbian-stretch-lite" },

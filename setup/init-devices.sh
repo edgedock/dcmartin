@@ -94,7 +94,6 @@ if [[ ! -s "$out" ]]; then
     nmap -sn -T5 "$net" > "$out"
   fi
 fi
-
 if [[ ! -s "$out" ]]; then
   echo 'ERROR: no nmap(8) output for '"$net" &> /dev/stderr
   exit 1
