@@ -405,7 +405,7 @@ All signatures verified
 ### Pattern
 This service may also be registered in the exchange as a _pattern_ for node registration.
 
-The **make** `start` target will initiate the service locally using all required services.
+The **make** `start` target will initiate the pattern locally using all required services.
 ```
 % make start
 ...
