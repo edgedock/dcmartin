@@ -167,7 +167,7 @@ based on the following:
 [ibm-apikeys]: https://console.bluemix.net/iam/#/apikeys
 [ibm-registration]: https://console.bluemix.net/registration/
 [issue]: https://github.com/dcmartin/open-horizon/issues
-[macos-install]: https://pkg.bluehorizon.network/macos
+[macos-install]: http://pkg.bluehorizon.network/macos
 [open-horizon]: http://github.com/open-horizon/
 [repository]: https://github.com/dcmartin/open-horizon
 [setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
