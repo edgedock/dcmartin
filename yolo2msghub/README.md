@@ -93,8 +93,6 @@ The **make** command is used to `build`,`run`,`check` (default), `publish`, `ver
 + `start` - intiates service and required services locally; __requires__ `hzn` CLI
 + `clean` - remove all generated artefacts, including running containers and images
 
-The `pattern` target will publish the pattern in the exchange (see **`pattern`** below).
-
 ### `check`
 ```
 % make check
@@ -115,24 +113,6 @@ The `pattern` target will publish the pattern in the exchange (see **`pattern`**
     "wan": { "log_level": "info", "debug": "false", "date": 1548797896, "period": 1800, "speedtest": { "download": 6030465.984919555, "upload": 2598608.738590407, "ping": 112, "server": { "url": "http://sjc.speedtest.net/speedtest/upload.php", "lat": "37.3041", "lon": "-121.8727", "name": "San Jose, CA", "country": "United States", "cc": "US", "sponsor": "Speedtest.net", "id": "10384", "url2": "http://sjc2.speedtest.net/speedtest/upload.php", "host": "sjc.host.speedtest.net:8080", "d": 7.476714842887551, "latency": 112 }, "timestamp": "2019-01-29T21:37:37.359821Z", "bytes_sent": 4472832, "bytes_received": 13115612, "share": null, "client": { "ip": "67.164.104.198", "lat": "37.2458", "lon": "-121.8306", "isp": "Comcast Cable", "isprating": "3.7", "rating": "0", "ispdlavg": "0", "ispulavg": "0", "loggedin": "0", "country": "US" } } } }
 }
 ```
-### `publish`
-```
-% make publish
-...
-Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_cpu:0.0.1'
-Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
-Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
-```
-### `verify`
-```
-% make verify
-# should return 'true'
-hzn exchange service list -o {org} -u iamapikey:{apikey} | jq '.|to_entries[]|select(.value=="'"{org}/{url}_{version}_{arch}"'")!=null'
-true
-# should return 'All signatures verified'
-hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
-All signatures verified
-```
 ### `start`
 ```
 % make start
@@ -148,6 +128,10 @@ Start service: service(s) yolo with instance id prefix com.github.dcmartin.open-
 Running service.
 Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
 Running service.
+```
+## Publishing
+
+The `pattern` target will publish the pattern in the exchange (see **`pattern`** below).
 ```
 ### `pattern`
 ```
