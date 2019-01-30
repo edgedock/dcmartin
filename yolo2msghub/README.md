@@ -155,7 +155,14 @@ Running service.
       "lspci": null,
       "lsblk": [ { "name": "mmcblk0", "maj:min": "179:0", "rm": "0", "size": "29.7G", "ro": "0", "type": "disk", "mountpoint": null, "children": [ { "name": "mmcblk0p1", "maj:min": "179:1", "rm": "0", "size": "43.9M", "ro": "0", "type": "part", "mountpoint": null }, { "name": "mmcblk0p2", "maj:min": "179:2", "rm": "0", "size": "29.7G", "ro": "0", "type": "part", "mountpoint": "/etc/hosts" } ] } ]
     },
-    "cpu": null,
+    "cpu": {
+      "log_level": "info",
+      "debug": "false",
+      "date": 1548820336,
+      "period": 60,
+      "interval": 1,
+      "percent": 79.7
+    },
     "wan": { "log_level": "info", "debug": "false", "date": 1548797896, "period": 1800, "speedtest": { "download": 6030465.984919555, "upload": 2598608.738590407, "ping": 112, "server": { "url": "http://sjc.speedtest.net/speedtest/upload.php", "lat": "37.3041", "lon": "-121.8727", "name": "San Jose, CA", "country": "United States", "cc": "US", "sponsor": "Speedtest.net", "id": "10384", "url2": "http://sjc2.speedtest.net/speedtest/upload.php", "host": "sjc.host.speedtest.net:8080", "d": 7.476714842887551, "latency": 112 }, "timestamp": "2019-01-29T21:37:37.359821Z", "bytes_sent": 4472832, "bytes_received": 13115612, "share": null, "client": { "ip": "67.164.104.198", "lat": "37.2458", "lon": "-121.8306", "isp": "Comcast Cable", "isprating": "3.7", "rating": "0", "ispdlavg": "0", "ispulavg": "0", "loggedin": "0", "country": "US" } } } }
 }
 ```
