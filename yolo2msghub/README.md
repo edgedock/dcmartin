@@ -82,7 +82,7 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
 ```
 # Building
 
-The **make** command is used to `build`,`run`,`check`, `publish`, `verify`,`start`, and `clean`; default: `build`, `run`, and `check`.
+The **make** command is used to `build`,`run`,`check` (default), `publish`, `verify`,`start`, and `clean`.
 
 + `build` - build container using `build.json` and `service.json`
 + `run` - run container locally; map `ports` in `service.json`
