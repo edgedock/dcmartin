@@ -4,7 +4,7 @@ Send YOLO classified image entity counts to Kafka; updates as often as underlyin
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ### About Open Horizon
-Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.  Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]. Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
+Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for _patterns_ of services.  Refer to these [setup instructions][setup].  Installation package for macOS is also [available][macos-install]. For more information: [getting started][edge-fabric] and [installation][edge-install].
 
 ## Status
 
