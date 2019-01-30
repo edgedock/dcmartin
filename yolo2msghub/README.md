@@ -8,6 +8,19 @@ Provides _pattern_ of services to send YOLO classified image entity counts to Ka
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
+### Options
+Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
++ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
++ `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
++ `YOLO_ENTITY` - entity to count; defaults to `person`
++ `YOLO_PERIOD` - seconds between updates; defaults to `0`
++ `LOCALHOST_PORT` - port for access; default 8587 
++ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
+#### Example registration
+```
+% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
+```
+
 ### Services
 
 This _pattern_ utilizes the following micro-services:
@@ -68,18 +81,6 @@ The `yolo2msghub` payload will be incomplete as the required services are not ru
 
 This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
 
-## User Input (options)
-Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
-+ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
-+ `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
-+ `YOLO_ENTITY` - entity to count; defaults to `person`
-+ `YOLO_PERIOD` - seconds between updates; defaults to `0`
-+ `LOCALHOST_PORT` - port for access; default 8587 
-+ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
-### Example registration
-```
-% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
-```
 ## Publishing
 
 Prior to _publishing_ either _service_ or _pattern_, the `service.json` [file][service-json] must be modified for your organization.
