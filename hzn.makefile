@@ -20,14 +20,14 @@ SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_p
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_LABEL),$(shell jq -r '.url' service.json))
 
 ## KEYS
-PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),"PRIVATE_KEY_FILE")
-PUBLIC_KEY_FILE := $(if $(wildcard ../IBM-*.pem),$(wildcard ../IBM-*.pem),"PUBLIC_KEY_FILE")
+PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)
+PUBLIC_KEY_FILE := $(if $(wildcard ../IBM-*.pem),$(wildcard ../IBM-*.pem),PUBLIC_KEY_FILE)
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
-APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json),)
-KAFKA_APIKEY := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -r '.api_key' ../apiKey-kafka.json),)
-KAFKA_BROKER := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -j '.kafka_brokers_sasl[]|(.,",")' ../apiKey-kafka.json),)
+APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json),APIKEY)
+KAFKA_APIKEY := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -r '.api_key' ../apiKey-kafka.json),KAFKA_APIKEY)
+KAFKA_BROKER := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -j '.kafka_brokers_sasl[]|(.,",")' ../apiKey-kafka.json),KAFKA_BROKER)
 
 ## docker
 DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
@@ -68,8 +68,8 @@ test: service.json userinput.json
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${ORG}" -d test
 	jq '.arch="'${ARCH}'"|.deployment.services.'${SERVICE_LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
-	for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' userinput.json) && if [ $${VAL} = "null" ]; then echo "+++ WARN: variable $${evar} has no default and value is null; edit userinput.json"; else echo "+++ INFO: $${evar} is $${VAL}"; fi; done
 	cp -f userinput.json test/userinput.json
+	for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' test/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; edit userinput.json"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} test/userinput.json) && echo "$${UI}" > test/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
 
 depend: test
 	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:${APIKEY} && ../mkdepend.sh test/
