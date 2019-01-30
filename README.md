@@ -15,7 +15,7 @@ Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LIN
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 sudo addgroup $(whoami) docker
-sudo apt install -y git make
+sudo apt install -y git make curl jq
 mkdir ~/gitdir
 cd ~/gitdir
 git clone http://github.com/dcmartin/open-horizon
