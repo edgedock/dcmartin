@@ -14,7 +14,7 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ### Sample
 
-![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
+![sample.png](sample.png?raw=true "YOLO2MSGHUB")
 
 ### Options
 Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
