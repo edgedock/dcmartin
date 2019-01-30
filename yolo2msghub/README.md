@@ -422,7 +422,7 @@ Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401
 Running service.
 ```
 
-The `pattern` target will publish the pattern in the exchange.
+The **make** `pattern` target will publish the pattern in the exchange.
 ```
 % make pattern
 ...
