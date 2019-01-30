@@ -8,13 +8,13 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ## Status
 
-+ `org` - `dcmartin@us.ibm.com/yolo2msghub`
++ `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
 ### Sample
 
-![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
+![sample.png](sample.png?raw=true "YOLO2MSGHUB")
 
 ### Options
 Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
