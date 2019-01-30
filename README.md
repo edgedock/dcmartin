@@ -10,7 +10,7 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 # Setup
 
-Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]; quick-start for Ubuntu/Debian/Raspbian LINUX below:
+Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. Installation for [macOS][macos-install].
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
