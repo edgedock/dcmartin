@@ -15,7 +15,7 @@ DOCKER_ID = $(shell whoami)
 ##
 
 SERVICES = cpu hal wan yolo
-PATTERNS = yolo2msghub motion
+PATTERNS = yolo2msghub # motion
 
 ALL = $(SERVICES) $(PATTERNS)
 
