@@ -8,6 +8,10 @@ Provides _pattern_ of services to send YOLO classified image entity counts to Ka
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
+### Sample
+
+![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
+
 ### Options
 Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
 + `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
@@ -43,9 +47,9 @@ This service supports the following architectures:
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
 
-# How To Use
+# Getting started
 
-Copy this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; see below:
+Copy this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; quick-start below:
 
 ```
 % mkdir ~/gitdir
@@ -72,18 +76,22 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
   }
 }
 ```
-The `yolo2msghub` payload will be incomplete as the required services are not running.  Use the `make start` target (see **Pattern** below); subsequent `make check` will return payload.
-### Sample
+# Building
 
-![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
+The **make** command is used to `build`,`run`,`check`, `publish`, `verify`,`start`, and `clean`; default: `build`, `run`, and `check`.
 
-## Publishing
++ `build` - build container using `build.json` and `service.json`
++ `run` - run container locally; map `ports` in `service.json`
++ `check` - tests the service locally on mapped port
++ `push` - push the container to Docker registry; __requires__ `DOCKER_ID` and `docker login`
++ `publish` - publish service to _exchange_; __requires__ `hzn` CLI
++ `verify` - verify service on exchange; __requires__ `hzn` CLI
++ `start` - intiates service and required services locally; __requires__ `hzn` CLI
++ `clean` - remove all generated artefacts, including running containers and images
 
-This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
-Prior to _publishing_ either _service_ or _pattern_, the `service.json` [file][service-json] must be modified for your organization.
+The `pattern` target will publish the pattern in the exchange (see **`pattern`** below).
 
-### Service
-The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
+### `publish`
 ```
 % make publish
 ...
@@ -91,6 +99,7 @@ Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f
 Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
 ```
+### `verify`
 ```
 % make verify
 # should return 'true'
@@ -100,10 +109,7 @@ true
 hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
 All signatures verified
 ```
-### Pattern
-This service may also be registered in the exchange as a _pattern_ for node registration.
-
-The **make** `start` target will initiate the pattern locally using all required services.
+### `start`
 ```
 % make start
 ...
@@ -119,8 +125,10 @@ Running service.
 Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
 Running service.
 ```
-After the `yolo2msghub` _pattern_ has been started, the **make** `check` target will return complete results; see below:
+### `check`
 ```
+% make check
+...
 {
   "hostname": "05acf6435757-192168016002",
   "service": "yolo2msghub",
@@ -129,304 +137,29 @@ After the `yolo2msghub` _pattern_ has been started, the **make** `check` target 
   "yolo2msghub": {
     "log_level": "info",
     "debug": "false",
-    "services": [
-      {
-        "name": "yolo",
-        "url": "http://yolo:80"
-      },
-      {
-        "name": "hal",
-        "url": "http://hal:80"
-      },
-      {
-        "name": "cpu",
-        "url": "http://cpu:80"
-      },
-      {
-        "name": "wan",
-        "url": "http://wan:80"
-      }
-    ],
+    "services": [ { "name": "yolo", "url": "http://yolo:80" }, { "name": "hal", "url": "http://hal:80" }, { "name": "cpu", "url": "http://cpu:80" }, { "name": "wan", "url": "http://wan:80" } ],
     "date": 1548798539,
-    "yolo": {
-      "log_level": "info",
-      "debug": "false",
-      "date": 1548798507,
-      "period": 0,
-      "entity": "person",
-      "time": 44.725642,
-      "count": 0,
-      "width": 320,
-      "height": 240,
-      "scale": "320x240",
-      "mock": "false",
-      "image": "redacted"
-    },
+    "yolo": { "log_level": "info", "debug": "false", "date": 1548798507, "period": 0, "entity": "person", "time": 44.725642, "count": 0, "width": 320, "height": 240, "scale": "320x240", "mock": "false", "image": "redacted" },
     "hal": {
       "log_level": "info",
       "debug": "false",
       "date": 1548797851,
       "period": 60,
-      "lshw": {
-        "id": "b5dd54a7a499",
-        "class": "system",
-        "claimed": true,
-        "description": "Computer",
-        "product": "Raspberry Pi 3 Model B Plus Rev 1.3",
-        "serial": "000000005770a507",
-        "width": 32,
-        "children": [
-          {
-            "id": "core",
-            "class": "bus",
-            "claimed": true,
-            "description": "Motherboard",
-            "physid": "0",
-            "capabilities": {
-              "raspberrypi_3-model-b-plus": true,
-              "brcm_bcm2837": true
-            },
-            "children": [
-              {
-                "id": "cpu:0",
-                "class": "processor",
-                "claimed": true,
-                "description": "CPU",
-                "product": "cpu",
-                "physid": "0",
-                "businfo": "cpu@0",
-                "units": "Hz",
-                "size": 1400000000,
-                "capacity": 1400000000,
-                "capabilities": {
-                  "cpufreq": "CPU Frequency scaling"
-                }
-              },
-              {
-                "id": "cpu:1",
-                "class": "processor",
-                "disabled": true,
-                "claimed": true,
-                "description": "CPU",
-                "product": "cpu",
-                "physid": "1",
-                "businfo": "cpu@1",
-                "units": "Hz",
-                "size": 1400000000,
-                "capacity": 1400000000,
-                "capabilities": {
-                  "cpufreq": "CPU Frequency scaling"
-                }
-              },
-              {
-                "id": "cpu:2",
-                "class": "processor",
-                "disabled": true,
-                "claimed": true,
-                "description": "CPU",
-                "product": "cpu",
-                "physid": "2",
-                "businfo": "cpu@2",
-                "units": "Hz",
-                "size": 1400000000,
-                "capacity": 1400000000,
-                "capabilities": {
-                  "cpufreq": "CPU Frequency scaling"
-                }
-              },
-              {
-                "id": "cpu:3",
-                "class": "processor",
-                "disabled": true,
-                "claimed": true,
-                "description": "CPU",
-                "product": "cpu",
-                "physid": "3",
-                "businfo": "cpu@3",
-                "units": "Hz",
-                "size": 1400000000,
-                "capacity": 1400000000,
-                "capabilities": {
-                  "cpufreq": "CPU Frequency scaling"
-                }
-              },
-              {
-                "id": "memory",
-                "class": "memory",
-                "claimed": true,
-                "description": "System memory",
-                "physid": "4",
-                "units": "bytes",
-                "size": 972234752
-              }
-            ]
-          },
-          {
-            "id": "network",
-            "class": "network",
-            "claimed": true,
-            "description": "Ethernet interface",
-            "physid": "1",
-            "logicalname": "eth0",
-            "serial": "02:42:ac:1d:00:02",
-            "units": "bit/s",
-            "size": 10000000000,
-            "configuration": {
-              "autonegotiation": "off",
-              "broadcast": "yes",
-              "driver": "veth",
-              "driverversion": "1.0",
-              "duplex": "full",
-              "ip": "172.29.0.2",
-              "link": "yes",
-              "multicast": "yes",
-              "port": "twisted pair",
-              "speed": "10Gbit/s"
-            },
-            "capabilities": {
-              "ethernet": true,
-              "physical": "Physical interface"
-            }
-          }
-        ]
-      },
-      "lsusb": [
-        {
-          "bus_number": "001",
-          "device_id": "001",
-          "device_bus_number": "1d6b",
-          "manufacture_id": "Bus 001 Device 001: ID 1d6b:0002",
-          "manufacture_device_name": "Bus 001 Device 001: ID 1d6b:0002"
-        },
-        {
-          "bus_number": "001",
-          "device_id": "003",
-          "device_bus_number": "0424",
-          "manufacture_id": "Bus 001 Device 003: ID 0424:2514",
-          "manufacture_device_name": "Bus 001 Device 003: ID 0424:2514"
-        },
-        {
-          "bus_number": "001",
-          "device_id": "002",
-          "device_bus_number": "0424",
-          "manufacture_id": "Bus 001 Device 002: ID 0424:2514",
-          "manufacture_device_name": "Bus 001 Device 002: ID 0424:2514"
-        },
-        {
-          "bus_number": "001",
-          "device_id": "005",
-          "device_bus_number": "0424",
-          "manufacture_id": "Bus 001 Device 005: ID 0424:7800",
-          "manufacture_device_name": "Bus 001 Device 005: ID 0424:7800"
-        },
-        {
-          "bus_number": "001",
-          "device_id": "004",
-          "device_bus_number": "1415",
-          "manufacture_id": "Bus 001 Device 004: ID 1415:2000",
-          "manufacture_device_name": "Bus 001 Device 004: ID 1415:2000"
-        }
-      ],
-      "lscpu": {
-        "Architecture": "armv7l",
-        "Byte Order": "Little Endian",
-        "CPU(s)": "4",
-        "On-line CPU(s) list": "0-3",
-        "Thread(s) per core": "1",
-        "Core(s) per socket": "4",
-        "Socket(s)": "1",
-        "Vendor ID": "ARM",
-        "Model": "4",
-        "Model name": "Cortex-A53",
-        "Stepping": "r0p4",
-        "CPU max MHz": "1400.0000",
-        "CPU min MHz": "600.0000",
-        "BogoMIPS": "89.60",
-        "Flags": "half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32"
-      },
+      "lshw": { "id": "b5dd54a7a499", "class": "system", "claimed": true, "description": "Computer", "product": "Raspberry Pi 3 Model B Plus Rev 1.3", "serial": "000000005770a507", "width": 32, "children": [ { "id": "core", "class": "bus", "claimed": true, "description": "Motherboard", "physid": "0", "capabilities": { "raspberrypi_3-model-b-plus": true, "brcm_bcm2837": true }, "children": [ { "id": "cpu:0", "class": "processor", "claimed": true, "description": "CPU", "product": "cpu", "physid": "0", "businfo": "cpu@0", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:1", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "1", "businfo": "cpu@1", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:2", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "2", "businfo": "cpu@2", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:3", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "3", "businfo": "cpu@3", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "memory", "class": "memory", "claimed": true, "description": "System memory", "physid": "4", "units": "bytes", "size": 972234752 } ] }, { "id": "network", "class": "network", "claimed": true, "description": "Ethernet interface", "physid": "1", "logicalname": "eth0", "serial": "02:42:ac:1d:00:02", "units": "bit/s", "size": 10000000000, "configuration": { "autonegotiation": "off", "broadcast": "yes", "driver": "veth", "driverversion": "1.0", "duplex": "full", "ip": "172.29.0.2", "link": "yes", "multicast": "yes", "port": "twisted pair", "speed": "10Gbit/s" }, "capabilities": { "ethernet": true, "physical": "Physical interface" } } ] },
+      "lsusb": [ { "bus_number": "001", "device_id": "001", "device_bus_number": "1d6b", "manufacture_id": "Bus 001 Device 001: ID 1d6b:0002", "manufacture_device_name": "Bus 001 Device 001: ID 1d6b:0002" }, { "bus_number": "001", "device_id": "003", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 003: ID 0424:2514", "manufacture_device_name": "Bus 001 Device 003: ID 0424:2514" }, { "bus_number": "001", "device_id": "002", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 002: ID 0424:2514", "manufacture_device_name": "Bus 001 Device 002: ID 0424:2514" }, { "bus_number": "001", "device_id": "005", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 005: ID 0424:7800", "manufacture_device_name": "Bus 001 Device 005: ID 0424:7800" }, { "bus_number": "001", "device_id": "004", "device_bus_number": "1415", "manufacture_id": "Bus 001 Device 004: ID 1415:2000", "manufacture_device_name": "Bus 001 Device 004: ID 1415:2000" } ],
+      "lscpu": { "Architecture": "armv7l", "Byte Order": "Little Endian", "CPU(s)": "4", "On-line CPU(s) list": "0-3", "Thread(s) per core": "1", "Core(s) per socket": "4", "Socket(s)": "1", "Vendor ID": "ARM", "Model": "4", "Model name": "Cortex-A53", "Stepping": "r0p4", "CPU max MHz": "1400.0000", "CPU min MHz": "600.0000", "BogoMIPS": "89.60", "Flags": "half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32" },
       "lspci": null,
-      "lsblk": [
-        {
-          "name": "mmcblk0",
-          "maj:min": "179:0",
-          "rm": "0",
-          "size": "29.7G",
-          "ro": "0",
-          "type": "disk",
-          "mountpoint": null,
-          "children": [
-            {
-              "name": "mmcblk0p1",
-              "maj:min": "179:1",
-              "rm": "0",
-              "size": "43.9M",
-              "ro": "0",
-              "type": "part",
-              "mountpoint": null
-            },
-            {
-              "name": "mmcblk0p2",
-              "maj:min": "179:2",
-              "rm": "0",
-              "size": "29.7G",
-              "ro": "0",
-              "type": "part",
-              "mountpoint": "/etc/hosts"
-            }
-          ]
-        }
-      ]
+      "lsblk": [ { "name": "mmcblk0", "maj:min": "179:0", "rm": "0", "size": "29.7G", "ro": "0", "type": "disk", "mountpoint": null, "children": [ { "name": "mmcblk0p1", "maj:min": "179:1", "rm": "0", "size": "43.9M", "ro": "0", "type": "part", "mountpoint": null }, { "name": "mmcblk0p2", "maj:min": "179:2", "rm": "0", "size": "29.7G", "ro": "0", "type": "part", "mountpoint": "/etc/hosts" } ] } ]
     },
     "cpu": null,
-    "wan": {
-      "log_level": "info",
-      "debug": "false",
-      "date": 1548797896,
-      "period": 1800,
-      "speedtest": {
-        "download": 6030465.984919555,
-        "upload": 2598608.738590407,
-        "ping": 112,
-        "server": {
-          "url": "http://sjc.speedtest.net/speedtest/upload.php",
-          "lat": "37.3041",
-          "lon": "-121.8727",
-          "name": "San Jose, CA",
-          "country": "United States",
-          "cc": "US",
-          "sponsor": "Speedtest.net",
-          "id": "10384",
-          "url2": "http://sjc2.speedtest.net/speedtest/upload.php",
-          "host": "sjc.host.speedtest.net:8080",
-          "d": 7.476714842887551,
-          "latency": 112
-        },
-        "timestamp": "2019-01-29T21:37:37.359821Z",
-        "bytes_sent": 4472832,
-        "bytes_received": 13115612,
-        "share": null,
-        "client": {
-          "ip": "67.164.104.198",
-          "lat": "37.2458",
-          "lon": "-121.8306",
-          "isp": "Comcast Cable",
-          "isprating": "3.7",
-          "rating": "0",
-          "ispdlavg": "0",
-          "ispulavg": "0",
-          "loggedin": "0",
-          "country": "US"
-        }
-      }
-    }
-  }
+    "wan": { "log_level": "info", "debug": "false", "date": 1548797896, "period": 1800, "speedtest": { "download": 6030465.984919555, "upload": 2598608.738590407, "ping": 112, "server": { "url": "http://sjc.speedtest.net/speedtest/upload.php", "lat": "37.3041", "lon": "-121.8727", "name": "San Jose, CA", "country": "United States", "cc": "US", "sponsor": "Speedtest.net", "id": "10384", "url2": "http://sjc2.speedtest.net/speedtest/upload.php", "host": "sjc.host.speedtest.net:8080", "d": 7.476714842887551, "latency": 112 }, "timestamp": "2019-01-29T21:37:37.359821Z", "bytes_sent": 4472832, "bytes_received": 13115612, "share": null, "client": { "ip": "67.164.104.198", "lat": "37.2458", "lon": "-121.8306", "isp": "Comcast Cable", "isprating": "3.7", "rating": "0", "ispdlavg": "0", "ispulavg": "0", "loggedin": "0", "country": "US" } } } }
 }
 ```
-The **make** `pattern` target will publish the pattern in the exchange.
+### `pattern`
 ```
 % make pattern
 ...
-export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange pattern publish -o "dcmartin@us.ibm.com" -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A -f pattern.json -p yolo2msghub -k ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key -K ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
+export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange pattern publish -o "dcmartin@us.ibm.com" -u iamapikey:{apikey} -f pattern.json -p yolo2msghub -k {private-key-file} -K {public-key-file}
 Updating yolo2msghub in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
 ```
