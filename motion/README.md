@@ -78,13 +78,14 @@ Prior to _publishing_ the `service.json` [file][service-json] must be modified f
 + `url` - `com.github.dcmartin.open-horizon.motion`
 + `version` - `0.0.1`
 
-## Publishing
-The **make** targets for `publish` and `verify` make the service and its container available for node registration.
+## Exchange
+
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
 ```
 % make publish
 ...
-Using 'dcmartin/amd64_motion@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_motion:0.0.1'
-Creating com.github.dcmartin.open-horizon.motion_0.0.1_amd64 in the exchange...
+Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_cpu:0.0.1'
+Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
 ```
 ```

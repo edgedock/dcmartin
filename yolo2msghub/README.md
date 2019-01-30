@@ -383,14 +383,14 @@ Prior to _publishing_ the `service.json` [file][service-json] must be modified f
 + `org` - `dcmartin@us.ibm.com/yolo2msghub`
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
+## Exchange
 
-## Publishing
-The **make** targets for `publish` and `verify` make the service and its container available for node registration.
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
 ```
 % make publish
 ...
-Using 'dcmartin/amd64_yolo2msghub@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_yolo2msghub:0.0.1'
-Creating com.github.dcmartin.open-horizon.yolo2msghub_0.0.1_amd64 in the exchange...
+Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_cpu:0.0.1'
+Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
 ```
 ```
@@ -401,6 +401,34 @@ true
 # should return 'All signatures verified'
 hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
 All signatures verified
+```
+### Pattern
+This service may also be registered in the exchange as a _pattern_ for node registration.
+
+The **make** `start` target will initiate the service locally using all required services.
+```
+% make start
+...
+export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn dev service start -d test/
+Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
+Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
+Start service: service(s) hal with instance id prefix com.github.dcmartin.open-horizon.hal_0.0.1_089fdddf-2206-4421-a84a-24b8ce95a3d7
+Running service.
+Start service: service(s) wan with instance id prefix com.github.dcmartin.open-horizon.wan_0.0.1_6adc547b-941f-46de-b189-213d9d98fe3a
+Running service.
+Start service: service(s) yolo with instance id prefix com.github.dcmartin.open-horizon.yolo_0.0.1_6e7c975a-ac22-4f8c-bad2-d6b97d2b20ec
+Running service.
+Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
+Running service.
+```
+
+The `pattern` target will publish the pattern in the exchange.
+```
+% make pattern
+...
+export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange pattern publish -o "dcmartin@us.ibm.com" -u iamapikey:bbNhrb_lTRsNVay_PmivR14Ie2mby3Bm0Bgo0XJne82A -f pattern.json -p yolo2msghub -k ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-private.key -K ../IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem
+Updating yolo2msghub in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
 ```
 ## About Open Horizon
 

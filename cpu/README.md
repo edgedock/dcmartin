@@ -76,8 +76,9 @@ Prior to _publishing_ the `service.json` [file][service-json] must be modified f
 + `url` - `com.github.dcmartin.open-horizon.cpu`
 + `version` - `0.0.1`
 
-## Publishing
-The **make** targets for `publish` and `verify` make the service and its container available for node registration.
+## Exchange
+
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
 ```
 % make publish
 ...
@@ -94,6 +95,7 @@ true
 hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
 All signatures verified
 ```
+
 ## About Open Horizon
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
