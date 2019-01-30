@@ -2,7 +2,13 @@
 
 Provides _pattern_ of services to send YOLO classified image entity counts to Kafka; updates as often as underlying services provide.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
-## Services
+## Status
+
++ `org` - `dcmartin@us.ibm.com/yolo2msghub`
++ `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
++ `version` - `0.0.1`
+
+### Services
 
 This _pattern_ utilizes the following micro-services:
 
@@ -16,7 +22,7 @@ This _pattern_ utilizes the following micro-services:
 [cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan
 
-## Architecture
+### Architecture
 
 This service supports the following architectures:
 
@@ -74,15 +80,11 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
 ```
-## Organization
+## Publishing
 
-Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
+Prior to _publishing_ either _service_ or _pattern_, the `service.json` [file][service-json] must be modified for your organization.
 
-+ `org` - `dcmartin@us.ibm.com/yolo2msghub`
-+ `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
-+ `version` - `0.0.1`
-## Exchange
-
+### Service
 The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
 ```
 % make publish
