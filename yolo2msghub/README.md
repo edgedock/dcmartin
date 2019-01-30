@@ -142,7 +142,7 @@ export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange patter
 Updating yolo2msghub in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
 ```
-## Changelog & Releases
+# Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
 of ``MAJOR.MINOR.PATCH``. In a nutshell, the version will be incremented
