@@ -53,7 +53,73 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
   }
 }
 ```
-The `yolo` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
+The `yolo2msghub` payload will be incomplete as the required services are not running.  Use the `make start` target (see **Pattern** below); subsequent `make check` will return payload.
+## Example
+
+![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
+
+# Open Horizon
+
+This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
+
+## User Input (options)
+Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
++ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
++ `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
++ `YOLO_ENTITY` - entity to count; defaults to `person`
++ `YOLO_PERIOD` - seconds between updates; defaults to `0`
++ `LOCALHOST_PORT` - port for access; default 8587 
++ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
+### Example registration
+```
+% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
+```
+## Organization
+
+Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
+
++ `org` - `dcmartin@us.ibm.com/yolo2msghub`
++ `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
++ `version` - `0.0.1`
+## Exchange
+
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
+```
+% make publish
+...
+Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_cpu:0.0.1'
+Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
+```
+```
+% make verify
+# should return 'true'
+hzn exchange service list -o {org} -u iamapikey:{apikey} | jq '.|to_entries[]|select(.value=="'"{org}/{url}_{version}_{arch}"'")!=null'
+true
+# should return 'All signatures verified'
+hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
+All signatures verified
+```
+### Pattern
+This service may also be registered in the exchange as a _pattern_ for node registration.
+
+The **make** `start` target will initiate the pattern locally using all required services.
+```
+% make start
+...
+export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn dev service start -d test/
+Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
+Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
+Start service: service(s) hal with instance id prefix com.github.dcmartin.open-horizon.hal_0.0.1_089fdddf-2206-4421-a84a-24b8ce95a3d7
+Running service.
+Start service: service(s) wan with instance id prefix com.github.dcmartin.open-horizon.wan_0.0.1_6adc547b-941f-46de-b189-213d9d98fe3a
+Running service.
+Start service: service(s) yolo with instance id prefix com.github.dcmartin.open-horizon.yolo_0.0.1_6e7c975a-ac22-4f8c-bad2-d6b97d2b20ec
+Running service.
+Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
+Running service.
+```
+After the `yolo2msghub` _pattern_ has been started, the **make** `check` target will return complete results; see below:
 ```
 {
   "hostname": "05acf6435757-192168016002",
@@ -356,72 +422,6 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
   }
 }
 ```
-## Example
-
-![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
-
-# Open Horizon
-
-This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
-
-## User Input (options)
-Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
-+ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
-+ `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
-+ `YOLO_ENTITY` - entity to count; defaults to `person`
-+ `YOLO_PERIOD` - seconds between updates; defaults to `0`
-+ `LOCALHOST_PORT` - port for access; default 8587 
-+ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
-### Example registration
-```
-% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
-```
-## Organization
-
-Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
-
-+ `org` - `dcmartin@us.ibm.com/yolo2msghub`
-+ `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
-+ `version` - `0.0.1`
-## Exchange
-
-The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
-```
-% make publish
-...
-Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f762a19e53d9144124' in 'deployment' field instead of 'dcmartin/amd64_cpu:0.0.1'
-Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
-Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
-```
-```
-% make verify
-# should return 'true'
-hzn exchange service list -o {org} -u iamapikey:{apikey} | jq '.|to_entries[]|select(.value=="'"{org}/{url}_{version}_{arch}"'")!=null'
-true
-# should return 'All signatures verified'
-hzn exchange service verify --public-key-file ../IBM-..-public.pem -o {org} -u iamapikey:{apikey} "{org}/{url}_{version}_{arch}"
-All signatures verified
-```
-### Pattern
-This service may also be registered in the exchange as a _pattern_ for node registration.
-
-The **make** `start` target will initiate the pattern locally using all required services.
-```
-% make start
-...
-export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn dev service start -d test/
-Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
-Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
-Start service: service(s) hal with instance id prefix com.github.dcmartin.open-horizon.hal_0.0.1_089fdddf-2206-4421-a84a-24b8ce95a3d7
-Running service.
-Start service: service(s) wan with instance id prefix com.github.dcmartin.open-horizon.wan_0.0.1_6adc547b-941f-46de-b189-213d9d98fe3a
-Running service.
-Start service: service(s) yolo with instance id prefix com.github.dcmartin.open-horizon.yolo_0.0.1_6e7c975a-ac22-4f8c-bad2-d6b97d2b20ec
-Running service.
-Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
-Running service.
-```
-
 The **make** `pattern` target will publish the pattern in the exchange.
 ```
 % make pattern
