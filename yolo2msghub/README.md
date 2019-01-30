@@ -114,6 +114,7 @@ The **make** command is used to `build`,`run`,`check` (default), `publish`, `ver
 }
 ```
 ### `start`
+The `start` target will initiate the _pattern_ with all required _services_; it depends on `publish` and `verify`
 ```
 % make start
 ...
@@ -131,8 +132,8 @@ Running service.
 ```
 ## Publishing
 
-The `pattern` target will publish the pattern in the exchange (see **`pattern`** below).
-```
+The `pattern` target will publish the pattern in the exchange.  The [`service.json`][service-json] file must be changed prior.
+
 ### `pattern`
 ```
 % make pattern
