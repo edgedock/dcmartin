@@ -43,7 +43,7 @@ This service supports the following architectures:
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
 
-## How To Use
+# How To Use
 
 Copy this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; see below:
 
@@ -73,16 +73,13 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
 }
 ```
 The `yolo2msghub` payload will be incomplete as the required services are not running.  Use the `make start` target (see **Pattern** below); subsequent `make check` will return payload.
-## Example
+### Sample
 
 ![sample.jpg](sample.jpg?raw=true "YOLO2MSGHUB")
 
-# Open Horizon
-
-This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
-
 ## Publishing
 
+This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
 Prior to _publishing_ either _service_ or _pattern_, the `service.json` [file][service-json] must be modified for your organization.
 
 ### Service
