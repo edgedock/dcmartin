@@ -36,7 +36,7 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
   }
 }
 ```
-The `cpu` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
+The `cpu` payload will be incomplete until the service initiates; subsequent `make check` will return complete; see below:
 ```
 {
   "hostname": "7c5bdc815fb1-172017000003",
