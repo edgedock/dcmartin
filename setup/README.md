@@ -84,7 +84,6 @@ David C Martin (github@dcmartin.com)
 [ibm-registration]: https://console.bluemix.net/registration/
 [issue]: https://github.com/dcmartin/open-horizon/setup/issues
 [keepchangelog]: http://keepachangelog.com/en/1.0.0/
-[macos-install]: https://github.com/open-horizon/anax/releases
 [network]: https://github.com/dcmartin/open-horizon/tree/master/setup/NETWORK.md
 [open-horizon]: https://github.com/open-horizon
 [raspbian-image]: https://www.raspberrypi.org/downloads/raspbian/
