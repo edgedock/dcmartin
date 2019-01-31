@@ -24,6 +24,8 @@
   "patterns": [
     { "id": "cpu2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.cpu2msghub" },
     { "id": "sdr2msghub", "org": "IBM", "url": "github.com.open-horizon.examples.sdr2msghub" },
+    { "id": "yolo2msghub", "org": "dcmartin@us.ibm.com", "url": "com.github.dcmartin.open-horizon.yolo2msghub" },
+    { "id": "motion", "org": "dcmartin@us.ibm.com", "url": "com.github.dcmartin.open-horizon.motion" },
     { "id": "none" }
   ],
   "setups": [
@@ -49,7 +51,6 @@
       "private_key": null,
       "nodes": [
         { "id": "rpi-1", "machine": "rpi3", "device": "test-cpu-1", "token": null },
-        { "id": "rpi-3", "machine": "rpi2", "device": "test-cpu-2", "token": null },
         { "id": "rpi-5", "machine": "rpi3", "device": "test-cpu-3", "token": null },
         { "id": "rpi-7", "machine": "rpi3", "device": "test-cpu-4", "token": null },
         { "id": "rpi-9", "machine": "rpi3", "device": "test-cpu-5", "token": null },
@@ -79,6 +80,20 @@
         { "id": "rpi-14", "machine": "rpi3", "device": "test-sdr-7", "token": null },
         { "id": "rpi-16", "machine": "rpi3", "device": "test-sdr-8", "token": null },
         { "id": "rpi-18", "machine": "rpi3", "device": "test-sdr-9", "token": null }
+      ]
+    },
+    {
+      "id": "yoloconf",
+      "pattern": "yolo2msghub",
+      "exchange": "alpha",
+      "network": "none",
+      "variables": [
+        { "key": "YOLO2MSGHUB_APIKEY", "value": null }
+      ],
+      "public_key": null,
+      "private_key": null,
+      "nodes": [
+        { "id": "rpi-3", "machine": "rpi3", "device": "test-yolo-1", "token": null }
       ]
     },
     { "id": "none" }

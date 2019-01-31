@@ -48,7 +48,7 @@ fi
 # check docker
 CMD=$(command -v docker)
 if [ -z "${CMD}" ]; then
-  echo "*** WARN: Installing docker" >&2
+  echo "+++ INFO: Installing docker" >&2
   wget -qO - get.docker.com | bash -s >&2
 fi
 

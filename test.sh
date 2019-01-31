@@ -34,7 +34,7 @@ DATE=$(date +%s)
 echo "${I}: ${DATE} ${COUNT}"
 while true; do
   OUT=$(curl -sSL "http://${HOST}" | jq -c '.yolo2msghub.yolo')
-  if [ ! -z "${OUT}" ]; then
+  if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
     D=$(echo "${OUT}" | jq -r '.date')
     if [[ ${D} > ${DATE} ]]; then 
       DATE=${D}
@@ -46,4 +46,5 @@ while true; do
   fi
   I=$((I+1))
   echo -n '.'
+  sleep 5
 done
