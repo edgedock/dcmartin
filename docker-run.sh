@@ -76,6 +76,11 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
       if [ -n "${VAL}" ] && [ "${VAL}" != 'null' ] && [ "${VAL}" != '' ]; then 
         DV=${VAL};
       elif [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
+        if [ -s "${NAME}" ]; then
+          DV=$(sed 's/^"\(.*\)"$/\1/' "${NAME}")
+        fi
+      fi
+      if [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
         echo "*** ERROR $0 $$ -- value NOT defined for required: ${NAME}; edit ${USERINPUT}; exiting"
         exit 1
       fi
