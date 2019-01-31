@@ -18,7 +18,7 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ### Options
 Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
-+ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
++ `YOLO2MSGHUB_APIKEY` - message hub API key; no default; **REQUIRED** `YOLO2MSGHUB_APIKEY`; _quoted_: `"<apikey>"` 
 + `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
 + `YOLO_ENTITY` - entity to count; defaults to `person`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
