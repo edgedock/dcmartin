@@ -8,6 +8,7 @@ CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 while true; do
+  DATE=$(date +%s)
   OUTPUT="${CONFIG}"
   for ls in lshw lsusb lscpu lspci lsblk; do
     OUT="$(${ls}.sh | jq '.'${ls}'?')"
@@ -17,5 +18,9 @@ while true; do
     if [ ${DEBUG:-} == 'true' ]; then echo "OUTPUT == ${OUTPUT}" &> /dev/stderr; fi
   done
   echo "${OUTPUT}" > "${TMP}/${SERVICE_LABEL}.json"
-  sleep ${HAL_PERIOD}
+  # wait for ..
+  SLEEP=$((HAL_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SLEEP} > 0 ]; then
+    sleep ${SLEEP}
+  fi
 done
