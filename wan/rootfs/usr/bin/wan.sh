@@ -9,10 +9,14 @@ CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 while true; do
-
+  DATE=$(date +%s)
   SPEEDTEST=$(speedtest --json)
   if [ -z "${SPEEDTEST}" ]; then SPEEDTEST=null; fi
 
   echo "${CONFIG}" | jq '.date='$(date +%s)'|.speedtest='"${SPEEDTEST}" > "${TMP}/${SERVICE_LABEL}.json"
-  sleep ${WAN_PERIOD}
+  # wait for ..
+  SLEEP=$((WAN_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SLEEP} > 0 ]; then
+    sleep ${SLEEP}
+  fi
 done
