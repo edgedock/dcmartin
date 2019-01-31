@@ -16,10 +16,15 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 ![sample.png](sample.png?raw=true "YOLO2MSGHUB")
 
-### Options
-Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Options include:
-+ `YOLO2MSGHUB_APIKEY` - message hub API key; required; no default
-+ `YOLO2MSGHUB_BROKER` - message hub brokers; default provided
+### User input
+Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name, for example:
+```
+% jq '.api_key' {kafka-apiKey-file} > YOLO2MSGHUB_APIKEY
+```
+#### REQUIRED
++ `YOLO2MSGHUB_APIKEY` - message hub API key
+#### OPTIONAL
++ `YOLO2MSGHUB_BROKER` - message hub brokers
 + `YOLO_ENTITY` - entity to count; defaults to `person`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
 + `LOCALHOST_PORT` - port for access; default 8587 
