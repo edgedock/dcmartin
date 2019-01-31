@@ -1,3 +1,4 @@
 test/
+YOLO_*
+APIKEY*
 check.json
-check.jpg
