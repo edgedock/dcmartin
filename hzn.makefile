@@ -25,9 +25,7 @@ PUBLIC_KEY_FILE := $(if $(wildcard ../IBM-*.pem),$(wildcard ../IBM-*.pem),PUBLIC
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
-APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json),APIKEY)
-KAFKA_APIKEY := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -r '.api_key' ../apiKey-kafka.json),KAFKA_APIKEY)
-KAFKA_BROKER := $(if $(wildcard ../apiKey-kafka.json),$(shell jq -j '.kafka_brokers_sasl[]|(.,",")' ../apiKey-kafka.json),KAFKA_BROKER)
+APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY),APIKEY)
 
 ## docker
 DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
@@ -55,24 +53,25 @@ check: service.json
 push: build
 	docker push ${DOCKER_TAG}
 
-publish: build test $(KEYS)
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:${APIKEY}
+publish: build test $(KEYS) $(APIKEY)
+	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:$(shell cat APIKEY)
 
-verify: publish $(KEYS)
+verify: publish $(KEYS) $(APIKEY)
 	# should return 'true'
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service list -o ${ORG} -u iamapikey:${APIKEY} | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service list -o ${ORG} -u iamapikey:$(shell cat {APIKEY) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
 	# should return 'All signatures verified'
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:${APIKEY} "${SERVICE_TAG}"
+	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:$(shell cat APIKEY) "${SERVICE_TAG}"
 
 test: service.json userinput.json
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${ORG}" -d test
 	jq '.arch="'${ARCH}'"|.deployment.services.'${SERVICE_LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
+	# for reqs in $$(jq -r '.requiredServices[]|.'
 	cp -f userinput.json test/userinput.json
 	for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' test/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; edit userinput.json"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} test/userinput.json) && echo "$${UI}" > test/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
 
-depend: test
-	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:${APIKEY} && ../mkdepend.sh test/
+depend: test APIKEY
+	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh test/
 
 start: remove stop publish depend
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d test/
@@ -81,8 +80,8 @@ start: remove stop publish depend
 stop: test
 	-export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d test/
 
-pattern: publish pattern.json
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${ORG}" -u iamapikey:${APIKEY} -f pattern.json -p ${SERVICE_LABEL} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+pattern: publish pattern.json APIKEY
+	export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_LABEL} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 	
 
 clean: remove stop
