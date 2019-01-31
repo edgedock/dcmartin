@@ -18,7 +18,11 @@ CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 cd ${DARKNET}
+
+
 while true; do
+  # when we start
+  DATE=$(date +%s)
   # capture image from /dev/video0 and grab file attributes for later use
   fswebcam --scale "${SCALE}" --no-banner "${JPG}" &> "${OUT}"
   # extract image size
@@ -45,7 +49,10 @@ while true; do
   IMAGE=$(base64 -w 0 -i predictions.jpg)
   echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/${SERVICE_LABEL}.json
   rm -f "${JPG}" "${OUT}" predictions.jpg
-
-  sleep ${YOLO_PERIOD}
+  # wait for ..
+  SLEEP=$((YOLO_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SLEEP} > 0 ]; then
+    sleep ${SLEEP}
+  fi
 done
 
