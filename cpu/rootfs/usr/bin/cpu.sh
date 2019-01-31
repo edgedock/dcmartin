@@ -10,7 +10,7 @@ CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 while true; do
-
+  DATE=$(date +%s)
   # https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
   RAW=$(grep -iE '^cpu ' /proc/stat)
   CT1=$(echo "${RAW}" | awk '{ printf("%d",$2+$3+$4+$5+$6+$7+$8+$9) }')
@@ -24,5 +24,9 @@ while true; do
   if [ -z "${PERCENT}" ]; then PERCENT=null; fi
 
   echo "${CONFIG}" | jq '.date='$(date +%s)'|.percent='${PERCENT} > "${TMP}/${SERVICE_LABEL}.json"
-  sleep ${CPU_PERIOD}
+  # wait for ..
+  SLEEP=$((CPU_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SLEEP} > 0 ]; then
+    sleep ${SLEEP}
+  fi
 done
