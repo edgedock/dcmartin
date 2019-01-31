@@ -36,7 +36,7 @@ Nodes should _register_ using a derivative of the template [`userinput.json`][us
 
 ### Services
 
-This _pattern_ utilizes the following micro-services:
+This _service_ utilizes the following required services:
 
 + [`yolo`][yolo-service] - captures images from camera and counts specified entity
 + [`hal`][hal-service] - provides hardware inventory layer API for client
