@@ -12,9 +12,13 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
-### Sample
+### Architecture
 
-![sample.png](sample.png?raw=true "YOLO2MSGHUB")
+This service supports the following architectures:
+
++ `arm` - RaspberryPi (armhf)
++ `amd64` - AMD/Intel 64-bit (x86-64)
++ `arm64` - nVidia TX2 (aarch)
 
 ### User input
 Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name, for example:
@@ -33,8 +37,11 @@ Nodes should _register_ using a derivative of the template [`userinput.json`][us
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
 ```
+### Sample
 
-### Services
+![sample.png](sample.png?raw=true "YOLO2MSGHUB")
+
+## Services
 
 This _service_ utilizes the following required services:
 
@@ -47,14 +54,6 @@ This _service_ utilizes the following required services:
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal
 [cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan
-
-### Architecture
-
-This service supports the following architectures:
-
-+ `arm` - RaspberryPi (armhf)
-+ `amd64` - AMD/Intel 64-bit (x86-64)
-+ `arm64` - nVidia TX2 (aarch)
 
 # Getting started
 
