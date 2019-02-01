@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEFAULT=/etc/default/horizon
+
 # get exchange
 if [ ! -z "${1}" ]; then
   case ${1} in
@@ -32,11 +34,22 @@ if [ ! -z "${OUT}" ] || [ $STATUS != 0 ]; then
   exit 1
 fi
 
+## CHECK
+
+OLD= $(grep "HZN_EXCHANGE_URL" "${DEFAULT}" | sed 's|HZN_EXCHANGE_URL=\(.*\)|\1|')
+if [ "${OLD}" == "${URL}" ]; then
+  echo -n "+++ WARN: exchange current; confirm switch to ${URL}? [y/n] (N): "
+  if [ "${VALUE}" != 'Y' ] && [ "${VALUE}" != 'y' ]; then 
+    echo "cancelling"
+    exit 0
+  fi
+fi
+
 ## ASK
 
-echo -n "WARNING: confirm exchange switch to ${URL}? [y/n] (N): "
+echo -n "Confirm exchange switch to ${URL}? [y/n] (N): "
 read VALUE
-if [ "${VALUE}" != 'Y' ] || [ "${VALUE}" != 'y' ]; then 
+if [ "${VALUE}" != 'Y' ] && [ "${VALUE}" != 'y' ]; then 
   echo "quitting"
   exit 0
 fi
@@ -51,10 +64,12 @@ sudo apt remove -y bluehorizon horizon horizon-cli
 sudo apt purge -y bluehorizon horizon horizon-cli
 
 # install
-sudo apt update -y && apt install -y bluehorizon horizon horizon-cli
+sudo apt update -y
+sudo apt install -y bluehorizon horizon horizon-cli
 
 # update URL
-sudo echo "HZN_EXCHANGE_URL=${URL}" > /etc/default/horizon
+echo "HZN_EXCHANGE_URL=${URL}" > /tmp/$$
+sudo mv /tmp/$$ "${DEFAULT}"
 
 # restart horizon
 sudo service horizon restart
