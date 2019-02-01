@@ -2,13 +2,11 @@
 
 Provides CPU usage information as micro-service; updates periodically (default `60` seconds or 1 minute).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
-## Discovery
-
+## Service discovery
 + `org` - `dcmartin@us.ibm.com/cpu`
 + `url` - `com.github.dcmartin.open-horizon.cpu`
 + `version` - `0.0.1`
-### Architecture
-This service supports the following architectures:
+### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
