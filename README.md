@@ -10,11 +10,11 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 # Setup
 
-Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. Installation for [macOS][macos-install].
+Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] macOS.
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
-sudo addgroup $(whoami) docker
+sudo addgroup $(whoami) docker # you will need to logout and log back in again for this change to take effect
 sudo apt install -y git make curl jq
 mkdir ~/gitdir
 cd ~/gitdir
