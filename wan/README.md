@@ -2,10 +2,11 @@
 
 Monitors Internet access information as micro-service; updates periodically (default `1800` seconds or 15 minutes).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
-## Architecture
-
-This service supports the following architectures:
-
+## Service discovery
++ `org` - `dcmartin@us.ibm.com/wan`
++ `url` - `com.github.dcmartin.open-horizon.wan`
++ `version` - `0.0.1`
+### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
@@ -99,17 +100,9 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
 ```
-## Organization
-
-Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
-
-+ `org` - `dcmartin@us.ibm.com/wan`
-+ `url` - `com.github.dcmartin.open-horizon.wan`
-+ `version` - `0.0.1`
-
 ## Exchange
 
-The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.  Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
 ```
 % make publish
 ...

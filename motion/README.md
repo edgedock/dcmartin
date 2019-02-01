@@ -1,11 +1,11 @@
 # `motion` - Motion detection using motion-project.io
 
 Monitors attached camera and provides motion detection information as micro-service.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
-
-## Architecture
-
-This service supports the following architectures:
-
+## Service discovery
++ `org` - `dcmartin@us.ibm.com/motion`
++ `url` - `com.github.dcmartin.open-horizon.motion`
++ `version` - `0.0.1`
+### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
@@ -70,17 +70,9 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
 ```
-## Organization
-
-Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
-
-+ `org` - `dcmartin@us.ibm.com/motion`
-+ `url` - `com.github.dcmartin.open-horizon.motion`
-+ `version` - `0.0.1`
-
 ## Exchange
 
-The **make** targets for `publish` and `verify` make the service and its container available on the exchange.
+The **make** targets for `publish` and `verify` make the service and its container available on the exchange.  Prior to _publishing_ the `service.json` [file][service-json] must be modified for your organization.
 ```
 % make publish
 ...
