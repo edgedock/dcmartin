@@ -52,7 +52,6 @@ remove:
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-
 clean:
 	for dir in $(ALL); do \
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
@@ -70,6 +69,11 @@ start:
 
 verify:
 	for dir in $(SERVICES); do \
+	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
+	done
+
+pattern:
+	for dir in $(PATTERNS); do \
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
