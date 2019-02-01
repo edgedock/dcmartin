@@ -4,7 +4,7 @@
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 if [ -z "${HAL_PERIOD:-}" ]; then HAL_PERIOD=60; fi
-CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${HAL_PERIOD}'}'
+CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${HAL_PERIOD}'}'
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 while true; do

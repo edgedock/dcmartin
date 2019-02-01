@@ -73,7 +73,7 @@ test: service.json userinput.json
 depend: test APIKEY
 	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh test/
 
-start: remove stop publish depend
+start: remove stop depend
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d test/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d test/
 

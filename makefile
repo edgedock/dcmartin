@@ -19,11 +19,11 @@ PATTERNS = yolo2msghub # motion
 
 ALL = $(SERVICES) $(PATTERNS)
 
-default: all
+default: $(SERVICES)
 
-all: $(SERVICES) $(PATTERNS)
+all: $(ALL)
 
-$(PATTERNS) $(SERVICES):
+$(ALL):
 	$(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $@
 
 build:
