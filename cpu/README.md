@@ -10,7 +10,10 @@ Provides CPU usage information as micro-service; updates periodically (default `
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
-
+#### Optional variables
++ `CPU_PERIOD` - seconds between updates; defaults to `60`
++ `CPU_INTERVAL` - seconds between CPU tests; defaults to `1`
++ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 ## How To Use
 
 Copy this [repository][repository], change to the `cpu` directory, then use the **make** command; see below:
