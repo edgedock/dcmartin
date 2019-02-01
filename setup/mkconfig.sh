@@ -111,7 +111,7 @@ done
 
 # check if existing default configuration has keys (exist and non-zero in filesystem)
 DEFCONF=$(jq -r '.default.configuration' "${CONFIG}")
-if [ "${DEFCONF}" != 'null' ] && [ "${DEFCONF}") != 'none' ]; then
+if [ "${DEFCONF}" != 'null' ] && [ "${DEFCONF}" != 'none' ]; then
   if [ -s "${DEFCONF}" ] && [ -s "${DEFCONF}.pub" ]; then
     echo "+++ WARN $0 $$ -- found credentials for default configuration ${DEFCONF}; setting from: ${DEFAULT_KEY_FILE}"
     DEFAULT_KEY_FILE="${DEFCONF}"
