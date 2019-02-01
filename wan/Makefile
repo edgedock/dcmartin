@@ -1,1 +1,1 @@
-../hzn.makefile
+../service.makefile
