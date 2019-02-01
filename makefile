@@ -19,7 +19,7 @@ PATTERNS = yolo2msghub # motion
 
 ALL = $(SERVICES) $(PATTERNS)
 
-default: $(SERVICES)
+default: $(SERVICES) check
 
 all: $(ALL)
 
