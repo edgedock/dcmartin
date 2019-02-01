@@ -14,7 +14,7 @@ Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LIN
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
-sudo addgroup $(whoami) docker # you will need to logout and log back in again for this change to take effect
+sudo addgroup $(whoami) docker # logout and log back in again to effect
 sudo apt install -y git make curl jq
 mkdir ~/gitdir
 cd ~/gitdir
