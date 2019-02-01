@@ -76,4 +76,4 @@ pattern:
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-.PHONY: default all build run check stop push publish verify clean depend start
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean depend start
