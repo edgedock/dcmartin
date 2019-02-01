@@ -36,7 +36,6 @@ push:
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-
 check:
 	for dir in $(ALL); do \
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
@@ -58,7 +57,7 @@ clean:
 	done
 
 publish:
-	for dir in $(SERVICES); do \
+	for dir in $(ALL); do \
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
@@ -77,4 +76,4 @@ pattern:
 	  $(MAKE) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean depend start
+.PHONY: default all build run check stop push publish verify clean depend start
