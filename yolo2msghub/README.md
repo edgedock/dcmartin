@@ -11,18 +11,16 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
-
-### User input
-Nodes should _register_ using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name, for example:
+### Pattern registration
+Register nodes using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name, for example:
 ```
 % jq '.api_key' {kafka-apiKey-file} > YOLO2MSGHUB_APIKEY
 ```
-#### REQUIRED
+#### Required variables
 + `YOLO2MSGHUB_APIKEY` - message hub API key
-#### OPTIONAL
+#### Optional variables
++ `YOLO2MSGHUB_PERIOD` - seconds between updates; defaults to `30`
 + `YOLO2MSGHUB_BROKER` - message hub brokers
-+ `YOLO_ENTITY` - entity to count; defaults to `person`
-+ `YOLO_PERIOD` - seconds between updates; defaults to `0`
 + `LOCALHOST_PORT` - port for access; default 8587 
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 #### Example registration
