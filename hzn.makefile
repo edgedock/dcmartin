@@ -33,7 +33,7 @@ DOCKER_NAME = $(ARCH)_$(SERVICE_LABEL)
 DOCKER_TAG = $(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
 
-default: build run check
+default: build run # check
 
 all: publish verify start validate
 
