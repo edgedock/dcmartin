@@ -6,7 +6,7 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 if [ -z "${CPU_INTERVAL}" ]; then CPU_INTERVAL=1; fi
 if [ -z "${CPU_PERIOD}" ]; then CPU_PERIOD=60; fi
 
-CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"date":'$(date +%s)',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 while true; do

@@ -14,7 +14,7 @@ if [ -z "${YOLO_PERIOD:-}" ]; then YOLO_PERIOD=0; fi
 if [ -z "${YOLO_ENTITY:-}" ]; then YOLO_ENTITY=person; fi
 if [ -z "${DARKNET:-}" ]; then DARKNET="/darknet"; else echo "** WARNING: DARKNET from environment: ${DARKNET}" &> /dev/stderr; fi
 
-CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'"}'
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'"}'
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 cd ${DARKNET}

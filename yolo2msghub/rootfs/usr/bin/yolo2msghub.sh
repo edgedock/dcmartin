@@ -5,7 +5,7 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 JSON='[{"name": "yolo", "url": "http://yolo:80" },{"name": "hal", "url": "http://hal:80" },{"name":"cpu","url":"http://cpu:80"},{"name":"wan","url":"http://wan:80"}]'
 
-CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":"'${DEBUG}'","services":'${JSON}',"period":'${YOLO2MSGHUB_PERIOD}'}'
+CONFIG='{"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${JSON}',"period":'${YOLO2MSGHUB_PERIOD}'}'
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
