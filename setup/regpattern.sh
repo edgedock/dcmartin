@@ -51,7 +51,7 @@ if [ -z "${node}" ] || [ "${node}" == 'null' ]; then
   fi
 fi
 if [ -z "${node_mac}" ]; then
-  echo 'ERROR: no MAC address for node: ${node_id}" &> /dev/stderr
+  echo "ERROR: no MAC address for node: ${node_id}" &> /dev/stderr
   exit 1
 else
   node_state=$(jq -r '.nodes[]|select(.mac=="'$MAC'")' "${CONFIG}")
