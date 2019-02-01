@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DEBUG=
-VERBOSE=
+DEBUG=true
+VERBOSE=true
 
 ###
 ### default EXCHANGE URL
@@ -399,7 +399,6 @@ for MAC in ${MACS}; do
   fi
   if [ "${config_security}" != "true" ]; then
     echo "*** ERROR: ${id} SECURITY failed; consider reflashing; continuing..." &> /dev/stderr
-    ################# UPDATE CONFIGURATION #######################
     node_state=$(echo "$node_state" | jq -c '.ssh=null|.security=null')
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
@@ -408,9 +407,13 @@ for MAC in ${MACS}; do
   fi
 
   ## COPY SOCAT
-  if [ ! -z "${SOCAT_LISTENER}" ]; then
+  if [ ! -z "${SOCAT_LISTENER:-}" ]; then
     for script in socat-node-id.sh node-id.sh; do
-      scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+      if [ ! -s "${script}" ]; then 
+	echo "*** ERROR: ${id}: cannot locate ${script}" &> /dev/stderr
+      else
+        scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+      fi
     done
   fi
 
@@ -454,9 +457,10 @@ for MAC in ${MACS}; do
     continue
   fi
 
-  ## Start SOCAT
-  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" './socat-node-id.sh')
-  
+  if [ ! -z "${SOCAT_LISTENER:-}" ]; then
+    ## Start SOCAT
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'export SOCAT_LISTENER='${SOCAT_LISTENER}' && ./socat-node-id.sh')
+  fi
 
   ## CONFIG EXCHANGE
   if [[ ${config_exchange} != "true" ]]; then
@@ -613,7 +617,6 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: node ${node_id} is ${node_status} with pattern ${node_pattern}" &> /dev/stderr; fi
   elif [[ $node_status == "unconfiguring" ]]; then
     echo "*** ERROR: ${id}: node ${node_id} aka ${ex_device} is unconfiguring; consider reflashing or remove, purge, update, prune, and reboot" &> /dev/stderr
-    ################# UPDATE CONFIGURATION #######################
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
   elif [[ ${node_id} != ${ex_device} || $node_status != "unconfigured" ]]; then
@@ -688,17 +691,17 @@ for MAC in ${MACS}; do
   # POLL client for agreementlist information; wait until agreement exists
   cmd="hzn agreement list"
   result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
-  i=1
+  iteration=1
   while [ -z "${result}" ] || [ $(echo "$result" | jq '.==[]') == "true" ]; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on agreement [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
     sleep 10
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
-    i=$((i+1))
-    if [[ i > 10 ]]; then
+    iteration=$((iteration+1))
+    if [ ${iteration} -ge 10 ]; then
       break
     fi
   done
-  if [[ i > 10 ]]; then
+  if [ -z "${result}" ] || [ $(echo "$result" | jq '.==[]') == "true" ]; then
     echo "*** ERROR: ${id}: agreement never established; consider re-flashing" &> /dev/stderr
     ################# UPDATE CONFIGURATION #######################
     continue
