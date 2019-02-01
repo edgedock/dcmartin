@@ -18,6 +18,7 @@ SERVICE_VERSION = $(shell jq -r '.version' service.json)
 SERVICE_TAG = "${ORG}/${URL}_${SERVICE_VERSION}_${ARCH}"
 SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_LABEL),$(shell jq -r '.url' service.json))
+SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)
@@ -50,7 +51,7 @@ check: service.json
 	rm -f check.json
 	curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
-push: build
+push: build check
 	docker push ${DOCKER_TAG}
 
 publish: build test $(KEYS) $(APIKEY)
@@ -62,7 +63,7 @@ verify: publish $(KEYS) $(APIKEY)
 	# should return 'All signatures verified'
 	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:$(shell cat APIKEY) "${SERVICE_TAG}"
 
-test: service.json userinput.json
+test: service.json userinput.json $(SERVICE_REQVARS)
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${ORG}" -d test
 	jq '.arch="'${ARCH}'"|.deployment.services.'${SERVICE_LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
