@@ -66,7 +66,6 @@ test: service.json userinput.json
 	rm -fr test/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${ORG}" -d test
 	jq '.arch="'${ARCH}'"|.deployment.services.'${SERVICE_LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
-	# for reqs in $$(jq -r '.requiredServices[]|.'
 	cp -f userinput.json test/userinput.json
 	for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' test/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; edit userinput.json"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} test/userinput.json) && echo "$${UI}" > test/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
 
