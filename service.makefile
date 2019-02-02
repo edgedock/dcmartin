@@ -15,9 +15,9 @@ ORG ?= $(shell jq -r '.org' service.json)
 ## SERVICE
 SERVICE_LABEL = $(shell jq -r '.label' service.json)
 SERVICE_VERSION = $(shell jq -r '.version' service.json)
-SERVICE_TAG = "${ORG}/${URL}_${SERVICE_VERSION}_${ARCH}"
+SERVICE_TAG = "${ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${ARCH}"
 SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
-SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_LABEL),$(shell jq -r '.url' service.json))
+SERVICE_URL := $(if $(SERVICE_URL),$(SERVICE_URL).$(SERVICE_LABEL),$(shell jq -r '.url' service.json))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
 
 ## KEYS
