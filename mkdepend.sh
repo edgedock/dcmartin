@@ -33,7 +33,7 @@ fi
 
 # tagging
 if [ ! -z "${TAG:-}" ]; then
-  echo "+++ WARN $0 $$ -- modifying all services in ${USERINPUT}.json with ${TAG}" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- modifying service URL with ${TAG} in ${USERINPUT}.json and ${SERVICE}.json" &> /dev/stderr
   jq -c '.services=[.services[]|.url as $url|.url=$url+"-'${TAG}'"]' ${USERINPUT}.json > /tmp/$$
   mv -f /tmp/$$ ${USERINPUT}.json
   jq -c '.requiredServices=[.requiredServices[]|.url as $url|.url=$url+"-'${TAG}'"]' ${SERVICE}.json > /tmp/$$
