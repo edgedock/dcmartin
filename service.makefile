@@ -3,21 +3,23 @@ ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's
 BUILD_ARCH=$(shell arch)
 
 ## HZN
-HZN := $(if $(HZN),$(HZN),$(shell hzn node list | jq -r '.configuration.exchange_api'))
+CMD := $(shell whereis hzn | awk '{ print $1 }')
+HZN := $(if $(HZN),$(HZN),$(if $(CMD),$(shell $(CMD) node list 2> /dev/null | jq -r '.configuration.exchange_api'),))
 HZN := $(if $(HZN),$(HZN),"https://alpha.edge-fabric.com/v1/")
+DIR ?= horizon
 
 ## BUILD
 BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 
-## HORIZON
-ORG ?= $(shell jq -r '.org' service.json)
-
 ## SERVICE
+SERVICE_ORG := $(if ${ORG},${ORG},$(shell jq -r '.org' service.json))
 SERVICE_LABEL = $(shell jq -r '.label' service.json)
+SERVICE_NAME = $(if ${TAG},${SERVICE_LABEL}-${TAG},${SERVICE_LABEL})
 SERVICE_VERSION = $(shell jq -r '.version' service.json)
-SERVICE_TAG = "${ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${ARCH}"
+SERVICE_TAG = "${SERVICE_ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${ARCH}"
 SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
-SERVICE_URL := $(if $(SERVICE_URL),$(SERVICE_URL).$(SERVICE_LABEL),$(shell jq -r '.url' service.json))
+SERVICE_URI := $(shell jq -r '.url' service.json)
+SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
 
 ## KEYS
@@ -26,66 +28,74 @@ PUBLIC_KEY_FILE := $(if $(wildcard ../IBM-*.pem),$(wildcard ../IBM-*.pem),PUBLIC
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
-APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY),APIKEY)
+APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY && echo APIKEY),APIKEY)
 
 ## docker
 DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
-DOCKER_NAME = $(ARCH)_$(SERVICE_LABEL)
+DOCKER_LOGIN := $(if $(wildcard ~/.docker/config.json),,LOGIN_DOCKER_HUB)
+DOCKER_NAME = $(ARCH)_$(SERVICE_NAME)
 DOCKER_TAG = $(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||') 
 
-default: build run # check
+##
+## targets
+##
 
-all: publish verify start validate
+default: build run check
+
+all: build run check publish start test pattern validate
 
 build: build.json service.json
-	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
+	@docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: remove
-	../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	@../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 remove:
-	-docker rm -f $(DOCKER_NAME) 2> /dev/null || :
+	-@docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check: service.json
-	rm -f check.json
-	curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
+	@rm -f check.json
+	@curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
-push: build check
-	docker push ${DOCKER_TAG}
+push: build check $(DOCKER_LOGIN)
+	@docker push ${DOCKER_TAG}
 
-publish: build test $(KEYS) $(APIKEY)
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f test/service.definition.json -o ${ORG} -u iamapikey:$(shell cat APIKEY)
+publish: ${DIR} $(KEYS) $(APIKEY)
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat APIKEY)
 
-verify: publish $(KEYS) $(APIKEY)
-	# should return 'true'
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service list -o ${ORG} -u iamapikey:$(shell cat {APIKEY) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
-	# should return 'All signatures verified'
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${ORG} -u iamapikey:$(shell cat APIKEY) "${SERVICE_TAG}"
+verify: $(KEYS) $(APIKEY)
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange service list -o ${SERVICE_ORG} -u iamapikey:$(shell cat APIKEY) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${SERVICE_ORG} -u iamapikey:$(shell cat APIKEY) "${SERVICE_TAG}"
 
-test: service.json userinput.json $(SERVICE_REQVARS)
-	rm -fr test/
-	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${ORG}" -d test
-	jq '.arch="'${ARCH}'"|.deployment.services.'${SERVICE_LABEL}'.image="'${DOCKER_TAG}'"' service.json | sed "s/{arch}/${ARCH}/g" > test/service.definition.json
-	cp -f userinput.json test/userinput.json
-	for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' test/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; edit userinput.json"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} test/userinput.json) && echo "$${UI}" > test/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
+${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
+	@rm -fr ${DIR}/
+	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
+	@jq '.label="'${SERVICE_NAME}'"|.arch="'${ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_NAME}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
+	@cp -f userinput.json ${DIR}/userinput.json
+	@for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
+	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh ${DIR}
 
-depend: test APIKEY
-	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh test/
+start: remove ${DIR} stop publish
+	@for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' ${DIR}/service.definition.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
+	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d ${DIR}
+	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d ${DIR}
 
-start: remove stop depend publish
-	export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d test/
-	export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d test/
+test: service.json
+	../test.sh 127.0.0.1:$(DOCKER_PORT)
 
-stop: test
-	-export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d test/
+stop: ${DIR}
+	-@export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}
 
 pattern: publish pattern.json APIKEY
-	export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_LABEL} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 	
+validate:
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern verify -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) --public-key-file ${PUBLIC_KEY_FILE} ${SERVICE_NAME}
+	@export HZN_EXCHANGE_URL=${HZN} && FOUND=false && for pattern in $$(hzn exchange pattern list -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) | jq -r '.[]'); do if [ "$${pattern}" = "${SERVICE_ORG}/${SERVICE_NAME}" ]; then found=true; break; fi; done && if [ -z $${found} ]; then echo "Did not find $(SERVICE_ORG)/$(SERVICE_NAME)"; exit 1; else echo "Found pattern $${pattern}"; fi
 
 clean: remove stop
-	rm -fr test/ check.*
-	-docker rmi $(DOCKER_TAG) 2> /dev/null || :
+	@rm -fr ${DIR} check.*
+	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
-.PHONY: default all build run check stop push publish verify clean depend start
+.PHONY: default all build run check stop push publish verify clean start

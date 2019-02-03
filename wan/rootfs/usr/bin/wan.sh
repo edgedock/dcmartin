@@ -15,7 +15,8 @@ while true; do
 
   OUTPUT=$(echo "${OUTPUT}" | jq '.date='$(date +%s))
 
-  echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMP}/$$"
+  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
   SLEEP=$((WAN_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SLEEP} > 0 ]; then

@@ -27,7 +27,8 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq '.percent='${PERCENT})
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
+  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
   SLEEP=$((CPU_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SLEEP} > 0 ]; then

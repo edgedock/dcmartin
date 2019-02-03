@@ -47,8 +47,12 @@ while true; do
   COUNT=$(egrep '^'"${YOLO_ENTITY}" "${OUT}" | wc -l)
   # capture annotated image as BASE64 encoded string
   IMAGE=$(base64 -w 0 -i predictions.jpg)
-  echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/${SERVICE_LABEL}.json
   rm -f "${JPG}" "${OUT}" predictions.jpg
+
+  # make it atomic
+  echo "${CONFIG}" | jq '.date='$(date +%s)'|.time='${TIME}'|.count='${COUNT}'|.width='${WIDTH}'|.height='${HEIGHT}'|.scale="'${SCALE}'"|.mock="'${MOCK}'"|.image="'${IMAGE}'"' > ${TMP}/$$
+  mv -f ${TMP}/$$ ${TMP}/${SERVICE_LABEL}.json
+
   # wait for ..
   SLEEP=$((YOLO_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SLEEP} > 0 ]; then

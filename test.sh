@@ -2,49 +2,63 @@
 
 if [ ! -z "${1}" ]; then
   HOST="${1}"
-  if [ "${HOST%:*}" == "${HOST}" ]; then
-    HOST="${HOST}:80"
-    echo "No port specified; assuming port 80"
-  fi
 else
-  HOST="127.0.0.1:8587"
+  HOST="127.0.0.1"
+  echo "+++ WARN $0 $$ -- No host specified; assuming ${HOST}"
 fi
-echo "Testing ${HOST}"
+
+if [ "${HOST%:*}" == "${HOST}" ]; then
+  PORT=$(jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||')
+  echo "+++ WARN $0 $$ -- No port specified; assuming port ${PORT}"
+  HOST="${HOST}:${PORT}"
+fi
+
+if [[ ${HOST} =~ http* ]]; then
+  echo "T"
+else
+  PROT="http"
+  echo "+++ WARN $0 $$ -- No protocol specified; assuming ${PROT}"
+  HOST="${PROT}://${HOST}"
+fi
+
+if [ -z "${SERVICE_LABEL:-}" ]; then SERVICE_LABEL=${PWD##*/}; fi
+CMD="${PWD}/test-${SERVICE_LABEL}.sh"
+
+if [ -z ${TIMEOUT:-} ]; then TIMEOUT=5; fi
+DATE=$(($(date +%s)+${TIMEOUT}))
+
+echo "+++ INFO $0 $$ -- Testing ${HOST} at" $(date)
 
 I=0
-COUNT=0
-DATE=$(date +%s)
 
-# curl 127.0.0.1:8587 | jq '.yolo2msghub.yolo|.image=null'
-# {
-#   "log_level": "info",
-#   "debug": "false",
-#   "date": 1548951749,
-#   "period": 0,
-#   "entity": "person",
-#   "time": 45.163295,
-#   "count": 1,
-#   "width": 320,
-#   "height": 240,
-#   "scale": "320x240",
-#   "mock": "false",
-#   "image": null
-# }
-
-echo "${I}: ${DATE} ${COUNT}"
 while true; do
-  OUT=$(curl -sSL "http://${HOST}" | jq -c '.yolo2msghub.yolo')
+  OUT=$(curl -m ${TIMEOUT} -sSL "${HOST}")
+  if [ $? != 0 ]; then
+    echo "ERROR: curl failed to http://${HOST}" &> /dev/stderr
+    exit 1
+  fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
-    D=$(echo "${OUT}" | jq -r '.date')
-    if [[ ${D} > ${DATE} ]]; then 
-      DATE=${D}
-      T=$(echo "${OUT}" | jq -r '.time')
-      C=$(echo "${OUT}" | jq -r '.count')
-      COUNT=$((COUNT+C))
-      echo; echo "${I}: ${DATE} ${COUNT} ${T}"
+    if [ ! -z "$(command -v ${CMD})" ]; then
+      TEST=$(echo "${OUT}" | ${CMD})
+      if [ "${TEST:-}" == 'true' ]; then
+        echo "--- SUCCESS $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr
+        exit 0
+      else
+        echo "*** ERROR $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr
+        exit 1
+      fi
+    else
+        echo "+++ WARN $0 $$ -- missing test command: ${CMD}" &> /dev/stderr
     fi
+  else
+    echo "*** ERROR $0 $$ -- ${HOST} returns ${OUT}" &> /dev/stderr
+    exit 1
+  fi
+  if [ $(date +%s) -gt ${TIMEOUT} ]; then
+    echo "*** ERROR $0 $$ -- timeout" &> /dev/stderr
+    exit 1
   fi
   I=$((I+1))
-  echo -n '.'
-  sleep 5
+  echo '+++ INFO $0 $$ -- iteration ${I}; sleeping ...'
+  sleep 1
 done

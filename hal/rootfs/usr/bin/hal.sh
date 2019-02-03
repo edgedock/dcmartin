@@ -19,7 +19,8 @@ while true; do
     if [ ${DEBUG:-} == 'true' ]; then echo "OUTPUT == ${OUTPUT}" &> /dev/stderr; fi
   done
 
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
+  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
   SLEEP=$((HAL_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SLEEP} > 0 ]; then

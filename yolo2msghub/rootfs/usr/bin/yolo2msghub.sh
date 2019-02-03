@@ -25,7 +25,8 @@ while true; do
     OUTPUT=$(echo "${OUTPUT:-}" | jq '.'"${S}"'='"${OUT}")
   done
 
-  echo "${OUTPUT}" > "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" > "${TMP}/$$"
+  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
 
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- output: ${OUTPUT}" &> /dev/stderr; fi
 

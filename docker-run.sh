@@ -98,5 +98,5 @@ else
   echo "+++ WARN $0 $$ -- no ports"
 fi
 
-echo "RUN: ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}"
+echo "--- INFO $0 $$ -- ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}"
 docker run -d --name "${DOCKER_NAME}" ${OPTIONS} "${DOCKER_TAG}"
