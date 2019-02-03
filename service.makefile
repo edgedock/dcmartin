@@ -74,7 +74,6 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	@jq '.label="'${SERVICE_LABEL}'"|.arch="'${ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
 	@../checkvars.sh ${DIR}
-	#for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.definition.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
 	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh ${DIR}
 
 start: remove stop publish
