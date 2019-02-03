@@ -24,14 +24,17 @@ RUN \
         apk-tools \
 	bc \
         bash \
-	speedtest-cli \
         curl \
         jq \
         coreutils \
         lshw \
         socat \
+	py-setuptools \
+	py-pip \
     && rm -f -r \
         /tmp/*
+
+RUN pip install speedtest-cli
 
 # Copy root file-system
 COPY rootfs /

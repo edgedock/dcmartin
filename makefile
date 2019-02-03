@@ -40,7 +40,7 @@ $(TARGETS):
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-start:
+start: build publish
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done

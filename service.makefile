@@ -45,7 +45,7 @@ default: build run check
 
 all: build run check publish start test pattern validate
 
-build: build.json service.json
+build: Dockerfile build.json service.json
 	@docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
 
 run: remove
