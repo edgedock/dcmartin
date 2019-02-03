@@ -77,8 +77,7 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
         fi
       fi
       if [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
-        echo "*** ERROR $0 $$ -- value NOT defined for required: ${NAME}; edit ${USERINPUT}; exiting"
-        exit 1
+        echo "*** WARN $0 $$ -- value NOT defined for required: ${NAME}; edit ${USERINPUT}; continuing"
       fi
     fi
     OPTIONS="${OPTIONS:-}"' -e '"${NAME}"'='"${DV}"

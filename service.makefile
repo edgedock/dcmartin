@@ -46,7 +46,7 @@ default: build run check
 all: build run check publish start test pattern validate
 
 build: Dockerfile build.json service.json
-	@docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)"
+	@docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)" > build.out
 
 run: remove
 	@../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
@@ -73,19 +73,20 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
 	@jq '.label="'${SERVICE_LABEL}'"|.arch="'${ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
-	@for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
+	@../checkvars.sh ${DIR}
+	#for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' service.definition.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
 	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh ${DIR}
 
-start: remove ${DIR} stop publish
-	@for evar in $$(jq -r '.userInput[]|select(.defaultValue==null).name' ${DIR}/service.definition.json); do VAL=$$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'$${evar}'").value' ${DIR}/userinput.json) && if [ $${VAL} = "null" ]; then if [ ! -s $${evar} ]; then echo "*** ERROR: variable $${evar} has no default and value is null; create $${eva}"; exit 1; else VAL=$$(cat $${evar}) && UI=$$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'$${evar}')|='$${VAL} ${DIR}/userinput.json) && echo "$${UI}" > ${DIR}/userinput.json; echo "+++ INFO: $${evar} is $${VAL}"; fi; fi; done
+start: remove stop publish
+	@../checkvars.sh ${DIR} 
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d ${DIR}
 
 test: service.json
-	../test.sh 127.0.0.1:$(DOCKER_PORT)
+	@../test.sh 127.0.0.1:$(DOCKER_PORT)
 
-stop: ${DIR}
-	-@export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}
+stop: 
+	@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
 
 pattern: publish pattern.json APIKEY
 	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
@@ -95,7 +96,10 @@ validate:
 	@export HZN_EXCHANGE_URL=${HZN} && FOUND=false && for pattern in $$(hzn exchange pattern list -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) | jq -r '.[]'); do if [ "$${pattern}" = "${SERVICE_ORG}/${SERVICE_NAME}" ]; then found=true; break; fi; done && if [ -z $${found} ]; then echo "Did not find $(SERVICE_ORG)/$(SERVICE_NAME)"; exit 1; else echo "Found pattern $${pattern}"; fi
 
 clean: remove stop
-	@rm -fr ${DIR} check.*
+	@rm -fr ${DIR} check.json build.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
+
+dist-clean: clean
+	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS)
 
 .PHONY: default all build run check stop push publish verify clean start

@@ -36,26 +36,31 @@ $(ALL):
 	$(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $@
 
 $(TARGETS):
+	@echo "+++ INFO $$$ $$0 -- making $@"
 	@for dir in $(ALL); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 start: build publish
+	@echo "+++ INFO -- starting $@"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 test:
+	@echo "+++ INFO -- testing service as pattern $@"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 pattern:
+	@echo "+++ INFO -- publishing pattern $@"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 validate: 
+	@echo "+++ INFO -- validating pattern $@"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
