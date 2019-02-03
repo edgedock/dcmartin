@@ -8,7 +8,7 @@
 
 ORG = dcmartin@us.ibm.com
 URL = com.github.dcmartin.open-horizon
-TAG ?= -beta
+TAG ?= beta
 DOCKER_ID ?= $(shell whoami)
 
 ##
