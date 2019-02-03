@@ -89,7 +89,7 @@ stop: ${DIR}
 
 pattern: publish pattern.json APIKEY
 	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
-	
+
 validate:
 	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern verify -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) --public-key-file ${PUBLIC_KEY_FILE} ${SERVICE_NAME}
 	@export HZN_EXCHANGE_URL=${HZN} && FOUND=false && for pattern in $$(hzn exchange pattern list -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) | jq -r '.[]'); do if [ "$${pattern}" = "${SERVICE_ORG}/${SERVICE_NAME}" ]; then found=true; break; fi; done && if [ -z $${found} ]; then echo "Did not find $(SERVICE_ORG)/$(SERVICE_NAME)"; exit 1; else echo "Found pattern $${pattern}"; fi

@@ -60,4 +60,4 @@ validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean depend start test
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test
