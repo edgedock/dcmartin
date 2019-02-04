@@ -48,19 +48,19 @@ start: build publish
 	done
 
 test:
-	@echo "+++ INFO -- testing service as pattern $@"
+	@echo "+++ INFO -- testing patterns"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 pattern:
-	@echo "+++ INFO -- publishing pattern $@"
+	@echo "+++ INFO -- publishing patterns"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 validate: 
-	@echo "+++ INFO -- validating pattern $@"
+	@echo "+++ INFO -- validating patterns"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
