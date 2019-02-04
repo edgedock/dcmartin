@@ -1,1 +1,1 @@
-../test-services.sh
+../test-service.sh

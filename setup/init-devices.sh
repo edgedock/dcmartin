@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBUG=true
-VERBOSE=true
+VERBOSE=
 
 ###
 ### default EXCHANGE URL
@@ -633,10 +633,12 @@ for MAC in ${MACS}; do
     iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="unconfigured"') == false ]; do
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on unregistration [10]; iteration ${iteration}; result:" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
       iteration=$((iteration+1))
-      if [ ${iteration} -le 5 ]; then 
+      if [ ${iteration} -le 10 ]; then 
+        if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on registration [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
         sleep 10
       else
         if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: stopped waiting on unregistration at iteration ${iteration}; result:" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
+        result=
         break
       fi
       result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
@@ -676,12 +678,19 @@ for MAC in ${MACS}; do
   # POLL client for node list information; wait for configured state
   cmd="hzn node list"
   result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
-  while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="configured"') == false ]; do
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on configuration [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
-    sleep 10
+  iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="configured"') == false ]; do
+    iteration=$((iteration+1))
+    if [ ${iteration} -le 10 ]; then
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on configuration [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
+      sleep 10
+    else
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: stopped waiting on unregistration at iteration ${iteration}; result:" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
+      result=
+      break
+    fi
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
   done
-  if [ -z "${result}" ] || [ "${results}" == "null" ]; then
+  if [ -z "${result}" ] || [ "${result}" == "null" ]; then
     echo "*** ERROR: ${id}: command $cmd failed; continuing..." &> /dev/stderr
     continue
   fi

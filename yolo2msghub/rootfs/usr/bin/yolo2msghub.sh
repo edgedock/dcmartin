@@ -41,7 +41,7 @@ while true; do
           -X sasl.mechanisms=PLAIN \
           -X sasl.username=iamapikey \
           -X sasl.password="${YOLO2MSGHUB_APIKEY}" \
-          -t "${SERVICE_LABEL}/${HZN_DEVICE_ID}"
+          -t "${SERVICE_LABEL}"
   else
     echo "+++ WARN $0 $$ -- kafka invalid" &> /dev/stderr
   fi

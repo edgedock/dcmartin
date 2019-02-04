@@ -5,7 +5,7 @@ if [ -z $(command -v "lscpu") ]; then
 fi
 echo -n '{"lscpu":{'
 lscpu 2> /dev/null | while read -r; do
-  KEY=$(echo "$REPLY" | sed 's|^\([^:]*\):.*|\1|')
+  KEY=$(echo "$REPLY" | sed 's|^\([^:]*\):.*|\1|' | sed 's| |_|g' | sed 's|-|_|g' | sed 's|(||g' | sed 's|)||g')
   VAL=$(echo "$REPLY" | sed 's|^[^:]*:[ \t]*\(.*\)|\1|')
   if [ -n "${VALUE:-}" ]; then echo -n ','; fi
   VALUE='"'${KEY}'": "'${VAL}'"'

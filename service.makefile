@@ -58,10 +58,10 @@ check: service.json
 	@rm -f check.json
 	@curl -sSL 'http://localhost:'${DOCKER_PORT} -o check.json && jq '.' check.json
 
-push: build check $(DOCKER_LOGIN)
+push: build $(DOCKER_LOGIN)
 	@docker push ${DOCKER_TAG}
 
-publish: ${DIR} $(KEYS) $(APIKEY)
+publish: ${DIR} $(KEYS) $(APIKEY) push
 	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat APIKEY)
 
 verify: $(KEYS) $(APIKEY)
