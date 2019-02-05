@@ -50,17 +50,16 @@ if [ -z "${REPLY}" ]; then echo "false"; exit 1; fi
 # process input
 OUT="${REPLY}"
 SERVICE_LABEL=$(echo "${OUT}" | jq -r '.service')
-if [ "${SERVICE_LABEL}" == 'null' ]; then echo "service: null"; break; fi
+if [ "${SERVICE_LABEL}" == 'null' ]; then echo "service: null"; fi
 ENTRIES=$(echo "${OUT}" | jq -r '.|to_entries[].key')
 if [ "${ENTRIES}" == 'null' ]; then echo "entries: null"; break; fi
-OUTPUT='{"'${SERVICE_LABEL}'": {'
+OUTPUT='{'
 DEPTH=1
 SUBS=; for E in ${ENTRIES}; do
     if [ ! -z "${SUBS}" ]; then SUBS="${SUBS}"','; fi
     SUBS="${SUBS}""$(print_object "${E}")"
 done
 OUTPUT="${OUTPUT}""${SUBS}"'}'
-OUTPUT="${OUTPUT}"'}'
 echo "${OUTPUT}" | jq -c '.' &> /dev/stderr
 
 if [ $? == 0 ]; then echo 'true'; exit 0; else echo 'false'; exit 1; fi

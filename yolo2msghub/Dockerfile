@@ -9,6 +9,7 @@ RUN apt-get update
 RUN apt-get install -q -y --no-install-recommends \
   curl \
   socat \
+  ca-certificates \
   kafkacat \
   jq 
 
