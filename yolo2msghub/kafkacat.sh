@@ -39,22 +39,22 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
     if [ $(echo "${REPLY}" | jq '.yolo2msghub.yolo!=null') == 'true' ]; then
       if [ $(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.mock') != 'true' ]; then
         if [ ${DATE} -gt ${LAST} ]; then
-	  COUNT=$(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.count')
+          COUNT=$(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.count')
           if [ ${COUNT} -gt 0 ]; then
-	    echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}"
+            echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}"
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
             echo "${REPLY}" | jq -r '.yolo2msghub.yolo.image' | base64 --decode > $0.$$.jpeg
             if [ ! -z $(command -v open) ]; then open $0.$$.jpeg; fi
-	  else
-	    echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person"
+          else
+            echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person"
           fi
           THIS=$(echo "${THIS}" | jq '.date='${DATE})
-	  DEVICES=$(echo "${DEVICES}" | jq '(.[]|select(.id=="'${ID}'"))|='"${THIS}")
+          DEVICES=$(echo "${DEVICES}" | jq '(.[]|select(.id=="'${ID}'"))|='"${THIS}")
           DEVICES=$(echo "${DEVICES}" | jq '.|sort_by(.count)|reverse')
         fi
       else
-	echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: mock"
+        echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: mock"
       fi
     else
       echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no yolo output"
