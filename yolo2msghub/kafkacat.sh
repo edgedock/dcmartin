@@ -15,4 +15,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
     else
       continue
     fi
+  echo "LAST:" $(jq -r '.hzn.device_id' $0.$$.out | tail -1)
+  echo "ALL:" $(jq -r '.hzn.device_id' $0.$$.out | sort | uniq)
 done
+rm -f $0.$$.out
