@@ -14,6 +14,7 @@ Provides entity count information as micro-service; updates periodically (defaul
 + `YOLO_ENTITY` - entity to count; defaults to `person`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
+
 ## How To Use
 
 Copy this [repository][repository], change to the `yolo` directory, then use the **make** command; see below:
@@ -78,6 +79,7 @@ Nodes should _register_ using a derivative of the template `userinput.json` [fil
 + `YOLO_ENTITY` - entity to count; defaults to `person`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
+
 ### Example registration
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
@@ -93,6 +95,7 @@ Using 'dcmartin/amd64_cpu@sha256:b1d9c38fee292f895ed7c1631ed75fc352545737d1cd58f
 Creating com.github.dcmartin.open-horizon.cpu_0.0.1_amd64 in the exchange...
 Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
 ```
+
 ```
 % make verify
 # should return 'true'
