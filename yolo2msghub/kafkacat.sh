@@ -12,7 +12,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
   -t "${TOPIC}" | while read -r; do
     if [ -n "${REPLY}" ]; then
       echo "${REPLY}" >> $0.$$.out
-      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> /dev/null)
+      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> $0.$$.json)
     else
       echo "+++ WARN $0 $$ -- null payload"
       continue
@@ -45,7 +45,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
             echo "${REPLY}" | jq -r '.yolo2msghub.yolo.image' | base64 --decode > $0.$$.jpeg
-            if [ ! -z $(command -v open) ]; then open $0.$$.jpeg; fi
+            # if [ ! -z $(command -v open) ]; then open $0.$$.jpeg; fi
           else
             echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person"
           fi

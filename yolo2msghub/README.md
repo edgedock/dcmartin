@@ -7,47 +7,59 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `org` - `dcmartin@us.ibm.com/yolo2msghub`
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
+
 ### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
+
 ### Pattern registration
-Register nodes using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name, for example:
+Register nodes using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name; **contents should be JSON**, e.g. quoted strings; extract from downloaded API keys using `jq` command:  
+
 ```
 % jq '.api_key' {kafka-apiKey-file} > YOLO2MSGHUB_APIKEY
 ```
 #### Required variables
 + `YOLO2MSGHUB_APIKEY` - message hub API key
+
 #### Optional variables
 + `YOLO2MSGHUB_PERIOD` - seconds between updates; defaults to `30`
++  `YOLO2MSGHUB_ADMIN_URL` - administrative URL for REStful API
 + `YOLO2MSGHUB_BROKER` - message hub brokers
-+ `LOCALHOST_PORT` - port for access; default 8587 
-+ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
++ `LOCALHOST_PORT` - port for access; default **8587**
++ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`). 
++
+
+**NOTE:** Refer to _Required services_ for their variables.
+
 #### Example registration
 ```
 % hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
 ```
-### Sample
 
-![sample.png](sample.png?raw=true "YOLO2MSGHUB")
+## Required services
 
-## Services
-
-This _service_ utilizes the following required services:
+This _service_ includes the following services:
 
 + [`yolo`][yolo-service] - captures images from camera and counts specified entity
 + [`hal`][hal-service] - provides hardware inventory layer API for client
 + [`cpu`][cpu-service] - provides CPU percentage API for client
 + [`wan`][wan-service] - provides wide-area-network information API for client
 
-[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo
-[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal
-[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
-[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan
+Each of these services is described in the following locations:
+
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+
+# Sample
+
+![sample.png](sample.png?raw=true "YOLO2MSGHUB")
 
 # Getting started
 
-Copy this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; quick-start below:
+Clone or fork this [repository][repository], change to the `yolo2msghub` directory, then use the **make** command; quick-start below:
 
 ```
 % mkdir ~/gitdir
@@ -55,7 +67,11 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
 % git clone http://github.com/dcmartin/open-horizon
 % cd open-horizon/yolo2msghub
 % make
-...
+```
+
+The default `make` command will `build`,`run`, and `check` this service.  A container with the name `{arch}_yolo2msghub`, e.g. `amd64_yolo2msghub` on Intel/AMD PC/MAC/LINUX, will be created (n.b. running containers can be listed through `docker ps`). Results from a successful `make check` yield a sample payload:
+
+```
 {
   "hostname": "a60b406943d4-172017000007",
   "org": "dcmartin@us.ibm.com",
@@ -74,38 +90,147 @@ Copy this [repository][repository], change to the `yolo2msghub` directory, then 
   }
 }
 ```
+
 # Building
 
-The **make** command is used to `build`,`run`,`check` (default), `publish`, `verify`,`start`, and `clean`.
+The **make** command by **default** performs `build`,`run`,`check`; available targets:
 
 + `build` - build container using `build.json` and `service.json`
-+ `run` - run container locally; map `ports` in `service.json`
-+ `check` - tests the service locally on mapped port
++ `run` - run container locally; map `ports` as in `service.json`
++ `check` - checks the service locally on mapped port
++ `test` - tests the service output using `test-{service}.sh` for conformant payload
 + `push` - push the container to Docker registry; __requires__ `DOCKER_ID` and `docker login`
 + `publish` - publish service to _exchange_; __requires__ `hzn` CLI
 + `verify` - verify service on exchange; __requires__ `hzn` CLI
 + `start` - intiates service and required services locally; __requires__ `hzn` CLI
 + `clean` - remove all generated artefacts, including running containers and images
++  `distclean` - remove all residuals, including variable and key files
 
-### `check`
+### `test`
+This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _pattern_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
+
 ```
-% make check
-...
 {
-  "hostname": "05acf6435757-192168016002",
-  "service": "yolo2msghub",
-  "device": "test-cpu-2",
-  "pid": 9,
+  "hzn": {
+    "agreementid": "string",
+    "arch": "string",
+    "cpus": "number",
+    "device_id": "string",
+    "exchange_url": "string",
+    "host_ips": [
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string"
+    ],
+    "organization": "string",
+    "pattern": "string",
+    "ram": "number"
+  },
+  "date": "number",
+  "service": "string",
+  "hostname": "string",
   "yolo2msghub": {
-    "log_level": "info",
-    "debug": "false",
-    "services": [ { "name": "yolo", "url": "http://yolo:80" }, { "name": "hal", "url": "http://hal:80" }, { "name": "cpu", "url": "http://cpu:80" }, { "name": "wan", "url": "http://wan:80" } ],
-    "date": 1548798539,
-    "yolo": { "log_level": "info", "debug": "false", "date": 1548798507, "period": 0, "entity": "person", "time": 44.725642, "count": 0, "width": 320, "height": 240, "scale": "320x240", "mock": "false", "image": "redacted" },
-    "hal": { "log_level": "info", "debug": "false", "date": 1548797851, "period": 60, "lshw": { "id": "b5dd54a7a499", "class": "system", "claimed": true, "description": "Computer", "product": "Raspberry Pi 3 Model B Plus Rev 1.3", "serial": "000000005770a507", "width": 32, "children": [ { "id": "core", "class": "bus", "claimed": true, "description": "Motherboard", "physid": "0", "capabilities": { "raspberrypi_3-model-b-plus": true, "brcm_bcm2837": true }, "children": [ { "id": "cpu:0", "class": "processor", "claimed": true, "description": "CPU", "product": "cpu", "physid": "0", "businfo": "cpu@0", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:1", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "1", "businfo": "cpu@1", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:2", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "2", "businfo": "cpu@2", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "cpu:3", "class": "processor", "disabled": true, "claimed": true, "description": "CPU", "product": "cpu", "physid": "3", "businfo": "cpu@3", "units": "Hz", "size": 1400000000, "capacity": 1400000000, "capabilities": { "cpufreq": "CPU Frequency scaling" } }, { "id": "memory", "class": "memory", "claimed": true, "description": "System memory", "physid": "4", "units": "bytes", "size": 972234752 } ] }, { "id": "network", "class": "network", "claimed": true, "description": "Ethernet interface", "physid": "1", "logicalname": "eth0", "serial": "02:42:ac:1d:00:02", "units": "bit/s", "size": 10000000000, "configuration": { "autonegotiation": "off", "broadcast": "yes", "driver": "veth", "driverversion": "1.0", "duplex": "full", "ip": "172.29.0.2", "link": "yes", "multicast": "yes", "port": "twisted pair", "speed": "10Gbit/s" }, "capabilities": { "ethernet": true, "physical": "Physical interface" } } ] }, "lsusb": [ { "bus_number": "001", "device_id": "001", "device_bus_number": "1d6b", "manufacture_id": "Bus 001 Device 001: ID 1d6b:0002", "manufacture_device_name": "Bus 001 Device 001: ID 1d6b:0002" }, { "bus_number": "001", "device_id": "003", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 003: ID 0424:2514", "manufacture_device_name": "Bus 001 Device 003: ID 0424:2514" }, { "bus_number": "001", "device_id": "002", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 002: ID 0424:2514", "manufacture_device_name": "Bus 001 Device 002: ID 0424:2514" }, { "bus_number": "001", "device_id": "005", "device_bus_number": "0424", "manufacture_id": "Bus 001 Device 005: ID 0424:7800", "manufacture_device_name": "Bus 001 Device 005: ID 0424:7800" }, { "bus_number": "001", "device_id": "004", "device_bus_number": "1415", "manufacture_id": "Bus 001 Device 004: ID 1415:2000", "manufacture_device_name": "Bus 001 Device 004: ID 1415:2000" } ], "lscpu": { "Architecture": "armv7l", "Byte Order": "Little Endian", "CPU(s)": "4", "On-line CPU(s) list": "0-3", "Thread(s) per core": "1", "Core(s) per socket": "4", "Socket(s)": "1", "Vendor ID": "ARM", "Model": "4", "Model name": "Cortex-A53", "Stepping": "r0p4", "CPU max MHz": "1400.0000", "CPU min MHz": "600.0000", "BogoMIPS": "89.60", "Flags": "half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae evtstrm crc32" }, "lspci": null, "lsblk": [ { "name": "mmcblk0", "maj:min": "179:0", "rm": "0", "size": "29.7G", "ro": "0", "type": "disk", "mountpoint": null, "children": [ { "name": "mmcblk0p1", "maj:min": "179:1", "rm": "0", "size": "43.9M", "ro": "0", "type": "part", "mountpoint": null }, { "name": "mmcblk0p2", "maj:min": "179:2", "rm": "0", "size": "29.7G", "ro": "0", "type": "part", "mountpoint": "/etc/hosts" } ] } ] },
-    "cpu": { "log_level": "info", "debug": "false", "date": 1548820336, "period": 60, "interval": 1, "percent": 79.7 },
-    "wan": { "log_level": "info", "debug": "false", "date": 1548797896, "period": 1800, "speedtest": { "download": 6030465.984919555, "upload": 2598608.738590407, "ping": 112, "server": { "url": "http://sjc.speedtest.net/speedtest/upload.php", "lat": "37.3041", "lon": "-121.8727", "name": "San Jose, CA", "country": "United States", "cc": "US", "sponsor": "Speedtest.net", "id": "10384", "url2": "http://sjc2.speedtest.net/speedtest/upload.php", "host": "sjc.host.speedtest.net:8080", "d": 7.476714842887551, "latency": 112 }, "timestamp": "2019-01-29T21:37:37.359821Z", "bytes_sent": 4472832, "bytes_received": 13115612, "share": null, "client": { "ip": "67.164.104.198", "lat": "37.2458", "lon": "-121.8306", "isp": "Comcast Cable", "isprating": "3.7", "rating": "0", "ispdlavg": "0", "ispulavg": "0", "loggedin": "0", "country": "US" } } } }
+    "log_level": "string",
+    "debug": "boolean",
+    "services": [
+      "object",
+      "object",
+      "object",
+      "object"
+    ],
+    "period": "number",
+    "yolo": {
+      "log_level": "string",
+      "debug": "boolean",
+      "date": "number",
+      "period": "number",
+      "entity": "string",
+      "time": "number",
+      "count": "number",
+      "width": "number",
+      "height": "number",
+      "scale": "string",
+      "mock": "string",
+      "image": "string"
+    },
+    "hal": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number",
+      "lshw": {
+        "id": "string",
+        "class": "string",
+        "claimed": "boolean",
+        "description": "string",
+        "product": "string",
+        "serial": "string",
+        "width": "number",
+        "children": [
+          "object",
+          "object"
+        ]
+      },
+      "lsusb": [
+        "object",
+        "object",
+        "object",
+        "object",
+        "object"
+      ],
+      "lscpu": {
+        "Architecture": "string",
+        "Byte_Order": "string",
+        "CPUs": "string",
+        "On_line_CPUs_list": "string",
+        "Threads_per_core": "string",
+        "Cores_per_socket": "string",
+        "Sockets": "string",
+        "Vendor_ID": "string",
+        "Model": "string",
+        "Model_name": "string",
+        "Stepping": "string",
+        "CPU_max_MHz": "string",
+        "CPU_min_MHz": "string",
+        "BogoMIPS": "string",
+        "Flags": "string"
+      },
+      "lspci": "null",
+      "lsblk": [
+        "object"
+      ]
+    },
+    "cpu": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number",
+      "interval": "number",
+      "percent": "number"
+    },
+    "wan": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number",
+      "speedtest": "null"
+    },
+    "date": "number"
+  }
 }
+
 ```
 ### `start`
 The `start` target will initiate the _pattern_ with all required _services_; it depends on `publish` and `verify`
