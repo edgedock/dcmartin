@@ -15,7 +15,7 @@ RUN apt-get update \
   \
   && ARCH="${BUILD_ARCH}" \
   && if [ "${BUILD_ARCH}" = "aarch64" ]; then ARCH="arm64"; fi \
-  && if [ "${BUILD_ARCH}" = "i386" ]; then ARCH="amd64"; fi \
+  && if [ "${BUILD_ARCH}" = "x86_64" ]; then ARCH="amd64"; fi \
   \
   && HORIZON_CLI="2.20.0" \
   && HORIZON_URL="http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli" \
