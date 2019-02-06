@@ -28,7 +28,6 @@ Register nodes using a derivative of the template [`userinput.json`][userinput].
 + `YOLO2MSGHUB_BROKER` - message hub brokers
 + `LOCALHOST_PORT` - port for access; default **8587**
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`). 
-+
 
 **NOTE:** Refer to _Required services_ for their variables.
 
