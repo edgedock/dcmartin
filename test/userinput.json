@@ -1,0 +1,14 @@
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.base",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    }
+  ]
+}

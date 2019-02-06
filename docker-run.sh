@@ -19,15 +19,15 @@ fi
 ## configuration
 if [ -z "${SERVICE:-}" ]; then SERVICE="service.json"; fi
 if [ ! -s "${SERVICE}" ]; then echo "*** ERROR $0 $$ -- Cannot locate service configuration ${SERVICE}; exiting"; exit 1; fi
-LABEL=$(jq -r '.label' "${SERVICE}")
+SERVICE_LABEL=$(jq -r '.label' "${SERVICE}")
 
 ## privileged
-if [ $(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").privileged==true' "${SERVICE}") == 'true' ]; then
+if [ "$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.privileged?==true' "${SERVICE}")" == 'true' ]; then
   OPTIONS="${OPTIONS:-}"' --privileged'
 fi
 
 ## environment
-EVARS=$(jq '.deployment.services|to_entries[]|select(.key=="'${LABEL}'").value.environment?' "${SERVICE}")
+EVARS=$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.environment?' "${SERVICE}")
 if [ "${EVARS}" != 'null' ]; then
   OPTIONS="${OPTIONS:-} $(echo "${EVARS}" | jq -r '.[]' | while read -r; do T="-e ${REPLY}"; echo "${T}"; done)"
 fi
@@ -91,11 +91,11 @@ if [ $(jq '.ports!=null' ${SERVICE}) == 'true' ]; then
   PORTS=$(jq -r '.ports?|to_entries[]|.key?' "${SERVICE}" | sed 's|/tcp||')
   for PS in ${PORTS}; do
     PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'/tcp")|.value' "${SERVICE}")
-    OPTIONS="${OPTIONS:-}"' --publish='"${PS}"':'"${PE}"
+    OPTIONS="${OPTIONS:-}"' --publish='"${PE}"':'"${PS}"
   done
 else
   echo "+++ WARN $0 $$ -- no ports"
 fi
 
-echo "--- INFO $0 $$ -- ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}"
+echo "--- INFO $0 $$ -- docker run -d --name ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}"
 docker run -d --name "${DOCKER_NAME}" ${OPTIONS} "${DOCKER_TAG}"

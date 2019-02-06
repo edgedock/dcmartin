@@ -2,18 +2,19 @@ ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM
 
-# Environment variables
-ENV \
-    HOME="/root" \
-    LANG="C.UTF-8" \
-    PS1="$(whoami)@$(hostname):$(pwd)$ " \
-    TERM="xterm"
+ARG BUILD_FROM=ubuntu:bionic
 
-# Set shell
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+ENV LANG C.UTF-8
 
-# Copy root file-system
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+  curl \
+  socat \
+  jq
+
+# Copy rootfs
 COPY rootfs /
+
+CMD [ "/usr/bin/run.sh" ]
 
 # Build arguments
 ARG BUILD_ARCH
@@ -23,8 +24,8 @@ ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.open-horizon.name="BASE" \
-    com.github.open-horizon.description="base container" \ 
+    com.github.open-horizon.name="base-ubuntu" \
+    com.github.open-horizon.description="base image for ubuntu bionic" \ 
     com.github.open-horizon.arch="${BUILD_ARCH}" \
     com.github.open-horizon.type="service" \
     com.github.open-horizon.version="${BUILD_VERSION}" \

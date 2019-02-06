@@ -13,7 +13,7 @@ RUN apt-get install -q -y --no-install-recommends \
   kafkacat \
   jq 
 
-# Copy usr
+# Copy rootfs
 COPY rootfs /
 
 CMD [ "/usr/bin/run.sh" ]

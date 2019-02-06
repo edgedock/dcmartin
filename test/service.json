@@ -1,24 +1,24 @@
 {
   "org": "dcmartin@us.ibm.com",
-  "label": "wan",
+  "label": "test",
   "description": "Provides hardware abstraction layer as service",
-  "documentation": "https://github.com/dcmartin/open-horizon/wan/README.md",
-  "url": "com.github.dcmartin.open-horizon.wan",
+  "documentation": "https://github.com/dcmartin/open-horizon/test/README.md",
+  "url": "com.github.dcmartin.open-horizon.test",
   "version": "0.0.1",
   "arch": null,
   "public": true,
   "sharable": "singleton",
   "requiredServices": [],
   "userInput": [
-        { "name": "WAN_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "1800" },
+        { "name": "TEST_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "300" },
         { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
         { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
   ],
   "deployment": {
     "services": {
-      "wan": {
+      "test": {
         "environment": [
-           "SERVICE_LABEL=wan"
+           "SERVICE_LABEL=test"
         ],
         "image": null,
         "privileged": true
@@ -29,6 +29,6 @@
     "size": 2048000
   },
   "ports": {
-    "80/tcp": 8583
+    "80/tcp": 8589
   }
 }

@@ -1,0 +1,30 @@
+{
+  "org": "dcmartin@us.ibm.com",
+  "label": "base-ubuntu",
+  "description": "Provides hardware abstraction layer as service",
+  "documentation": "https://github.com/dcmartin/open-horizon/base-ubuntu/README.md",
+  "url": "com.github.dcmartin.open-horizon.base-ubuntu",
+  "version": "0.0.1",
+  "arch": null,
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [],
+  "userInput": [],
+  "deployment": {
+    "services": {
+      "base-ubuntu": {
+        "environment": [
+          "SERVICE_LABEL=base"
+        ],
+        "image": null,
+        "privileged": true
+      }
+    }
+  },
+  "tmpfs": {
+    "size": 8192000
+  },
+  "ports": {
+    "80/tcp": 8580
+  }
+}

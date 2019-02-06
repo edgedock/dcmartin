@@ -9,7 +9,8 @@ HZN := $(if $(HZN),$(HZN),"https://alpha.edge-fabric.com/v1/")
 DIR ?= horizon
 
 ## BUILD
-BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_FROM=$(if ${TAG},$(shell echo $(BUILD_BASE) | sed 's|\(.*\):\(.*\)|\1-beta:\2|'),${BUILD_BASE})
 
 ## SERVICE
 SERVICE_ORG := $(if ${ORG},${ORG},$(shell jq -r '.org' service.json))
@@ -46,7 +47,7 @@ default: build run check
 all: build run check publish start test pattern validate
 
 build: Dockerfile build.json service.json
-	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)" > build.out
+	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)" > build.out || cat build.out && false
 
 run: remove
 	../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"

@@ -4,7 +4,7 @@
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 # hzn config
-HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID}'","arch":"'${HZN_ARCH}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID}'","exchange_url":"'${HZN_EXCHANGE_URL}'","host_ips":['$(echo "${HZN_HOST_IPS}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION}'","pattern":"'${HZN_PATTERN}'","ram":'${HZN_RAM:-0}'},"date":'$(date +%s)',"service":"'${SERVICE_LABEL:-}'"}'
+export HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID}'","arch":"'${HZN_ARCH}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID}'","exchange_url":"'${HZN_EXCHANGE_URL}'","host_ips":['$(echo "${HZN_HOST_IPS}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION}'","pattern":"'${HZN_PATTERN}'","ram":'${HZN_RAM:-0}'},"date":'$(date +%s)',"service":"'${SERVICE_LABEL:-}'"}'
 
 # add hostname
 IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
@@ -18,7 +18,7 @@ echo "${HZN}" > ${TMP}/config.json
 if [ ! -z "${SERVICE_LABEL:-}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then
   ${SERVICE_LABEL}.sh &
 else
-  echo "*** ERROR $0 $$ -- environment variable SERVICE_LABEL: ${SERVICE_LABEL:-}; command:" $(command -v "${SERVICE_LABEL:-}.sh") &> /dev/stderr
+  echo "+++ WARN $0 $$ -- executable not found for ${SERVICE_LABEL}: ${SERVICE_LABEL:-}.sh" &> /dev/stderr
 fi
 
 # port

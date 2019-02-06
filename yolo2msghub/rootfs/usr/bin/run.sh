@@ -18,7 +18,7 @@ echo "${HZN}" > ${TMP}/config.json
 if [ ! -z "${SERVICE_LABEL:-}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then
   ${SERVICE_LABEL}.sh &
 else
-  echo "*** ERROR $0 $$ -- environment variable SERVICE_LABEL: ${SERVICE_LABEL:-}; command:" $(command -v "${SERVICE_LABEL:-}.sh") &> /dev/stderr
+  echo "+++ WARN $0 $$ -- executable not found for ${SERVICE_LABEL}: ${SERVICE_LABEL:-}.sh" &> /dev/stderr
 fi
 
 # port
