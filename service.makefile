@@ -1,6 +1,6 @@
 ## ARCHITECTURE
 ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
-BUILD_ARCH=$(shell arch)
+BUILD_ARCH=$(shell uname -m)
 
 ## HZN
 CMD := $(shell whereis hzn | awk '{ print $1 }')
@@ -9,7 +9,8 @@ HZN := $(if $(HZN),$(HZN),"https://alpha.edge-fabric.com/v1/")
 DIR ?= horizon
 
 ## BUILD
-BUILD_FROM=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_FROM=$(if ${TAG},$(shell echo $(BUILD_BASE) | sed 's|\(.*\):\(.*\)|\1-beta:\2|'),${BUILD_BASE})
 
 ## SERVICE
 SERVICE_ORG := $(if ${ORG},${ORG},$(shell jq -r '.org' service.json))
