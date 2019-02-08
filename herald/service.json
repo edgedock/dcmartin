@@ -21,10 +21,8 @@
           "SERVICE_LABEL=herald"
         ],
         "specific_ports": [
-          {
-            "HostPort": "5960/tcp",
-            "HostIP": "0.0.0.0"
-          }
+          { "HostPort": "5959/udp", "HostIP": "0.0.0.0" },
+          { "HostPort": "5960/tcp", "HostIP": "0.0.0.0" }
         ],
         "image": null,
         "privileged": true
@@ -35,7 +33,8 @@
     "size": 8192000
   },
   "ports": {
-    "80/tcp": 5959,
+    "80/tcp": 8589,
+    "5959/udp": 5959,
     "5960/tcp": 5960
   }
 }
