@@ -13,11 +13,7 @@ addons:
   apt:
     update: true
     sources:
-    - sourceline: deb [arch=amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
-      key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
-    - sourceline: deb [arch=arm64] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
-      key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
-    - sourceline: deb [arch=arm] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
+    - sourceline: deb [arch=amd64,arm,arm64] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
       key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
     packages:
     - make
@@ -29,7 +25,6 @@ before_install:
 before_script:
   - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_ID}" --password-stdin; echo "${IBMCLOUD_APIKEY}" > APIKEY; echo "${YOLO2MSGHUB_APIKEY}" > yolo2msghub/YOLO2MSGHUB_APIKEY; if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi; else if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi; fi
 script:
-  - make start
-  - make test
+  - make build
 after_success:
-  - make pattern
+  - make push
