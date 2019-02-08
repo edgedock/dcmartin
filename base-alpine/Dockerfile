@@ -42,6 +42,7 @@ ARG BUILD_VERSION
 # Labels
 LABEL \
     org.label-schema.schema-version="1.0" \
+    org.label-schema.build-arch="${BUILD_ARCH}" \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.name="base-alpine" \
     org.label-schema.description="base alpine container" \ 

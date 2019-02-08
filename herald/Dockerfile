@@ -41,9 +41,10 @@ ARG BUILD_VERSION
 LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.build-date="${BUILD_DATE}" \
-    org.label-schema.name="base-alpine" \
-    org.label-schema.description="base alpine container" \ 
-    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \ 
+    org.label-schema.build-arch="${BUILD_ARCH}" \
+    org.label-schema.name="herald" \
+    org.label-schema.description="herald of services" \ 
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/herald/" \ 
     org.label-schema.vcs-ref="${BUILD_REF}" \ 
     org.label-schema.version="${BUILD_VERSION}" \
     org.label-schema.vendor="David C Martin <github@dcmartin.com>"

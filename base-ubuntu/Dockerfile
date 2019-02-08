@@ -31,6 +31,7 @@ ARG BUILD_VERSION
 LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.build-arch="${BUILD_ARCH}" \
     org.label-schema.name="base-ubuntu" \
     org.label-schema.description="base ubuntu container" \ 
     org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-ubuntu/" \ 

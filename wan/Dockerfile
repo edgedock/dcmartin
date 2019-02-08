@@ -30,6 +30,7 @@ RUN \
     && rm -f -r \
         /tmp/*
 
+RUN pip install --upgrade pip
 RUN pip install speedtest-cli
 
 # Copy root file-system
@@ -46,9 +47,10 @@ ARG BUILD_VERSION
 LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.build-date="${BUILD_DATE}" \
-    org.label-schema.name="base-alpine" \
-    org.label-schema.description="base alpine container" \
-    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \
+    org.label-schema.build-arch="${BUILD_ARCH}" \
+    org.label-schema.name="wan" \
+    org.label-schema.description="wide-area-network statistics" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/wan/" \
     org.label-schema.vcs-ref="${BUILD_REF}" \
     org.label-schema.version="${BUILD_VERSION}" \
     org.label-schema.vendor="David C Martin <github@dcmartin.com>"
