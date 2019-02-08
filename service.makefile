@@ -36,8 +36,8 @@ DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
 BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
-BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\([^:]*\)/.*|\1|")
-SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_ID) ]; then echo ${DOCKER_ID}; else echo ""; fi)
+BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\([^/]*\)/.*|\1|")
+SAME_ORG=$(shell if [ $(BUILD_ORG) == $(DOCKER_ID) ]; then echo ${DOCKER_ID}; else echo ""; fi)
 BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/\([^:]*\):.*|\1|")
 BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
