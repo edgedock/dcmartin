@@ -9,8 +9,8 @@ addons:
     update: true
     sources:
     - blue-horizon
-    - sourceline: 'deb [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main'
-    - sourceline: 'deb-src [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main'
+    - sourceline: deb [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
+    - sourceline: deb-src [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
       key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
 env:
   - BUILD_ARCH=amd64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
