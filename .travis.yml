@@ -1,7 +1,7 @@
 sudo: true
 language: c
 services: docker
-dist: xenial
+dist: bionic 
 branches:
   only:
     - master
@@ -22,12 +22,6 @@ addons:
     - ca-certificates
     - gnupg
 before_install:
-  # - sudo apt update -y && apt install -y make curl jq ca-certificates gnupg
-  # - sudo apt update -y && apt install -q -y --no-install-recommends make curl jq ca-certificates gnupg
-  - sudo export APT_REPO=updates && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key && curl -fsSL "${PUBLICKEY_URL}" | apt-key add - && echo "deb [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}" && echo "deb-src [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
-  - sudo apt update -y
-  - sudo apt install -y horizon-cli
-  # - sudo export HORIZON_VER="2.20.1" && HORIZON_URL="http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli" && HORIZON_PKG="${HORIZON_URL}_${HORIZON_VER}~ppa~ubuntu.xenial_${BUILD_ARCH}.deb" && curl -sSL "${HORIZON_PKG}" -o /tmp/horizon-cli.deb && dpkg --install /tmp/horizon-cli.deb && rm -f /tmp/horizon-cli.deb
 before_script:
   - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_ID}" --password-stdin; echo "${IBMCLOUD_APIKEY}" > APIKEY; echo "${YOLO2MSGHUB_APIKEY}" > yolo2msghub/YOLO2MSGHUB_APIKEY; if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi; else if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi
 script:
