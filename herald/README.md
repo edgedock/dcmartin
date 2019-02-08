@@ -31,14 +31,39 @@ Copy this [repository][repository], change to the `herald` directory, then use t
 % make
 ...
 {
-  "hostname": "abec6ffa6455-172017000002",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "herald",
-  "device": "test-cpu-2-arm_herald",
-  "pid": 0,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1549596687,
+  "service": "herald",
+  "hostname": "06ab8e7ac516-172017000002",
+  "pid": 21,
   "herald": {
+    "date": 1549596748,
     "log_level": "info",
-    "debug": "false"
+    "debug": false,
+    "period": 30,
+    "pid": 24,
+    "found": {
+      "discovered": [
+        {
+          "data": "Hello, World!",
+          "address": "172.17.0.2"
+        }
+      ],
+      "version": "1.0",
+      "udp_port": 5959
+    }
   }
 }
 ```
