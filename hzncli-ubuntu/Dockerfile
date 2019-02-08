@@ -9,21 +9,24 @@ ENV \
     PS1="$(whoami)@$(hostname):$(pwd)$ " \
     TERM="xterm"
 
-ARG BUILD_ARCH=
+ARG BUILD_ARCH=amd64
  
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
+  ca-certificates \
+  curl \
   gnupg
+
+RUN apt-get update -y 
+
+RUN curl -v google.com
 
 RUN apt-get update \
   \
-  && ARCH="${BUILD_ARCH}" \
-  && if [ "${BUILD_ARCH}" = "aarch64" ]; then ARCH="arm64"; fi \
-  && if [ "${BUILD_ARCH}" = "x86_64" ]; then ARCH="amd64"; fi \
-  \
-  && HORIZON_CLI="2.20.0" \
+  && HORIZON_VER="2.20.1" \
   && HORIZON_URL="http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli" \
-  && HORIZON_PKG="${HORIZON_URL}_${HORIZON_CLI}~ppa~ubuntu.xenial_${ARCH}.deb" \
-  && curl -fsSL -o /tmp/horizon-cli.deb  "${HORIZON_PKG}" \
+  && HORIZON_PKG="${HORIZON_URL}_${HORIZON_VER}~ppa~ubuntu.xenial_${BUILD_ARCH}.deb" \
+#  && curl -sSL "http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli_2.21.0~ppa~ubuntu.xenial_amd64.deb" -o /tmp/horizon-cli.deb \
+  && curl -sSL "${HORIZON_PKG}" -o /tmp/horizon-cli.deb \
   && dpkg --install /tmp/horizon-cli.deb
 
 RUN apt-get update -y \

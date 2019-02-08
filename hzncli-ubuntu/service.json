@@ -9,12 +9,16 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [],
-  "userInput": [ ],
+  "userInput": [
+    { "name": "HZNCLI_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "60" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
+  ],
   "deployment": {
     "services": {
       "hzncli-ubuntu": {
         "environment": [
-           "SERVICE_LABEL=hzncli"
+          "SERVICE_LABEL=hzncli"
         ],
         "image": null,
         "privileged": true

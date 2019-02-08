@@ -1,6 +1,5 @@
 ## ARCHITECTURE
-ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
-BUILD_ARCH=$(shell uname -m)
+BUILD_ARCH=$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
 
 ## HZN
 CMD := $(shell whereis hzn | awk '{ print $1 }')
@@ -14,15 +13,11 @@ SERVICE_ORG := $(if ${ORG},${ORG},$(shell jq -r '.org' service.json))
 SERVICE_LABEL = $(shell jq -r '.label' service.json)
 SERVICE_NAME = $(if ${TAG},${SERVICE_LABEL}-${TAG},${SERVICE_LABEL})
 SERVICE_VERSION = $(shell jq -r '.version' service.json)
-SERVICE_TAG = "${SERVICE_ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${ARCH}"
+SERVICE_TAG = "${SERVICE_ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${BUILD_ARCH}"
 SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
 SERVICE_URI := $(shell jq -r '.url' service.json)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
-
-## BUILD
-BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
-BUILD_FROM=$(if ${TAG},$(shell echo $(BUILD_BASE) | sed "s|${SERVICE_ORG}/\(.*\):\(.*\)|${SERVICE_ORG}/\1-beta:\2|"),${BUILD_BASE})
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)
@@ -35,9 +30,17 @@ APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json
 ## docker
 DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
 DOCKER_LOGIN := $(if $(wildcard ~/.docker/config.json),,LOGIN_DOCKER_HUB)
-DOCKER_NAME = $(ARCH)_$(SERVICE_NAME)
+DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_NAME)
 DOCKER_TAG = $(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
+
+## BUILD
+BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\([^:]*\)/.*|\1|")
+SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_ID) ]; then echo ${DOCKER_ID}; else echo ""; fi)
+BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/\([^:]*\):.*|\1|")
+BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
+BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
 
 ##
 ## targets
@@ -73,7 +76,7 @@ verify: $(KEYS) $(APIKEY)
 ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	rm -fr ${DIR}/
 	export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
-	jq '.label="'${SERVICE_LABEL}'"|.arch="'${ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
+	jq '.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	cp -f userinput.json ${DIR}/userinput.json
 	../checkvars.sh ${DIR}
 	export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) && ../mkdepend.sh ${DIR}

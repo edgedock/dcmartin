@@ -6,6 +6,7 @@
       "url": "com.github.dcmartin.open-horizon.hzncli-ubuntu",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
+        "HZNCLI_PERIOD": 120,
         "LOG_LEVEL": "info",
         "DEBUG": false
       }
