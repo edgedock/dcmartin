@@ -1,16 +1,19 @@
 sudo: true
 language: c
 services: docker
+dist: xenial
 branches:
   only:
     - master
+env:
+  - BUILD_ARCH=amd64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
+  - BUILD_ARCH=arm ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
+  - BUILD_ARCH=arm64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
 addons:
   apt:
     update: true
     sources:
-    - blue-horizon
-    - sourceline: deb [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
-    - sourceline: deb-src [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
+    - sourceline: deb [arch=amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
       key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
     packages:
     - make
@@ -18,10 +21,6 @@ addons:
     - jq
     - ca-certificates
     - gnupg
-env:
-  - BUILD_ARCH=amd64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
-  - BUILD_ARCH=arm ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
-  - BUILD_ARCH=arm64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
 before_install:
   # - sudo apt update -y && apt install -y make curl jq ca-certificates gnupg
   # - sudo apt update -y && apt install -q -y --no-install-recommends make curl jq ca-certificates gnupg
