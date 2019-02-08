@@ -13,7 +13,6 @@ ARG BUILD_ARCH=amd64
  
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   ca-certificates \
-  curl \
   gnupg
 
 RUN apt-get update -y 
