@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.base",
+      "url": "com.github.dcmartin.open-horizon.base-alpine",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "LOG_LEVEL": "info",

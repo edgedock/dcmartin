@@ -2,7 +2,12 @@ ARG BUILD_FROM=dcmartin/base-ubuntu
 
 FROM $BUILD_FROM
 
-ENV LANG C.UTF-8
+# Environment variables
+ENV \
+    HOME="/root" \
+    LANG="C.UTF-8" \
+    PS1="$(whoami)@$(hostname):$(pwd)$ " \
+    TERM="xterm"
 
 ARG BUILD_ARCH=
  
@@ -18,8 +23,7 @@ RUN apt-get update \
   && HORIZON_CLI="2.20.0" \
   && HORIZON_URL="http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli" \
   && HORIZON_PKG="${HORIZON_URL}_${HORIZON_CLI}~ppa~ubuntu.xenial_${ARCH}.deb" \
-  #&& curl -fsSL -o /tmp/horizon-cli.deb  "${HORIZON_PKG}" \
-  && curl -vSL -o /tmp/horizon-cli.deb  "${HORIZON_PKG}" \
+  && curl -fsSL -o /tmp/horizon-cli.deb  "${HORIZON_PKG}" \
   && dpkg --install /tmp/horizon-cli.deb
 
 RUN apt-get update -y \
@@ -34,16 +38,17 @@ COPY rootfs /
 CMD [ "/usr/bin/run.sh" ]
 
 # Build arguments
-ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.open-horizon.name="test" \
-    com.github.open-horizon.description="test image for base-ubuntu" \ 
-    com.github.open-horizon.arch="${BUILD_ARCH}" \
-    com.github.open-horizon.type="service" \
-    com.github.open-horizon.version="${BUILD_VERSION}" \
-    maintainer="David C Martin <github@dcmartin.com>"
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.name="base-alpine" \
+    org.label-schema.description="base alpine container" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \
+    org.label-schema.vcs-ref="${BUILD_REF}" \
+    org.label-schema.version="${BUILD_VERSION}" \
+    org.label-schema.vendor="David C Martin <github@dcmartin.com>"

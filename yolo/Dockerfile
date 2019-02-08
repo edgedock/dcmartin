@@ -2,7 +2,12 @@ ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM as darknet
 
-ENV LANG C.UTF-8
+# Environment variables
+ENV \
+    HOME="/root" \
+    LANG="C.UTF-8" \
+    PS1="$(whoami)@$(hostname):$(pwd)$ " \
+    TERM="xterm"
 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   curl \
@@ -32,16 +37,17 @@ COPY rootfs/usr /usr
 CMD [ "/usr/bin/run.sh" ]
 
 # Build arguments
-ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.open-horizon.name="YOLO" \
-    com.github.open-horizon.description="Provide YOLO as-a-service on /dev/video0" \ 
-    com.github.open-horizon.arch="${BUILD_ARCH}" \
-    com.github.open-horizon.type="service" \
-    com.github.open-horizon.version="${BUILD_VERSION}" \
-    maintainer="David C Martin <github@dcmartin.com>"
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.name="base-alpine" \
+    org.label-schema.description="base alpine container" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \
+    org.label-schema.vcs-ref="${BUILD_REF}" \
+    org.label-schema.version="${BUILD_VERSION}" \
+    org.label-schema.vendor="David C Martin <github@dcmartin.com>"

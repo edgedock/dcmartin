@@ -1,0 +1,2 @@
+{ "hzn": { "agreementid": "", "arch": "", "cpus": 0, "device_id": "", "exchange_url": "", "host_ips": [ "" ], "organization": "", "pattern": "", "ram": 0 }, "date": 1549587947, "service": "hzncli", "hostname": "53fd03856e7a-172017000002", "pid": 21, "hzncli": null }
+

@@ -9,10 +9,6 @@ ENV \
     PS1="$(whoami)@$(hostname):$(pwd)$ " \
     TERM="xterm"
 
-# Set shell
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
-
-# Install base system
 RUN \
     set -o pipefail \
     \
@@ -46,17 +42,18 @@ COPY rootfs /
 
 CMD [ "/usr/bin/run.sh" ]
 
-# Build arugments
-ARG BUILD_ARCH
+# Build arguments
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.open-horizon.name="MOTION" \
-    com.github.open-horizon.description="Provide motion as-a-service on /dev/video0" \ 
-    com.github.open-horizon.arch="${BUILD_ARCH}" \
-    com.github.open-horizon.type="service" \
-    com.github.open-horizon.version="${BUILD_VERSION}" \
-    maintainer="David C Martin <github@dcmartin.com>"
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.name="base-alpine" \
+    org.label-schema.description="base alpine container" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \
+    org.label-schema.vcs-ref="${BUILD_REF}" \
+    org.label-schema.version="${BUILD_VERSION}" \
+    org.label-schema.vendor="David C Martin <github@dcmartin.com>"

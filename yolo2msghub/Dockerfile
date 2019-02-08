@@ -2,16 +2,19 @@ ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM
 
-ENV LANG C.UTF-8
+# Environment variables
+ENV \
+    HOME="/root" \
+    LANG="C.UTF-8" \
+    PS1="$(whoami)@$(hostname):$(pwd)$ " \
+    TERM="xterm"
 
-RUN apt-get update 
-
-RUN apt-get install -q -y --no-install-recommends \
-  curl \
-  socat \
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
   ca-certificates \
-  kafkacat \
-  jq 
+  curl \
+  jq \
+  socat \
+  kafkacat 
 
 # Copy rootfs
 COPY rootfs /
@@ -19,16 +22,18 @@ COPY rootfs /
 CMD [ "/usr/bin/run.sh" ]
 
 # Build arguments
-ARG BUILD_ARCH
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_VERSION
 
 # Labels
 LABEL \
-    com.github.dcmartin.open-horizon.name="YOLO2MSGHUB" \
-    com.github.dcmartin.open-horizon.description="Send YOLO to IBM MessageHub" \ 
-    com.github.dcmartin.open-horizon.arch="${BUILD_ARCH}" \
-    com.github.dcmartin.open-horizon.type="pattern" \
-    com.github.dcmartin.open-horizon.version="${BUILD_VERSION}" \
-    maintainer="David C Martin <github@dcmartin.com>"
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.name="base-alpine" \
+    org.label-schema.description="base alpine container" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/base-alpine/" \
+    org.label-schema.vcs-ref="${BUILD_REF}" \
+    org.label-schema.version="${BUILD_VERSION}" \
+    org.label-schema.vendor="David C Martin <github@dcmartin.com>"
+

@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.base-ubuntu",
+      "url": "com.github.dcmartin.open-horizon.hzncli-ubuntu",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "LOG_LEVEL": "info",

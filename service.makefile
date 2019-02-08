@@ -7,10 +7,7 @@ CMD := $(shell whereis hzn | awk '{ print $1 }')
 HZN := $(if $(HZN),$(HZN),$(if $(CMD),$(shell $(CMD) node list 2> /dev/null | jq -r '.configuration.exchange_api'),))
 HZN := $(if $(HZN),$(HZN),"https://alpha.edge-fabric.com/v1/")
 DIR ?= horizon
-
-## BUILD
-BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
-BUILD_FROM=$(if ${TAG},$(shell echo $(BUILD_BASE) | sed 's|\(.*\):\(.*\)|\1-beta:\2|'),${BUILD_BASE})
+TAG ?= $(if $(wildcard ../TAG),$(shell cat ../TAG),)
 
 ## SERVICE
 SERVICE_ORG := $(if ${ORG},${ORG},$(shell jq -r '.org' service.json))
@@ -22,6 +19,10 @@ SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_p
 SERVICE_URI := $(shell jq -r '.url' service.json)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
+
+## BUILD
+BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_FROM=$(if ${TAG},$(shell echo $(BUILD_BASE) | sed "s|${SERVICE_ORG}/\(.*\):\(.*\)|${SERVICE_ORG}/\1-beta:\2|"),${BUILD_BASE})
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)

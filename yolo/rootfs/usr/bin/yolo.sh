@@ -19,7 +19,6 @@ echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 cd ${DARKNET}
 
-
 while true; do
   # when we start
   DATE=$(date +%s)

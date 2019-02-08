@@ -1,10 +1,10 @@
-# `base` - Base container for Ubuntu Bionic
+# `hzn-ubuntu` - Horizon CLI installed
 
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Service discovery
-+ `org` - `dcmartin@us.ibm.com/base`
-+ `url` - `com.github.dcmartin.open-horizon.base`
++ `org` - `dcmartin@us.ibm.com/hzn-ubuntu`
++ `url` - `com.github.dcmartin.open-horizon.hzn-ubuntu`
 + `version` - `0.0.1`
 ### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
@@ -16,26 +16,26 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 
 ## How To Use
 
-Specify `dcmartin/base-ubuntu:latest` in service `build.json`
+Specify `dcmartin/hzn-ubuntu:0.0.1` in service `build.json`
 
 ### Building this continer
 
-Copy this [repository][repository], change to the `base` directory, then use the **make** command; see below:
+Copy this [repository][repository], change to the `hzn-ubuntu` directory, then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
 % git clone http://github.com/dcmartin/open-horizon
-% cd open-horizon/base
+% cd open-horizon/hzn-ubuntu
 % make
 ...
 {
   "hostname": "abec6ffa6455-172017000002",
   "org": "dcmartin@us.ibm.com",
-  "pattern": "base",
-  "device": "test-cpu-2-arm_base",
+  "pattern": "hzn-ubuntu",
+  "device": "test-cpu-2-arm_hzn-ubuntu",
   "pid": 0,
-  "base": {
+  "hzn-ubuntu": {
     "log_level": "info",
     "debug": "false"
   }
@@ -83,10 +83,10 @@ based on the following:
 
 [David C Martin][dcmartin] (github@dcmartin.com)
 
-[userinput]: https://github.com/dcmartin/open-horizon/blob/master/base/userinput.json
-[service-json]: https://github.com/dcmartin/open-horizon/blob/master/base/service.json
-[build-json]: https://github.com/dcmartin/open-horizon/blob/master/base/build.json
-[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/base/Dockerfile
+[userinput]: https://github.com/dcmartin/open-horizon/blob/master/hzn-ubuntu/userinput.json
+[service-json]: https://github.com/dcmartin/open-horizon/blob/master/hzn-ubuntu/service.json
+[build-json]: https://github.com/dcmartin/open-horizon/blob/master/hzn-ubuntu/build.json
+[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/hzn-ubuntu/Dockerfile
 
 
 [dcmartin]: https://github.com/dcmartin
