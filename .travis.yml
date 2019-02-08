@@ -17,7 +17,8 @@ env:
   - BUILD_ARCH=arm ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
   - BUILD_ARCH=arm64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
 before_install:
-  - sudo apt update -y && apt install -q -y --no-install-recommends make curl jq ca-certificates gnupg
+  - sudo apt update -y && apt install -y make curl jq ca-certificates gnupg
+  # - sudo apt update -y && apt install -q -y --no-install-recommends make curl jq ca-certificates gnupg
   # - sudo export APT_REPO=updates && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key && curl -fsSL "${PUBLICKEY_URL}" | apt-key add - && echo "deb [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}" && echo "deb-src [arch=${BUILD_ARCH}] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}"
   # - sudo apt update -y
   - sudo apt install -y horizon-cli
