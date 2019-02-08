@@ -10,7 +10,9 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 # Setup
 
-Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] macOS.
+Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.  Click [here][build-pattern-video] for an accelerated video of building a pattern.
+
+[build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash

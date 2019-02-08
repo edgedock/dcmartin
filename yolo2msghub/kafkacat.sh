@@ -1,8 +1,37 @@
 #!/bin/bash
 BROKER="kafka05-prod02.messagehub.services.us-soutbluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093"
-APIKEY=$(sed -e 's|"\(.*\)"|\1|' YOLO2MSGHUB_APIKEY)
+
+if [ -z "${1}" ]; then SERVICE="service.json"; echo "+++ WARN $0 $$ -- service configuration JSON not specified on command line; using ${SERVICE}" &> /dev/stderr; else SERVICE="${1}"; fi
+if [ ! -s "${SERVICE}" ]; then echo "*** ERROR $0 $$ -- cannot locate service configuration JSON: ${SERVICE}; exiting" &> /dev/stderr; exit 1; fi
+
+LABEL=$(jq -r '.label' "${SERVICE}")
+if [ -z "${LABEL}" ]; then echo "*** ERROR $0 $$ -- no service label defined in ${SERVICE}; exiting" &> /dev/stderr; exit 1; fi
+
+ENVIRONMENT=$(jq -r '.deployment.services.'"${LABEL}"'.environment[]' "${SERVICE}")
+if [ ! -z "${ENVIRONMENT}" ] && [ "${ENVIRONMENT}" != 'null' ]; then
+  for E in ${ENVIRONMENT}; do
+    if [[ "${E}" == SERVICE_LABEL=* ]]; then SERVICE_LABEL=$(echo "${E}" | sed 's|SERVICE_LABEL=||'); break; fi
+  done
+  if [ -z "${SERVICE_LABEL:-}" ]; then
+    SERVICE_LABEL="${LABEL}"
+    echo "+++ WARN $0 $$ -- SERVICE_LABEL not defined in deployment.services.${SERVICE}.environment; using default ${SERVICE_LABEL}" &> /dev/stderr
+  fi
+else
+  echo "+++ WARN $0 $$ -- no environment defined for service ${LABEL}; exiting" &> /dev/stderr
+  exit 1
+fi
+
+REQUIRED_VARIABLES=YOLO2MSGHUB_APIKEY
+for R in ${REQUIRED_VARIABLES}; do
+  if [ ! -s "${R}" ]; then echo "*** ERROR $0 $$ -- required variable ${R} file not found; exiting" &> /dev/stderr; fi
+  APIKEY=$(sed -e 's|^["]*\([^"]*\)["]*|\1|' "${R}")
+  echo "--- INFO $0 $$ -- set ${R} to ${APIKEY}" &> /dev/stderr
+done
+
 TOPIC="yolo2msghub"
 DEVICES='[]'
+
+echo "--- INFO $0 $$ -- listening for topic ${TOPIC}" &> /dev/stderr
 
 kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
   -X "security.protocol=sasl_ssl" \
@@ -11,8 +40,8 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
   -X "sasl.password=${APIKEY:16}" \
   -t "${TOPIC}" | while read -r; do
     if [ -n "${REPLY}" ]; then
-      echo "${REPLY}" >> $0.$$.out
-      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> $0.$$.json)
+      echo "${REPLY}" >> $0.$$.json
+      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> $0.$$.out)
     else
       echo "+++ WARN $0 $$ -- null payload"
       continue

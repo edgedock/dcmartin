@@ -17,8 +17,6 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
 
 RUN apt-get update -y 
 
-RUN curl -v google.com
-
 RUN apt-get update \
   \
   && HORIZON_VER="2.20.1" \

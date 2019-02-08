@@ -42,13 +42,13 @@ $(TARGETS):
 	done
 
 start: build publish
-	@echo "+++ INFO -- starting $@"
+	@echo "+++ INFO -- starting"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
 test:
-	@echo "+++ INFO -- testing patterns"
+	@echo "+++ INFO -- testing"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
