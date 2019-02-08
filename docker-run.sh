@@ -91,6 +91,7 @@ if [ $(jq '.ports!=null' ${SERVICE}) == 'true' ]; then
   PORTS=$(jq -r '.ports?|to_entries[]|.key?' "${SERVICE}" | sed 's|/tcp||')
   for PS in ${PORTS}; do
     PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'/tcp")|.value' "${SERVICE}")
+    if [ -z "${PE}" ]; then PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'")|.value' "${SERVICE}"); fi
     OPTIONS="${OPTIONS:-}"' --publish='"${PE}"':'"${PS}"
   done
 else
