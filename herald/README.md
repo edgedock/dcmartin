@@ -1,4 +1,4 @@
-# `herald` - Base container for Ubuntu Bionic
+# `herald` - Announce discoveries from other heralds
 
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
@@ -11,12 +11,13 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
 #### Optional variables
++ `HERALD_PERIOD` - seconds between updates; defaults to `30`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 + `DEBUG` - force debug settings; boolean; default `false`
 
 ## How To Use
 
-Specify `dcmartin/herald-ubuntu:latest` in service `build.json`
+Specify `dcmartin/herald:latest` in service `build.json`
 
 ### Building this continer
 

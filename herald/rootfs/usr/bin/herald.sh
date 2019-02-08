@@ -10,12 +10,20 @@ echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 python /usr/bin/discovery.py &
 
+# get pid
+PID=$(ps | grep "discovery.py" | grep -v grep | awk '{ print $1 }' | head -1)
+if [ -z "${PID}" ]; then PID=0; fi
+CONFIG=$(echo "${CONFIG}" | jq '.pid='"${PID}")
+
+URL='http://127.0.0.1:5960/v1/discovered'
+
 while true; do
   DATE=$(date +%s)
   OUTPUT="${CONFIG}"
 
-  if [ -z "${FOUND}" ]; then FOUND=null; fi
-  OUTPUT=$(echo "${OUTPUT}" | jq '.found='${FOUND})
+  DISCOVERED=$(curl -sSL "${URL}" | jq -c '.' 2> /dev/null)
+  if [ -z "${DISCOVERED}" ]; then DISCOVERED=null; echo "+++ WARN $0 $$ -- no output from ${URL}; continuing"; fi
+  OUTPUT=$(echo "${OUTPUT}" | jq -c '.found='"${DISCOVERED}")
 
   # output
   echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
