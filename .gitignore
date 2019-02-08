@@ -1,4 +1,6 @@
+TAG
 IBM-*
 .DS_Store
 apiKey*
 build.out
+check.json
