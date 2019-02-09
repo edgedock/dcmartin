@@ -33,7 +33,7 @@ Provides CPU usage information as micro-service; updates periodically (default `
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
 ## Service discovery
-+ `org` - `dcmartin@us.ibm.com/cpu`
++ `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.cpu`
 + `version` - `0.0.1`
 

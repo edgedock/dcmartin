@@ -33,7 +33,7 @@ Monitors Internet access information as micro-service; updates periodically (def
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
 ## Service discovery
-+ `org` - `dcmartin@us.ibm.com/wan`
++ `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.wan`
 + `version` - `0.0.1`
 

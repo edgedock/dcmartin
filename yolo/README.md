@@ -33,7 +33,7 @@ Provides entity count information as micro-service; updates periodically (defaul
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
 ## Service discovery
-+ `org` - `dcmartin@us.ibm.com/yolo`
++ `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.yolo`
 + `version` - `0.0.1`
 

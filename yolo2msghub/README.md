@@ -34,7 +34,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
 ## Service discovery
-+ `org` - `dcmartin@us.ibm.com/yolo2msghub`
++ `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
