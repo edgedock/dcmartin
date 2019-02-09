@@ -37,11 +37,6 @@ Provides CPU usage information as micro-service; updates periodically (default `
 + `url` - `com.github.dcmartin.open-horizon.cpu`
 + `version` - `0.0.1`
 
-### Architecture(s) supported
-+ `arm` - RaspberryPi (armhf)
-+ `amd64` - AMD/Intel 64-bit (x86-64)
-+ `arm64` - nVidia TX2 (aarch)
-
 #### Optional variables
 + `CPU_PERIOD` - seconds between updates; defaults to `60`
 + `CPU_INTERVAL` - seconds between CPU tests; defaults to `1`

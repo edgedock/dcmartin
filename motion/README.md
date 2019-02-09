@@ -37,11 +37,6 @@ Monitors attached camera and provides motion detection information as micro-serv
 + `url` - `com.github.dcmartin.open-horizon.motion`
 + `version` - `0.0.1`
 
-### Architecture(s) supported
-+ `arm` - RaspberryPi (armhf)
-+ `amd64` - AMD/Intel 64-bit (x86-64)
-+ `arm64` - nVidia TX2 (aarch)
-
 ## How To Use
 
 Copy this [repository][repository], change to the `motion` directory, then use the **make** command; see below:

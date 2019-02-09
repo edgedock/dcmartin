@@ -37,11 +37,6 @@ Provides hardware information as micro-service; updates periodically (default `6
 + `url` - `com.github.dcmartin.open-horizon.hal`
 + `version` - `0.0.1`
 
-### Architecture(s) supported
-+ `arm` - RaspberryPi (armhf)
-+ `amd64` - AMD/Intel 64-bit (x86-64)
-+ `arm64` - nVidia TX2 (aarch)
-
 #### Optional variables
 + `HAL_PERIOD` - seconds between updates; defaults to `60`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)

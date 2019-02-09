@@ -37,11 +37,6 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `url` - `com.github.dcmartin.open-horizon.base-alpine`
 + `version` - `0.0.1`
 
-### Architecture(s) supported
-+ `arm` - RaspberryPi (armhf)
-+ `amd64` - AMD/Intel 64-bit (x86-64)
-+ `arm64` - nVidia TX2 (aarch)
-
 #### Optional variables
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 + `DEBUG` - force debug settings; boolean; default `false`
