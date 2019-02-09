@@ -20,9 +20,7 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 # Setup
 
-Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.  Click [here][build-pattern-video] for an accelerated video of building a pattern.
-
-[build-pattern-video]: https://youtu.be/cv_rOdxXidA
+Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
@@ -34,6 +32,15 @@ git clone http://github.com/dcmartin/open-horizon
 cd open-horizon
 make
 ```
+
+# Build
+
+The `make` program is used to build; the _default_ target is to perform the _default_ target across all services and patterns.  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; more information is available [here][travis-md]. Click [here][build-pattern-video] for an accelerated video of building a pattern.
+
+[make-md]: https://github.com/dcmartin/open-horizon/edit/master/MAKE.md
+[travis-md]: https://github.com/dcmartin/open-horizon/edit/master/TRAVIS.md
+[travis-yaml]: https://github.com/dcmartin/open-horizon/edit/master/.travis.yml
+[build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
 # Services
 
