@@ -1,7 +1,5 @@
 # `make` - building the software
 
-# Building
-
 The **make** command by **default** performs `build`,`run`,`check`; available targets:
 
 + `build` - build container using `build.json` and `service.json`
@@ -15,7 +13,7 @@ The **make** command by **default** performs `build`,`run`,`check`; available ta
 + `clean` - remove all generated artefacts, including running containers and images
 +  `distclean` - remove all residuals, including variable and key files
 
-### `test`
+## `test`
 This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _pattern_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
 
 ```
@@ -38,7 +36,7 @@ This target may be used against the local container, the local service (n.b. see
 }
 
 ```
-### `start`
+## `start`
 The `start` target will initiate the _pattern_ with all required _services_; it depends on `publish` and `verify`
 ```
 % make start
@@ -55,11 +53,11 @@ Running service.
 Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
 Running service.
 ```
-## Publishing
+
+## `pattern`
 
 The `pattern` target will publish the pattern in the exchange.  The [`service.json`][service-json] file must be changed prior.
 
-### `pattern`
 ```
 % make pattern
 ...
