@@ -15,18 +15,14 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
   ca-certificates \
   gnupg
 
-RUN apt-get update -y 
-
-RUN apt-get update \
-  \
-  && HORIZON_VER="2.20.1" \
-  && HORIZON_URL="http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli" \
-  && HORIZON_PKG="${HORIZON_URL}_${HORIZON_VER}~ppa~ubuntu.xenial_${BUILD_ARCH}.deb" \
-#  && curl -sSL "http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli_2.21.0~ppa~ubuntu.xenial_amd64.deb" -o /tmp/horizon-cli.deb \
-  && curl -sSL "${HORIZON_PKG}" -o /tmp/horizon-cli.deb \
-  && dpkg --install /tmp/horizon-cli.deb
-
 RUN apt-get update -y \
+  && APT_REPO=updates \
+  && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list \
+  && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key \
+  && curl -fsSL "${PUBLICKEY_URL}" | apt-key add - \
+  && echo "deb [arch=arm,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}" \
+  && apt-get update -y \
+  && apt-get install -y horizon-cli \
   && rm -fr \
       /tmp/* \
       /var/{cache,log}/* \
