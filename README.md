@@ -44,7 +44,8 @@ make
 
 # Build
 
-The `make` program is used to build; the _default_ target is to perform the _default_ target across all services and patterns.  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; more information is available [here][travis-md]. Click [here][build-pattern-video] for an accelerated video of building a pattern.
+The `make` program is used to build; the _default_ target is to perform the _default_ target across all services and patterns.  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to the [`TRAVIS.md`][travis-md]. There is 
+a accelerated [video][build-pattern-video] of building this pattern.
 
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md
