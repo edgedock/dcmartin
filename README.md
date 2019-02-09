@@ -1,6 +1,13 @@
 # Open Horizon
 
+![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
 [![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+![](https://img.shields.io/github/repo-size/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/last-commit/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/commit-activity/w/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/contributors/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/issues/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/tag/dcmartin/open-horizon.svg?style=flat)
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
