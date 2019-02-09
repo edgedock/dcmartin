@@ -32,6 +32,7 @@ RUN apk add --no-cache \
   gawk \
   git \
   imagemagick \
+  inotify-tools \
   jq \
   mosquitto-clients \
   motion@edge \
