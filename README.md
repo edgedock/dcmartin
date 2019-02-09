@@ -40,6 +40,7 @@ The `make` program is used to build; the _default_ target is to perform the _def
 [make-md]: https://github.com/dcmartin/open-horizon/edit/master/MAKE.md
 [travis-md]: https://github.com/dcmartin/open-horizon/edit/master/TRAVIS.md
 [travis-yaml]: https://github.com/dcmartin/open-horizon/edit/master/.travis.yml
+[travis-ci]: https://travis-ci.org/
 [build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
 # Services
