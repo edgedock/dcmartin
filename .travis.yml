@@ -1,4 +1,3 @@
-os: osx
 sudo: true
 language: c
 services: docker
