@@ -15,7 +15,7 @@ DOCKER_ID ?= $(shell whoami)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo herald base-ubuntu hzncli-ubuntu
+SERVICES = base-alpine base-ubuntu cpu hal wan yolo herald hzncli-ubuntu
 PATTERNS = yolo2msghub # motion
 
 ALL = $(SERVICES) $(PATTERNS)
@@ -33,7 +33,6 @@ default: $(ALL) check
 all: build publish verify start test pattern validate
 
 $(ALL):
-	@echo "--- INFO -- making $@"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $@
 
 $(TARGETS):
