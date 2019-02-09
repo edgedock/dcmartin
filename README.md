@@ -5,8 +5,9 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 ## Status
 
 ![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
-[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
 ![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
+[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+[![Coverage Status](https://coveralls.io/repos/github/dcmartin/open-horizon/badge.svg?branch=master)](https://coveralls.io/github/dcmartin/open-horizon?branch=master)
 
 ![](https://img.shields.io/github/repo-size/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/last-commit/dcmartin/open-horizon.svg?style=flat)
