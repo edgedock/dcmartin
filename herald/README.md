@@ -2,24 +2,52 @@
 
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
+## Status
+
+![Supports amd64 Architecture][amd64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_herald-beta.svg)](https://microbadger.com/images/dcmartin/amd64_herald-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_herald-beta.svg)](https://microbadger.com/images/dcmartin/amd64_herald-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-amd64]][docker-amd64]
+
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_herald-beta
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_herald-beta.svg
+
+![Supports armhf Architecture][arm-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_herald-beta.svg)](https://microbadger.com/images/dcmartin/arm_herald-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_herald-beta.svg)](https://microbadger.com/images/dcmartin/arm_herald-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm]][docker-arm]
+
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_herald-beta
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_herald-beta.svg
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_herald-beta.svg)](https://microbadger.com/images/dcmartin/arm64_herald-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_herald-beta.svg)](https://microbadger.com/images/dcmartin/arm64_herald-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_herald-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_herald-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com/herald`
 + `url` - `com.github.dcmartin.open-horizon.herald`
 + `version` - `0.0.1`
+
 ### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
+
 #### Optional variables
 + `HERALD_PERIOD` - seconds between updates; defaults to `30`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 + `DEBUG` - force debug settings; boolean; default `false`
 
 ## How To Use
-
-Specify `dcmartin/herald:latest` in service `build.json`
-
-### Building this continer
 
 Copy this [repository][repository], change to the `herald` directory, then use the **make** command; see below:
 

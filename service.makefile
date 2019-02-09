@@ -51,7 +51,7 @@ default: build run check
 all: build run check publish start test pattern validate
 
 build: Dockerfile build.json service.json
-	docker build --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)" # > build.out
+	docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH=$(BUILD_ARCH) --build-arg BUILD_FROM=$(BUILD_FROM) . -t "$(DOCKER_TAG)" # > build.out
 
 run: remove
 	../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"

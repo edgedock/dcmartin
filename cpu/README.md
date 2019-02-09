@@ -2,14 +2,46 @@
 
 Provides CPU usage information as micro-service; updates periodically (default `60` seconds or 1 minute).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
+## Status
+
+![Supports amd64 Architecture][amd64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_cpu-beta.svg)](https://microbadger.com/images/dcmartin/amd64_cpu-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_cpu-beta.svg)](https://microbadger.com/images/dcmartin/amd64_cpu-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-amd64]][docker-amd64]
+
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_cpu-beta
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_cpu-beta.svg
+
+![Supports armhf Architecture][arm-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_cpu-beta.svg)](https://microbadger.com/images/dcmartin/arm_cpu-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_cpu-beta.svg)](https://microbadger.com/images/dcmartin/arm_cpu-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm]][docker-arm]
+
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_cpu-beta
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_cpu-beta.svg
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_cpu-beta.svg)](https://microbadger.com/images/dcmartin/arm64_cpu-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_cpu-beta.svg)](https://microbadger.com/images/dcmartin/arm64_cpu-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_cpu-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_cpu-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com/cpu`
 + `url` - `com.github.dcmartin.open-horizon.cpu`
 + `version` - `0.0.1`
+
 ### Architecture(s) supported
 + `arm` - RaspberryPi (armhf)
 + `amd64` - AMD/Intel 64-bit (x86-64)
 + `arm64` - nVidia TX2 (aarch)
+
 #### Optional variables
 + `CPU_PERIOD` - seconds between updates; defaults to `60`
 + `CPU_INTERVAL` - seconds between CPU tests; defaults to `1`

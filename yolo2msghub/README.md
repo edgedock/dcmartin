@@ -3,6 +3,36 @@
 Send YOLO classified image entity counts to Kafka; updates as often as underlying services provide.
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
+## Status
+
+![Supports amd64 Architecture][amd64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/amd64_yolo2msghub-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/amd64_yolo2msghub-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-amd64]][docker-amd64]
+
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_yolo2msghub-beta
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_yolo2msghub-beta.svg
+
+![Supports armhf Architecture][arm-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/arm_yolo2msghub-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/arm_yolo2msghub-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm]][docker-arm]
+
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_yolo2msghub-beta
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_yolo2msghub-beta.svg
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/arm64_yolo2msghub-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_yolo2msghub-beta.svg)](https://microbadger.com/images/dcmartin/arm64_yolo2msghub-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_yolo2msghub-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_yolo2msghub-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com/yolo2msghub`
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
@@ -289,3 +319,24 @@ based on the following:
 [open-horizon]: http://github.com/open-horizon/
 [repository]: https://github.com/dcmartin/open-horizon
 [setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+
+
+[amd64-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-amd64.svg
+[amd64-microbadger]: https://microbadger.com/images/dcmartin/plex-amd64
+[armhf-microbadger]: https://microbadger.com/images/dcmartin/plex-armhf
+[armhf-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-armhf.svg
+
+[amd64-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-amd64.svg
+[amd64-arch-shield]: https://img.shields.io/badge/architecture-amd64-blue.svg
+[amd64-dockerhub]: https://hub.docker.com/r/dcmartin/plex-amd64
+[amd64-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-amd64.svg
+[armhf-arch-shield]: https://img.shields.io/badge/architecture-armhf-blue.svg
+[armhf-dockerhub]: https://hub.docker.com/r/dcmartin/plex-armhf
+[armhf-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-armhf.svg
+[armhf-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-armhf.svg
+[i386-arch-shield]: https://img.shields.io/badge/architecture-i386-blue.svg
+[i386-dockerhub]: https://hub.docker.com/r/dcmartin/plex-i386
+[i386-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-i386.svg
+[i386-microbadger]: https://microbadger.com/images/dcmartin/plex-i386
+[i386-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-i386.svg
+[i386-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-i386.svg
