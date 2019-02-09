@@ -7,6 +7,7 @@
 ![](https://img.shields.io/github/commit-activity/w/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/contributors/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/issues/dcmartin/open-horizon.svg?style=flat)
+![](https://img.shields.io/github/release-pre/dcmartin/open-horizon.svg?colorB=yellow&label=pre-release&style=flat)
 ![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/tag/dcmartin/open-horizon.svg?style=flat)
 
