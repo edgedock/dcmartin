@@ -2,6 +2,8 @@ ARG BUILD_FROM=dcmartin/base-ubuntu
 
 FROM $BUILD_FROM
 
+ARG BUILD_ARCH=amd64
+
 # Environment variables
 ENV \
     HOME="/root" \
@@ -9,8 +11,6 @@ ENV \
     PS1="$(whoami)@$(hostname):$(pwd)$ " \
     TERM="xterm"
 
-ARG BUILD_ARCH=amd64
- 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   ca-certificates \
   gnupg

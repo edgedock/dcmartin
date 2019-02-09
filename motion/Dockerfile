@@ -2,6 +2,8 @@ ARG BUILD_FROM=alpine:3.8
 
 FROM $BUILD_FROM
 
+ARG BUILD_ARCH=amd64
+
 # Environment variables
 ENV \
     HOME="/root" \

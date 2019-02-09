@@ -73,7 +73,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
             echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}"
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
-            echo "${REPLY}" | jq -r '.yolo2msghub.yolo.image' | base64 --decode > $0.$$.jpeg
+            echo "${REPLY}" | jq -r '.yolo2msghub.yolo.image' | base64 --decode > $0.$$.${ID}.jpeg
             # if [ ! -z $(command -v open) ]; then open $0.$$.jpeg; fi
           else
             echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person"

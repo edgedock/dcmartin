@@ -2,6 +2,8 @@ ARG BUILD_FROM=ubuntu:bionic
 
 FROM $BUILD_FROM as darknet
 
+ARG BUILD_ARCH=amd64
+
 # Environment variables
 ENV \
     HOME="/root" \
