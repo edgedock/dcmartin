@@ -7,8 +7,8 @@ branches:
     - master
 env:
   - BUILD_ARCH=amd64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
-  - BUILD_ARCH=arm ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
-  - BUILD_ARCH=arm64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
+#  - BUILD_ARCH=arm ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
+#  - BUILD_ARCH=arm64 ORG=dcmartin@us.ibm.com URL=com.github.dcmartin.open-horizon TAG=beta
 addons:
   apt:
     update: true
