@@ -1,4 +1,1 @@
-horizon
-MOTION_*
-APIKEY*
-check.json
+../.gitignore

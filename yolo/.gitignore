@@ -1,4 +1,1 @@
-horizon
-YOLO_*
-APIKEY*
-check.json
+../.gitignore

@@ -1,4 +1,1 @@
-check.json
-WAN_*
-APIKEY*
-horizon
+../.gitignore

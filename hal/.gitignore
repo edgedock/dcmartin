@@ -1,4 +1,1 @@
-check.json
-HAL_*
-APIKEY*
-horizon
+../.gitignore

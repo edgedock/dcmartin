@@ -1,7 +1,1 @@
-apiKey*
-SETUP_*
-APIKEY*
-cpuconf*
-sdrconf*
-horizon.json
-*.zip
+../.gitignore
