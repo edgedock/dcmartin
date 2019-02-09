@@ -2,12 +2,6 @@
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
 
-## Credentials
-
-**Note:** _You will need an IBM Cloud [account][ibm-registration]_
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
-
 ## Status
 
 ![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
@@ -82,6 +76,12 @@ There are sample patterns available:
 # Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
+
+## Credentials
+
+**Note:** _You will need an IBM Cloud [account][ibm-registration]_
+
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
 
 ## Changelog & Releases
 
