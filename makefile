@@ -15,7 +15,7 @@ DOCKER_ID ?= $(shell whoami)
 ## things NOT TO change
 ##
 
-SERVICES = base-alpine base-ubuntu cpu hal wan yolo herald hzncli-ubuntu
+SERVICES = base-alpine base-ubuntu cpu hal wan yolo herald # hzncli-ubuntu
 PATTERNS = yolo2msghub # motion
 
 ALL = $(SERVICES) $(PATTERNS)
