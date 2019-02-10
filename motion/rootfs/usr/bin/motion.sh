@@ -75,43 +75,46 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
   case "${FULLPATH##*/}" in
     *-*-*.json)
         if [ -s "${FULLPATH}" ]; then
-	  OUT=$(jq '.' "${FULLPATH}")
+          OUT=$(jq '.' "${FULLPATH}")
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${OUT}" &> /dev/stderr; fi
-	  if [ -z "${OUT}" ]; then OUT='null'; fi
+          if [ -z "${OUT}" ]; then OUT='null'; fi
           OUTPUT=$(echo "${OUTPUT}" | jq '.image='"${OUT}")
-	else
+        else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
-	  continue
-	fi
-	IMG="${FULLPATH%%.*}.jpg"
-        if [ -s "${IMG}" ]; then
-          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${IMG}" &> /dev/stderr; fi
-          # OUTPUT=$(echo "${OUTPUT}" | jq '.image.jpeg="'$(base64 -w 0 -i "${IMG}")'"')
-	else
-          echo "+++ WARN $0 $$ -- no JPEG at ${IMG}" &> /dev/stderr
+          continue
         fi
         ;;
     *-*.json)
         if [ -s "${FULLPATH}" ]; then
-	  OUT=$(jq '.' "${FULLPATH}")
+          OUT=$(jq '.' "${FULLPATH}")
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: ${OUT}" &> /dev/stderr; fi
-	  if [ -z "${OUT}" ]; then OUT='null'; fi
+          if [ -z "${OUT}" ]; then OUT='null'; fi
           OUTPUT=$(echo "${OUTPUT}" | jq '.event='"${OUT}")
-	else
+        else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
-	  continue
-	fi
-	IMG="${FULLPATH%%.*}.gif"
-        if [ -s "${IMG}" ]; then
-          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${IMG}" &> /dev/stderr; fi
-          # OUTPUT=$(echo "${OUTPUT}" | jq '.event.gif="'$(base64 -w 0 -i "${IMG}")'"')
-	else
-          echo "+++ WARN $0 $$ -- no GIF at ${IMG}" &> /dev/stderr
+          continue
         fi
+	# test for end
+	IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
+	if [ ! -z "${IMAGES}" ] && [ "${IMAGES}" != null ]; then 
+          # cleanup
+	  for I in ${IMAGES}; do
+	    IP="${FULLPATH%/*}/${I}.jpg"
+	    if [ -e "${IP}" ]; then 
+	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- deleting image ${IP}" &> /dev/stderr; fi
+	      rm -f "${IP}" "${IP%%.*}.json"
+	    else
+	      echo "+++ WARN $0 $$ -- no file at ${IP}" &> /dev/stderr
+	    fi
+	  done
+	else
+	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
+	fi
+        rm -f "${FULLPATH}"
         ;;
     *)
         echo "+++ WARN $0 $$ -- skipping image: ${FULLPATH}" &> /dev/stderr
-	continue
+        continue
         ;;
   esac
 

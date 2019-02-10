@@ -4,12 +4,20 @@
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 # hzn config
-if [ ! -z "${HZN}" ]; then
-  BODY="${HZN}"
-else
-  echo "*** ERROR $0 $$ -- environment HZN unset; exiting" 2> /dev/stderr
-  exit 1
+if [ -z "${HZN}" ]; then
+  if [ ! -s "/tmp/config.json" ]; then
+    echo "*** ERROR $0 $$ -- environment HZN unset; empty /tmp/config.json; exiting" 2> /dev/stderr
+    exit 1
+  fi
+  echo "+++ WARN $0 $$ -- environment HZN unset; using /tmp/config.json; continuing" 2> /dev/stderr
+  export HZN=$(jq '.' "/tmp/config.json")
+  if [ -z "${HZN}" ]; then
+    echo "*** ERROR $0 $$ -- environment HZN unset; invalid /tmp/config.json; exiting" $(cat /tmp/config.json) 2> /dev/stderr
+    exit 1
+  fi
 fi
+
+BODY="${HZN}"
 
 # git pid
 if [ ! -z "${SERVICE_LABEL:-}" ]; then

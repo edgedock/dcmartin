@@ -12,7 +12,7 @@ HOSTNAME="$(hostname)-${IPADDR}"
 HZN=$(echo "${HZN}" | jq '.hostname="'${HOSTNAME}'"')
 
 # make a file
-echo "${HZN}" > ${TMP}/config.json
+echo "${HZN}" > "${TMP}/config.json"
 
 # label
 if [ ! -z "${SERVICE_LABEL:-}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then
