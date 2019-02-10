@@ -21,7 +21,9 @@ RUN \
     && rm -f -r \
         /tmp/*
 
-RUN apk add --no-cache \
+RUN apk update \
+  && apk add --no-cache \
+  apk-tools \
   bash \
   bc \
   coreutils \
