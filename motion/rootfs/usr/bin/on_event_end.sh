@@ -298,7 +298,7 @@ cp -f "$average" "$composite"
 ### KEY FRAMES or NOT
 ###
 
-if ($?KEY_FRAMES != 0) then
+if ($?ALL_FRAMES == 0) then
   set kjpgs = ()
   set kdiffs = ()
   @ i = 1

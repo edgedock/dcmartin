@@ -17,7 +17,7 @@
         "MOTION_LOG_LEVEL": 2,
         "MOTION_LOG_TYPE": "all",
         "LOG_LEVEL": "info",
-        "DEBUG": false
+        "DEBUG": true
       }
     }
   ]
