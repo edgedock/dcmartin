@@ -19,7 +19,7 @@ echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 ## update services functions
 update_services() {
-  OUTPUT="${1}"
+  OUTPUT='{}'
   for S in $SERVICES; do
       URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
       if [ ! -z "${URL}" ]; then
@@ -47,9 +47,11 @@ mkdir -p ${TMP}/motion
 rm -fr /var/lib/motion
 ln -s ${TMP}/motion /var/lib
 # start motion
-motion -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr &
+CMD=$(command -v motion)
+if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot find motion executable; exiting" &> /dev/stderr; fi
+${CMD} -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr &
 # get pid
-PID=$(ps | grep "motion" | grep -v grep | awk '{ print $1 }' | head -1)
+PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
 if [ -z "${PID}" ]; then PID=0; fi
 # add PID to CONFIG
 CONFIG=$(echo "${CONFIG}" | jq '.pid='"${PID}")
@@ -114,7 +116,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
   esac
 
   if [ $(date '+%s') -gt ${WHEN} ]; then
-    OUTPUT="$(update_services "${OUTPUT}")"
+    OUTPUT="$(echo "${OUTPUT}" | jq '.*'"$(update_services)")"
     WHEN=$(($(date '+%s')+MOTION_PERIOD))
   else
     if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- skipping services" &> /dev/stderr; fi

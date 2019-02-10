@@ -8,7 +8,7 @@ else
 fi
 
 if [ "${HOST%:*}" == "${HOST}" ]; then
-  PORT=$(jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|/tcp||')
+  PORT=$(jq -r '.ports?|to_entries|first|.value?' service.json)
   echo "+++ WARN $0 $$ -- No port specified; assuming port ${PORT}"
   HOST="${HOST}:${PORT}"
 fi
@@ -27,7 +27,7 @@ CMD="${PWD}/test-${SERVICE_LABEL}.sh"
 if [ -z ${TIMEOUT:-} ]; then TIMEOUT=5; fi
 DATE=$(($(date +%s)+${TIMEOUT}))
 
-echo "+++ INFO $0 $$ -- Testing ${HOST} at" $(date)
+echo "--- INFO $0 $$ -- Testing ${HOST} at" $(date)
 
 I=0
 

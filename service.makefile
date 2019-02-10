@@ -50,7 +50,7 @@ default: build run check
 
 all: build run check publish start test pattern validate
 
-build: Dockerfile build.json service.json
+build: Dockerfile build.json service.json rootfs Makefile
 	@echo "--- INFO -- building docker container ${SERVICE_NAME} with tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
@@ -62,7 +62,7 @@ remove:
 	@echo "--- INFO -- removing docker container ${DOCKER_NAME} for service ${SERVICE_LABEL}"
 	-@docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
-check: service.json
+check:
 	@echo "--- INFO -- checking ${SERVICE_LABEL} on ${DOCKER_PORT}"
 	@rm -f check.json
 	curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq '.' check.json
@@ -89,13 +89,13 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	@../checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) TAG="${TAG}" && ../mkdepend.sh ${DIR}
 
-start: remove stop publish
+start: remove stop push ${DIR}
 	@echo "--- INFO -- starting ${SERVICE_LABEL} from $(DIR)"
 	@../checkvars.sh "${DIR}"
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d ${DIR}
 
-test: service.json start
+test:
 	@echo "--- INFO -- testing ${SERVICE_LABEL} on $(SERVICE_PORT)"
 	@../test.sh 127.0.0.1:$(SERVICE_PORT)
 
@@ -120,4 +120,4 @@ distclean: clean
 	@echo "--- INFO -- cleaning for distribution"
 	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS)
 
-.PHONY: default all build run check stop push publish verify clean start
+.PHONY: default all build run check stop push publish verify clean start test
