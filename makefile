@@ -36,7 +36,6 @@ $(ALL):
 	@$(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $@
 
 $(TARGETS):
-	@echo "--- INFO -- making ${TARGETS}"
 	@for dir in $(ALL); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
