@@ -1,32 +1,35 @@
-# `motion` - motion-project.io _as-a-service_
+# `motion2mqtt` - [motion-project.github.io][motion-project-io] transmitting output to [MQTT][mqtt-org]
 
-Monitors attached camera and provides motion detection information as micro-service.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
+[mqtt-org]: http://mqtt.org/
+[motion-project-io]: https://motion-project.github.io/
+
+Monitors attached camera and provides motion detection as micro-service, transmitting _events_ and _images_ to a designated MQTT host.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_motion-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_motion-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt-beta "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_motion-beta
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_motion-beta.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_motion2mqtt-beta
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_motion2mqtt-beta.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_motion-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_motion-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt-beta "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_motion-beta
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_motion-beta.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_motion2mqtt-beta
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_motion2mqtt-beta.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_motion-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_motion-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt-beta "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_motion-beta
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_motion-beta.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_motion2mqtt-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_motion2mqtt-beta.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -34,45 +37,45 @@ Monitors attached camera and provides motion detection information as micro-serv
 
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
-+ `url` - `com.github.dcmartin.open-horizon.motion`
++ `url` - `com.github.dcmartin.open-horizon.motion2mqtt`
 + `version` - `0.0.1`
 
 ## How To Use
 
-Copy this [repository][repository], change to the `motion` directory, then use the **make** command; see below:
+Copy this [repository][repository], change to the `motion2mqtt` directory, then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
 % cd ~/gitdir
 % git clone http://github.com/dcmartin/open-horizon
-% cd open-horizon/motion
+% cd open-horizon/motion2mqtt
 % make
 ...
 {
   "hostname": "544720549bbf-172017000003",
   "org": "dcmartin@us.ibm.com",
-  "pattern": "motion",
-  "device": "newman-amd64_motion",
+  "pattern": "motion2mqtt",
+  "device": "test-camera-1",
   "pid": 8,
-  "motion": {
+  "motion2mqtt": {
     "log_level": "info",
     "debug": "true",
     "date": 1548700891,
     "db": "debug",
     "name": "test",
     "timezone": "America/Los_Angeles",
+    "post": "center",
     "mqtt": {
-      "host": "192.168.1.40",
+      "host": "mqtt",
       "port": "1883",
-      "username": "test",
-      "password": "test"
-    },
-    "post": "center"
+      "username": "<username>",
+      "password": "<password>"
+    }
   }
 }
 
 ```
-The `motion` value will initially be incomplete until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
+The `motion2mqtt` value will initially be incomplete until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
 ```
 % curl -sSL http://localhost:8583
 {
@@ -85,13 +88,16 @@ This service may be published to an Open Horizon exchange for an organization.  
 
 ## User Input (options)
 Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
++ `MOTION_DEVICE_DB` - device group name (aka database)
++ `MOTION_DEVICE_NAME` - device name (aka hostname)
++ `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `127.0.0.1`
 + `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `127.0.0.1`
 + `MOTION_MQTT_PORT` - port #; defaults to `1883`
 + `MOTION_MQTT_USERNAME` - MQTT username; no default; required; ignored if no security
 + `MOTION_MQTT_PASSWORD` - MQTT password; no default; required; ignored if no security
 + `MOTION_POST_PICTURES` - post pictures; default `off`; options include `on`, `best`, and `center`
-+ `MOTION_LOG_LEVEL` - level of logging for motion; default `2`
-+ `MOTION_LOG_TYPE` - type of logging for motion; default `all`
++ `MOTION_LOG_LEVEL` - level of logging for motion2mqtt; default `2`
++ `MOTION_LOG_TYPE` - type of logging for motion2mqtt; default `all`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 ### Example registration
 ```
@@ -148,10 +154,10 @@ based on the following:
 
 [David C Martin][dcmartin] (github@dcmartin.com)
 
-[userinput]: https://github.com/dcmartin/open-horizon/blob/master/motion/userinput.json
-[service-json]: https://github.com/dcmartin/open-horizon/blob/master/motion/service.json
-[build-json]: https://github.com/dcmartin/open-horizon/blob/master/motion/build.json
-[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/motion/Dockerfile
+[userinput]: https://github.com/dcmartin/open-horizon/blob/master/motion2mqtt/userinput.json
+[service-json]: https://github.com/dcmartin/open-horizon/blob/master/motion2mqtt/service.json
+[build-json]: https://github.com/dcmartin/open-horizon/blob/master/motion2mqtt/build.json
+[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/motion2mqtt/Dockerfile
 
 
 [dcmartin]: https://github.com/dcmartin

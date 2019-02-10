@@ -74,6 +74,9 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
       elif [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
         if [ -s "${NAME}" ]; then
           DV=$(sed 's/^"\(.*\)"$/\1/' "${NAME}")
+	else
+          echo "*** WARN $0 $$ -- value NOT defined for required: ${NAME}; create file ${NAME} with JSON value; exiting"
+	  exit 1
         fi
       fi
       if [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then

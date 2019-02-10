@@ -1,9 +1,9 @@
 {
   "org": "dcmartin@us.ibm.com",
-  "label": "motion",
-  "description": "Provides motion-project.io as service",
-  "documentation": "https://github.com/dcmartin/open-horizon/motion/README.md",
-  "url": "com.github.dcmartin.open-horizon.motion",
+  "label": "motion2mqtt",
+  "description": "Provides motion-project.io as service sending output via MQTT",
+  "documentation": "https://github.com/dcmartin/open-horizon/motion2mqtt/README.md",
+  "url": "com.github.dcmartin.open-horizon.motion2mqtt",
   "version": "0.0.1",
   "arch": null,
   "public": true,
@@ -31,9 +31,9 @@
   ],
   "deployment": {
     "services": {
-      "motion": {
+      "motion2mqtt": {
         "environment": [
-          "SERVICE_LABEL=motion"
+          "SERVICE_LABEL=motion2mqtt"
         ],
         "binds": null,
         "specific_ports": [
