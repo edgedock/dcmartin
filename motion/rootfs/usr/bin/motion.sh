@@ -47,7 +47,7 @@ mkdir -p ${TMP}/motion
 rm -fr /var/lib/motion
 ln -s ${TMP}/motion /var/lib
 # start motion
-motion -d -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l "${TMP}/motion.log" &
+motion -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr &
 # get pid
 PID=$(ps | grep "motion" | grep -v grep | awk '{ print $1 }' | head -1)
 if [ -z "${PID}" ]; then PID=0; fi
