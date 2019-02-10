@@ -292,8 +292,13 @@ set masks = ( $diffs )
 # start with average
 set composite = "$tmpdir/$lastjson:t:r"'-composite.jpg'
 cp -f "$average" "$composite"
-# test if key frame only
-if ($?ALL_FRAMES == 0) then
+
+
+###
+### KEY FRAMES or NOT
+###
+
+if ($?KEY_FRAMES != 0) then
   set kjpgs = ()
   set kdiffs = ()
   @ i = 1
@@ -311,7 +316,8 @@ if ($?ALL_FRAMES == 0) then
   set srcs = ( $kjpgs )
   set masks = ( $kdiffs )
 endif
-# loop
+
+## process sources
 if ($?DEBUG) echo "$0:t $$ -- Compositing $#srcs sources with $#masks masks" >& /dev/stderr
 @ i = 1
 while ( $i <= $#srcs )
@@ -397,11 +403,6 @@ if (! -s "$gif") then
 else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
   set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-animated"
   mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$gif"
-
-  ### MOVE TO DIR
-  mv "$gif" "$lastjson:r.gif"
-  ###
-
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
   if ($?DEBUG) echo "$0:t $$ -- Posted file $gif to host ${MOTION_MQTT_HOST} topic $MQTT_TOPIC" >& /dev/stderr
 endif
