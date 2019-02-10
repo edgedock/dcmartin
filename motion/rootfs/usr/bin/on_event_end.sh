@@ -144,10 +144,6 @@ else
   echo "$JSON" >! "$lastjson"
 endif
 
-## UPDATE
-if [ -d "/tmpfs" ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
-cp -f "$lastjson" ${TMP}/motion.json
-
 ## do MQTT
 if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
   set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/event/end"
@@ -400,6 +396,7 @@ if (! -s "$gif") then
 else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
   set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-animated"
   mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$gif"
+  mv "$gif" "$lastjson:r.gif"
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
   if ($?DEBUG) echo "$0:t $$ -- Posted file $gif to host ${MOTION_MQTT_HOST} topic $MQTT_TOPIC" >& /dev/stderr
 endif
