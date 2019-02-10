@@ -21,8 +21,11 @@ BODY="${HZN}"
 
 # git pid
 if [ ! -z "${SERVICE_LABEL:-}" ]; then
-  PID=$(ps | grep "${SERVICE_LABEL:-}.sh" | grep -v grep | awk '{ print $1 }' | head -1)
-  if [ -z "${PID}" ]; then PID=0; fi
+  CMD=$(command -v "${SERVICE_LABEL:-}.sh")
+  if [ ! -z "${CMD}" ]; then
+    PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
+  fi
+  if [ -z "${PID:-}" ]; then PID=0; fi
   BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
 else
   echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" 2> /dev/stderr

@@ -5,7 +5,7 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 JSON='[{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
 
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":"'${MOTION_MQTT_PORT}'","username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"post":"'${MOTION_POST_PICTURES}'","period":'${MOTION_PERIOD}'}' 
+CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":"'${MOTION_MQTT_PORT}'","username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post":"'${MOTION_POST_PICTURES}'"},"period":'${MOTION_PERIOD}'}' 
 
 if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- config: ${CONFIG}" 2> /dev/stderr; fi
 
@@ -51,7 +51,7 @@ CMD=$(command -v motion)
 if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot find motion executable; exiting" &> /dev/stderr; fi
 ${CMD} -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -l /dev/stderr &
 # get pid
-PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
+PID=$(ps | awk '{ print $1, $4 }' | grep "${CMD}" | awk '{ print $1 }' | head -1)
 if [ -z "${PID}" ]; then PID=0; fi
 # add PID to CONFIG
 CONFIG=$(echo "${CONFIG}" | jq '.pid='"${PID}")
@@ -78,7 +78,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
           OUT=$(jq '.' "${FULLPATH}")
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${OUT}" &> /dev/stderr; fi
           if [ -z "${OUT}" ]; then OUT='null'; fi
-          OUTPUT=$(echo "${OUTPUT}" | jq '.image='"${OUT}")
+          OUTPUT=$(echo "${OUTPUT}" | jq '.motion.image='"${OUT}")
         else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
           continue
@@ -89,7 +89,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
           OUT=$(jq '.' "${FULLPATH}")
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: ${OUT}" &> /dev/stderr; fi
           if [ -z "${OUT}" ]; then OUT='null'; fi
-          OUTPUT=$(echo "${OUTPUT}" | jq '.event='"${OUT}")
+          OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
         else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
           continue
