@@ -9,104 +9,25 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    {
-      "url": "com.github.dcmartin.open-horizon.hal",
-      "org": "dcmartin@us.ibm.com",
-      "version": "0.0.1",
-      "arch": "{arch}"
-    },
-    {
-      "url": "com.github.dcmartin.open-horizon.cpu",
-      "org": "dcmartin@us.ibm.com",
-      "version": "0.0.1",
-      "arch": "{arch}"
-    },
-    {
-      "url": "com.github.dcmartin.open-horizon.wan",
-      "org": "dcmartin@us.ibm.com",
-      "version": "0.0.1",
-      "arch": "{arch}"
-    }
+    { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null }
   ],
   "userInput": [
-    {
-      "name": "MOTION_TIMEZONE",
-      "label": "database and group name for devices",
-      "type": "string",
-      "defaultValue": "GMT"
-    },
-    {
-      "name": "MOTION_DEVICE_DB",
-      "label": "database and group name for devices",
-      "type": "string",
-      "defaultValue": "motion"
-    },
-    {
-      "name": "MOTION_DEVICE_NAME",
-      "label": "name of device",
-      "type": "string",
-      "defaultValue": "testcam"
-    },
-    {
-      "name": "MOTION_MQTT_HOST",
-      "label": "IP or FQDN for mqtt host",
-      "type": "string",
-      "defaultValue": null
-    },
-    {
-      "name": "MOTION_MQTT_PORT",
-      "label": "port number",
-      "type": "int",
-      "defaultValue": "1883"
-    },
-    {
-      "name": "MOTION_MQTT_USERNAME",
-      "label": "username",
-      "type": "string",
-      "defaultValue": null
-    },
-    {
-      "name": "MOTION_MQTT_PASSWORD",
-      "label": "password",
-      "type": "string",
-      "defaultValue": null
-    },
-    {
-      "name": "MOTION_POST_PICTURES",
-      "label": "post pictures; on, off, center, best",
-      "type": "boolean",
-      "defaultValue": "best"
-    },
-    {
-      "name": "MOTION_LOG_LEVEL",
-      "label": "specify motion logging level",
-      "type": "int",
-      "defaultValue": "2"
-    },
-    {
-      "name": "MOTION_LOG_TYPE",
-      "label": "specify motion logging type",
-      "type": "string",
-      "defaultValue": "all"
-    },
-    {
-      "name": "LOCALHOST_PORT",
-      "label": "localhost port",
-      "type": "int",
-      "defaultValue": "8583"
-    },
-    {
-      "name": "LOG_LEVEL",
-      "label": "specify logging level",
-      "type": "string",
-      "defaultValue": "info"
-    },
-    {
-      "name": "DEBUG",
-      "label": "debug; true or false",
-      "type": "boolean",
-      "defaultValue": "false"
-    }
+    { "name": "MOTION_TIMEZONE", "label": "database and group name for devices", "type": "string", "defaultValue": "GMT" },
+    { "name": "MOTION_DEVICE_DB", "label": "database and group name for devices", "type": "string", "defaultValue": "motion" },
+    { "name": "MOTION_DEVICE_NAME", "label": "name of device", "type": "string", "defaultValue": "testcam" },
+    { "name": "MOTION_MQTT_HOST", "label": "IP or FQDN for mqtt host", "type": "string", "defaultValue": null },
+    { "name": "MOTION_MQTT_PORT", "label": "port number", "type": "int", "defaultValue": "1883" },
+    { "name": "MOTION_MQTT_USERNAME", "label": "username", "type": "string", "defaultValue": null },
+    { "name": "MOTION_MQTT_PASSWORD", "label": "password", "type": "string", "defaultValue": null },
+    { "name": "MOTION_POST_PICTURES", "label": "post pictures; on, off, center, best", "type": "string", "defaultValue": "best" },
+    { "name": "MOTION_LOG_LEVEL", "label": "specify motion logging level", "type": "int", "defaultValue": "2" },
+    { "name": "MOTION_LOG_TYPE", "label": "specify motion logging type", "type": "string", "defaultValue": "all" },
+    { "name": "MOTION_PERIOD", "label": "specify motion watchdog in seconds", "type": "number", "defaultValue": "300" },
+    { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8082" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug; true or false", "type": "boolean", "defaultValue": "false" }
   ],
   "deployment": {
     "services": {
@@ -117,7 +38,8 @@
         "binds": null,
         "specific_ports": [
           { "HostPort": "8080/tcp", "HostIP": "0.0.0.0" },
-          { "HostPort": "8081/tcp", "HostIP": "0.0.0.0" }
+          { "HostPort": "8081/tcp", "HostIP": "0.0.0.0" },
+          { "HostPort": "8082/tcp", "HostIP": "0.0.0.0" }
         ],
         "image": null,
         "privileged": true,
@@ -131,6 +53,7 @@
     "size": 32767000
   },
   "ports": {
+    "8082/tcp": 8082,
     "8080/tcp": 8080,
     "8081/tcp": 8081
   }

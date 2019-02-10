@@ -5,8 +5,9 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 ## Status
 
 ![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
-[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
 ![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
+[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+[![Coverage Status](https://coveralls.io/repos/github/dcmartin/open-horizon/badge.svg?branch=master)](https://coveralls.io/github/dcmartin/open-horizon?branch=master)
 
 ![](https://img.shields.io/github/repo-size/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/last-commit/dcmartin/open-horizon.svg?style=flat)
@@ -31,17 +32,20 @@ Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LIN
 wget -qO - ibm.biz/horizon-setup | sudo bash
 sudo addgroup $(whoami) docker # logout and log back in again to effect
 sudo apt install -y git make curl jq
-mkdir ~/gitdir
-cd ~/gitdir
-git clone http://github.com/dcmartin/open-horizon
-cd open-horizon
-make
 ```
 
 # Build
 
 The `make` program is used to build; the _default_ target is to perform the _default_ target across all services and patterns.  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to the [`TRAVIS.md`][travis-md]. There is 
 a accelerated [video][build-pattern-video] of building this pattern.
+
+```
+mkdir ~/gitdir
+cd ~/gitdir
+git clone http://github.com/dcmartin/open-horizon
+cd open-horizon
+make
+```
 
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md

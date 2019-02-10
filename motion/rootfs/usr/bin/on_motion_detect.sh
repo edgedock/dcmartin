@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if [ "${VERBOSE:-}" == 'true' ]; then echo "+++ BEGIN: ${0##*/}: $*" $(date) >& /dev/stderr; fi
+DEBUG=
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "+++ BEGIN: ${0##*/}: $*" $(date) >& /dev/stderr; fi
 
 # %Y = year, %m = month, %d = date,
 # %H = hour, %M = minute, %S = second,
@@ -25,4 +27,4 @@ HOUR="${6}"
 MINUTE="${7}"
 SECOND="${8}"
 
-if [ "${VERBOSE:-}" == 'true' ]; then echo "+++ END: ${0##*/}: $*" $(date) >& /dev/stderr; fi
+if [ "${DEBUG:-}" == 'true' ]; then echo "+++ END: ${0##*/}: $*" $(date) >& /dev/stderr; fi
