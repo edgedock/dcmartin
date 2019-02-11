@@ -29,7 +29,7 @@ APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json
 
 ## docker
 DOCKER_ID := $(if $(DOCKER_ID),$(DOCKER_ID),$(shell whoami))
-DOCKER_LOGIN := $(if $(wildcard ~/.docker/config.json),,LOGIN_DOCKER_HUB)
+DOCKER_LOGIN := $(if $(wildcard ~/.docker/config.json),,Please_login_to_docker_hub)
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_NAME)
 DOCKER_TAG = $(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
