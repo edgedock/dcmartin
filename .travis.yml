@@ -2,6 +2,8 @@ sudo: true
 language: c
 services: docker
 dist: bionic 
+ignore:
+  - *.md
 branches:
   only:
     - master
