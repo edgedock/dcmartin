@@ -1,8 +1,8 @@
-# Open Horizon
+# Open Horizon example _services_ and _patterns_
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
 
-## Status
+# 1. Status
 
 ![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
@@ -24,19 +24,9 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
-# Setup
+# 2. Build
 
-Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.
-
-```
-wget -qO - ibm.biz/horizon-setup | sudo bash
-sudo addgroup $(whoami) docker # logout and log back in again to effect
-sudo apt install -y git make curl jq
-```
-
-# Build
-
-The `make` program is used to build; the _default_ target is to perform the _default_ target across all services and patterns.  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to the [`TRAVIS.md`][travis-md]. There is 
+The `make` program is used to build; there is no software installation required by default -- except [Docker][docker-start].  More information is available in the [`MAKE.md`][make-md].  The build process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to the [`TRAVIS.md`][travis-md]. There is 
 a accelerated [video][build-pattern-video] of building this pattern.
 
 ```
@@ -46,14 +36,14 @@ git clone http://github.com/dcmartin/open-horizon
 cd open-horizon
 make
 ```
-
+[docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md
 [travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
 [travis-ci]: https://travis-ci.org/
 [build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
-# Services
+# 3. Services
 
 There are sample services available:
 
@@ -62,30 +52,40 @@ There are sample services available:
 1. [`hal`][hal-service] -  Hardware Abstraction Layer information
 1. [`yolo`][yolo-service] -  Entity recognition and counting
 
-[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo
-[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal
-[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
-[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
 
-# Patterns
+# 4. Patterns
 
 There are sample patterns available:
 
-1. [`yolo2msghub`][yolo2msghub-pattern] - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
+1. [`yolo2msghub`][yolo2msghub-pattern] - Capture image, detect & count entity, publish to a Kafka broker
 1. [`motion2mqtt`][motion2mqtt-pattern] - Motion detection, image capture, and publish to a MQTT broker
 
-[yolo2msghub-pattern]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub
-[motion2mqtt-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt
+[yolo2msghub-pattern]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[motion2mqtt-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
 
-# Further Information 
+# 5. Open Horizon
 
-Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
+Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.
 
-## Credentials
+```
+wget -qO - ibm.biz/horizon-setup | sudo bash
+sudo addgroup $(whoami) docker # logout and log back in again to effect
+sudo apt install -y git make curl jq
+```
+
+## 5.1 Credentials
 
 **Note:** _You will need an IBM Cloud [account][ibm-registration]_
 
 Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
+
+## 5.2 Further Information 
+
+Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
 ## Changelog & Releases
 
