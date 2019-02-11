@@ -4,10 +4,7 @@
 
 **All services in this [repository][repository] may be built OOTB (out-of-the-box) by running the `make` command.**
 
-The top-level [makefile][makefile]  by default will `build` and `run` (locally) the containers for each _service_ in this repository, and then `check` each _service_ (see `make check` below).  All services share a common [service.makefile][service-makefile] which is driven through the service configuration files.
-
-[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
-[makefile]: https://github.com/dcmartin/open-horizon/blob/master/makefile
+The top-level [makefile][makefile]  by default will `build` and `run` (locally) the containers for each _service_ in this repository, and then `check` each _service_ (see `make check` below).
 
 # B. Detailed instructions
 
@@ -105,6 +102,12 @@ This configuration file is _not_ used in the build process, but provides a templ
 The `Dockerfile` contains details on the required operating environment and package installation.  By default, all services are configured to launch `/usr/bin/run.sh` which invokes `/usr/bin/service.sh` to respond to RESTful `GET` for status on its designated port (n.b. default `80`); see the `make check` section below for details.  There should be no need to change this file.
 
 ## 3. `make`
+
+The build process is controlled by the `make` command and two files: [`makefile`][makefile] at the top-level and [`service.makefile`][service-makefile], which all _services_ share.  There are many variables in these files, but usually do not require modification (see command-line options); for more information refer to [`MAKEVARS.md`][makevars-md]
+
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
+[makefile]: https://github.com/dcmartin/open-horizon/blob/master/makefile
 
 The **make** command by **default** performs `build`,`run`,`check`; other available targets:
 

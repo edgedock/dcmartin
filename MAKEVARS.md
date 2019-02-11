@@ -15,13 +15,13 @@
 
 ## Service definitions
 
-+ `SERVICE_ORG` - _organization_ for service; defaults to `.org` from `service.json`
-+ `SERVICE_LABEL` - _label_ for service; defaults to `.label` from `service.json`
++ `SERVICE_ORG` - _organization_ for service; defaults to `org` from `service.json`
++ `SERVICE_LABEL` - _label_ for service; defaults to `label` from `service.json`
 + `SERVICE_NAME` - name to use for service artefacts w/ `TAG` if exists; defaults to `SERVICE_LABEL`
-+ `SERVICE_VERSION` - semantic version `#.#.#` for service; defaults to `.version` from `service.json`
++ `SERVICE_VERSION` - semantic version `#.#.#` for service; defaults to `version` from `service.json`
 + `SERVICE_TAG` - identifier for service as recorded in Open Horizon _exchange_ [**automatic**]
 + `SERVICE_PORT` - status port for service; identified as first entry from `specific_ports` in `service.json` [**automatic**]
-+ `SERVICE_URI` - unique identifier for _service_ in _exchange_; defaults to `.url` from `service.json` [**automatic**]
++ `SERVICE_URI` - unique identifier for _service_ in _exchange_; defaults to `url` from `service.json` [**automatic**]
 + `SERVICE_URL` - unique identifier for _service_ in _exchange_ w/ `TAG` if exists; defaults to `SERVICE_URI` [**automatic**]
 + `SERVICE_REQVARS` - list of required variables from `service.json`; [**automatic**]
 
@@ -32,7 +32,7 @@
 
 ## IBM Cloud API Key
 
-+ `APIKEY`- IBM Cloud platform API key; defaults to `.apiKey` from `apiKey.json` or  contents of `APIKEY` file
++ `APIKEY`- IBM Cloud platform API key; defaults to `apiKey` from `apiKey.json` or contents of `APIKEY` file
 
 ## Docker
 
