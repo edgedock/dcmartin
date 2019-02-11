@@ -53,15 +53,27 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
 % make
 ...
 {
-  "hostname": "7c5bdc815fb1-172017000003",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "cpu",
-  "device": "test-cpu-2-arm_cpu",
-  "pid": 9,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1549907345,
+  "service": "cpu",
+  "hostname": "7a635ad1f814-172017000002",
+  "pid": 21,
   "cpu": {
+    "date": 1549907345,
     "log_level": "info",
-    "debug": "false",
-    "date": 1548702244,
+    "debug": false,
     "period": 60,
     "interval": 1
   }
@@ -70,18 +82,30 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
 The `cpu` payload will be incomplete until the service initiates; subsequent `make check` will return complete; see below:
 ```
 {
-  "hostname": "7c5bdc815fb1-172017000003",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "cpu",
-  "device": "test-cpu-2-arm_cpu",
-  "pid": 9,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1549907345,
+  "service": "cpu",
+  "hostname": "7a635ad1f814-172017000002",
+  "pid": 21,
   "cpu": {
+    "date": 1549907346,
     "log_level": "info",
-    "debug": "false",
-    "date": 1548702245,
+    "debug": false,
     "period": 60,
     "interval": 1,
-    "percent": 49.26
+    "percent": 2.5
   }
 }
 ```
