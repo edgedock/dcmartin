@@ -16,7 +16,7 @@
   "userInput": [
     { "name": "MOTION_TIMEZONE", "label": "database and group name for devices", "type": "string", "defaultValue": "GMT" },
     { "name": "MOTION_DEVICE_DB", "label": "database and group name for devices", "type": "string", "defaultValue": null },
-    { "name": "MOTION_DEVICE_NAME", "label": "name of device", "type": "string", "defaultValue": null },
+    { "name": "MOTION_DEVICE_NAME", "label": "name of device", "type": "string", "defaultValue": "" },
     { "name": "MOTION_MQTT_HOST", "label": "IP or FQDN for mqtt host", "type": "string", "defaultValue": null },
     { "name": "MOTION_MQTT_PORT", "label": "port number", "type": "int", "defaultValue": "1883" },
     { "name": "MOTION_MQTT_USERNAME", "label": "username", "type": "string", "defaultValue": null },

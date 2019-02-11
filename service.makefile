@@ -87,11 +87,14 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	@jq '.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
 	@../checkvars.sh ${DIR}
-	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) TAG="${TAG}" && ../mkdepend.sh ${DIR}
+	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) TAG=${TAG} && ../mkdepend.sh ${DIR}
+
+${DIR}/pattern.json: pattern.json
+	@export TAG=${TAG} && ../fixpattern.sh ${DIR}
 
 start: remove stop push ${DIR}
 	@echo "--- INFO -- starting ${SERVICE_LABEL} from $(DIR)"
-	@../checkvars.sh "${DIR}"
+	@../checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d ${DIR}
 
@@ -102,9 +105,9 @@ test:
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
 
-pattern: publish pattern.json APIKEY
+pattern: publish APIKEY ${DIR}/pattern.json
 	@echo "--- INFO -- updating pattern ${SERVICE_LABEL} for ${SERVICE_ORG} on $(HZN)"
-	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 validate:
 	@echo "--- INFO -- validating ${SERVICE_LABEL} for ${SERVICE_ORG} on $(HZN)"

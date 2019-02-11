@@ -1,10 +1,10 @@
 {
-  "label": "motion",
-  "description": "motion as a pattern",
+  "label": "motion2mqtt",
+  "description": "motion2mqtt as a pattern",
   "public": true,
   "services": [
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "amd64",
       "serviceVersions": [
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm",
       "serviceVersions": [
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm64",
       "serviceVersions": [
