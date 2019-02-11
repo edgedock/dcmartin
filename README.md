@@ -72,10 +72,10 @@ There are sample services available:
 There are sample patterns available:
 
 1. [`yolo2msghub`][yolo2msghub-pattern] - Transmits `yolo`,`cpu`,`gps`,`hal` services payload to a Kafka broker
-1. [`motion`][motion-pattern] - Motion detection, image capture, and publish to a MQTT broker
+1. [`motion2mqtt`][motion2mqtt-pattern] - Motion detection, image capture, and publish to a MQTT broker
 
 [yolo2msghub-pattern]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub
-[motion-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion
+[motion2mqtt-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt
 
 # Further Information 
 
