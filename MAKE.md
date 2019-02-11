@@ -13,15 +13,15 @@ The top-level [makefile][makefile]  by default will `build` and `run` (locally) 
 
 While these services may be built automatically, there are a number of details important for successful development and deployment.  Each _service_ in an Open Horizon _exchange_ is associated with an _organization_ and may be either **private** to that organization or **public** to all organizations on the exchange.  
 
-## 1. Configuration files
-These build process is controlled a few command lines options and three JSON files.  
+## 1. Service configuration
+The _service_ configuration and `make` process is controlled by a few command lines options and three JSON files.   The JSON files are:
 
-+ `build.json` - service supported architecture `BUILD_FROM` targets
-+ `service.json` - service definition including `label`, `org`, `url`, `port`, and other information
-+ `pattern.json`- configuration information for the _service_ as a _pattern_ of services  [**optional**] 
++ `build.json` - service supported architectures and `BUILD_FROM` targets
++ `service.json` - service definition including `label`, `org`, `url`, and other information
++ `pattern.json`- information for the _service_ as a _pattern_ of services  [**_optional_**] 
 
 ### 1.1 `build.json`
-This JSON configuration file maps supported architectures to designated containers from which to build.  For example the `cpu` service supports four architectures:
+This JSON configuration file maps supported architectures to designated containers from which to build.  For example, the [`cpu`][cpu-service] service supports four architectures:
 
 ```
 {
@@ -33,6 +33,7 @@ This JSON configuration file maps supported architectures to designated containe
     }
 }
 ```
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
 
 ### 1.2 `service.json`
 This JSON configuration file specifies information about the service itself and is used as a template; the build process utilizes the following:
@@ -44,9 +45,9 @@ This JSON configuration file specifies information about the service itself and 
 
 The `label` and `version` values are used in the `make` process to derive other identifiers, e.g. the Docker image `name`; it is **recommended**, but not required, that the `label` be unique within the _organization_.
  
-#### 1.2.1`userInput`
+#### 1.2.1`userInput` in `service.json`
 
-The `userInput` from `service.json` specifies values provided to the service as environment variables.  Some services _require_ values to be provided.  During development and testing, required values may be specified through files of the same name.  For example, the `yolo2msghub` service requires `YOLO2MSGHUB_APIKEY` as indicated by its `defaultValue` being `null` (see below and [here][yolo2msghub-service]).
+The `userInput` specifies values provided to the service as environment variables.  Some services _require_ values to be provided.  During development and testing, required values may be specified through files of the same name.  For example, the `yolo2msghub` service requires `YOLO2MSGHUB_APIKEY` as indicated by its `defaultValue` being `null` (see below and [here][yolo2msghub-service]).
 
 [yolo2msghub-service]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
 
@@ -66,6 +67,20 @@ In this case a file may be created by processing the Kafka API key provided by t
 
 [message-hub]: https://www.ibm.com/cloud/message-hub
 
+#### 1.2.1 `ports` in `service.json`
+ The `ports` specifies the ports to be mapped _from_ the container to the localhost, e.g. the following maps the service port `80` to the localhost port `8581`.  Both `tcp` and `udp` ports may be specified.  This port mapping is _only_ done when running the service locally (see `make run`).
+ 
+```
+ "ports": {  "80/tcp": 8581 }
+```
+
+#### 1.2.2 `tmpfs` in `service.json`
+The `tmpfs` specifies whether a temporary file-system should be created in RAM and it's `size` in bytes, `destination` directory (default "/tmpfs"), and `mode` permissions (default `0177`).
+
+```
+ "tmpfs": {  "size": 2048000, "destination": "/tmpfs", "mode": "0177" }
+```
+
 ### 1.3 `pattern.json`
 This configuration file specifies information about using the _service_ in a pattern with other services for the architectures supported.  If a `pattern.json` files does not exist, the _service_ has not been configured as a _pattern_ and some `make` targets will not succeed.  In addition, before a _pattern_ can be published to an _exchange_, all `requiredServices` as specified in the `service.json` must already be published to the exchange (see `make publish` below).
 
@@ -82,14 +97,16 @@ This configuration file specifies information about using the _service_ in a pat
 }  
 ```
 
-## 2. Dockerfile
-This JSON configuration file 
+### 1.4 `userinput.json`
 
-In addition to the **Configuration**, the `Dockerfile` contains details on the required operating environment and package installation.  By default, all services are configured to launch `/usr/bin/run.sh` which invokes `/usr/bin/service.sh` to respond to RESTful `GET` for status on its designated port (n.b. default `80`); see the `make check` section below for details.
+This configuration file is _not_ used in the build process, but provides a template for specifying the values required to _register_ for this pattern and is used to run the `start` the service (n.b. see `make start`).  The values specified in this file are utilized if there are no corresponding files with the variable name, for example `YOLO2MSGHUB_APIKEY`.
+
+## 2. Dockerfile
+The `Dockerfile` contains details on the required operating environment and package installation.  By default, all services are configured to launch `/usr/bin/run.sh` which invokes `/usr/bin/service.sh` to respond to RESTful `GET` for status on its designated port (n.b. default `80`); see the `make check` section below for details.  There should be no need to change this file.
 
 ## 3. `make`
 
-The **make** command by **default** performs `build`,`run`,`check`; available targets:
+The **make** command by **default** performs `build`,`run`,`check`; other available targets:
 
 + `build` - build container using `build.json` and `service.json`
 + `run` - run container locally; map `ports` as in `service.json`
@@ -104,26 +121,25 @@ The **make** command by **default** performs `build`,`run`,`check`; available ta
 
 
 ###  3.0 Command-line options
-The command line directives are options, but include:
+The command line directives are optional, but may be specified to control the architecture and naming of the artefacts.  By default the native architecture is automatically detected and `TAG` is empty.
 
 + `BUILD_ARCH` - specify the architecture for the build process per `build.json` options
 + `TAG` - a _string_ value appened to _almost_ all artefacts, including Docker images, service `url`, ..
 
-These options may be specified when invoking the `make` command:
+These options may be specified when invoking the `make` command (see below) or statically specified by creating a file with the same name in the top-level directory, e.g. `echo 'experimental' > TAG`)
 
 ```
 % make BUILD_ARCH=arm64 TAG=experimental
 ```
 
-
 ### 3.1 `build`
-This target builds a Docker container for local execution.
+This target builds a local Docker container for the service.  Output from the build is stored in the file `build.out`
 
 ### 3.2 `run`
-This target runs the locally built Docker container for the service.
+This target runs the local Docker container for the service.
 
 ### 3.3 `check`
-This target accesses the service on its mapped service port; see `service.json` for individual services
+This target checks the service on its mapped port; see `service.json` for individual services.  For example, the `cpu` service responds on port `8581` with the following payload when `make check` is invoked in the `cpu/` directory.
 
 ```
 {
@@ -156,7 +172,7 @@ This target accesses the service on its mapped service port; see `service.json` 
 ```
 
 ### 3.4 `push`
-This target pushes the locally built Docker container to [Docker hub][docker-hub]
+This target pushes the local Docker container to [Docker hub][docker-hub]
 
 [docker-hub]: http://hub.docker.com/
 
@@ -199,34 +215,38 @@ This target may be used against the local container, the local service (n.b. see
 }
 ```
 ### 3.8 `start`
-The `start` target will initiate the _pattern_ with all required _services_; it depends on `publish` and `verify`
+The `start` target will initiate the _service_ with all `requiredServices` as specified in `service.json`.  For example:
+
 ```
-% make start
-...
-export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn dev service start -d test/
-Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
-Service project /home/dcmartin/GIT/open-horizon/yolo2msghub/test verified.
-Start service: service(s) hal with instance id prefix com.github.dcmartin.open-horizon.hal_0.0.1_089fdddf-2206-4421-a84a-24b8ce95a3d7
-Running service.
-Start service: service(s) wan with instance id prefix com.github.dcmartin.open-horizon.wan_0.0.1_6adc547b-941f-46de-b189-213d9d98fe3a
-Running service.
-Start service: service(s) yolo with instance id prefix com.github.dcmartin.open-horizon.yolo_0.0.1_6e7c975a-ac22-4f8c-bad2-d6b97d2b20ec
-Running service.
-Start service: service(s) yolo2msghub with instance id prefix d1f279369ee592e401daadf249ae4a1196c42a548d3533fda6d7e240c9f483e1
+cpu/% make start
+--- INFO -- removing docker container amd64_cpu-beta for service cpu
+amd64_cpu-beta
+Stop service: service(s) cpu with instance id prefix com.github.dcmartin.open-horizon.cpu-beta_0.0.1_8617f17b-f2b8-4761-ba35-2806f6d5c4e9
+Stopped service.
+--- INFO -- building docker container cpu-beta with tag dcmartin/amd64_cpu-beta:0.0.1
+--- INFO -- pushing docker container dcmartin/amd64_cpu-beta:0.0.1 for service cpu
+The push refers to repository [docker.io/dcmartin/amd64_cpu-beta]
+9bce4b746201: Layer already exists 
+5f6c19678c43: Layer already exists 
+767f936afb51: Layer already exists 
+0.0.1: digest: sha256:58139697236f8cbfd921837bf693c2141cb0d0796a88e9e2a10fe73f80f2b11b size: 947
+--- INFO -- building horizon
+Created horizon metadata files in /Users/dcmartin/GIT/open-horizon/cpu/horizon. Edit these files to define and configure your new service.
++++ WARN ../checkvars.sh 74370 -- service template unspecified; default: service.json
++++ WARN ../mkdepend.sh 74382 -- modifying service URL with beta in horizon/userinput.json and horizon/service.definition.json
+--- INFO -- starting cpu from horizon
++++ WARN ../checkvars.sh 74415 -- service template unspecified; default: service.json
+Service project /Users/dcmartin/GIT/open-horizon/cpu/horizon verified.
+Service project /Users/dcmartin/GIT/open-horizon/cpu/horizon verified.
+Start service: service(s) cpu with instance id prefix 19c8bf62b10e5eb63bf0a46ba6f958fcc073a766353cb45fea1cb2d108985db3
 Running service.
 ```
 
 ### 3.9 `pattern`
 
-The `pattern` target will publish the pattern in the exchange.  The [`service.json`][service-json] file must be changed prior.
+The `pattern` target will publish the _service_ as a _pattern_ in the _exchange_.  A `pattern.json` file must be present. 
 
-```
-% make pattern
-...
-export HZN_EXCHANGE_URL=https://alpha.edge-fabric.com/v1/ && hzn exchange pattern publish -o "dcmartin@us.ibm.com" -u iamapikey:{apikey} -f pattern.json -p yolo2msghub -k {private-key-file} -K {public-key-file}
-Updating yolo2msghub in the exchange...
-Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
-```
+
 # Changelog & Releases
 
 Releases are based on [Semantic Versioning][semver], and use the format
