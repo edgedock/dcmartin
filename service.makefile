@@ -100,7 +100,7 @@ start: remove stop push ${DIR}
 
 test:
 	@echo "--- INFO -- testing ${SERVICE_LABEL} on $(SERVICE_PORT)"
-	@../test.sh 127.0.0.1:$(SERVICE_PORT)
+	@../test.sh
 
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
