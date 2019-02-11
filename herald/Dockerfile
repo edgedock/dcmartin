@@ -15,10 +15,6 @@ ENV \
 RUN \
     set -o pipefail \
     \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
-    \
     && apk add --no-cache \
 	python3 \
 	py-pip \
