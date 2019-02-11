@@ -57,15 +57,24 @@ Copy this [repository][repository], change to the `base` directory, then use the
 % make
 ...
 {
-  "hostname": "abec6ffa6455-172017000002",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "base",
-  "device": "test-cpu-2-arm_base",
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1549909627,
+  "service": "base",
+  "hostname": "fe855a6844c0-172017000003",
   "pid": 0,
-  "base": {
-    "log_level": "info",
-    "debug": "false"
-  }
+  "base": null
 }
 ```
 
