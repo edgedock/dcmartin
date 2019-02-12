@@ -149,12 +149,18 @@ foreach f ( $frames )
   set jpg = "$dir/$f.jpg" 
 
   # get image information
-  set info = ( `identify "$jpg" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq '.'` )
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpg"'","info":'"${info}"'}'
   if ($?DEBUG) echo "$0:t $$ -- Identified $jpg as $info" >& /dev/stderr
   if (-e "$jpg:r.json") then
     if ($?DEBUG) echo "$0:t $$ -- Found JSON $jpg:r.json; updating with $info" >& /dev/stderr
-    jq '.info='"$info"'|.end='"${NOW}" "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
+
+if ($?IDENTIFY_IMAGE) then
+  set info = ( `identify "$jpg" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq '.'` )
+  jq '.info='"$info" "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
+else
+  jq '.' "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
+fi
+
     if (-s ${tmpdir}/$0:t.$$.json) then
       mv ${tmpdir}/$0:t.$$.json "$jpg:r.json"
       set jpgs = ( $jpgs "$jpg" )
@@ -241,7 +247,7 @@ while ( $i <= $#jpgs )
   endif
   # retrieve size
   set size = `jq -r '.size' "$jpgs[$i]:r".json`
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpgs[$i]"'","size":"'$size'"}'
+  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpgs[$i]"'","size":'$size'}'
   # keep track of size
   @ totalsize += $size
   if ( $maxsize < $size ) then
