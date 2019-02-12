@@ -84,7 +84,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
     *-*-*.json)
         if [ -s "${FULLPATH}" ]; then
           OUT=$(jq '.' "${FULLPATH}")
-          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${OUT}" &> /dev/stderr; fi
+          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
           if [ -z "${OUT}" ]; then OUT='null'; fi
           OUTPUT=$(echo "${OUTPUT}" | jq '.motion.image='"${OUT}")
         else
@@ -95,7 +95,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
     *-*.json)
         if [ -s "${FULLPATH}" ]; then
           OUT=$(jq '.' "${FULLPATH}")
-          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: ${OUT}" &> /dev/stderr; fi
+          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
           if [ -z "${OUT}" ]; then OUT='null'; fi
           OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
         else
@@ -115,10 +115,11 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
 	      echo "+++ WARN $0 $$ -- no file at ${IP}" &> /dev/stderr
 	    fi
 	  done
+          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- deleting event JSON ${FULLPATH}" &> /dev/stderr; fi
+          rm -f "${FULLPATH}"
 	else
 	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
 	fi
-        rm -f "${FULLPATH}"
         ;;
     *)
         echo "+++ WARN $0 $$ -- skipping image: ${FULLPATH}" &> /dev/stderr

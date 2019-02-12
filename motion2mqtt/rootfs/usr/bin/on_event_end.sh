@@ -4,18 +4,16 @@ if ( -d "/tmpfs" ) then
   set TMP = "/tmpfs"
 else
   set TMP="/tmp"
-endif
+endif 
+
+set tmpdir = "${TMP}/$0:t/$$"
+mkdir -p "${tmpdir}"
+
 
 setenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"info":"START"}'
-
-if ( -d "/tmpfs" ) then
-  set TMP = "/tmpfs"
-else
-  set TMP="/tmp"
-fi
 
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
@@ -179,12 +177,12 @@ foreach f ( $frames )
   if ($?DEBUG) echo "$0:t $$ -- Identified $jpg as $info" >& /dev/stderr
   if (-e "$jpg:r.json") then
     if ($?DEBUG) echo "$0:t $$ -- Found JSON $jpg:r.json; updating with $info" >& /dev/stderr
-    jq '.info='"$info"'|.end='"${NOW}" "$jpg:r.json" >! ${TMP}/$0:t.$$.json
-    if (-s ${TMP}/$0:t.$$.json) then
-      mv ${TMP}/$0:t.$$.json "$jpg:r.json"
+    jq '.info='"$info"'|.end='"${NOW}" "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
+    if (-s ${tmpdir}/$0:t.$$.json) then
+      mv ${tmpdir}/$0:t.$$.json "$jpg:r.json"
       set jpgs = ( $jpgs "$jpg" )
     else
-      rm -f ${TMP}/$0:t.$$.json
+      rm -f ${tmpdir}/$0:t.$$.json
       if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpg"'","error":"JSON failed"}'
       if ($?DEBUG) echo "$0:t $$ -- JSON failed; skipping" >& /dev/stderr
       continue
@@ -227,22 +225,19 @@ if ($#jpgs <= 1) then
   goto done
 endif
 
-set tmpdir = "${TMP}/$0:t/$$"
-mkdir -p $tmpdir
-
 if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"tmpdir":"'"$tmpdir"'"}'
 
 ## AVERAGE 
 set average = "$tmpdir/$lastjson:t:r"'-average.jpg'
-convert $jpgs -average $average >&! ${TMP}/$$.out
+convert $jpgs -average $average >&! ${tmpdir}/$$.out
 if ( -s "$average") then
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"average":"'"$average"'"}'
   if ($?DEBUG) echo "$0:t $$ -- Calculated average image $average from $#jpgs JPEGS" >& /dev/stderr
 else
-  set out = `cat "${TMP}/$$.out"`
+  set out = `cat "${tmpdir}/$$.out"`
   if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"error":"'"$out"'"}'
   if ($?DEBUG) echo "$0:t $$ -- Failed to calculate average image from $#jpgs JPEGS" `cat $out` >& /dev/stderr
-  rm -f "${TMP}/$$.out"
+  rm -f "${tmpdir}/$$.out"
   goto done
 endif
 if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
