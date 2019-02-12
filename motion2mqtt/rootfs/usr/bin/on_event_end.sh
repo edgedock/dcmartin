@@ -4,6 +4,8 @@ setenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 
+if [ -d "/tmpfs" ]; then TMP="/tmpfs"; else TMP="/tmp"; fi
+
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
    set dateconv = /usr/bin/dateutils.dconv
@@ -214,7 +216,7 @@ if ($#jpgs <= 1) then
   goto done
 endif
 
-set tmpdir = "/tmpfs/$0:t/$$"
+set tmpdir = "${TMP}/$0:t/$$"
 mkdir -p $tmpdir
 
 if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"tmpdir":"'"$tmpdir"'"}'
