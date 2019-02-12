@@ -4,6 +4,7 @@ services: docker
 dist: bionic 
 ignore:
   - *.md
+  - setup/*
 branches:
   only:
     - master
