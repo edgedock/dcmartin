@@ -56,7 +56,7 @@ build: Dockerfile build.json service.json rootfs Makefile
 
 run: remove
 	@echo "--- INFO -- running docker container ${DOCKER_NAME} for service ${SERVICE_LABEL}"
-	@../docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 remove:
 	@echo "--- INFO -- removing docker container ${DOCKER_NAME} for service ${SERVICE_LABEL}"
@@ -86,21 +86,21 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) APIKEY
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
 	@jq '.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
-	@../checkvars.sh ${DIR}
-	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) TAG=${TAG} && ../mkdepend.sh ${DIR}
+	@./checkvars.sh ${DIR}
+	@export HZN_EXCHANGE_URL=${HZN} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat APIKEY) TAG=${TAG} && ./mkdepend.sh ${DIR}
 
 ${DIR}/pattern.json: pattern.json
-	@export TAG=${TAG} && ../fixpattern.sh ${DIR}
+	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
 
 start: remove stop push ${DIR}
 	@echo "--- INFO -- starting ${SERVICE_LABEL} from $(DIR)"
-	@../checkvars.sh ${DIR}
+	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HZN} && hzn dev service start -d ${DIR}
 
 test:
 	@echo "--- INFO -- testing ${SERVICE_LABEL} on $(SERVICE_PORT)"
-	@../test.sh
+	@./test.sh
 
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
