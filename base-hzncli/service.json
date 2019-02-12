@@ -1,9 +1,9 @@
 {
   "org": "dcmartin@us.ibm.com",
-  "label": "hzncli-ubuntu",
+  "label": "base-hzncli",
   "description": "Provides hardware abstraction layer as service",
-  "documentation": "https://github.com/dcmartin/open-horizon/hzncli-ubuntu/README.md",
-  "url": "com.github.dcmartin.open-horizon.hzncli-ubuntu",
+  "documentation": "https://github.com/dcmartin/open-horizon/base-hzncli/README.md",
+  "url": "com.github.dcmartin.open-horizon.base-hzncli",
   "version": "0.0.1",
   "arch": null,
   "public": true,

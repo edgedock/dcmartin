@@ -1,4 +1,4 @@
-ARG BUILD_FROM=alpine:3.8
+ARG BUILD_FROM=dcmartin/amd64_base-alpine:0.0.1
 
 FROM $BUILD_FROM
 
