@@ -171,6 +171,53 @@ while true; do
 done
 ```
 
+##### Example payload
+
+```
+{
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1549934160,
+  "service": "yolo2msghub",
+  "hostname": "9b1c65c1768d-172017000004",
+  "pid": 21,
+  "yolo2msghub": {
+    "log_level": "info",
+    "debug": false,
+    "services": [
+      {
+        "name": "yolo",
+        "url": "http://yolo"
+      },
+      {
+        "name": "hal",
+        "url": "http://hal"
+      },
+      {
+        "name": "cpu",
+        "url": "http://cpu"
+      },
+      {
+        "name": "wan",
+        "url": "http://wan"
+      }
+    ],
+    "period": 30
+  }
+}
+```
+
 # Changelog & Releases
 
 Releases are based on [Semantic Versioning][semver], and use the format
