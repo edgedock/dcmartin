@@ -1,5 +1,11 @@
 #!/bin/tcsh
 
+if ( -d "/tmpfs" ) then 
+  set TMP = "/tmpfs"
+else
+  set TMP="/tmp"
+endif
+
 setenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
