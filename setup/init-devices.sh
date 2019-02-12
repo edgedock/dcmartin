@@ -11,7 +11,7 @@ HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"
 
 ## check for necessary tooling
 if [[ ! -e "/usr/local/bin/nmap" && ! -e "/usr/bin/nmap" ]]; then
-  echo '*** ERROR: No nmap(8); install using brew or apt' &> /dev/stderr
+  echo '*** ERROR $0 $$ -- No nmap(8); install using brew or apt' &> /dev/stderr
   exit 1
 fi
 
@@ -29,7 +29,11 @@ fi
 if [ -n "${1}" ]; then
   CONFIG="${1}"
 else
-  CONFIG="horizon.json"
+  if [ "${0%/*}" != "${0}" ]; then
+    CONFIG="${0%/*}/horizon.json"
+  else
+    CONFIG="horizon.json"
+  fi
 fi
 if [ ! -s "${CONFIG}" ]; then
   echo "Cannot find configuration file: ${CONFIG}" &> /dev/stderr
@@ -43,11 +47,11 @@ SETUP_ID=$(jq -r '.setup' "${CONFIG}")
 if [ -n "${SETUP_ID}" ]; then
   HORIZON_SETUP_URL=$(jq -r '.setups[]|select(.id=="'$SETUP_ID'").url' "${CONFIG}")
   if [ -z "${HORIZON_SETUP_URL}" ]; then
-    echo "*** ERROR: cannot find URL for setup id ${SETUP_ID} in ${CONFIG}" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- cannot find URL for setup id ${SETUP_ID} in ${CONFIG}" &> /dev/stderr
     exit 1
   fi
 else
-  echo "*** ERROR: no setup specified" &> /dev/stderr
+  echo "*** ERROR $0 $$ -- no setup specified" &> /dev/stderr
   exit 1
 fi
 
@@ -56,11 +60,11 @@ VENDOR_ID=$(jq -r '.vendor' "${CONFIG}")
 if [ -n "${VENDOR_ID}" ]; then
   VENDOR_TAG=$(jq -r '.vendors[]|select(.id=="'"${VENDOR_ID}"'").tag' "${CONFIG}")
   if [ -z "${VENDOR_TAG}" ]; then
-    echo "*** ERROR: cannot find tag for vendor id ${VENDOR_ID} in configuration ${CONFIG}" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- cannot find tag for vendor id ${VENDOR_ID} in configuration ${CONFIG}" &> /dev/stderr
     exit 1
   fi
 else
-  echo "+++ WARN: no vendor specified for auto-discovery in ${CONFIG}" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- no vendor specified for auto-discovery in ${CONFIG}" &> /dev/stderr
   VENDOR_TAG=
 fi
 
@@ -70,7 +74,7 @@ if [[ -n "${2}" ]]; then
 else
   net="192.168.1.0/24"
 fi
-echo "$(date '+%T') INFO: executing: $0 ${CONFIG} $net" &> /dev/stderr
+echo "--- INFO $0 $$ -- executing: $0 ${CONFIG} $net" &> /dev/stderr
 
 TTL=300 # seconds
 SECONDS=$(date "+%s")
@@ -88,7 +92,7 @@ out="${TMP%.*}.$DATE.txt"
 if [[ ! -s "$out" ]]; then
   rm -f "${out%.*}".*.txt
   if [[ $(whoami) != "root" ]]; then
-    echo "$(date '+%T') INFO: scanning network ${net}" &> /dev/stderr
+    echo "$(date '+%T') INFO $0 $$ -- scanning network ${net}" &> /dev/stderr
     sudo nmap -sn -T5 "$net" > "$out"
   else
     nmap -sn -T5 "$net" > "$out"
@@ -102,12 +106,12 @@ fi
 MACS=$(egrep MAC "$out" | awk '{ print $3 }' | sort | uniq)
 MAC_ARRAY=($(echo ${MACS}))
 MAC_COUNT=${#MAC_ARRAY[@]}
-echo "$(date '+%T') INFO: found ${MAC_COUNT} devices on LAN ${net}" &> /dev/stderr
+echo "$(date '+%T') INFO $0 $$ -- found ${MAC_COUNT} devices on LAN ${net}" &> /dev/stderr
 
 # get nodes
 NODES=$(jq -r '.nodes[]?.mac' "${CONFIG}")
 if [ -z "${NODES}" ] || [ "${NODES}" == 'null' ]; then
-  echo "+++ WARN: no nodes in configuration" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- no nodes in configuration" &> /dev/stderr
   NODE_COUNT=0
 else
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: existing nodes:" $(echo ${NODES} | fmt -256) &> /dev/stderr; fi
@@ -149,7 +153,7 @@ fi
 # update 
 NODES=$(jq -r '.nodes[]?.mac' "${CONFIG}")
 if [ -z "${NODES}" ]; then
-  echo "+++ WARN: no nodes (MACs) in configuration" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- no nodes (MACs) in configuration" &> /dev/stderr
   NODE_COUNT=0
 else
   NODE_ARRAY=($(echo ${NODES}))
@@ -157,7 +161,7 @@ else
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: found ${NODE_COUNT} nodes (MACs) in configuration" &> /dev/stderr; fi
 fi
 
-echo "$(date '+%T') INFO: total of ${NODE_COUNT} nodes in configuration ${CONFIG}" &> /dev/stderr
+echo "$(date '+%T') INFO $0 $$ -- total of ${NODE_COUNT} nodes in configuration ${CONFIG}" &> /dev/stderr
 
 ###
 ### ITERATE OVER ALL MACS on LAN
@@ -173,7 +177,7 @@ for MAC in ${MACS}; do
     continue
   else
     # get ip address from nmap output file
-    echo "$(date '+%T') INFO: ${id}: FOUND at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
+    echo '>>>' "$(date '+%T') INFO $0 $$ -- ${id}: FOUND at MAC: $MAC; IP $client_ipaddr" &> /dev/stderr
     # remove from known hosts
     if [ -s "${HOME}/.ssh/known_hosts" ]; then
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: removing $client_ipaddr from ${HOME}/.ssh/known_hosts" &> /dev/stderr; fi
@@ -181,6 +185,7 @@ for MAC in ${MACS}; do
       mv -f $TMP/known_hosts ${HOME}/.ssh/known_hosts
     fi
   fi
+
   ## UPDATE CONFIGURATION
   node_state=$(jq '.nodes[]?|select(.id=="'${id}'")' "${CONFIG}" | jq '.ipv4="'"${client_ipaddr}"'"')
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: updating configuration ${CONFIG}" &> /dev/stderr; fi
@@ -191,7 +196,7 @@ for MAC in ${MACS}; do
   # find configuration which includes device
   conf=$(jq '.configurations[]|select(.nodes[]?.id=="'"${id}"'")' "${CONFIG}")
   if [ -z "${conf}" ] || [ "${conf}" == "null" ]; then
-    echo "*** ERROR: ${id}: Cannot find node configuration for device: $id" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: Cannot find node configuration for device: $id" &> /dev/stderr
     continue
   else
     # identify configuration
@@ -229,7 +234,7 @@ for MAC in ${MACS}; do
         ssh-keygen -t rsa -f "$conf_id" -N "" &> /dev/null
         # test for success
         if [[ ! -s "$conf_id" || ! -s "$conf_id.pub" ]]; then
-          echo "*** ERROR: ${id}: failed to create key files for $conf_id" &> /dev/stderr
+          echo "*** ERROR $0 $$ -- ${id}: failed to create key files for $conf_id" &> /dev/stderr
           exit 1
         fi
       fi
@@ -306,9 +311,9 @@ for MAC in ${MACS}; do
   if [ "${config_ssh}" == "true" ]; then
     # test access
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: testing access with ${private_keyfile}" &> /dev/stderr; fi
-    result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami') 2> /dev/null
+    result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'whoami' 2> /dev/null)
     if [[ -z "${result}" || "${result}" != "${client_username}" ]]; then
-      echo "*** ERROR: ${id} SSH failed; cannot confirm identity ${client_username}; re-starting SSH configuration"
+      echo "*** ERROR $0 $$ -- ${id} SSH ${client_username}$@{client_ipaddr} failed; cannot confirm identity ${client_username}; re-starting SSH configuration"
       config_ssh=false
     else
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH access successful for ${client_username}; result= $result" &> /dev/stderr; fi
@@ -326,10 +331,10 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH attempting ssh-copy-id ${ssh_copy_id} to ${client_ipaddr}" &> /dev/stderr; fi
     success=$(expect -f "$ssh_copy_id" 2> /dev/null | egrep "success")
     if [ "${success}" != "success"  ]; then
-      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id} SSH failed ssh-copy-id; checking public key: $public_keyfile" &> /dev/stderr ; fi
-      result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname 2> /dev/null')
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id} SSH failed ssh-copy-id; checking private key: $private_keyfile" &> /dev/stderr ; fi
+      result=$(ssh -o "BatchMode yes" -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname 2> /dev/null')
       if [ -z "${result}" ]; then
-	echo "*** ERROR: ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
+	echo "*** ERROR $0 $$ -- ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
 	continue
       else
         if [ -n "${DEBUG}" ]; then echo "??? DEBUG ${id}: SSH hostname: ${result}" &> /dev/stderr; fi
@@ -344,7 +349,7 @@ for MAC in ${MACS}; do
     config_ssh=$(jq '.nodes[]|select(.id=="'$id'").ssh != null' "${CONFIG}")
   fi
   if [ "${config_ssh}" != "true" ]; then
-    echo "*** ERROR: ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id} SSH failed; not accessible; continuing..." &> /dev/stderr
     continue
   else
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: SSH public key configured:" $(echo "$node_state" | jq -c '.ssh.id') &> /dev/stderr ; fi
@@ -353,12 +358,12 @@ for MAC in ${MACS}; do
   ## CONFIG SECURITY
   if [[ ${config_security} == "true" ]]; then
     # test access
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname')
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'hostname')
     if [[ -z $result || $(echo "$node_state" | jq -r '.ssh.device=="'"$result"'"') != "true" ]]; then
-      echo "*** ERROR: ${id} SECURITY failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id} SECURITY failed; cannot confirm hostname: ${result}" $(echo "$node_state" | jq '.ssh') &> /dev/stderr
       config_security=false
     else
-      echo "$(date '+%T') INFO: ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
+      echo "$(date '+%T') INFO $0 $$ -- ${id}: SECURITY configured" $(echo "$node_state" | jq -c '.ssh') &> /dev/stderr
     fi
   fi
   if [[ ${config_security} != "true" ]]; then
@@ -366,7 +371,7 @@ for MAC in ${MACS}; do
     # get node configuration specifics
     device=$(echo "$node_conf" | jq -r '.device')
     if [ -z "$device" ]; then
-      echo "*** ERROR: ${id}: node configuration device identifier unspecified: $node_conf" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: node configuration device identifier unspecified: $node_conf" &> /dev/stderr
       continue
     fi
     token=$(echo "$node_conf" | jq -r '.token')
@@ -383,12 +388,12 @@ for MAC in ${MACS}; do
       | sed 's|%%DEVICE_TOKEN%%|'"${token}"'|g' \
       > "${config_script}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: copying SSH script ${config_script}" &> /dev/stderr; fi
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
     cmd="sudo bash ./${config_script##*/}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")
     if [ "${result}" != "changed" ]; then
-      echo "*** ERROR: ${id}: SECURITY failed; result ($result) for command $cmd; continuing..." &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: SECURITY failed; result ($result) for command $cmd; continuing..." &> /dev/stderr
       continue
     fi
     ## UPDATE CONFIGURATION
@@ -398,7 +403,7 @@ for MAC in ${MACS}; do
     config_security=$(echo "$node_state" | jq '.ssh.device!=null')
   fi
   if [ "${config_security}" != "true" ]; then
-    echo "*** ERROR: ${id} SECURITY failed; consider reflashing; continuing..." &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id} SECURITY failed; consider reflashing; continuing..." &> /dev/stderr
     node_state=$(echo "$node_state" | jq -c '.ssh=null|.security=null')
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
@@ -410,9 +415,9 @@ for MAC in ${MACS}; do
   if [ ! -z "${SOCAT_LISTENER:-}" ]; then
     for script in socat-node-id.sh node-id.sh; do
       if [ ! -s "${script}" ]; then 
-	echo "*** ERROR: ${id}: cannot locate ${script}" &> /dev/stderr
+	echo "*** ERROR $0 $$ -- ${id}: cannot locate ${script}" &> /dev/stderr
       else
-        scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+        scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${script}" "${client_username}@${client_ipaddr}:." &> /dev/null
       fi
     done
   fi
@@ -420,7 +425,7 @@ for MAC in ${MACS}; do
   ## CONFIG SOFTWARE
   if [ "${config_software}" == "true" ]; then
     # test access
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn')
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'command -v hzn')
     if [ -z "${result}" ] || [ "${result}" != $(echo "${node_state}" | jq -r '.software.command') ]; then
       echo "+++ WARN : ${id} SOFTWARE failed; cannot confirm command: ${result}" &> /dev/stderr
       node_state=$(echo "$node_state" | jq '.software=null')
@@ -429,15 +434,15 @@ for MAC in ${MACS}; do
       # update software configuration
       config_software=$(jq '.nodes[]?|select(.id=="'$id'").software != null' "${CONFIG}")
     else
-      echo "$(date '+%T') INFO: ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
+      echo "$(date '+%T') INFO $0 $$ -- ${id}: SOFTWARE configured:" $(echo "$node_state" | jq -c '.software.command') &> /dev/stderr
     fi
   fi
   if [ "${config_software}" != "true" ]; then
     # install software
-    echo "$(date '+%T') INFO: ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: SOFTWARE installing ${HORIZON_SETUP_URL}" &> /dev/stderr
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'wget -qO - '"${HORIZON_SETUP_URL}"' | sudo bash 2> log')
     if [[ -z "${result}" ]]; then
-      echo "*** ERROR: ${id}: SOFTWARE failed; result = $result" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: SOFTWARE failed; result = $result" &> /dev/stderr
       continue
     else
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: installation result: $result" &> /dev/stderr; fi
@@ -453,34 +458,34 @@ for MAC in ${MACS}; do
   fi
   # sanity
   if [ "${config_software}" != "true" ]; then
-    echo "*** ERROR: ${id}: SOFTWARE failed" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: SOFTWARE failed" &> /dev/stderr
     continue
   fi
 
   if [ ! -z "${SOCAT_LISTENER:-}" ]; then
     ## Start SOCAT
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'export SOCAT_LISTENER='${SOCAT_LISTENER}' && ./socat-node-id.sh')
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" 'export SOCAT_LISTENER='${SOCAT_LISTENER}' && ./socat-node-id.sh')
   fi
 
   ## CONFIG EXCHANGE
   if [[ ${config_exchange} != "true" ]]; then
-    echo "$(date '+%T') INFO: ${id}: EXCHANGE configuring" &> /dev/stderr
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: EXCHANGE configuring" &> /dev/stderr
     # get exchange
     ex_id=$(echo "$conf" | jq -r '.exchange')
     if [[ -z $ex_id || "$ex_id" == "null" ]]; then
-      echo "*** ERROR: ${id}: exchange not specified in configuration: $conf" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: exchange not specified in configuration: $conf" &> /dev/stderr
       continue
     fi
     exchange=$(jq '.exchanges[]|select(.id=="'$ex_id'")' "${CONFIG}")
     if [[ -z "${exchange}" || "${exchange}" == null ]]; then
-      echo "*** ERROR: ${id}: exchange $ex_id not found in exchanges" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: exchange $ex_id not found in exchanges" &> /dev/stderr
       continue
     fi
     # check URL for exchange
     ex_url=$(echo "$exchange" | jq -r '.url')
     if [[ -z $ex_url || "$ex_url" == "null" ]]; then
       ex_url="$HZN_EXCHANGE_URL"
-      echo "+++ WARN: exchange $ex_id does not have URL specified; using default: $ex_url" &> /dev/stderr
+      echo "+++ WARN $0 $$ -- exchange $ex_id does not have URL specified; using default: $ex_url" &> /dev/stderr
     fi
 
     # update node state
@@ -497,37 +502,37 @@ for MAC in ${MACS}; do
     # force specification of exchange URL
     cmd="sudo sed -i 's|HZN_EXCHANGE_URL=.*|HZN_EXCHANGE_URL=${ex_url}|' /etc/default/horizon"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     cmd="sudo systemctl restart horizon || false"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     # test for failure status
     if [[ $? != 0 ]]; then
-      echo "*** ERROR: ${id}: EXCHANGE failed; $cmd" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: EXCHANGE failed; $cmd" &> /dev/stderr
       continue
     else
-      echo "$(date '+%T') INFO: ${id}: EXCHANGE succeeded; $cmd" &> /dev/stderr
+      echo "$(date '+%T') INFO $0 $$ -- ${id}: EXCHANGE succeeded; $cmd" &> /dev/stderr
     fi
 
     # create node in exchange (always returns nothing)
     cmd="hzn exchange node create -o ${ex_org} -u ${ex_username}:${ex_password} -n ${ex_device}:${ex_token}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     result=$?
     while [[ $result != 0 ]]; do
-	if [ -n "${DEBUG}" ]; then echo "+++ WARN: ${id}: failed command ${result}: $cmd" &> /dev/stderr; fi
-        ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+	if [ -n "${DEBUG}" ]; then echo "+++ WARN $0 $$ -- ${id}: failed command ${result}: $cmd" &> /dev/stderr; fi
+        ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
         result=$?
     done
 
     # get exchange node information
     cmd="hzn exchange node list -o ${ex_org} -u ${ex_username}:${ex_password} ${ex_device}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
     result=$?
     while [[ $result != 0 || ! -s "$TMP/henl.json" ]]; do
-      echo "+++ WARN: ${id}: EXCHANGE retry; $cmd" &> /dev/stderr
-      ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
+      echo "+++ WARN $0 $$ -- ${id}: EXCHANGE retry; $cmd" &> /dev/stderr
+      ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/henl.json"
       result=$?
     done
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: result $TMP/henl.json" $(jq -c '.' "$TMP/henl.json") &> /dev/stderr; fi
@@ -539,11 +544,11 @@ for MAC in ${MACS}; do
     # get exchange status
     cmd="hzn exchange status -o $ex_org -u ${ex_username}:${ex_password}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
     result=$?
     while [[ $result != 0 || ! -s "$TMP/hes.json" ]]; do
-      echo "+++ WARN: ${id}: EXCHANGE retry; $cmd" &> /dev/stderr
-      ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
+      echo "+++ WARN $0 $$ -- ${id}: EXCHANGE retry; $cmd" &> /dev/stderr
+      ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" > "$TMP/hes.json"
       result=$?
     done
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: result $TMP/hes.json" $(jq -c '.' "$TMP/hes.json") &> /dev/stderr; fi
@@ -558,27 +563,27 @@ for MAC in ${MACS}; do
   fi
   # sanity
   if [[ ${config_exchange} != "true" ]]; then
-    echo "+++ WARN: ${id}: EXCHANGE failed" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- ${id}: EXCHANGE failed" &> /dev/stderr
     continue
   else
-    echo "$(date '+%T') INFO: ${id}: EXCHANGE configured:" $(echo "$node_state" | jq -c '.exchange.id') &> /dev/stderr
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: EXCHANGE configured:" $(echo "$node_state" | jq -c '.exchange.id') &> /dev/stderr
   fi
 
   ##
   ## CONFIG PATTERN (or reconfigure)
   ##
 
-  echo "$(date '+%T') INFO: ${id}: PATTERN configuring" &> /dev/stderr
+  echo "$(date '+%T') INFO $0 $$ -- ${id}: PATTERN configuring" &> /dev/stderr
   # get pattern
   ptid=$(echo "$conf" | jq -r '.pattern?')
   if [[ -z $ptid || $ptid == 'null' ]]; then
-    echo "*** ERROR: ${id}: pattern not specified in configuration: $conf" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: pattern not specified in configuration: $conf" &> /dev/stderr
     continue
   fi
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: pattern identifier $ptid" &> /dev/stderr; fi
   pattern=$(jq '.patterns[]|select(.id=="'$ptid'")' "${CONFIG}")
   if [[ -z "${pattern}" || "${pattern}" == "null" ]]; then
-    echo "*** ERROR: ${id}: pattern $ptid not found in patterns" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: pattern $ptid not found in patterns" &> /dev/stderr
     continue
   fi
 
@@ -599,9 +604,9 @@ for MAC in ${MACS}; do
   # get node status
   cmd='hzn node list'
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.')
+  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null" | jq '.')
   if [ -z "${result}" ]; then
-    echo "*** ERROR: remote command $cmd returned zero results; continuing..." &> /dev/stderr
+    echo "*** ERROR $0 $$ -- remote command $cmd returned zero results; continuing..." &> /dev/stderr
     continue
   else
     node_state=$(echo "$node_state" | jq '.node='"$result")
@@ -616,7 +621,7 @@ for MAC in ${MACS}; do
   if [[ ${node_id} == ${ex_device} && $node_pattern == ${pt_org}/${pt_id} && ( $node_status == "configured" || $node_status == "configuring" ) ]]; then
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: node ${node_id} is ${node_status} with pattern ${node_pattern}" &> /dev/stderr; fi
   elif [[ $node_status == "unconfiguring" ]]; then
-    echo "*** ERROR: ${id}: node ${node_id} aka ${ex_device} is unconfiguring; consider reflashing or remove, purge, update, prune, and reboot" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: node ${node_id} aka ${ex_device} is unconfiguring; consider reflashing or remove, purge, update, prune, and reboot" &> /dev/stderr
     jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
     continue
   elif [[ ${node_id} != ${ex_device} || $node_status != "unconfigured" ]]; then
@@ -624,13 +629,13 @@ for MAC in ${MACS}; do
     # unregister client
     cmd='hzn unregister -f'
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
 
     # POLL client for node list information; wait until device identifier matches requested
     cmd='hzn node list'
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: executing remote command: $cmd" &> /dev/stderr; fi
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
-    iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="unconfigured"') == false ]; do
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+    iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="unconfigured"') != 'true' ]; do
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on unregistration [10]; iteration ${iteration}; result:" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
       iteration=$((iteration+1))
       if [ ${iteration} -le 10 ]; then 
@@ -641,10 +646,10 @@ for MAC in ${MACS}; do
         result=
         break
       fi
-      result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+      result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
     done
     if [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="unconfigured"') == false ]; then
-      echo "*** ERROR: ${id}: command failed: $cmd; iteration ${iteration}; result:" $(echo "${result}" | jq -c '.') &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: command failed: $cmd; iteration ${iteration}; result:" $(echo "${result}" | jq -c '.') &> /dev/stderr
       continue
     fi
     node_state=$(echo "$node_state" | jq '.node='"$result")
@@ -668,17 +673,18 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node ${ex_device}; pattern ${pt_org}/${pt_id}; input" $(cat "${input}") &> /dev/stderr; fi
 
     # copy pattern registration file to client
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." &> /dev/null
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." &> /dev/null
     # perform registration
     cmd="hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input##*/} -n ${ex_device}:${ex_token}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: registering with command: $cmd" &> /dev/stderr; fi
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd} &> /dev/null")
+    #result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd} &> /dev/null")
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd}")
   fi
 
   # POLL client for node list information; wait for configured state
   cmd="hzn node list"
-  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
-  iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="configured"') == false ]; do
+  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+  iteration=1; while [ -z "${result}" ] || [ $(echo "$result" | jq '.configstate.state=="configured"') != 'true' ]; do
     iteration=$((iteration+1))
     if [ ${iteration} -le 10 ]; then
       if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on configuration [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
@@ -688,10 +694,10 @@ for MAC in ${MACS}; do
       result=
       break
     fi
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
   done
   if [ -z "${result}" ] || [ "${result}" == "null" ]; then
-    echo "*** ERROR: ${id}: command $cmd failed; continuing..." &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: command $cmd failed; continuing..." &> /dev/stderr
     continue
   fi
   node_state=$(echo "$node_state" | jq '.node='"$result")
@@ -699,19 +705,19 @@ for MAC in ${MACS}; do
 
   # POLL client for agreementlist information; wait until agreement exists
   cmd="hzn agreement list"
-  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+  result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
   iteration=1
   while [ -z "${result}" ] || [ $(echo "$result" | jq '.==[]') == "true" ]; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: waiting on agreement [10]" $(echo "$result" | jq -c '.') &> /dev/stderr; fi
     sleep 10
-    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
+    result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd 2> /dev/null")
     iteration=$((iteration+1))
     if [ ${iteration} -ge 10 ]; then
       break
     fi
   done
   if [ -z "${result}" ] || [ $(echo "$result" | jq '.==[]') == "true" ]; then
-    echo "*** ERROR: ${id}: agreement never established; consider re-flashing" &> /dev/stderr
+    echo "*** ERROR $0 $$ -- ${id}: agreement never established; consider re-flashing" &> /dev/stderr
     ################# UPDATE CONFIGURATION #######################
     continue
   fi
@@ -722,23 +728,23 @@ for MAC in ${MACS}; do
   jq '(.nodes[]|select(.id=="'$id'"))|='"$node_state" "${CONFIG}" > "$TMP/${CONFIG##*/}"; mv -f "$TMP/${CONFIG##*/}" "${CONFIG}"
 
   ## DONE w/ PATTERN
-  echo "$(date '+%T') INFO: ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
+  echo "$(date '+%T') INFO $0 $$ -- ${id}: PATTERN configured" $(echo "$node_state" | jq -c '.pattern[]?.workload_to_run.url') &> /dev/stderr
 
   ##
   ## CONFIG NETWORK
   ##
 
   if [[ ${config_network} != "true" ]]; then
-    echo "$(date '+%T') INFO: ${id}: configuring NETWORK" &> /dev/stderr
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: configuring NETWORK" &> /dev/stderr
     # get network
     nwid=$(echo "$conf" | jq -r '.network?')
     if [[ -z $nwid || $nwid == 'null' ]]; then
-      echo "*** ERROR: ${id}: network not specified in configuration: $conf" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: network not specified in configuration: $conf" &> /dev/stderr
       continue
     fi
     network=$(jq '.networks[]|select(.id=="'$nwid'")' "${CONFIG}")
     if [[ -z "${network}" || "${network}" == "null" ]]; then
-      echo "*** ERROR: ${id}: network $nwid not found in network" &> /dev/stderr
+      echo "*** ERROR $0 $$ -- ${id}: network $nwid not found in network" &> /dev/stderr
       continue
     fi
     # network for deployment
@@ -753,10 +759,10 @@ for MAC in ${MACS}; do
       | sed 's|%%NETWORK_PASSWORD%%|'"${nw_password}"'|g' \
       > "${config_script}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: copying script ${config_script}" &> /dev/stderr; fi
-    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+    scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking script ${config_script##*/}" &> /dev/stderr; fi
     cmd='sudo mv -f '"${config_script##*/}"' /etc/wpa_supplicant/wpa_supplicant.conf'
-    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
+    ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "$cmd &> /dev/null"
     result='{ "ssid": "'"${nw_ssid}"'","password":"'"${nw_password}"'"}'
     node_state=$(echo "$node_state" | jq '.network='"$result")
 
@@ -766,10 +772,10 @@ for MAC in ${MACS}; do
   fi
   # sanity
   if [[ ${config_network} != "true" ]]; then
-    echo "+++ WARN: ${id}: NETWORK failed" &> /dev/stderr
+    echo "+++ WARN $0 $$ -- ${id}: NETWORK failed" &> /dev/stderr
     continue
   else
-    echo "$(date '+%T') INFO: ${id}: NETWORK configured" $(echo "$node_state" | jq -c '.network') &> /dev/stderr
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: NETWORK configured" $(echo "$node_state" | jq -c '.network') &> /dev/stderr
   fi
 
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node state:" $(echo "${node_state}" | jq -c '.') &> /dev/stderr; fi

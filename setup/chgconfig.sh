@@ -12,9 +12,14 @@ else
   BASE64_ENCODE='base64 -w 0'
 fi
 
-TEMPLATE="template.json"
-CONFIG="horizon.json"
-DEFAULT_KEY_FILE=~/.ssh/id_rsa
+if [ "${0%/*}" != "${0}" ]; then
+  CONFIG="${0%/*}/horizon.json"
+  TEMPLATE="${0%/*}/template.json"
+else
+  CONFIG="horizon.json"
+  TEMPLATE="template.json"
+fi
+
 DEFAULT_MACHINE="rpi3"
 # if [ -n "${HZN_DEFAULT_TOKEN:-} ]; then DEFAULT_TOKEN="${HZN_DEFAULT_TOKEN}"; fi
 

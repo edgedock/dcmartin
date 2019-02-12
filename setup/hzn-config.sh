@@ -12,8 +12,13 @@ else
   BASE64_ENCODE='base64 -w 0'
 fi
 
-TEMPLATE="template.json"
-CONFIG_FILE="horizon.json"
+if [ "${0%/*}" != "${0}" ]; then
+  CONFIG="${0%/*}/horizon.json"
+  TEMPLATE="${0%/*}/template.json"
+else
+  CONFIG="horizon.json"
+  TEMPLATE="template.json"
+fi
 
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG_FILE}" ]; then

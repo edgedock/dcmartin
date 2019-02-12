@@ -26,7 +26,11 @@ HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"
 if [ ! -z "${1}" ]; then
   CONFIG="${1}"
 else
-  CONFIG="horizon.json"
+  if [ "${0%/*}" != "${0}" ]; then
+    CONFIG="${0%/*}/horizon.json"
+  else
+    CONFIG="horizon.json"
+  fi
 fi
 if [ ! -s "${CONFIG}" ]; then
   echo "*** ERROR: Cannot find configuration file: ${CONFIG}; run mkconfig.sh" &> /dev/stderr

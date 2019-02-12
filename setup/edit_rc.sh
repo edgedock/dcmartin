@@ -11,7 +11,11 @@ fi
 DEFAULT_KEY_FILE=~/.ssh/id_rsa
 
 ## CONFIGURATION
-CONFIG="horizon.json"
+if [ "${0%/*}" != "${0}" ]; then
+  CONFIG="${0%/*}/horizon.json"
+else
+  CONFIG="horizon.json"
+fi
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
     echo "+++ WARN $0 $$ -- no configuration specified; default found: ${CONFIG}"

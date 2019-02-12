@@ -1,6 +1,10 @@
 #!/bin/bash
 
-CONFIG="horizon.json"
+if [ "${0%/*}" != "${0}" ]; then
+  CONFIG="${0%/*}/horizon.json"
+else
+  CONFIG="horizon.json"
+fi
 
 if [ -z "${1}" ]; then
   if [ -s "${CONFIG}" ]; then
