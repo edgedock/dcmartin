@@ -403,7 +403,7 @@ for MAC in ${MACS}; do
   fi
 
   # pattern for registration
-  pt_id=$(echo "$pattern" | jq -r '.id')
+  pt_name=$(echo "$pattern" | jq -r '.name')
   pt_org=$(echo "$pattern" | jq -r '.org')
   pt_url=$(echo "$pattern" | jq -r '.url')
   pt_vars=$(echo "$conf" | jq '.variables')
@@ -433,7 +433,7 @@ for MAC in ${MACS}; do
   node_pattern=$(echo "$node_state" | jq -r '.node.pattern')
 
   # unregister node iff
-  if [[ ${node_id} == ${ex_device} && $node_pattern == ${pt_org}/${pt_id} && ( $node_status == "configured" || $node_status == "configuring" ) ]]; then
+  if [[ ${node_id} == ${ex_device} && $node_pattern == ${pt_org}/${pt_name} && ( $node_status == "configured" || $node_status == "configuring" ) ]]; then
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: node ${node_id} is ${node_status} with pattern ${node_pattern}" &> /dev/stderr; fi
   elif [[ $node_status == "unconfiguring" ]]; then
     echo "*** ERROR: ${id}: node ${node_id} aka ${ex_device} is unconfiguring; consider reflashing or remove, purge, update, prune, and reboot" &> /dev/stderr
@@ -485,12 +485,12 @@ for MAC in ${MACS}; do
       i=$((i+1))
     done
     echo '}}]}' >> "${input}"
-    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node ${ex_device}; pattern ${pt_org}/${pt_id}; input" $(cat "${input}") &> /dev/stderr; fi
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: node ${ex_device}; pattern ${pt_org}/${pt_name}; input" $(cat "${input}") &> /dev/stderr; fi
 
     # copy pattern registration file to client
     scp -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "${input}" "${client_username}@${client_ipaddr}:." &> /dev/null
     # perform registration
-    cmd="hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_id} -f ${input##*/} -n ${ex_device}:${ex_token}"
+    cmd="hzn register ${ex_org} -u ${ex_username}:${ex_password} ${pt_org}/${pt_name} -f ${input##*/} -n ${ex_device}:${ex_token}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: registering with command: $cmd" &> /dev/stderr; fi
     result=$(ssh -o "CheckHostIP no" -o "StrictHostKeyChecking no" -i "$private_keyfile" "$client_username"@"$client_ipaddr" "${cmd} &> /dev/null")
   fi

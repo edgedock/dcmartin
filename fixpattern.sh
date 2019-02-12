@@ -14,8 +14,7 @@ if [ -s "${PATTERN}" ]; then
   if [ ! -z "${TAG:-}" ]; then
     PATTERN_LABEL=$(jq -r '.label' "${PATTERN}")
     echo "+++ WARN $0 $$ -- modifying service label to ${PATTERN_LABEL} URL with ${TAG} in ${PATTERN}" &> /dev/stderr
-    # jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${DIR}/${PATTERN}"
-    jq -c '.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${DIR}/${PATTERN}"
+    jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${DIR}/${PATTERN}"
   else
     echo "--- INFO $0 $$ -- no TAG; doing nothing" &> /dev/stderr
   fi
