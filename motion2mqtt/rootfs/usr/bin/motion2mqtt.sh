@@ -6,8 +6,12 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 JSON='[{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
 
 if [ -z "${MOTION_DEVICE_NAME:-}" ]; then
-  IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
-  MOTION_DEVICE_NAME="$(hostname)-${IPADDR}"
+  if [ -z "${HZN_DEVICE_ID}" ]; then
+    IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
+    MOTION_DEVICE_NAME="$(hostname)-${IPADDR}"
+  else
+    MOTION_DEVICE_NAME="${HZN_DEVICE_ID}"
+  fi
 fi
 
 CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":"'${MOTION_MQTT_PORT}'","username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post":"'${MOTION_POST_PICTURES}'"},"period":'${MOTION_PERIOD}'}' 

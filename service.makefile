@@ -107,7 +107,8 @@ stop:
 
 pattern: publish APIKEY ${DIR}/pattern.json
 	@echo "--- INFO -- updating pattern ${SERVICE_LABEL} for ${SERVICE_ORG} on $(HZN)"
-	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f ${DIR}/pattern.json -p ${SERVICE_LABEL} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	#@export HZN_EXCHANGE_URL=${HZN} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat APIKEY) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 validate:
 	@echo "--- INFO -- validating ${SERVICE_LABEL} for ${SERVICE_ORG} on $(HZN)"
