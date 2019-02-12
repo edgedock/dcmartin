@@ -14,9 +14,7 @@
         "MOTION_MQTT_PASSWORD": null,
         "MOTION_POST_PICTURES": "center",
         "MOTION_LOG_LEVEL": 2,
-        "MOTION_LOG_TYPE": "all",
-        "LOG_LEVEL": "info",
-        "DEBUG": true
+        "MOTION_LOG_TYPE": "all"
       }
     }
   ]

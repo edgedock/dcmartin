@@ -1,7 +1,5 @@
 #!/bin/bash
 
-DEBUG=
-
 if [ "${DEBUG:-}" == 'true' ]; then echo "+++ BEGIN: ${0##*/}: $*" $(date) >& /dev/stderr; fi
 
 # %Y = year, %m = month, %d = date,

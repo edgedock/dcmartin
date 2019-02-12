@@ -9,7 +9,6 @@ endif
 set tmpdir = "${TMP}/$0:t/$$"
 mkdir -p "${tmpdir}"
 
-
 setenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
