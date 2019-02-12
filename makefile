@@ -8,7 +8,8 @@
 
 ORG = dcmartin@us.ibm.com
 URL = com.github.dcmartin.open-horizon
-TAG ?= beta
+TAG ?= $(if $(wildcard TAG),$(shell cat TAG),)
+# BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 DOCKER_ID ?= $(shell whoami)
 
 ##
