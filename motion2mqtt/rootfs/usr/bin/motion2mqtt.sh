@@ -3,7 +3,8 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-JSON='[{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
+#JSON='[{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
+JSON='[{"name":"cpu","url":"http://cpu"}]'
 
 if [ -z "${MOTION_DEVICE_NAME:-}" ]; then
   if [ -z "${HZN_DEVICE_ID}" ]; then
