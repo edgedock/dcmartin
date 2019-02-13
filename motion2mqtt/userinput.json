@@ -15,7 +15,7 @@
         "MOTION_POST_PICTURES": "center",
         "MOTION_LOG_LEVEL": 2,
         "MOTION_LOG_TYPE": "all",
-        "DEBUG": true
+        "DEBUG": false
       }
     }
   ]
