@@ -97,8 +97,6 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
         if [ -s "${FULLPATH}" ]; then
           OUT=$(jq '.' "${FULLPATH}")
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
-          if [ -z "${OUT}" ]; then OUT='null'; fi
-          OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
         else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
           continue
@@ -106,6 +104,8 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
 	# test for end
 	IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
 	if [ ! -z "${IMAGES}" ] && [ "${IMAGES}" != null ]; then 
+          if [ -z "${OUT}" ]; then OUT='null'; fi
+          OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
           # cleanup
 	  for I in ${IMAGES}; do
 	    IP="${FULLPATH%/*}/${I}.jpg"

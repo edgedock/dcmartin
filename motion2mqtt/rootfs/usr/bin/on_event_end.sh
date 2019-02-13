@@ -9,7 +9,8 @@ endif
 set tmpdir = "${TMP}/$0:t/$$"
 mkdir -p "${tmpdir}"
 
-setenv USE_MQTT
+unsetenv DEBUG
+unsetenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"info":"START"}'

@@ -6,7 +6,8 @@ else
   set TMP="/tmp"
 endif
 
-setenv USE_MQTT
+unsetenv DEBUG
+unsetenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 
