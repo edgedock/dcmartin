@@ -96,6 +96,7 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
     *-*.json)
         if [ -s "${FULLPATH}" ]; then
           OUT=$(jq '.' "${FULLPATH}")
+          if [ -z "${OUT}" ]; then OUT='null'; fi
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
         else
           echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
@@ -103,8 +104,10 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
         fi
 	# test for end
 	IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
-	if [ ! -z "${IMAGES}" ] && [ "${IMAGES}" != null ]; then 
-          if [ -z "${OUT}" ]; then OUT='null'; fi
+	if [ -z "${IMAGES}" ] || [ "${IMAGES}" == null ]; then 
+	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
+	  continue
+	else
           OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
           # cleanup
 	  for I in ${IMAGES}; do
@@ -118,8 +121,6 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
 	  done
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- deleting event JSON ${FULLPATH}" &> /dev/stderr; fi
           rm -f "${FULLPATH}"
-	else
-	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
 	fi
         ;;
     *)
