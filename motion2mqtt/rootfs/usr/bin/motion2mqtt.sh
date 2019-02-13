@@ -106,7 +106,6 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
 	IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
 	if [ -z "${IMAGES}" ] || [ "${IMAGES}" == null ]; then 
 	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
-	  continue
 	else
           OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
           # cleanup
