@@ -2,18 +2,33 @@
 
 **This content is informational only; there is usually no need to specify any of these variables when executing the build process.**
 
-## `ORG`, `URL`, `TAG`, `BUILD_ARCH`
-
-+ `ORG` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
-+ `URL` - base of identifier for each service, e.g. `com.github.dcmartin.open-horizon`
-+ `TAG` - tag, if any, for build artefacts; defaults to empty unless `TAG` file found or specified as environment variable
-+ `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
-
 ## Horizon controls
 
 + `CMD` - location of `hzn` command
 + `HZN` - Open Horizon _exchange_ URL; defaults to  `https://alpha.edge-fabric.com/v1/`
 + `DIR` - directory name for temporary build files; defaults to `horizon`
+
+## `ORG`, `URL`
+These variables are used to control which organization services and patterns are directed.  The `URL` provides a unique path for services.  These variables should be changed prior to attempting to `publish` either a service or a pattern.
+
++ `ORG` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
++ `URL` - base of identifier for each service, e.g. `com.github.dcmartin.open-horizon`
+
+## `TAG`
+This variable is used to control naming of artefacts.
+
++ `TAG` - tag, if any, for build artefacts; defaults to empty unless `TAG` file found or specified as environment variable
+
+##`BUILD_ARCH`
+This variable controls the architecture for which artefacts are built; options are defined in the `build.json` configuration file.
+
++ `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
+
+This variable may be used on the command-line to control the build, for example:
+
+```
+% make BUILD_ARCH=arm64 TAG=test publish start
+```
 
 ## Service definitions
 
