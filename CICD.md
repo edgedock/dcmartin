@@ -29,7 +29,7 @@ Services are published to the exchange through an intermediary container registr
 The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The key success criteria are:
 
 1. __avoid failure in the field__ - a node that is currently operational should not fail due to an automated CI/CD process
-2. __stage all changes__ - all changes to deployed systems should be staged for testing prior to release
+2. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
 3. __enforce testing__ - all components should provide interfaces and cases for testing
 4. __automate everything__ - to the greatest degree possible, automate the process
 
@@ -51,6 +51,17 @@ The Open Horizon [page on github.com][open-horizon-github] provides open-source 
 [edge-fabric-staging-docs]: https://github.ibm.com/Edge-Fabric/staging-docs
 
 This CI/CD process was developed based on the existing example patterns and services; only functional patterns and services available in the `IBM` organization were utilized; other examples were not utilized.  The [documentation][edge-fabric-staging-docs] for these examples provided guidance and insight on the requirements for the build process; no documenation was available for any existing release process or build automation.
+
+### Stage everything
+The change control system for this repository is Git which provides mechanisms to stage changes between various versions of a repository.  These versions are distinguished within a repository via branching from a parent (e.g. the trunk or _main_ branch) and then incorporating any changes through a _commit_ back to the parent.  The _push_ of the change back to the repository may be used to evaluate the state and determine if a _stage_ is ready for a build to be initiated.  The relevant content to define a _stage_ should be an artefact in the build process from which state information may be extracted; storing relevant information in the `Makefile` defeats that objective.
+
+Explicit changes to a version artefact with appropriate build automation is still TBD.  The service version is specified in the`service.json` configuration template.  That version is used to determine the Docker _tag_ as well as the Open Horizon _service_ tag.
+
+### Enforce testing
+Staged changes require testing processes to automate the build process.  Each service should conform to a standard test harness with either a default or custom test script.  Standardization of the testing process enables replication and re-use of tests for the service and its required services, simplifying testing.  Additional standardization in testing should be extended to API coverage through utilization of Swagger (n.b. IBM API Connect).
+
+### Automate everything
+Determination of build state in the TravisCI process requires utilization of platform controlled environment variables, typically reserved for _secrets_, or can leverage repository sources, e.g. JSON configurations.  While specification of environment variables through the build automation process would possible, both the quantity and the variability in naming present challenges to automation and repeatability.
 
 ## `examples` Repository
 
