@@ -53,7 +53,7 @@ For example, the `cpu` service returns the following when tested locally:
 
 Each service provides a script with its name (e.g. `cpu.sh`) and that script performs asynchrous updates and writes status updates to its well-known location (e.g. `/tmp/cpu.json`).  The _service_ script should never exit.  Most services include a periodicity value, e.g. `CPU_PERIOD`, indicating how often the service should update its status.
 
-### 1.1.1 example `cpu.sh`
+### 1.2.1 example `cpu.sh`
 
 The `cpu.sh` script example demonstrates this pattern with a never-ending `while true; do` loop, initiating its status with its `CONFIG` information from the `userInput` provided, and polling the `/proc/stat` attribute of the `cpu` on a default `CPU_PERIOD` of `60` seconds (n.b that's belt-and-suspenders, BTW).  The calculation of `SLEEP` time is based on an expectation of non-zero latency in performing the system cpu process inspection.
 
@@ -97,7 +97,7 @@ while true; do
 done
 ``` 
 
-### 1.1.2 example `yolo2msghub.sh`
+### 1.2.2 example `yolo2msghub.sh`
 
 A slightly more complicated script that combines multiple `requiredServices`, notably `hal`, `cpu`,  `wan`, and `yolo`, to provide a composite service includes all the status outputs.  In this example, each of the sub-services is processed to only include the payload service content, 
 
