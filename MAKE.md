@@ -4,7 +4,7 @@
 
 **All services in this [repository][repository] may be built OOTB (out-of-the-box) by running the `make` command.**
 
-The top-level [makefile][makefile]  by default will `build` and `run` (locally) the containers for each _service_ in this repository, and then `check` each _service_ (see `make check` below).
+The top-level [makefile][makefile]  by default will `build` and `run` (locally) the containers for each _service_ in this repository, and then `check` each _service_ (see `make check` below); for more information refer to [`MAKEVARS.md`][makevars-md]
 
 # B. Detailed instructions
 
