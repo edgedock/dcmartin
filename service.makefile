@@ -50,6 +50,9 @@ default: build run check
 
 all: build run check publish start test pattern validate
 
+$(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE):
+	@echo "*** ERROR -- cannot locate $@; use command \"hzn key create\" to create keys; exiting" && exit 1
+
 build: Dockerfile build.json service.json rootfs Makefile
 	@echo "--- INFO -- building docker container ${SERVICE_NAME} with tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out

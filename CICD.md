@@ -45,7 +45,7 @@ The Open Horizon [page on github.com][open-horizon-github] provides open-source 
   + gps - return GPS coordinates - derived from dongle or Internet
   + sdr - capture FM radio broadcasts
   + _network_ - **deprecated**
-  + _pi3_streamer_ - **deprecated**
+  + _pi3-streamer_ - **deprecated**
   + _weatherstation_ - **deprecated**
 
 [edge-fabric-staging-docs]: https://github.ibm.com/Edge-Fabric/staging-docs
