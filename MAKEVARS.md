@@ -19,7 +19,7 @@ This variable is used to control naming of artefacts.
 
 + `TAG` - tag, if any, for build artefacts; defaults to empty unless `TAG` file found or specified as environment variable
 
-##`BUILD_ARCH`
+## `BUILD_ARCH`
 This variable controls the architecture for which artefacts are built; options are defined in the `build.json` configuration file.
 
 + `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
