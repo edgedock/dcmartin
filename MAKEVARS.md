@@ -2,10 +2,12 @@
 
 **This content is informational only; there is usually no need to specify any of these variables when executing the build process.**
 
-## Architecture and `TAG`
+## `ORG`, `URL`, `TAG`, `BUILD_ARCH`
 
-+ `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
++ `ORG` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
++ `URL` - base of identifier for each service, e.g. `com.github.dcmartin.open-horizon`
 + `TAG` - tag, if any, for build artefacts; defaults to empty unless `TAG` file found or specified as environment variable
++ `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
 
 ## Horizon controls
 
