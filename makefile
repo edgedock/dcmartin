@@ -3,14 +3,14 @@
 ###
 
 ##
-## things TO change
+## things TO change - create your own ORG and URL files.
 ##
 
-ORG = dcmartin@us.ibm.com
-URL = com.github.dcmartin.open-horizon
+ORG ?= $(if $(wildcard ORG),$(shell cat ORG),dcmartin@us.ibm.com)
+URL ?= $(if $(wildcard URL),$(shell cat URL),com.github.dcmartin.open-horizon)
 TAG ?= $(if $(wildcard TAG),$(shell cat TAG),)
-# BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 DOCKER_ID ?= $(shell whoami)
+BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 
 ##
 ## things NOT TO change
