@@ -3,6 +3,7 @@ kafkacat.sh.*
 *.zip
 .DS_Store
 APIKEY*
+HZN_*
 CPU_*
 HAL_*
 IBM-*
