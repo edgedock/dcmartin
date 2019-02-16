@@ -69,19 +69,15 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
     DV=$(jq -r '.userInput[]|select(.name=="'$NAME'").defaultValue' ${SERVICE})
     if [ -s "${USERINPUT}" ]; then
       VAL=$(jq -r '.services[]|select(.url=="'${URL}'").variables|to_entries[]|select(.key=="'${NAME}'").value' ${USERINPUT})
-      if [ -n "${VAL}" ] && [ "${VAL}" != 'null' ] && [ "${VAL}" != '' ]; then 
-        DV=${VAL};
-      elif [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
-        if [ -s "${NAME}" ]; then
-          DV=$(sed 's/^"\(.*\)"$/\1/' "${NAME}")
-	else
-          echo "*** WARN $0 $$ -- value NOT defined for required: ${NAME}; create file ${NAME} with JSON value; exiting"
-	  exit 1
-        fi
-      fi
-      if [ -z "${DV}" ] || [ "${DV}" == 'null' ]; then
-        echo "*** WARN $0 $$ -- value NOT defined for required: ${NAME}; edit ${USERINPUT}; continuing"
-      fi
+    fi
+    if [ -s "${NAME}" ]; then
+       VAL=$(sed 's/^"\(.*\)"$/\1/' "${NAME}")
+    fi
+    if [ -n "${VAL}" ] && [ "${VAL}" != 'null' ] && [ "${VAL}" != '' ]; then 
+      DV=${VAL};
+    elif [ "${DV}" == 'null' ]; then
+      echo "*** WARN $0 $$ -- value NOT defined for required: ${NAME}; create file ${NAME} with JSON value; exiting"
+      exit 1
     fi
     OPTIONS="${OPTIONS:-}"' -e '"${NAME}"'='"${DV}"
   done

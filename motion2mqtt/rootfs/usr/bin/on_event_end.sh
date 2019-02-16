@@ -219,6 +219,10 @@ switch ( "${MOTION_POST_PICTURES}" )
     breaksw
 endsw
 
+if [ ! -s "$IF:r.json ]; then
+  set POST_IMAGE_JSON = "$IF:r.json"
+endif
+
 # test
 if ( "${post}" != "${MOTION_POST_PICTURES}" ) then
   if ($?DEBUG) then
@@ -257,7 +261,7 @@ if ($#jpgs < 2) then
 endif
 
 ###
-### MULTIPLE IMAGE ANALYSIS
+### calculate AVERAGE and BLEND images
 ###
 
 ## AVERAGE 
@@ -515,41 +519,10 @@ endif
 
 set TMPJSON = "${tmpdir}/$EVENT_JSON:t"
 
-if ($?DEBUG_TMPJSON) then
-  set message = "found: ${EVENT_JSON}"
-  echo "$0:t $$ -- ${message}" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-  set CAT = `cat "${EVENT_JSON}"`
-  set WC = `wc -l "${EVENT_JSON}" | awk '{ print $1 }'`
-  set message = "file ${EVENT_JSON} is ${WC} lines long; contents: ${CAT}"
-  echo "$0:t $$ -- ${message}" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-  
-  # update event JSON to TMPJSON
   set date = `date +%s`
-  jq '.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
-
-  # test for success
-  if ( -s "${TMPJSON}" ) then
-    set CAT = `cat "${TMPJSON}"`
-    set WC = `wc -l "${TMPJSON}" | awk '{ print $1 }'`
-    set message = "file ${TMPJSON} is ${WC} lines long; contents: ${CAT}"
-    echo "$0:t $$ -- ${message}" >& /dev/stderr
-    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-    # over write event JSON
-    jq -c '.' "${TMPJSON}" >! "$EVENT_JSON"
-  else
-    # jq command failed
-    set message = "empty or not found: ${TMPJSON}"
-    echo "$0:t $$ -- ${message}" >& /dev/stderr
-    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-  endif
-else
-  set date = `date +%s`
-  jq '.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
+  jq '.post:'$(jq -c '.' ${POST_IMAGE_JSON})'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
   rm -f "${EVENT_JSON}"
   jq -c '.' "${TMPJSON}" > "${EVENT_JSON}"
-endif
 
 rm -f "${TMPJSON}"
 
