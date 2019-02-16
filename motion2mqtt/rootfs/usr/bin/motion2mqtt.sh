@@ -3,7 +3,6 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-#JSON='[{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
 JSON='[{"name":"cpu","url":"http://cpu"}]'
 
 if [ -z "${MOTION_DEVICE_NAME:-}" ]; then
@@ -72,10 +71,11 @@ echo "${CONFIG}" > "${TMP}/${SERVICE_LABEL}.json"
 ## initiate watchdog
 WHEN=0
 
-OUTPUT="${CONFIG}"
 
 ## wait on output from motion
-DIR=/var/lib/motion
+DIR=/var/lib/motion/
+
+OUTPUT="${CONFIG}"
 
 inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH; do
 
@@ -99,15 +99,16 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
           if [ -z "${OUT}" ]; then OUT='null'; fi
           if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
         else
-          echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
+          echo "+++ WARN $0 $$ -- EVENT: no content in ${FULLPATH}" &> /dev/stderr
           continue
         fi
+        # add output
+        OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
 	# test for end
 	IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
-	if [ -z "${IMAGES}" ] || [ "${IMAGES}" == null ]; then 
-	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- motion event start" &> /dev/stderr; fi
+	if [ -z "${IMAGES}" ] || [ "${IMAGES}" == 'null' ]; then 
+	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: start" &> /dev/stderr; fi
 	else
-          OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
           # cleanup
 	  for I in ${IMAGES}; do
 	    IP="${FULLPATH%/*}/${I}.jpg"
@@ -118,12 +119,12 @@ inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH;
 	      echo "+++ WARN $0 $$ -- no file at ${IP}" &> /dev/stderr
 	    fi
 	  done
-          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- deleting event JSON ${FULLPATH}" &> /dev/stderr; fi
+          if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: deleting JSON ${FULLPATH}" &> /dev/stderr; fi
           rm -f "${FULLPATH}"
 	fi
         ;;
     *)
-        echo "+++ WARN $0 $$ -- skipping image: ${FULLPATH}" &> /dev/stderr
+        if [ "${DEBUG}" == 'true' ]; then echo "--- INFO $0 $$ -- skipping: ${FULLPATH}" &> /dev/stderr; fi
         continue
         ;;
   esac

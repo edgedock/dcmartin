@@ -3,17 +3,20 @@
 if ( -d "/tmpfs" ) then 
   set TMP = "/tmpfs"
 else
-  set TMP="/tmp"
+  set TMP = "/tmp"
 endif 
 
-set tmpdir = "${TMP}/$0:t/$$"
+set tmpdir = "${TMP}/$0:t/$$."`date +%s`
 mkdir -p "${tmpdir}"
 
-unsetenv DEBUG
-unsetenv USE_MQTT
+setenv DEBUG
+setenv USE_MQTT
 
-if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"info":"START"}'
+if ($?DEBUG) then
+  set message = ( "START" `date` )
+  echo "$0:t $$ -- $message" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+endif
 
 ## REQUIRES date utilities
 if ( -e /usr/bin/dateutils.dconv ) then
@@ -23,8 +26,12 @@ else if ( -e /usr/bin/dateconv ) then
 else if ( -e /usr/local/bin/dateconv ) then
    set dateconv = /usr/local/bin/dateconv
 else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"ERROR":"'$0:t'","pid":'$$',"error":"no date converter; install dateutils"}'
-  if ($?DEBUG) echo "$0:t $$ -- no dateutils(1) found; exiting" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "no dateutils(1) found; exiting"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+  # quit
   goto done
 endif
 
@@ -61,9 +68,6 @@ endif
 
 set dir = "/var/lib/motion"
 
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","date":'$NOW'}'
-if ($?DEBUG) echo "$0:t $$ -- processing $dir for camera $CN event $EN date $NOW" >& /dev/stderr
-
 ##
 ## find all images during event
 ##
@@ -71,30 +75,42 @@ if ($?DEBUG) echo "$0:t $$ -- processing $dir for camera $CN event $EN date $NOW
 # find all event jsons (YYYYMMDDHHMMSS-##.json)
 set jsons = ( `echo "$dir"/??????????????"-${EN}".json` )
 
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","jsons":'$#jsons'}'
-if ($?DEBUG) echo "$0:t $$ -- found $#jsons JSON for camera $CN in $dir for event $EN" >& /dev/stderr
+if ($?DEBUG) then
+  set message = "processing directory: ${dir}; camera: ${CN}; event: ${EN}; events: $#jsons"
+  echo "$0:t $$ -- $message" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+endif
 
 # find event start
 if ($#jsons) then
-  set lastjson = $jsons[$#jsons]
-  if (! -s "$lastjson") then
-    if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","error":"'"$lastjson:t"' is empty"}'
-    if ($?DEBUG) echo "$0:t $$ -- No last JSON found; exiting" >& /dev/stderr
+  set EVENT_JSON = $jsons[$#jsons]
+  if (! -s "$EVENT_JSON") then
+    if ($?DEBUG) then
+      set message = "cannot find last JSON ${EVENT_JSON}; exiting"
+      echo "$0:t $$ -- $message" >& /dev/stderr
+      if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+    endif
     goto done
   else
-    set START = `jq -r '.start' $lastjson`
-    if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","start":'$START'}'
-    if ($?DEBUG) echo "$0:t $$ -- Identified start date $START for JSON $lastjson" >& /dev/stderr
+    set START = `jq -r '.start' $EVENT_JSON`
   endif
   set jpgs = ( `echo "${dir}"/*"-${EN}-"*.jpg` )
 else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","error":"no JSONS '"$?jsons"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Found no JSON; exiting" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "found no events; exiting"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
   goto done
 endif
 
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","candidates":'"$#jpgs"'}'
-if ($?DEBUG) echo "$0:t $$ -- Found $#jpgs candidate images for camera $CN in $dir for event $EN" >& /dev/stderr
+if ($?DEBUG) then
+  set message = "found $#jpgs candidate images for camera $CN in $dir for event $EN"
+  echo "$0:t $$ -- $message" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+endif
+
+## process frames
 
 set frames = ()
 set elapsed = 0
@@ -104,8 +120,11 @@ if ($#jpgs) then
     set jpg = "$jpgs[$i]"
     set jsn = "$jpg:r.json"
     if ( ! -s "$jsn" ) then
-      if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"camera":"'$CN'","jpg":"'$jpg'","error":"cannot find JSON ('"$jsn"')"}'
-      if ($?DEBUG) echo "$0:t $$ -- Cannot locate JSON $jsn for camera $CN image $jpg; skipping.." >& /dev/stderr
+      if ($?DEBUG) then
+	set message = "cannot locate JSON $jsn for camera $CN image $jpg; skipping.."
+	echo "$0:t $$ -- $message" >& /dev/stderr
+	if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+      endif
       @ i--
       continue
     endif
@@ -113,8 +132,6 @@ if ($#jpgs) then
     set THIS = `$dateconv -i '%Y%m%d%H%M%S' -f "%s" $THIS`
     if ($?LAST == 0) set LAST = $THIS
     @ seconds = $THIS - $START
-    if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"json":"'"$jsn"'","elapsed":'$seconds'}'
-    if ($?DEBUG) echo "$0:t $$ -- Located JSON $jsn for image $jpg; elapsed $seconds" >& /dev/stderr
     # test for breaking conditions
     if ( $seconds < 0 ) break
     # add frame to this interval
@@ -123,71 +140,205 @@ if ($#jpgs) then
     @ i--
   end
 else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"camera":"'$CN'","date":'$NOW',"error":"no jpgs"}'
-  if ($?DEBUG) echo "$0:t $$ -- No candidate images ($#jpgs) found for camera $CN from date $NOW; exiting" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "no candidate images ($#jpgs) found for camera $CN; date $NOW; exiting"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
   goto done
 endif
 
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"camera":"'$CN'","date":'$NOW',"frames":'$#frames',"elapsed":'$elapsed'}'
-if ($?DEBUG) echo "$0:t $$ -- Found $#frames frames for camera $CN at date $NOW elapsed $elapsed" >& /dev/stderr
-
-if ($#frames) then
-  set images = `echo "$frames" | sed 's/ /,/g' | sed 's/\([^,]*\)\([,]*\)/"\1"\2/g'`
-  set images = '['"$images"']'
-else
-  set images = "null"
+if ($?DEBUG) then
+  set message = "found $#frames frames for camera $CN at date $NOW elapsed $elapsed"
+  echo "$0:t $$ -- $message" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
-
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"camera":"'$CN'","event":"'${EN}'","elapsed":'$elapsed',"images":'"$images"'}'
-if ($?DEBUG) echo "$0:t $$ -- Found $#frames images for camera $CN event $EN $images" >& /dev/stderr
 
 ###
 ### PROCESS 
 ###
 
 set jpgs = ()
+set maxjpgsz = 0
 foreach f ( $frames )
   set jpg = "$dir/$f.jpg" 
-
-  # get image information
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpg"'","info":'"${info}"'}'
-  if ($?DEBUG) echo "$0:t $$ -- Identified $jpg as $info" >& /dev/stderr
   if (-e "$jpg:r.json") then
-    if ($?DEBUG) echo "$0:t $$ -- Found JSON $jpg:r.json; updating with $info" >& /dev/stderr
-
-if ($?IDENTIFY_IMAGE) then
-  set info = ( `identify "$jpg" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq '.'` )
-  jq '.info='"$info" "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
-else
-  jq '.' "$jpg:r.json" >! ${tmpdir}/$0:t.$$.json
-fi
-
-    if (-s ${tmpdir}/$0:t.$$.json) then
-      mv ${tmpdir}/$0:t.$$.json "$jpg:r.json"
-      set jpgs = ( $jpgs "$jpg" )
-    else
-      rm -f ${tmpdir}/$0:t.$$.json
-      if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpg"'","error":"JSON failed"}'
-      if ($?DEBUG) echo "$0:t $$ -- JSON failed; skipping" >& /dev/stderr
-      continue
+    set jpgsz = ( `jq -r '.size' "$jpg:r.json"` )
+    if ( $jpgsz > $maxjpgsz ) then
+      set maxjpgsz = $jpgsz
+      set BESTJPG = $jpg
     endif
+    set jpgs = ( $jpgs "$jpg" )
   else
-    if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpg"'","error":"JSON not found"}'
-    if ($?DEBUG) echo "$0:t $$ -- Failed to find JSON $jpg:r.json; skipped" >& /dev/stderr
+    if ($?DEBUG) then
+      set message = "failed to find JSON $jpg:r.json; skipped"
+      echo "$0:t $$ -- $message" >& /dev/stderr
+      if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+    endif
   endif
 end
 
-if ($#jpgs) then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"njpgs":'$#jpgs'}'
-  if ($?DEBUG) echo "$0:t $$ -- Found $#jpgs images from $#frames frames" >& /dev/stderr
+## test quantity
+if ($#jpgs < 1) then
+  if ($?DEBUG) then
+    set message = "insufficient ($#jpgs) images from $#frames frames; exiting"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+  got done
 else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"error":"insufficient jpegs"}'
-  if ($?DEBUG) echo "$0:t $$ -- Found zero ($#jpgs) images from $#frames frames; exiting" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "found $#jpgs images from $#frames frames"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+endif
+
+##
+## POST PICTURE
+##
+set IF = "$jpgs[1]"
+set post = "first"
+switch ( "${MOTION_POST_PICTURES}" )
+  case "center":
+    @ h = $#jpgs / 2
+    if ( $h >= 1 && $h <= $#jpgs ) then
+      set post = "center"
+      set IF = "$jpgs[$h]"
+    endif
+    breaksw
+  case "best":
+    if ($?BESTJPG) then
+      set post = "best"
+      set IF = "${BESTJPG}"
+    endif
+    breaksw
+  case "last":
+    set post = "last"
+    set IF = "$jpgs[$#jpgs]"
+    breaksw
+endsw
+
+# test
+if ( "${post}" != "${MOTION_POST_PICTURES}" ) then
+  if ($?DEBUG) then
+    set message = "unable to find ${MOTION_POST_PICTURES} image; using ${post} image: ${IF}"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+endif
+
+# PUBLISH 
+if ( -s "${IF}" ) then
+  set MQTT_TOPIC = "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/${CN}/image"
+  mosquitto_pub -q 2 -r -i "${MOTION_DEVICE_NAME}" -h "${MOTION_MQTT_HOST}" -p "${MOTION_MQTT_PORT}" -t "${MQTT_TOPIC}" -f "${IF}"
+  if ($?DEBUG) then
+    set message = "sent file ${IF} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+else
+  if ($?DEBUG) then
+    set message = "cannot locate file: ${IF}; exiting"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
   goto done
 endif
 
+## minimum frame count
+if ($#jpgs < 2) then
+  if ($?DEBUG) then
+    set message = "insufficient images ($#jpgs) for motion analysis; going to update"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+  goto update
+endif
+
 ###
-### PROCESS IMAGES
+### MULTIPLE IMAGE ANALYSIS
+###
+
+## AVERAGE 
+set average = "$tmpdir/$EVENT_JSON:t:r"'-average.jpg'
+convert $jpgs -average $average >&! ${tmpdir}/$$.out
+if ( ! -s "$average") then
+  if ($?DEBUG) then
+    set message = `cat "${tmpdir}/$$.out"`
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+else
+  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-average"
+  mosquitto_pub -q 2 -r -i "${MOTION_DEVICE_NAME}" -h "${MOTION_MQTT_HOST}" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$average"
+  if ($?DEBUG) then
+    set message = "sent file ${average} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+endif
+rm -f "${tmpdir}/$$.out"
+
+## BLEND
+set blend = "$tmpdir/$EVENT_JSON:t:r"'-blend.jpg'
+convert $jpgs -compose blend -define 'compose:args=50' -alpha on -composite $blend >&! ${tmpdir}/$$.out
+if ( ! -s "$blend") then
+  if ($?DEBUG) then
+    set message = `cat "${tmpdir}/$$.out"`
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+else 
+  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-blend"
+  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$blend"
+  if ($?DEBUG) then
+    set message = "sent file ${blend} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+endif
+rm -f "${tmpdir}/$$.out"
+
+###
+### GIF
+###
+
+# find frames per second for this camera
+set fps = `echo "$#frames / $elapsed" | bc -l`
+set rem = `echo $fps:e | sed "s/\(.\).*/\1/"`
+if ($rem >= 5) then
+  @ fps = $fps:r + 1
+else
+  set fps = $fps:r
+endif
+# calculate ticks (1/100 second)
+set delay = `echo "100.0 / $fps" | bc -l`
+set delay = $delay:r
+
+## animated GIF
+set gif = "$tmpdir/$EVENT_JSON:t:r.gif"
+convert -loop 0 -delay $delay $jpgs $gif
+if ( ! -s "$gif" ) then
+  if {$?DEBUG) then
+    set message = "Failed to convert $#jpgs into GIF: $gif" 
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+else 
+  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-animated"
+  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$gif"
+  if ($?DEBUG) then
+    set message = "sent file ${gif} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+endif
+
+goto update
+
+###
+### DIFFS
 ###
 
 # calculate all frame-to-frame differences
@@ -203,42 +354,12 @@ set totalsize = 0
 set ps = ()
 set diffs = ()
 
-## calculate average and diffs
-if ($#jpgs <= 1) then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"warn":"singleton"}'
-  goto done
-endif
-
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"tmpdir":"'"$tmpdir"'"}'
-
-## AVERAGE 
-set average = "$tmpdir/$lastjson:t:r"'-average.jpg'
-convert $jpgs -average $average >&! ${tmpdir}/$$.out
-if ( -s "$average") then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"average":"'"$average"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Calculated average image $average from $#jpgs JPEGS" >& /dev/stderr
-else
-  set out = `cat "${tmpdir}/$$.out"`
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"error":"'"$out"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to calculate average image from $#jpgs JPEGS" `cat $out` >& /dev/stderr
-  rm -f "${tmpdir}/$$.out"
-  goto done
-endif
-if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-average"
-  mosquitto_pub -q 2 -r -i "${MOTION_DEVICE_NAME}" -h "${MOTION_MQTT_HOST}" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$average"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Posted file $average to host $MOTION_MQTT_HOST topic $MQTT_TOPIC" >& /dev/stderr
-endif
-
-## DIFFS
 set i = 1
 while ( $i <= $#jpgs )
+
   # calculate difference
   set diffs = ( $diffs "$tmpdir/$jpgs[$i]:t:r"'-mask.jpg' )
   set p = ( `compare -metric fuzz -fuzz "$fuzz"'%' "$jpgs[$i]" "$average" -compose src -highlight-color white -lowlight-color black "$diffs[$#diffs]" |& awk '{ print $1 }'` )
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpgs[$i]"'","pixels":'$p'}'
-  set MQTT_TOPIC = "$MOTION_DEVICE_DB/$MOTION_DEVICE_NAME/$CN/image"
   # keep track of differences
   set ps = ( $ps $p:r )
   @ totaldiff += $ps[$#ps]
@@ -248,33 +369,42 @@ while ( $i <= $#jpgs )
   endif
   # retrieve size
   set size = `jq -r '.size' "$jpgs[$i]:r".json`
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"jpg":"'"$jpgs[$i]"'","size":'$size'}'
   # keep track of size
   @ totalsize += $size
   if ( $maxsize < $size ) then
     set maxsize = $size
     set biggest = "$jpgs[$i]"
   endif
+
+  # update image JSON
+  set IMGJSON = "$jpgs[$i]:r.json"
+  set TMPJSON = "${tmpdir}/$jpgs[$i]:t:r.json"
+  set diff = '{"pixels":'${p}',"size":'${size}'}'
+  jq '.diff='"${diff}" "${IMGJSON}" > "${TMPJSON}"
+  jq -c '.' "${TMPJSON}" >! "${IMGJSON}"
+  rm -f "${TMPJSON}"
+
+  # debug
+  if ($?DEBUG) then
+    set message = "calculated difference for $jpgs[$i] as $diff"
+    echo "$0:t $$ -- $message" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+
   # increment and continue
   @ i++
 end
+
 # calculate average difference
 if ($#ps) @ avgdiff = $totaldiff / $#ps
 if ($#ps) @ avgsize = $totalsize / $#ps
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"diff":'$avgdiff',"size":'$avgsize'}'
-if ($?DEBUG) echo "$0:t $$ -- Average difference: $avgdiff; size: $avgsize from $#jpgs JPEGS" >& /dev/stderr
 
-## BLEND
-set blend = "$tmpdir/$lastjson:t:r"'-blend.jpg'
-convert $jpgs -compose blend -define 'compose:args=50' -alpha on -composite $blend
-if ( ! -s "$blend") then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"blend":"FAILED"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to convert $#jpgs into a blend: $blend" >& /dev/stderr
-else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-blend"
-  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$blend"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- ${MOTION_MQTT_HOST} $MQTT_TOPIC" >& /dev/stderr
+set AVGJSON = '{"count":'$#jpgs',"difference":'${avgdiff}',"size":'${avgsize}'}'
+
+if {$?DEBUG) then
+  set message = "averages: ${AVGJSON}"
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"${message}"'"'}'
 endif
 
 ## COMPOSITE 
@@ -283,34 +413,27 @@ endif
 set srcs = ( $jpgs )
 set masks = ( $diffs )
 # start with average
-set composite = "$tmpdir/$lastjson:t:r"'-composite.jpg'
+set composite = "$tmpdir/$EVENT_JSON:t:r"'-composite.jpg'
 cp -f "$average" "$composite"
 
-
-###
-### KEY FRAMES or NOT
-###
-
+# KEY FRAMES or NOT
 if ($?ALL_FRAMES == 0) then
   set kjpgs = ()
   set kdiffs = ()
   @ i = 1
   while ( $i <= $#jpgs )
-
     # keep track of jpgs w/ change > average
     if ($ps[$i] > $avgdiff) then
-      if ($?DEBUG) echo "$0:t $$ -- KEY ($i) SIZE ($ps[$i]) - $jpgs[$i] $diffs[$i]" >& /dev/stderr
       set kjpgs = ( $kjpgs $jpgs[$i] )
       set kdiffs = ( $kdiffs $diffs[$i] )
     endif
     @ i++
   end
-  if ($?DEBUG) echo "$0:t $$ -- key frames $#kjpgs of total frames $#frames" >& /dev/stderr
   set srcs = ( $kjpgs )
   set masks = ( $kdiffs )
 endif
 
-## process sources
+# process sources
 if ($?DEBUG) echo "$0:t $$ -- Compositing $#srcs sources with $#masks masks" >& /dev/stderr
 @ i = 1
 while ( $i <= $#srcs )
@@ -322,137 +445,144 @@ while ( $i <= $#srcs )
 end
 # success or failure
 if (! -s "$composite") then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"composite":"FAILED"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to convert $#jpgs into a composite: $composite" >& /dev/stderr
-else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
+  if {$?DEBUG) then
+    set message = "Failed to convert $#jpgs into a composite: $composite"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"${message}"'"'}'
+  endif
+else 
   set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-composite"
   mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$composite"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Posted file $composite to host ${MOTION_MQTT_HOST} topic $MQTT_TOPIC" >& /dev/stderr
-endif
-
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"{MOTION_POST_PICTURES}":"'"${MOTION_POST_PICTURES}"'"}'
-if ($?DEBUG) echo "$0:t $$ -- Posting pictures specified as: ${MOTION_POST_PICTURES}" >& /dev/stderr
-
-set IF = $jpgs[1]
-switch ( "${MOTION_POST_PICTURES}" )
-  case "off":
-    set IF = ()
-    breaksw
-  case "center":
-    @ h = $#ps / 2
-    if ($h > 1 && $h <= $#ps) set IF = "$jpgs[$h]"
-    breaksw
-  case "best":
-    if ($#biggest) set IF = "$biggest"
-    breaksw
-  case "most":
-    if ($#changed) set IF = "$changed"
-    breaksw
-  case "last":
-    set IF = "$jpgs[$#jpgs]"
-    breaksw
-  case "first":
-  default:
-    set IF = "$jpgs[1]"
-    breaksw
-endsw
-
-set MQTT_TOPIC = "$MOTION_DEVICE_DB/$MOTION_DEVICE_NAME/$CN/image"
-if ($#IF && -s "$IF" && $?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  ## PUBLISH 
-  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "$MOTION_MQTT_PORT" -t "$MQTT_TOPIC" -f "$IF"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'","image":"'${IF}'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Posting file $IF to host $MOTION_MQTT_HOST topic $MQTT_TOPIC" >& /dev/stderr
-else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"post":"'"${MOTION_POST_PICTURES}"'","topic":"'"$MQTT_TOPIC"'","image":"'${IF}'"}'
-  if ($?DEBUG) echo "$0:t $$ -- No file specified to post" >& /dev/stderr
-endif
-
-##
-## ANIMATE
-##
-
-## find frames per second for this camera
-set fps = `echo "$#frames / $elapsed" | bc -l`
-set rem = `echo $fps:e | sed "s/\(.\).*/\1/"`
-if ($rem >= 5) then
-    @ fps = $fps:r + 1
-else
-    set fps = $fps:r
-endif
-# calculate ticks (1/100 second)
-set delay = `echo "100.0 / $fps" | bc -l`
-set delay = $delay:r
-if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"FPS":'$fps',"delay":'$delay'}'
-if ($?DEBUG) echo "$0:t $$ -- Calculated delay at $delay ticks based on camera $CN at $fps FPS" >& /dev/stderr
-
-## animated GIF
-set gif = "$tmpdir/$lastjson:t:r.gif"
-convert -loop 0 -delay $delay $jpgs $gif
-if (! -s "$gif") then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"gif":"FAILED"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to convert $#jpgs into a gif: $gif" >& /dev/stderr
-else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-animated"
-  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$gif"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Posted file $gif to host ${MOTION_MQTT_HOST} topic $MQTT_TOPIC" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "sent file ${composite} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"${message}""}'
+  endif
 endif
 
 ## animated GIF mask
-set mask = $tmpdir/$lastjson:t:r.mask.gif
+set mask = $tmpdir/$EVENT_JSON:t:r.mask.gif
 pushd "$dir" >& /dev/null
 convert -loop 0 -delay $delay $diffs $mask
 popd >& /dev/null
 if (! -s "$mask") then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"mask":"FAILED"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to convert $#jpgs into a mask: $mask" >& /dev/stderr
-else if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
+  if ($?DEBUG) then
+    set message = "failed to convert $#jpgs into a mask: $mask"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"${message}""}'
+  endif
+else
   set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/image-animated-mask"
   mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "${MOTION_MQTT_PORT}" -t "$MQTT_TOPIC" -f "$mask"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'"$MQTT_TOPIC"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- MQTT post to host ${MOTION_MQTT_HOST} topic $MQTT_TOPIC file $mask" >& /dev/stderr
+  if ($?DEBUG) then
+    set message = "sent file ${mask} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"${message}""}'
+  endif
 endif
 
-##
-## UPDATE EVENT JSON
-##
+###
+### UPDATE EVENT
+###
 
-set date = `date +%s`
-set JSON = `jq '.elapsed='"$elapsed"'|.end='${LAST}'|.date='"$date"'|.images='"$images" "$lastjson"`
-if ( "$JSON" == "" ) then
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"camera":"'$CN'","event":"'"$EN"'","FAILED":"'"$lastjson"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Failed to update JSON $lastjson; exiting: $JSON" >& /dev/stderr
-  goto done
+update:
+
+## build images array
+if ($#jpgs) then
+  unset images
+  foreach jpg ( $jpgs )
+    if ($?images) then
+      set images = "${images}"','
+    else
+      set images = '['
+    endif
+    set images = "${images}"'"'"$jpg:t:r"'"'
+  end
+  set images = "${images}"']'
 else
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"event":'"$JSON"'}'
-  if ($?DEBUG) echo "$0:t $$ -- Updated $lastjson with $JSON" >& /dev/stderr
-  echo "$JSON" >! "$lastjson"
+  set images = 'null'
 endif
+
+if ( ! -s "${EVENT_JSON}" ) then
+  # no event JSON
+  set message = "empty or not found: ${EVENT_JSON}"
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  goto done
+endif
+
+#############
+
+set TMPJSON = "${tmpdir}/$EVENT_JSON:t"
+
+if ($?DEBUG_TMPJSON) then
+  set message = "found: ${EVENT_JSON}"
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  set CAT = `cat "${EVENT_JSON}"`
+  set WC = `wc -l "${EVENT_JSON}" | awk '{ print $1 }'`
+  set message = "file ${EVENT_JSON} is ${WC} lines long; contents: ${CAT}"
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  
+  # update event JSON to TMPJSON
+  set date = `date +%s`
+  jq '.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
+
+  # test for success
+  if ( -s "${TMPJSON}" ) then
+    set CAT = `cat "${TMPJSON}"`
+    set WC = `wc -l "${TMPJSON}" | awk '{ print $1 }'`
+    set message = "file ${TMPJSON} is ${WC} lines long; contents: ${CAT}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+    # over write event JSON
+    jq -c '.' "${TMPJSON}" >! "$EVENT_JSON"
+  else
+    # jq command failed
+    set message = "empty or not found: ${TMPJSON}"
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+else
+  set date = `date +%s`
+  jq '.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
+  rm -f "${EVENT_JSON}"
+  jq -c '.' "${TMPJSON}" > "${EVENT_JSON}"
+endif
+
+rm -f "${TMPJSON}"
+
+if ($?DEBUG) then
+  set message = ( "checkpoint 4" "${EVENT_JSON}" `jq -c '.' "${EVENT_JSON}"` )
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+endif
+
+#############
+
 ## do MQTT
-if ($?MOTION_MQTT_HOST && $?MOTION_MQTT_PORT) then
-  set MQTT_TOPIC = "$MOTION_DEVICE_DB/${MOTION_DEVICE_NAME}/${CN}/event/end"
-  mosquitto_pub -q 2 -r -i "$MOTION_DEVICE_NAME" -h "$MOTION_MQTT_HOST" -p "$MOTION_MQTT_PORT" -t "$MQTT_TOPIC" -f "$lastjson"
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "$MOTION_MQTT_HOST" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"topic":"'$MQTT_TOPIC'","JSON":"'"$lastjson"'"}'
-  if ($?DEBUG) echo "$0:t $$ -- Posted MQTT file $lastjson to host $MOTION_MQTT_HOST topic $MQTT_TOPIC" >& /dev/stderr
+set MQTT_TOPIC = "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/${CN}/event/end"
+mosquitto_pub -q 2 -r -i "${MOTION_DEVICE_NAME}" -h "${MOTION_MQTT_HOST}" -p "${MOTION_MQTT_PORT}" -t "${MQTT_TOPIC}" -f "${EVENT_JSON}"
+if ($?DEBUG) then
+  set message = "sent file ${EVENT_JSON} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
 
-
-##
-## ALL DONE
-##
+###
+### ALL DONE
+###
 
 done:
-  if ($?jsons) then
-    rm -f $jsons
-  endif
-  if ($?frames) then
-    rm -f $frames
-  endif
-  if ($?tmpdir) then
-    rm -fr $tmpdir
-  endif
-  if ($?DEBUG) echo "$0:t $$ -- END" `date` >& /dev/stderr
-  if ($?USE_MQTT && $?DEBUG) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"DEBUG":"'$0:t'","pid":'$$',"info":"END"}'
+
+if ($?tmpdir) then
+  rm -fr "${tmpdir}"
+endif
+
+if ($?DEBUG) then
+  set message = ( "FINSH" `date` )
+  echo "$0:t $$ -- ${message}" >& /dev/stderr
+  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+endif
 

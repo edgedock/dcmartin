@@ -3,11 +3,11 @@
 if ( -d "/tmpfs" ) then 
   set TMP = "/tmpfs"
 else
-  set TMP="/tmp"
+  set TMP = "/tmp"
 endif
 
-unsetenv DEBUG
-unsetenv USE_MQTT
+setenv DEBUG
+setenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START $*" `date` >& /dev/stderr
 

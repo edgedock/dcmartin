@@ -15,7 +15,6 @@
         "MOTION_POST_PICTURES": "center",
         "MOTION_LOG_LEVEL": 2,
         "MOTION_LOG_TYPE": "all",
-        "HZN_EXCHANGE_APIKEY": null,
         "DEBUG": false
       }
     }
