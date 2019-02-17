@@ -42,6 +42,9 @@ BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/\([^:]*\):.*|\1|")
 BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
 
+## TEST
+TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell cat TEST_JQ_FILTER),)
+
 ##
 ## targets
 ##
@@ -68,7 +71,7 @@ remove:
 check:
 	@echo "--- INFO -- checking ${SERVICE_LABEL} on ${DOCKER_PORT}"
 	@rm -f check.json
-	curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq '.' check.json
+	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
 push: build $(DOCKER_LOGIN)
 	@echo "--- INFO -- pushing docker container ${DOCKER_TAG} for service ${SERVICE_LABEL}"

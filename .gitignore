@@ -3,7 +3,6 @@ kafkacat.sh.*
 *.zip
 .DS_Store
 DEBUG*
-JQ_*
 APIKEY*
 HZN_*
 CPU_*
