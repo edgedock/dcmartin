@@ -43,7 +43,10 @@ BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
 
 ## TEST
-TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell cat TEST_JQ_FILTER),)
+TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
+TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
+TEST_TIMEOUT = 10
+TEST_MACHINES = $(if $(wildcard TEST_MACHINES),$(shell cat TEST_MACHINES),)
 
 ##
 ## targets
@@ -71,7 +74,7 @@ remove:
 check:
 	@echo "--- INFO -- checking ${SERVICE_LABEL} on ${DOCKER_PORT}"
 	@rm -f check.json
-	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
+	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json
 
 push: build $(DOCKER_LOGIN)
 	@echo "--- INFO -- pushing docker container ${DOCKER_TAG} for service ${SERVICE_LABEL}"
@@ -108,6 +111,13 @@ test:
 	@echo "--- INFO -- testing ${SERVICE_LABEL} on $(SERVICE_PORT)"
 	@./test.sh
 
+testnodes: $(TEST_MACHINES)
+	@echo "--- INFO -- finish testing $(SERVICE_LABEL) on ${TEST_MACHINES} at $$(date)"
+
+$(TEST_MACHINES):
+	@echo "--- INFO -- start testing ${SERVICE_LABEL} on ${@}.local port $(SERVICE_PORT) at $$(date)"
+	@export JQ_FILTER="$(TEST_NODE_FILTER)" && curl -m $(TEST_TIMEOUT) -sSL "http://${@}.local:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json
+
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
 
@@ -129,4 +139,4 @@ distclean: clean
 	@echo "--- INFO -- cleaning for distribution"
 	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS)
 
-.PHONY: default all build run check stop push publish verify clean start test
+.PHONY: default all build run check stop push publish verify clean start test $(TEST_MACHINES) deployed
