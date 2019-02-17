@@ -1,3 +1,4 @@
+.test.cpu=.motion2mqtt.cpu?!=null,.test.event=.motion2mqtt.motion.event.base64?!=null,.test.image=.motion2mqtt.motion.image.base64?!=null
 .motion2mqtt.cpu?!=null,.motion2mqtt.motion.event.base64?!=null,.motion2mqtt.motion.image.base64?!=null
 .motion2mqtt.cpu?!=null and .motion2mqtt.motion.event.base64?!=null and .motion2mqtt.motion.image.base64?!=null
 {"cpu":.motion2mqtt.cpu?!=null,"event":.motion2mqtt.motion.event.base64?!=null,"image":.motion2mqtt.motion.image.base64?!=null}

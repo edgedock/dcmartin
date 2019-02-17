@@ -116,7 +116,7 @@ testnodes: $(TEST_MACHINES)
 
 $(TEST_MACHINES):
 	@echo "--- INFO -- start testing ${SERVICE_LABEL} on ${@}.local port $(SERVICE_PORT) at $$(date)"
-	@export JQ_FILTER="$(TEST_NODE_FILTER)" && curl -m $(TEST_TIMEOUT) -sSL "http://${@}.local:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json
+	@export JQ_FILTER="$(TEST_NODE_FILTER)" && curl -m $(TEST_TIMEOUT) -sSL "http://${@}.local:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
 
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi
