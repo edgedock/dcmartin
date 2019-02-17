@@ -86,7 +86,7 @@ endif
 done:
 
 if ($?DEBUG) then
-  set message = ( "FINSH" `date` )
+  set message = ( "FINISH" `date` )
   echo "$0:t $$ -- $message" >& /dev/stderr
   if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif

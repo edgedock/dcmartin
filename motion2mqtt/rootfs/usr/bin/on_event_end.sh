@@ -134,6 +134,10 @@ if ($#jpgs) then
     @ seconds = $THIS - $START
     # test for breaking conditions
     if ( $seconds < 0 ) break
+#      rm -f "$jpg"
+#      @ i--
+#      continue
+#    endif
     # add frame to this interval
     set frames = ( "$jpg:t:r" $frames )
     if ( $seconds > $elapsed ) set elapsed = $seconds
@@ -219,10 +223,6 @@ switch ( "${MOTION_POST_PICTURES}" )
     breaksw
 endsw
 
-if [ ! -s "$IF:r.json ]; then
-  set POST_IMAGE_JSON = "$IF:r.json"
-endif
-
 # test
 if ( "${post}" != "${MOTION_POST_PICTURES}" ) then
   if ($?DEBUG) then
@@ -241,6 +241,7 @@ if ( -s "${IF}" ) then
     echo "$0:t $$ -- ${message}" >& /dev/stderr
     if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
   endif
+  if ( -s "$IF:r.json" ) set POST_IMAGE_JSON = "$IF:r.json"
 else
   if ($?DEBUG) then
     set message = "cannot locate file: ${IF}; exiting"
@@ -337,6 +338,7 @@ else
     echo "$0:t $$ -- ${message}" >& /dev/stderr
     if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
   endif
+  cp -f "$gif" "$EVENT_JSON:r.gif"
 endif
 
 goto update
@@ -517,14 +519,34 @@ endif
 
 #############
 
-set TMPJSON = "${tmpdir}/$EVENT_JSON:t"
+set date = `date +%s`
 
-  set date = `date +%s`
-  jq '.post:'$(jq -c '.' ${POST_IMAGE_JSON})'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" >! "${TMPJSON}"
-  rm -f "${EVENT_JSON}"
-  jq -c '.' "${TMPJSON}" > "${EVENT_JSON}"
+if ( $?POST_IMAGE_JSON ) then
+  set noglob
+  set PIJ = ( `jq -c '.' "${POST_IMAGE_JSON}"` )
 
-rm -f "${TMPJSON}"
+  if ($?DEBUG) then
+    set message = ( "checkpoint 3.0 - ${PIJ}" )
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+
+  jq '.image='"${PIJ}"'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
+
+  if ($?DEBUG) then
+    set message = ( "checkpoint 3.1 -" `jq -c '.' ${TMP}/$$` )
+    echo "$0:t $$ -- ${message}" >& /dev/stderr
+    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  endif
+
+  unset noglob
+else
+  jq '|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
+endif
+
+rm -f "${EVENT_JSON}"
+jq -c '.' "${TMP}/$$" > "${EVENT_JSON}"
+rm -f "${TMP}/$$"
 
 if ($?DEBUG) then
   set message = ( "checkpoint 4" "${EVENT_JSON}" `jq -c '.' "${EVENT_JSON}"` )

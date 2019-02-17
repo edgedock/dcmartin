@@ -38,19 +38,16 @@ echo "${BODY}" > "${RESPONSE}"
 
 SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
 if [ -s "${SERVICE_OUTPUT_FILE}" ]; then 
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- found ${SERVICE_OUTPUT_FILE}:" $(jq -c '.' ${SERVICE_OUTPUT_FILE}) &> /dev/stderr; fi
+  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- found ${SERVICE_OUTPUT_FILE}; size:" $(wc -c ${SERVICE_OUTPUT_FILE}) &> /dev/stderr; fi
   DATE=$(jq -r '.date' "${SERVICE_OUTPUT_FILE}")
   PERIOD=$(jq -r '.period' "${SERVICE_OUTPUT_FILE}")
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- date: ${DATE}; period: ${PERIOD}" &> /dev/stderr; fi
   # process service output (should only happen on change)
   jq -c '.' "${SERVICE_OUTPUT_FILE}" | sed -e 's|\(.*\)|{"'"${SERVICE_LABEL}"'": \1}|' > "${TMP}/$$"
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- sed" $(cat ${TMP}/$$) &> /dev/stderr; fi
   jq -s add "${RESPONSE}" "${TMP}/$$" > "${RESPONSE}.$$" && mv -f "${RESPONSE}.$$" "${RESPONSE}"
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- jq -s" $(jq -c '.' ${RESPONSE}) &> /dev/stderr; fi
   rm -f "${TMP}/$$"
 fi
 
-if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- processed ${RESPONSE}:" $(jq -c '.' ${RESPONSE}) &> /dev/stderr; fi
+if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- prepared ${RESPONSE}; size:" $(wc -c "${RESPONSE}") &> /dev/stderr; fi
 
 if [ -z "${PERIOD:-}" ] || [ "${PERIOD}" == 'null' ]; then PERIOD=5; fi
 if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=1; fi

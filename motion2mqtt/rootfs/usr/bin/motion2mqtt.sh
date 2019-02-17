@@ -68,42 +68,44 @@ if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- PID: ${PID}" 2> /dev/
 ## update
 echo "${CONFIG}" > "${TMP}/${SERVICE_LABEL}.json"
 
-## initiate watchdog
-WHEN=0
-
-
 ## wait on output from motion
 DIR=/var/lib/motion/
 
-OUTPUT="${CONFIG}"
-OUTPUT_FILE="${TMP}/$$.output.json"
-echo "${OUTPUT}" > "${OUTPUT_FILE}"
+SECONDS=$(date +%s)
+DATE=$(echo "${SECONDS} / ${MOTION_PERIOD} * ${MOTION_PERIOD}" | bc)
+WHEN=$((DATE+MOTION_PERIOD))
+OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.${DATE}.json"
+echo "${CONFIG}" > "${OUTPUT_FILE}"
 
-inotifywait --timeout ${MOTION_PERIOD} -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH; do
-
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- FULLPATH: ${FULLPATH}" 2> /dev/stderr; fi
-
-  if [ ! -z "${FULLPATH}" ]; then
-    B64_PATH=
-    case "${FULLPATH##*/}" in
-      *-*-*.json)
+while true; do 
+  inotifywait --timeout ${MOTION_PERIOD} -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH; do
+    if [ ! -z "${FULLPATH}" ]; then 
+      # process updates
+      case "${FULLPATH##*/}" in
+	*-*-*.json)
 	  if [ -s "${FULLPATH}" ]; then
 	    OUT=$(jq '.' "${FULLPATH}")
 	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
 	    if [ -z "${OUT}" ]; then OUT='null'; fi
-	    # OUTPUT=$(echo "${OUTPUT}" | jq '.motion.image='"${OUT}")
-	    jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
-	    IMAGE_PATH="${FULLPATH%.*}.jpg"
-	    if [ -s "${IMAGE_PATH}" ]; then
-	      B64_PATH="${TMP}/${IMAGE_PATH##*/}"; B64_PATH="${B64_PATH%.*}.b64"
-	      base64 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"image":{"base64":"\1"}}}|' > "${B64_PATH}"
+	    # don't update always
+	    if [ "${MOTION_POST_PICTURES}" == 'all' ]; then
+	      jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
+	      IMAGE_PATH="${FULLPATH%.*}.jpg"
+	      if [ -s "${IMAGE_PATH}" ]; then
+		IMG_B64_FILE="${TMP}/${IMAGE_PATH##*/}"; IMG_B64_FILE="${IMG_B64_FILE%.*}.b64"
+		base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"image":{"base64":"\1"}}}|' > "${IMG_B64_FILE}"
+	      fi
 	    fi
 	  else
-	    echo "+++ WARN $0 $$ -- no content in ${FULLPATH}" &> /dev/stderr
-	    continue
+	    echo "+++ WARN $0 $$ -- no content in ${FULLPATH}; continuing..." &> /dev/stderr
+            continue
 	  fi
+	  if [ "${MOTION_POST_PICTURES}" != 'all' ]; then 
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- posting only ${MOTION_POST_PICTURES} picture; continuing..." &> /dev/stderr; fi
+	    continue
+          fi
 	  ;;
-      *-*.json)
+	*-*.json)
 	  if [ -s "${FULLPATH}" ]; then
 	    OUT=$(jq '.' "${FULLPATH}")
 	    if [ -z "${OUT}" ]; then OUT='null'; fi
@@ -117,15 +119,34 @@ inotifywait --timeout ${MOTION_PERIOD} -m -r -e close_write --format '%w%f' "${D
 	  if [ -z "${IMAGES}" ] || [ "${IMAGES}" == 'null' ]; then 
 	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: start" &> /dev/stderr; fi
 	  else
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: end begin" &> /dev/stderr; fi
 	    # update event
-	    # OUTPUT=$(echo "${OUTPUT}" | jq '.motion.event='"${OUT}")
 	    jq '.motion.event='"${OUT}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
-	    IMAGE_PATH="${FULLPATH%.*}.jpg"
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: updated ${OUTPUT_FILE} with event JSON:" $(echo "${OUT}" | jq -c) &> /dev/stderr; fi
 	    # check for GIF
 	    IMAGE_PATH="${FULLPATH%.*}.gif"
 	    if [ -s "${IMAGE_PATH}" ]; then
-	      B64_PATH="${TMP}/${IMAGE_PATH##*/}"; B64_PATH="${B64_PATH%.*}.b64"
-	      base64 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"event":{"base64":"\1"}}}|' > "${B64_PATH}"
+	      GIF_B64_FILE="${TMP}/${IMAGE_PATH##*/}"; GIF_B64_FILE="${GIF_B64_FILE%.*}.b64"
+	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: found GIF: ${IMAGE_PATH}; creating ${GIF_B64_FILE}" &> /dev/stderr; fi
+	      base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"event":{"base64":"\1"}}}|' > "${GIF_B64_FILE}"
+	    fi
+	    # find posted picture
+	    POSTED_IMAGE_JSON=$(jq -r '.image?' "${FULLPATH}")
+	    if [ ! -z "${POSTED_IMAGE_JSON}" ] && [ "${POSTED_IMAGE_JSON}" != 'null' ]; then
+	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: posted image JSON:" $(echo "${POSTED_IMAGE_JSON}" | jq -c) &> /dev/stderr; fi
+	      PID=$(echo "${POSTED_IMAGE_JSON}" | jq -r '.id?')
+	      if [ ! -z "${PID}" ] && [ "${PID}" != 'null' ]; then
+		if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: posted image ID: ${PID}" &> /dev/stderr; fi
+		IMAGE_PATH="${FULLPATH%/*}/${PID}.jpg"
+		if [ -s  "${IMAGE_PATH}" ]; then
+		  IMG_B64_FILE="${TMP}/${IMAGE_PATH##*/}"; IMG_B64_FILE="${IMG_B64_FILE%.*}.b64"
+		  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: found JPEG: ${IMAGE_PATH}; creating ${IMG_B64_FILE}" &> /dev/stderr; fi
+		  base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"image":{"base64":"\1"}}}|' > "${IMG_B64_FILE}"
+		fi
+	      fi
+	      # update output to posted image
+	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
+	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- EVENT: updated ${OUTPUT_FILE} with posted image JSON: " $(echo "${POSTED_IMAGE_JSON}" | jq -c) &> /dev/stderr; fi
 	    fi
 	    # cleanup
 	    for I in ${IMAGES}; do
@@ -141,38 +162,57 @@ inotifywait --timeout ${MOTION_PERIOD} -m -r -e close_write --format '%w%f' "${D
 	    rm -f "${FULLPATH}"
 	  fi
 	  ;;
-      *)
-	  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO $0 $$ -- skipping: ${FULLPATH}" &> /dev/stderr; fi
+	*)
+	  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO $0 $$ -- ${FULLPATH}; continuing..." &> /dev/stderr; fi
 	  continue
 	  ;;
-    esac
-  fi
-
-  # merge services
-  if [ $(date '+%s') -gt ${WHEN} ]; then
-    # OUTPUT="$(echo "${OUTPUT}" | jq '.*'"$(update_services)")"
-    jq '.*'"$(update_services)" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
-    WHEN=$(($(date '+%s')+MOTION_PERIOD))
-  else
-    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- skipping services" &> /dev/stderr; fi
-  fi
-
-  # merge base64 iff exists
-  if [ ! -z "${B64_PATH:-}" ] && [ -s "${B64_PATH}" ]; then
-    jq -s add "${B64_PATH}" "${OUTPUT_FILE}" > "${B64_PATH}.$$"
-    if [ -s "${B64_PATH}.$$" ];  then
-      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ successfully merged ${B64_PATH}" &> /dev/stderr; fi
-      rm -f "${B64_PATH}"
-      mv "${B64_PATH}.$$" "${OUTPUT_FILE}"
+      esac
     else
-      echo "+++ WARN $0 $$ -- failed to merge ${B64_PATH}" &> /dev/stderr
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- timeout" 2> /dev/stderr; fi
     fi
-  fi
 
-  # output
-  # echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
-  jq '.date='$(date +%s) "${OUTPUT_FILE}" > "${TMP}/$$"
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- moving ${TMP}/$$ to ${TMP}/${SERVICE_LABEL}.json" &> /dev/stderr; fi
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ checkpoint 0:"  $(jq '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+
+    # merge image base64 iff exists
+    if [ ! -z "${IMG_B64_FILE:-}" ] && [ -s "${IMG_B64_FILE}" ]; then
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- found ${IMG_B64_FILE}" &> /dev/stderr; fi
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${IMG_B64_FILE}" > "${IMG_B64_FILE}.$$" && mv "${IMG_B64_FILE}.$$" "${OUTPUT_FILE}"
+      IMG_B64_FILE=
+    fi
+
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- checkpoint 1:"  $(jq '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+
+    # merge GIF base64 iff exists
+    if [ ! -z "${GIF_B64_FILE:-}" ] && [ -s "${GIF_B64_FILE}" ]; then
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- found ${GIF_B64_FILE}" &> /dev/stderr; fi
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${GIF_B64_FILE}" > "${GIF_B64_FILE}.$$" && mv "${GIF_B64_FILE}.$$" "${OUTPUT_FILE}"
+      GIF_B64_FILE=
+    fi
+
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- checkpoint 2:"  $(jq '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+
+    # get time
+    SECONDS=$(date +%s)
+    # merge services
+    if [ ${SECONDS} -gt ${WHEN} ]; then
+      UDS=$(update_services) 
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- successfully updated services:"  $(echo "${UDS}" | jq -c '.') &> /dev/stderr; fi
+      echo "${UDS}" | jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" - > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- successfully merged services:"  $(jq -c '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+      WHEN=$((SECONDS+MOTION_PERIOD))
+    else
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- skipping services" &> /dev/stderr; fi
+    fi
+
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- checkpoint 3:"  $(jq '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+
+    # output
+    jq '.date='${SECONDS} "${OUTPUT_FILE}" > "${TMP}/$$" && mv -f "${TMP}/$$" "${OUTPUT_FILE}"
+    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- successfully dated output:"  $(jq -c '.motion.event.base64=null|.motion.image.base64=null' ${OUTPUT_FILE}) &> /dev/stderr; fi
+    jq -c '.' "${OUTPUT_FILE}" > ${TMP}/${SERVICE_LABEL}.json
+
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- checkpoint 4:"  $(jq '.motion.event.base64=null|.motion.image.base64=null' ${TMP}/${SERVICE_LABEL}.json) &> /dev/stderr; fi
+
+  done
 
 done
