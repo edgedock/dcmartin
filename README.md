@@ -28,8 +28,17 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 # 2. Build
 
-The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start].  More information is available in the [`MAKE.md`][make-md].  The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is 
-an accelerated [video][build-pattern-video] of building a pattern.
+The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start].    More information is available in the [`MAKE.md`][make-md].  The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is an accelerated [video][build-pattern-video] of building a pattern.
+
+### Quick Start
+A _quick_ start for Debian LINUX (Ubuntu or Raspbian) is to install `docker` and the build tools:
+
+```
+wget -qO - get.docker.com  | sh
+sudo addgroup $(whoami) docker
+sudo apt install -y git make curl jq
+```
+**NOTE**:  Then `logout` and login to establish `docker` group privileges, clone the GIT repo, and `make` the software:
 
 ```
 mkdir ~/gitdir
@@ -38,6 +47,9 @@ git clone http://github.com/dcmartin/open-horizon
 cd open-horizon
 make
 ```
+
+The default target for the build process will create the container images, `run` them locally, and `check` the status of each _service_.
+
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md
@@ -75,8 +87,6 @@ Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LIN
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
-sudo addgroup $(whoami) docker # logout and log back in again to effect
-sudo apt install -y git make curl jq
 ```
 
 ## 5.1 Credentials
