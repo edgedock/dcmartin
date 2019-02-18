@@ -48,7 +48,7 @@ cd open-horizon
 make
 ```
 
-The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in the [`MAKE.md`][make-md].   
+The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in [`MAKE.md`][make-md].   
 
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
