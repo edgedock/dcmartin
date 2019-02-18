@@ -46,7 +46,8 @@ BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD
 TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
 TEST_TIMEOUT = 10
-TEST_MACHINES = $(if $(wildcard TEST_MACHINES),$(shell cat TEST_MACHINES),)
+# temporary
+TEST_MACHINES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
 
 ##
 ## targets
@@ -115,8 +116,8 @@ testnodes: $(TEST_MACHINES)
 	@echo "--- INFO -- finish testing $(SERVICE_LABEL) on ${TEST_MACHINES} at $$(date)"
 
 $(TEST_MACHINES):
-	@echo "--- INFO -- start testing ${SERVICE_LABEL} on ${@}.local port $(SERVICE_PORT) at $$(date)"
-	@export JQ_FILTER="$(TEST_NODE_FILTER)" && curl -m $(TEST_TIMEOUT) -sSL "http://${@}.local:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
+	@echo "--- INFO -- start testing ${SERVICE_LABEL} on ${@} port $(SERVICE_PORT) at $$(date)"
+	@export JQ_FILTER="$(TEST_NODE_FILTER)" && curl --connect-timeout $(TEST_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
 
 stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HZN} && hzn dev service stop -d ${DIR}; fi

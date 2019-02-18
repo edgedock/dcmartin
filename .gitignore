@@ -4,6 +4,7 @@ kafkacat.sh.*
 .DS_Store
 DEBUG*
 APIKEY*
+TEST_TMP_*
 HZN_*
 CPU_*
 HAL_*
