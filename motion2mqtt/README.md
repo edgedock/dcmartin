@@ -52,33 +52,43 @@ Copy this [repository][repository], change to the `motion2mqtt` directory, then 
 % make
 ...
 {
-  "hostname": "544720549bbf-172017000003",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "motion2mqtt",
-  "device": "test-camera-1",
-  "pid": 8,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "pattern": "",
+    "ram": 0
+  },
+  "date": 1550509113,
+  "service": "motion2mqtt",
+  "pattern": null,
   "motion2mqtt": {
-    "log_level": "info",
-    "debug": "true",
-    "date": 1548700891,
-    "db": "debug",
-    "name": "test",
-    "timezone": "America/Los_Angeles",
-    "post": "center",
-    "mqtt": {
-      "host": "mqtt",
-      "port": "1883",
-      "username": "<username>",
-      "password": "<password>"
+    "cpu": false,
+    "motion": {
+      "event": {
+        "base64": false
+      },
+      "image": {
+        "base64": false
+      }
     }
   }
 }
-
 ```
+
 The `motion2mqtt` value will initially be incomplete until the service completes its initial execution.  Subsequent tests should return a completed payload, see below:
+
 ```
 % curl -sSL http://localhost:8082
 ```
+
+should result in a completed service payload (n.b. `base64` encoded JPEG and GIF images have been redacted):
 
 ```
 {
