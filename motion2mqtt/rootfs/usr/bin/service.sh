@@ -45,10 +45,7 @@ if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot locate ${WAITER}.sh; ex
 PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
 if [ -z "${PID:-}" ]; then
   echo "${HZN}" > "${RESPONSE_FILE}"
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- starting: ${CMD} ${SERVICE_OUTPUT_FILE} ${RESPONSE_FILE}" $(jq -c '.' "${RESPONSE_FILE}") &> /dev/stderr; fi
   ${CMD} "${SERVICE_OUTPUT_FILE}" "${RESPONSE_FILE}" &> /dev/stderr &
-else
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${CMD} running; PID: ${PID}" &> /dev/stderr; fi
 fi
 
 # check on service interval
@@ -57,14 +54,10 @@ if [ -z "${PERIOD:-}" ] || [ "${PERIOD}" == 'null' ]; then PERIOD=0; fi
 DATE=$(jq -r '.'"${SERVICE_LABEL}"'.date?' "${RESPONSE_FILE}")
 if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=1; fi
 
-if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- period: ${PERIOD}; date: ${DATE}" &> /dev/stderr; fi
-
 NOW=$(date +%s)
 AGE=$((NOW - DATE))
 LMD=$(echo "${DATE}" | dconv -i '%s' -f '%a, %d %b %Y %H:%M:%S %Z' 2> /dev/stderr)
 SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
-
-if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${RESPONSE_FILE}; age: ${AGE}; size: ${SIZ}" &> /dev/stderr; fi
 
 echo "HTTP/1.1 200 OK"
 echo "Content-Type: application/json; charset=ISO-8859-1"

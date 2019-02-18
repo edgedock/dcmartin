@@ -524,21 +524,7 @@ set date = `date +%s`
 if ( $?POST_IMAGE_JSON ) then
   set noglob
   set PIJ = ( `jq -c '.' "${POST_IMAGE_JSON}"` )
-
-  if ($?DEBUG) then
-    set message = ( "checkpoint 3.0 - ${PIJ}" )
-    echo "$0:t $$ -- ${message}" >& /dev/stderr
-    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-  endif
-
   jq '.image='"${PIJ}"'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
-
-  if ($?DEBUG) then
-    set message = ( "checkpoint 3.1 -" `jq -c '.' ${TMP}/$$` )
-    echo "$0:t $$ -- ${message}" >& /dev/stderr
-    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-  endif
-
   unset noglob
 else
   jq '|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
@@ -547,12 +533,6 @@ endif
 rm -f "${EVENT_JSON}"
 jq -c '.' "${TMP}/$$" > "${EVENT_JSON}"
 rm -f "${TMP}/$$"
-
-if ($?DEBUG) then
-  set message = ( "checkpoint 4" "${EVENT_JSON}" `jq -c '.' "${EVENT_JSON}"` )
-  echo "$0:t $$ -- ${message}" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
-endif
 
 #############
 

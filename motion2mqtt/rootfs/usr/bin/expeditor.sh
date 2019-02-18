@@ -5,29 +5,36 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
 if [ -z "${SERVICE_LABEL}" ]; then echo "*** ERROR $0 $$ -- no service label: ${SERVICE_LABEL}" &> /dev/stderr; exit 1; fi
 
-if [ -z "${1}" ] || [ -z "${2}" ]; then echo "*** ERROR $0 $$ -- usage: $0 <service-file-json> <response-file-json>" &> /dev/stderr; exit 1; fi
+if [ -z "${1}" ] || [ -z "${2}" ]; then echo "*** ERROR $0 $$ -- usage: $0 <service-file> <response-file>" &> /dev/stderr; exit 1; fi
  
 SERVICE_FILE="${1}"
 RESPONSE_FILE="${2}"
 
-while true; do
-  if [ -s "${SERVICE_FILE}" ]; then 
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${SERVICE_FILE}" $(jq -c '.' "${SERVICE_FILE}") &> /dev/stderr; fi
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${RESPONSE_FILE}" $(jq -c '.' "${RESPONSE_FILE}") &> /dev/stderr; fi
-    jq -c '.' "${SERVICE_FILE}" | sed -e 's|\(.*\)|{"'"${SERVICE_LABEL}"'": \1}|' > "${TMP}/$$"
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- created ${TMP}/$$" $(jq -c '.' "${TMP}/$$") &> /dev/stderr; fi
-    jq -s add "${RESPONSE_FILE}" "${TMP}/$$" > "${RESPONSE_FILE}.$$" 
-    if [ -s "${RESPONSE_FILE}.$$" ]; then
-      mv -f "${RESPONSE_FILE}.$$" "${RESPONSE_FILE}"
-      if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- updated ${RESPONSE_FILE}" $(jq -c '.' "${RESPONSE_FILE}") &> /dev/stderr; fi
-    else
-      if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- jq add failed" &> /dev/stderr; fi
-    fi
-    rm -f "${TMP}/$$"
-  else
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- no ${SERVICE_FILE}; sleeping (1 sec) ..." &> /dev/stderr; fi
-    sleep 1
+while [ ! -e "${SERVICE_FILE}" ]; do
+  echo "+++ WARN -- $0 $$ -- no ${SERVICE_FILE}; waiting" &> /dev/stderr; fi
+  sleep 1
+done
+
+RESPONSE_TEMPLATE="${TMP}/${0##*/}.${RESPONSE_FILE##*/}.$$"
+jq -c '.' "${RESPONSE_FILE}" > "${RESPONSE_TEMPLATE}"
+if [ $? != 0 ]; then
+  echo "*** ERROR -- $0 $$ -- <response-file> ${RESPONSE_FILE} not valid JSON; exiting" &> /dev/stderr; fi
+  exit 1
+fi
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${SERVICE_FILE}" &> /dev/stderr; fi
+
+inotifywait -m -e close_write --format '%w%f' "${SERVICE_FILE}" | while read FULLPATH; do
+  if [ "${FULLPATH}" != "${SERVICE_FILE}" ]; then
+    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- ${FULLPATH} is not ${SERVICE_FILE}" &> /dev/stderr; fi
     continue
   fi
-  inotifywait -m -r -e close_write --format '%w%f' "${SERVICE_FILE}"
+  if [ -s "${SERVICE_FILE}" ]; then 
+    TSF="${TMP}/${0##*/}.${SERVICE_LABEL}.$$"
+    echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
+    cat "${SERVICE_FILE}" >> "${TSF}"
+    echo '}' >> "${TSF}"
+    jq -s add "${TSF}" "${RESPONSE_TEMPLATE}" > "${RESPONSE_TEMPLATE}.$$" && mv -f "${RESPONSE_TEMPLATE}.$$" "${RESPONSE_FILE}"
+    rm -f "${TSF}"
+  fi
 done
