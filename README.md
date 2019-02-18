@@ -28,7 +28,7 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 # 2. Build
 
-The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start].    More information is available in the [`MAKE.md`][make-md].  The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is an accelerated [video][build-pattern-video] of building a pattern.
+The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start]. The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is an accelerated [video][build-pattern-video] of building a pattern.
 
 ### Quick Start
 A _quick_ start for Debian LINUX (Ubuntu or Raspbian) is to install `docker` and the build tools:
@@ -48,7 +48,7 @@ cd open-horizon
 make
 ```
 
-The default target for the build process will create the container images, `run` them locally, and `check` the status of each _service_.
+The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in the [`MAKE.md`][make-md].   
 
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
