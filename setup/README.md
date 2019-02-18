@@ -4,18 +4,12 @@ This repository contains sample scripts to automatically setup nodes for [Open H
 
 You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
 
-# System Installation
-
-System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][system] instructions.
-
-# Network Installation
-
-Installations can be performed over the network when devices are discovered.  This technique is suitable for early-adopters. Please refer to [these][network] instructions.
-
-# Manual Installation
+# Installation
 
 ## Supported devices
 A target device or virtual environment is required; either of the following are sufficient.
+
+## Manual installation
 
 ### LINUX (Ubuntu) Virtual Machine
 Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
@@ -26,12 +20,20 @@ Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. u
 1. Eject the SD-card (e.g. on macOS use `diskutil eject /Volume/boot`).
 1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
 
-## Process
+### Process
 For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][horizon-setup] is used to install the Horizon software under LINUX; the short-cut URL is `ibm.biz/horizon-setup`:
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
 When this installation finishes the device will still need to be registered for a specific pattern.  Refer to the _Horizon Addons_ section below for information on using Home Assistant addons to initiate device patterns and listen for sensor output.
+
+## Network installation
+
+Installations can be performed over the network when devices are discovered.  This technique is suitable for local-area network (LAN) deployments. Please refer to [these][network] instructions.
+
+## System installation
+
+System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][system] instructions.
 
 # Horizon Addons
 
@@ -71,7 +73,7 @@ David C Martin (github@dcmartin.com)
 [docker]: https://www.docker.com/
 [edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
 [edge-install]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/adding-devices.html
-[edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
+[edge-slack]: https://ibm-cloudplatform.slack.com/messages/edge-fabric-users/
 [etcher-io]: https://www.balena.io/etcher/
 [examples]: https://github.com/open-horizon/examples
 [ha-addons]: https://github.com/hassio-addons
