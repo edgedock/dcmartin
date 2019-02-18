@@ -6,62 +6,65 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 # hzn config
 if [ -z "${HZN}" ]; then
   if [ ! -s "/tmp/config.json" ]; then
-    echo "*** ERROR $0 $$ -- environment HZN unset; empty /tmp/config.json; exiting" 2> /dev/stderr
+    echo "*** ERROR $0 $$ -- environment HZN unset; empty /tmp/config.json; exiting" &> /dev/stderr
     exit 1
   fi
-  echo "+++ WARN $0 $$ -- environment HZN unset; using /tmp/config.json; continuing" 2> /dev/stderr
+  echo "+++ WARN $0 $$ -- environment HZN unset; using /tmp/config.json; continuing" &> /dev/stderr
   export HZN=$(jq '.' "/tmp/config.json")
   if [ -z "${HZN}" ]; then
-    echo "*** ERROR $0 $$ -- environment HZN unset; invalid /tmp/config.json; exiting" $(cat /tmp/config.json) 2> /dev/stderr
+    echo "*** ERROR $0 $$ -- environment HZN unset; invalid /tmp/config.json; exiting" $(cat /tmp/config.json) &> /dev/stderr
     exit 1
   fi
 fi
-
-BODY="${HZN}"
-
-# git pid
-if [ ! -z "${SERVICE_LABEL:-}" ]; then
-  CMD=$(command -v "${SERVICE_LABEL:-}.sh")
-  if [ ! -z "${CMD}" ]; then
-    PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
-  fi
-  if [ -z "${PID:-}" ]; then PID=0; fi
-  BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
-else
-  echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" 2> /dev/stderr
-  exit 1
-fi
-
-
-RESPONSE="${TMP}/response.$(date +%s).json"
-echo "${BODY}" > "${RESPONSE}"
-
-SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
-if [ -s "${SERVICE_OUTPUT_FILE}" ]; then 
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- found ${SERVICE_OUTPUT_FILE}; size:" $(wc -c ${SERVICE_OUTPUT_FILE}) &> /dev/stderr; fi
-  DATE=$(jq -r '.date' "${SERVICE_OUTPUT_FILE}")
-  PERIOD=$(jq -r '.period' "${SERVICE_OUTPUT_FILE}")
-  # process service output (should only happen on change)
-  jq -c '.' "${SERVICE_OUTPUT_FILE}" | sed -e 's|\(.*\)|{"'"${SERVICE_LABEL}"'": \1}|' > "${TMP}/$$"
-  jq -s add "${RESPONSE}" "${TMP}/$$" > "${RESPONSE}.$$" && mv -f "${RESPONSE}.$$" "${RESPONSE}"
-  rm -f "${TMP}/$$"
-fi
-
-if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- prepared ${RESPONSE}; size:" $(wc -c "${RESPONSE}") &> /dev/stderr; fi
-
-if [ -z "${PERIOD:-}" ] || [ "${PERIOD}" == 'null' ]; then PERIOD=5; fi
-if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=1; fi
-NOW=$(date +%s)
-AGE=$((NOW - DATE))
 
 # find dateutils
 for dc in dconv dateutils.dconv; do
-  dconv=$(command -v "${dc}")
-  if [ ! -z "${dconv}" ]; then break; fi
+  DCONV=$(command -v "${dc}")
+  if [ ! -z "${DCONV}" ]; then break; fi
 done
+if [ -z "${DCONV}" ]; then echo "*** ERROR $0 $$ -- cannot locate dateutils; exiting" &> /dev/stderr; exit 1; fi
 
+# output from the service
+if [ -z "${SERVICE_LABEL:-}" ]; then echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" &> /dev/stderr; exit 1; fi
+SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
+
+# get pid of service
+CMD=$(command -v "${SERVICE_LABEL:-}.sh")
+if [ ! -z "${CMD}" ]; then
+  PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
+fi
+if [ -z "${PID:-}" ]; then PID=0; fi
+
+# start the response body
+RESPONSE_FILE="${TMP}/${0##*/}.json"
+
+# wait for service
+WAITER='expeditor'
+CMD=$(command -v "${WAITER}.sh")
+if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot locate ${WAITER}.sh; exiting" &> /dev/stderr; exit 1; fi
+PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
+if [ -z "${PID:-}" ]; then
+  echo "${HZN}" > "${RESPONSE_FILE}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- starting: ${CMD} ${SERVICE_OUTPUT_FILE} ${RESPONSE_FILE}" $(jq -c '.' "${RESPONSE_FILE}") &> /dev/stderr; fi
+  ${CMD} "${SERVICE_OUTPUT_FILE}" "${RESPONSE_FILE}" &> /dev/stderr &
+else
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${CMD} running; PID: ${PID}" &> /dev/stderr; fi
+fi
+
+# check on service interval
+PERIOD=$(jq -r '.'"${SERVICE_LABEL}"'.period?' "${RESPONSE_FILE}")
+if [ -z "${PERIOD:-}" ] || [ "${PERIOD}" == 'null' ]; then PERIOD=0; fi
+DATE=$(jq -r '.'"${SERVICE_LABEL}"'.date?' "${RESPONSE_FILE}")
+if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=1; fi
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- period: ${PERIOD}; date: ${DATE}" &> /dev/stderr; fi
+
+NOW=$(date +%s)
+AGE=$((NOW - DATE))
 LMD=$(echo "${DATE}" | dconv -i '%s' -f '%a, %d %b %Y %H:%M:%S %Z' 2> /dev/stderr)
-SIZ=$(wc -c "${RESPONSE}" | awk '{ print $1 }')
+SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${RESPONSE_FILE}; age: ${AGE}; size: ${SIZ}" &> /dev/stderr; fi
 
 echo "HTTP/1.1 200 OK"
 echo "Content-Type: application/json; charset=ISO-8859-1"
@@ -71,6 +74,4 @@ echo "Age: ${AGE}"
 echo "Cache-Control: max-age=${PERIOD}"
 echo "Last-Modified: ${LMD}" 
 echo ""
-cat "${RESPONSE}"
-
-rm -f "${RESPONSE}"
+cat "${RESPONSE_FILE}"

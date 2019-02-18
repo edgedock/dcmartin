@@ -144,6 +144,7 @@ while true; do
 		  base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"image":{"base64":"\1"}}}|' > "${IMG_B64_FILE}"
 		fi
 	      fi
+	      rm -f "${IMAGE_PATH}"
 	      # update output to posted image
 	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
 	    fi
@@ -151,7 +152,6 @@ while true; do
 	    for I in ${IMAGES}; do
 	      IP="${FULLPATH%/*}/${I}.jpg"
 	      if [ -e "${IP}" ]; then 
-		if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG $0 $$ -- deleting image ${IP}" &> /dev/stderr; fi
 		rm -f "${IP}" "${IP%%.*}.json"
 	      else
 		echo "+++ WARN $0 $$ -- no file at ${IP}" &> /dev/stderr

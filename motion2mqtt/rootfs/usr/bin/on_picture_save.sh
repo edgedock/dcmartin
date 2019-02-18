@@ -7,7 +7,7 @@ else
 endif
 
 unsetenv DEBUG
-setenv USE_MQTT
+unsetenv USE_MQTT
 
 if ($?DEBUG) echo "$0:t $$ -- START" `date` >& /dev/stderr
 

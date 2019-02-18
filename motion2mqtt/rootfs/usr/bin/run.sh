@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
@@ -25,10 +25,13 @@ export HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID:-}'","arch":"'${HZN_ARCH:-
 echo "${HZN}" > "${TMP}/config.json"
 
 # label
-if [ ! -z "${SERVICE_LABEL:-}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then
-  ${SERVICE_LABEL}.sh &
+if [ ! -z "${SERVICE_LABEL:-}" ]; then
+  CMD=$(command -v "${SERVICE_LABEL:-}.sh")
+  if [ ! -z "${CMD}" ]; then
+    ${CMD} &
+  fi
 else
-  echo "+++ WARN $0 $$ -- executable not found for ${SERVICE_LABEL}: ${SERVICE_LABEL:-}.sh" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- executable ${SERVICE_LABEL:-}.sh not found" &> /dev/stderr
 fi
 
 # port
