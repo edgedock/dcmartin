@@ -1,4 +1,5 @@
 kafkacat.sh.*
+test-config-*
 *.out
 *.zip
 .DS_Store
