@@ -29,7 +29,7 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 # 2. Build
 
 The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start].  More information is available in the [`MAKE.md`][make-md].  The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is 
-a accelerated [video][build-pattern-video] of building this pattern.
+an accelerated [video][build-pattern-video] of building this pattern.
 
 ```
 mkdir ~/gitdir
