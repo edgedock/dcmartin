@@ -24,16 +24,16 @@ for dc in dconv dateutils.dconv; do
 done
 if [ -z "${DCONV}" ]; then echo "*** ERROR $0 $$ -- cannot locate dateutils; exiting" &> /dev/stderr; exit 1; fi
 
-# output from the service
-if [ -z "${SERVICE_LABEL:-}" ]; then echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" &> /dev/stderr; exit 1; fi
-SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
-
 # get pid of service
 CMD=$(command -v "${SERVICE_LABEL:-}.sh")
 if [ ! -z "${CMD}" ]; then
   PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
 fi
 if [ -z "${PID:-}" ]; then PID=0; fi
+
+# output from the service
+if [ -z "${SERVICE_LABEL:-}" ]; then echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" &> /dev/stderr; exit 1; fi
+SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
 
 # start the response body
 RESPONSE_FILE="${TMP}/${0##*/}.json"

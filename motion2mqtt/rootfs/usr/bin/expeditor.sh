@@ -24,6 +24,10 @@ while true; do
       if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- jq add failed" &> /dev/stderr; fi
     fi
     rm -f "${TMP}/$$"
+  else
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- no ${SERVICE_FILE}; sleeping (1 sec) ..." &> /dev/stderr; fi
+    sleep 1
+    continue
   fi
   inotifywait -m -r -e close_write --format '%w%f' "${SERVICE_FILE}"
 done
