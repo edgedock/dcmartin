@@ -11,7 +11,7 @@ SERVICE_FILE="${1}"
 RESPONSE_FILE="${2}"
 
 while [ ! -e "${SERVICE_FILE}" ]; do
-  echo "+++ WARN -- $0 $$ -- no ${SERVICE_FILE}; waiting" &> /dev/stderr; fi
+  echo "+++ WARN -- $0 $$ -- no ${SERVICE_FILE}; waiting" &> /dev/stderr
   sleep 1
 done
 
