@@ -43,11 +43,11 @@ if [ -z "${IBM_CLOUD_LOGIN_EMAIL}" ] || [ "${IBM_CLOUD_LOGIN_EMAIL}" == "null" ]
 fi
 
 ALL=$(curl -sL -u "${IBM_CLOUD_LOGIN_EMAIL}/iamapikey:${IBM_CLOUD_APIKEY}" "${HZN_EXCHANGE_URL}/orgs/${IBM_CLOUD_LOGIN_EMAIL}/services")
-PATTERNS=$(echo "${ALL}" | jq '{"services":[.services | objects | keys[]] | unique}' | jq -r '.services[]')  
+ENTITYS=$(echo "${ALL}" | jq '{"services":[.services | objects | keys[]] | unique}' | jq -r '.services[]')  
 OUTPUT='{"services":['
-i=0; for PATTERN in ${PATTERNS}; do 
+i=0; for ENTITY in ${ENTITYS}; do 
   if [[ $i > 0 ]]; then OUTPUT="${OUTPUT}"','; fi
-  OUTPUT="${OUTPUT}"$(echo "${ALL}" | jq '.services."'"${PATTERN}"'"' | jq -c '.id="'"${PATTERN}"'"')
+  OUTPUT="${OUTPUT}"$(echo "${ALL}" | jq '.services."'"${ENTITY}"'"' | jq -c '.id="'"${ENTITY}"'"')
   i=$((i+1))
 done 
 OUTPUT="${OUTPUT}"']}'
