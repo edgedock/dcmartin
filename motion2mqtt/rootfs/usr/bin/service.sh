@@ -3,9 +3,6 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-echo "HTTP/1.1 200 OK"
-echo "Content-Type: application/json; charset=ISO-8859-1"
-
 # hzn config
 if [ -z "${HZN}" ]; then
   if [ ! -s "/tmp/config.json" ]; then
@@ -55,13 +52,15 @@ fi
 PERIOD=$(jq -r '.'"${SERVICE_LABEL}"'.period' "${RESPONSE_FILE}")
 if [ -z "${PERIOD:-}" ] || [ "${PERIOD}" == 'null' ]; then PERIOD=0; fi
 DATE=$(jq -r '.'"${SERVICE_LABEL}"'.date' "${RESPONSE_FILE}")
-if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=$(stat -f %m "${RESPONSE_FILE}"; fi
+if [ -z "${DATE:-}" ] || [ "${DATE}" == 'null' ]; then DATE=1; fi
 
 NOW=$(date +%s)
 AGE=$((NOW - DATE))
 LMD=$(echo "${DATE}" | dconv -i '%s' -f '%a, %d %b %Y %H:%M:%S %Z' 2> /dev/stderr)
-SIZ=$(stat -f %z "${RESPONSE_FILE}")
+SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
 
+echo "HTTP/1.1 200 OK"
+echo "Content-Type: application/json; charset=ISO-8859-1"
 echo "Content-length: ${SIZ}" 
 echo "Access-Control-Allow-Origin: *"
 echo "Age: ${AGE}"
