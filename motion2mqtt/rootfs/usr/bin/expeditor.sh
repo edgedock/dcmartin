@@ -11,18 +11,20 @@ SERVICE_FILE="${1}"
 RESPONSE_FILE="${2}"
 
 while [ ! -e "${SERVICE_FILE}" ]; do
-  echo "+++ WARN -- $0 $$ -- no ${SERVICE_FILE}; waiting" &> /dev/stderr
+  echo "+++ WARN -- $0 $$ -- no ${SERVICE_FILE}; sleeping .." &> /dev/stderr
   sleep 1
 done
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- service file: ${SERVICE_FILE}" &> /dev/stderr; fi
 
 RESPONSE_TEMPLATE="${TMP}/${0##*/}.${RESPONSE_FILE##*/}.$$"
 jq -c '.' "${RESPONSE_FILE}" > "${RESPONSE_TEMPLATE}"
 if [ $? != 0 ]; then
-  echo "*** ERROR -- $0 $$ -- <response-file> ${RESPONSE_FILE} not valid JSON; exiting" &> /dev/stderr; fi
+  echo "*** ERROR -- $0 $$ -- <response-file> ${RESPONSE_FILE} not valid JSON; exiting" &> /dev/stderr
   exit 1
 fi
 
-if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${SERVICE_FILE}" &> /dev/stderr; fi
+if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- response template: ${RESPONSE_TEMPLATE}" &> /dev/stderr; fi
 
 inotifywait -m -e close_write --format '%w%f' "${SERVICE_FILE}" | while read FULLPATH; do
   if [ "${FULLPATH}" != "${SERVICE_FILE}" ]; then
