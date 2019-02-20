@@ -105,6 +105,26 @@ hzn key create IBM dcmartin@us.ibm.com
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
+## CLOC
+
+```
+--------------------------------------------------------------------------------
+Language                      files          blank        comment           code
+--------------------------------------------------------------------------------
+JSON                             66              1              0           8095
+Bourne Shell                     55            667            684           4571
+Markdown                         19            699              0           3012
+Dockerfile                       10             92             46            387
+YAML                              2             29             13            354
+make                              3             84             58            248
+Bourne Again Shell                3             15             15            106
+Python                            1             10             20             48
+Expect                            1              0              0              5
+--------------------------------------------------------------------------------
+SUM:                            160           1597            836          16826
+--------------------------------------------------------------------------------
+```
+
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
