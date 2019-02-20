@@ -8,17 +8,20 @@ if [ ! -d "${DIR}" ]; then
 fi
 
 # what
+SERVICE="service.json"
+SERVICE_VERSION=$(jq -r '.version' "${SERVICE}")
+
 PATTERN="pattern.json"
+PATTERN_LABEL=$(jq -r '.label' "${PATTERN}")
 if [ -s "${PATTERN}" ]; then
+  jq -c '.services=[.services[]|.serviceVersions[].version="'${SERVICE_VERSION}'"]' "${PATTERN}" > "${PATTERN}.$$"
   # tagging
   if [ ! -z "${TAG:-}" ]; then
-    PATTERN_LABEL=$(jq -r '.label' "${PATTERN}")
-    echo "+++ WARN $0 $$ -- modifying service label to ${PATTERN_LABEL} URL with ${TAG} in ${PATTERN}" &> /dev/stderr
-    jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${DIR}/${PATTERN}"
-  else
-    echo "--- INFO $0 $$ -- no TAG; doing nothing" &> /dev/stderr
+    jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}.$$" > "${PATTERN}.$$.$$"
+    mv -f "${PATTERN}.$$.$$" "${PATTERN}.$$"
   fi
+  mv -f "${PATTERN}.$$" "${DIR}/${PATTERN}"
 else
-  echo "+++ WARN $0 $$ -- cannot find file: ${PATTERN}" &> /dev/stderr
+  echo "+++ WARN $0 $$ -- cannot find pattern JSON template: ${PATTERN}" &> /dev/stderr
   exit 1
 fi

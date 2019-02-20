@@ -18,7 +18,8 @@ SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_p
 SERVICE_URI := $(shell jq -r '.url' service.json)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
-SERVICE_ARCH = $(shell jq -r '.build_from|to_entries[].key' build.json)
+SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json)
+SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[].key' build.json)
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)
@@ -69,11 +70,10 @@ $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE):
 
 ${DIR}: service.json userinput.json $(SERVICE_REQVARS) $(APIKEY)
 	@echo "--- INFO -- building temporary directory $(DIR)/"
-	@rm -fr ${DIR}/
+	@rm -fr ${DIR}/ && mkdir -p ${DIR}/
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
 	@jq '.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
-	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./mkdepend.sh ${DIR}
 
 ##
@@ -84,7 +84,7 @@ build: Dockerfile build.json service.json rootfs Makefile
 	@echo "--- INFO -- building container ${SERVICE_NAME} with tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
-run: remove stop-service
+run: remove service-stop
 	@echo "--- INFO -- running container ${DOCKER_NAME} for service ${SERVICE_NAME}"
 	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
@@ -101,16 +101,15 @@ push: build $(DOCKER_LOGIN)
 	@echo "--- INFO -- pushing container ${DOCKER_TAG} for service ${SERVICE_NAME}"
 	@docker push ${DOCKER_TAG}
 
-
 ##
 ## SERVICES
 ##
 
-${SERVICE_ARCH}:
+${SERVICE_ARCH_SUPPORT}:
 	@echo "--- INFO -- building service ${SERVICE_NAME} for architecture $@ with tag ${DOCKER_TAG}"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$@" build
 
-service-start: remove stop-service push ${DIR}
+service-start: remove service-stop push ${DIR}
 	@echo "--- INFO -- starting ${SERVICE_NAME} from $(DIR)"
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
@@ -120,7 +119,7 @@ service-test:
 	@echo "--- INFO -- testing ${SERVICE_NAME} on $(SERVICE_PORT)"
 	@./test.sh
 
-stop-service: 
+service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
 service-publish: build $(APIKEY) $(KEYS) ${DIR}
@@ -137,12 +136,13 @@ service-verify: $(APIKEY) $(KEYS)
 ##
 
 pattern-publish: ${APIKEY) ${DIR}
-	@echo "--- INFO -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH}"
-	@for arch in $(SERVICE_ARCH); do \
+	@echo "--- INFO -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" service-publish; \
 	done
 	@echo "--- INFO -- updating pattern ${SERVICE_NAME} for ${SERVICE_ORG} on ${HEU}"
 	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
+	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 pattern-validate:
@@ -172,17 +172,17 @@ unregister:
 ## CLEANUP
 ##
 
-clean: remove stop-service
+clean: remove service-stop
 	@echo "--- INFO -- cleaning service ${SERVICE_NAME} including image for ${DOCKER_TAG}"
-	@rm -fr ${DIR} check.json build.out
+	@rm -fr ${DIR} check.json build.out 
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: clean
 	@echo "--- INFO -- cleaning for distribution"
-	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS)
+	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS) ${SERVICE_VARIABLES} TEST_TMP_*
 
 ##
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check push service-start stop-service service-test service-publish service-verify $(TEST_MACHINES) $(SERVICE_ARCH) clean distclean
+.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-verify $(TEST_MACHINES) $(SERVICE_ARCH_SUPPORT) clean distclean
