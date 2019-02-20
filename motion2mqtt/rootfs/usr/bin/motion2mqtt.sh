@@ -3,6 +3,9 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
+## initialize service output ASAP
+touch "${TMP}/${SERVICE_LABEL}.json"
+
 JSON='[{"name":"cpu","url":"http://cpu"}]'
 
 if [ -z "${MOTION_DEVICE_NAME:-}" ]; then
@@ -22,9 +25,7 @@ SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
 CONFIG=$(echo "${CONFIG}" | jq '.services=['$(echo "${SERVICES}" | fmt | sed 's| |","|g' | sed 's|\(.*\)|"\1"|')']')
 if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- SERVICES: ${SERVICES}" 2> /dev/stderr; fi
 
-## initialize service output ASAP
-echo "${CONFIG}" > "${TMP}/${SERVICE_LABEL}.json"
-
+## timezone
 ZONEINFO="/usr/share/zoneinfo/${MOTION_TIMEZONE}"
 if [ -e "${ZONEINFO}" ]; then
   cp "${ZONEINFO}" /etc/localtime
@@ -53,7 +54,6 @@ start_motion() {
   CONFIG=$(echo "${CONFIG}" | jq '.pid='"${PID}")
   if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- PID: ${PID}" 2> /dev/stderr; fi
 }
-
 
 ###
 ### FUNCTIONS
@@ -106,6 +106,8 @@ WHEN=0
 SECONDS=$(date +%s)
 DATE=$(echo "${SECONDS} / ${MOTION_PERIOD} * ${MOTION_PERIOD}" | bc)
 OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.${DATE}.json"
+
+## initialize service output
 echo "${CONFIG}" > "${OUTPUT_FILE}"
 
 ## forever
