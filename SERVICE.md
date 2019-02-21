@@ -5,7 +5,7 @@ Services are defined within a directory hierarchy of this [repository][repositor
 + [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
 + [`wan`][wan-service] - provide Wide-Area-Network information
 + [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
-+ [`yolo`][yolo-service] - recognize `person` and othe entities from image
++ [`yolo`][yolo-service] - recognize `person` and other entities from image
 + [`yolo2masgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
 + [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
 
