@@ -119,7 +119,9 @@ One script with two names for interrogating the _exchange_.  When invoked as `se
 
 ## 3. Build process automation
 
-The `make` program is used to build; OOTB software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].
+The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].
+
+[docker-start]: https://www.docker.com/get-started
 
 The automated CI/CD process utilizes [Travis CI][travis-ci]; please refer to [`TRAVIS.md`][travis-md] for more information.
 

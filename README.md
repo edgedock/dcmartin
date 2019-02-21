@@ -28,9 +28,9 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 # 2. Build
 
-The `make` program is used to build; the software required: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  More information about the build process at [`BUILD.md`][build-md].
+The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. 
 
-The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in [`MAKE.md`][make-md].   
+More information is available in [`MAKE.md`][make-md] and [`BUILD.md`][build-md].
 
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
