@@ -11,26 +11,26 @@ hzn key create IBM dcmartin@us.ibm.com
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].
 
-# 1. `make` targets
+# `make` targets
 
 + `service-start` - starts the services and required services
 + `service-stop` - stops the services and required services
 + `service-publish` - publishes the service in the exchange
 + `service-verify` - verifies the published service in the exchange
 
-## 4.1 `service-start`
+## `service-start`
 
 This target will ensure that the service is built and then initiate the service using the `hzn` CLI commands.  All services specified, including required services, will also be initiated and appropriate virtual private networks will be established.  Please refer to the Open Horizon documentation for more details on the `hzn` command-line-interface.
 
-## 4.2 `service-stop`
+## `service-stop`
 
 This target will stop the services and all required services initiated using the `service-start` target.
 
-## 4.3 `service-publish`
+## `service-publish`
 
 This target will publish the service to the exchange, checking that appropriate modifications of the service `version` and its required services have been made.
 
-## 4.4 `service-verify`
+## `service-verify`
 
 This target will verify that the service is published into the exchange.
 
