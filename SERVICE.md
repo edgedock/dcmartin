@@ -13,6 +13,7 @@ Open Horizon is available for a variety of architectures and platforms.  For mor
 The build process for each service is identical.  The _default_ `make` target is to `build`, `run`, and `check` the  service.  These targets only support a single Docker container image do _not_ include the required services.  More information is available in [`BUILD.md`][build-md] and [`MAKE.md`][make-md].
 
 + `service-start` - starts the services and required services
++ `service-test` - tests the service output using `test-{service}.sh` for conformant payload
 + `service-stop` - stops the services and required services
 + `service-publish` - publishes the service in the exchange
 + `service-verify` - verifies the published service in the exchange
@@ -20,6 +21,40 @@ The build process for each service is identical.  The _default_ `make` target is
 ## `service-start`
 
 This target will ensure that the service is built and then initiate the service using the `hzn` CLI commands.  All services specified, including required services, will also be initiated and appropriate virtual private networks will be established.  Please refer to the Open Horizon documentation for more details on the `hzn` command-line-interface.
+
+## `service-test`
+
+This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _service_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
+
+```
+{
+  "hzn": {
+    "agreementid": "string",
+    "arch": "string",
+    "cpus": "number",
+    "device_id": "string",
+    "exchange_url": "string",
+    "host_ips": [
+      "string"
+    ],
+    "organization": "string",
+    "pattern": "string",
+    "ram": "number"
+  },
+  "date": "number",
+  "service": "string",
+  "hostname": "string",
+  "pid": "number",
+  "cpu": {
+    "date": "number",
+    "log_level": "string",
+    "debug": "boolean",
+    "period": "number",
+    "interval": "number",
+    "percent": "number"
+  }
+}
+```
 
 ## `service-stop`
 

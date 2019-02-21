@@ -38,7 +38,6 @@ This JSON configuration file maps supported architectures to designated containe
     }
 }
 ```
-[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu
 
 ### 1.2 `service.json`
 This JSON configuration file specifies information about the service itself and is used as a template; the build process utilizes the following:
@@ -54,7 +53,6 @@ The `label` and `version` values are used in the `make` process to derive other 
 
 The `userInput` specifies values provided to the service as environment variables.  Some services _require_ values to be provided.  During development and testing, required values may be specified through files of the same name.  For example, the `yolo2msghub` service requires `YOLO2MSGHUB_APIKEY` as indicated by its `defaultValue` being `null` (see below and [here][yolo2msghub-service]).
 
-[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
 
 ```
 "userInput": [
@@ -70,7 +68,6 @@ In this case a file may be created by processing the Kafka API key provided by t
 % jq '.api_key' apiKey.json > YOLO2MSGHUB_APIKEY
 ```
 
-[message-hub]: https://www.ibm.com/cloud/message-hub
 
 #### 1.2.1 `ports` in `service.json`
  The `ports` specifies the ports to be mapped _from_ the container to the localhost, e.g. the following maps the service port `80` to the localhost port `8581`.  Both `tcp` and `udp` ports may be specified.  This port mapping is _only_ done when running the service locally (see `make run`).
@@ -112,10 +109,6 @@ The `Dockerfile` contains details on the required operating environment and pack
 ## 3. `make`
 
 The build process is controlled by the `make` command and two files: [`makefile`][makefile] at the top-level and [`service.makefile`][service-makefile], which all _services_ share.  There are many variables in these files, but usually do not require modification (see command-line options); for more information refer to [`MAKEVARS.md`][makevars-md]
-
-[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
-[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
-[makefile]: https://github.com/dcmartin/open-horizon/blob/master/makefile
 
 The **make** command by **default** performs `build`,`run`,`check`; other available targets:
 
@@ -187,78 +180,14 @@ This target checks the service on its mapped port; see `service.json` for indivi
 ### 3.4 `push`
 This target pushes the local Docker container to [Docker hub][docker-hub]
 
-[docker-hub]: http://hub.docker.com/
 
-### 3.5 `service-publish`
-This target publishes containers in Docker hub to the Open Horizon _exchange_.
+## 4. `service-` targets
 
-### 3.6 `service-verify`
-This target verifies the service(s) in the Open Horizon _exchange_.
+Please refer to [`SERVICE.md`][service-md] for more information on these targets.
 
-### 3.7 `service-test`
-This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _service_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
+## 5. `pattern-` targets
 
-```
-{
-  "hzn": {
-    "agreementid": "string",
-    "arch": "string",
-    "cpus": "number",
-    "device_id": "string",
-    "exchange_url": "string",
-    "host_ips": [
-      "string"
-    ],
-    "organization": "string",
-    "pattern": "string",
-    "ram": "number"
-  },
-  "date": "number",
-  "service": "string",
-  "hostname": "string",
-  "pid": "number",
-  "cpu": {
-    "date": "number",
-    "log_level": "string",
-    "debug": "boolean",
-    "period": "number",
-    "interval": "number",
-    "percent": "number"
-  }
-}
-```
-### 3.8 `start`
-The `start` target will initiate the _service_ with all `requiredServices` as specified in `service.json`.  For example:
-
-```
-cpu/% make start
---- INFO -- removing docker container amd64_cpu-beta for service cpu
-amd64_cpu-beta
-Stop service: service(s) cpu with instance id prefix com.github.dcmartin.open-horizon.cpu-beta_0.0.1_8617f17b-f2b8-4761-ba35-2806f6d5c4e9
-Stopped service.
---- INFO -- building docker container cpu-beta with tag dcmartin/amd64_cpu-beta:0.0.1
---- INFO -- pushing docker container dcmartin/amd64_cpu-beta:0.0.1 for service cpu
-The push refers to repository [docker.io/dcmartin/amd64_cpu-beta]
-9bce4b746201: Layer already exists 
-5f6c19678c43: Layer already exists 
-767f936afb51: Layer already exists 
-0.0.1: digest: sha256:58139697236f8cbfd921837bf693c2141cb0d0796a88e9e2a10fe73f80f2b11b size: 947
---- INFO -- building horizon
-Created horizon metadata files in /Users/dcmartin/GIT/open-horizon/cpu/horizon. Edit these files to define and configure your new service.
-+++ WARN ../checkvars.sh 74370 -- service template unspecified; default: service.json
-+++ WARN ../mkdepend.sh 74382 -- modifying service URL with beta in horizon/userinput.json and horizon/service.definition.json
---- INFO -- starting cpu from horizon
-+++ WARN ../checkvars.sh 74415 -- service template unspecified; default: service.json
-Service project /Users/dcmartin/GIT/open-horizon/cpu/horizon verified.
-Service project /Users/dcmartin/GIT/open-horizon/cpu/horizon verified.
-Start service: service(s) cpu with instance id prefix 19c8bf62b10e5eb63bf0a46ba6f958fcc073a766353cb45fea1cb2d108985db3
-Running service.
-```
-
-### 3.9 `pattern-publish`
-
-The `pattern` target will publish the _service_ as a _pattern_ in the _exchange_.  A `pattern.json` file must be present. 
-
+Please refer to [`PATTERN.md`][pattern-md] for more information on these targets.
 
 # Changelog & Releases
 
@@ -269,46 +198,24 @@ based on the following:
 - ``MAJOR``: Incompatible or major changes.
 - ``MINOR``: Backwards-compatible new features and enhancements.
 - ``PATCH``: Backwards-compatible bugfixes and package updates.
-[semver]: https://semver.org/
 
 
 ## Authors & contributors
 
 [David C Martin][dcmartin] (github@dcmartin.com)
 
-[userinput]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/userinput.json
-[service-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
 [build-json]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/build.json
-[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/Dockerfile
 [dcmartin]: https://github.com/dcmartin
-[edge-fabric]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/getting-started.html
-[edge-install]: https://console.test.cloud.ibm.com/docs/services/edge-fabric/adding-devices.html
-[edge-slack]: https://ibm-appsci.slack.com/messages/edge-fabric-users/
-[ibm-apikeys]: https://console.bluemix.net/iam/#/apikeys
-[ibm-registration]: https://console.bluemix.net/registration/
+[docker-hub]: http://hub.docker.com/
 [issue]: https://github.com/dcmartin/open-horizon/issues
-[macos-install]: http://pkg.bluehorizon.network/macos
+[makefile]: https://github.com/dcmartin/open-horizon/blob/master/makefile
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+[message-hub]: https://www.ibm.com/cloud/message-hub
 [open-horizon]: http://github.com/open-horizon/
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
 [repository]: https://github.com/dcmartin/open-horizon
-[setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
-
-
-[amd64-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-amd64.svg
-[amd64-microbadger]: https://microbadger.com/images/dcmartin/plex-amd64
-[armhf-microbadger]: https://microbadger.com/images/dcmartin/plex-armhf
-[armhf-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-armhf.svg
-
-[amd64-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-amd64.svg
-[amd64-arch-shield]: https://img.shields.io/badge/architecture-amd64-blue.svg
-[amd64-dockerhub]: https://hub.docker.com/r/dcmartin/plex-amd64
-[amd64-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-amd64.svg
-[armhf-arch-shield]: https://img.shields.io/badge/architecture-armhf-blue.svg
-[armhf-dockerhub]: https://hub.docker.com/r/dcmartin/plex-armhf
-[armhf-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-armhf.svg
-[armhf-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-armhf.svg
-[i386-arch-shield]: https://img.shields.io/badge/architecture-i386-blue.svg
-[i386-dockerhub]: https://hub.docker.com/r/dcmartin/plex-i386
-[i386-layers-shield]: https://images.microbadger.com/badges/image/dcmartin/plex-i386.svg
-[i386-microbadger]: https://microbadger.com/images/dcmartin/plex-i386
-[i386-pulls-shield]: https://img.shields.io/docker/pulls/dcmartin/plex-i386.svg
-[i386-version-shield]: https://images.microbadger.com/badges/version/dcmartin/plex-i386.svg
+[semver]: https://semver.org/
+[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
+[setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/blob/master/yolo2msghub/service.json
