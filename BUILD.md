@@ -12,14 +12,14 @@ Within each directory is a set of files to control the build process:
 + `userinput.json` - variables template for use in testing _service_
 + `pattern.json` - [**optional**] _pattern_ configuration template (see [`PATTERN.md`][pattern-md] for more information).
 
-### 1.1 `Makefile` &&  `.travis.yml`
+### 1.1 `Makefile` &  `.travis.yml`
 
 The `Makefile` is shared across all services; it is a symbolic link to a common [`service.makefile`][service-makefile] in the root of the repository.
 Services are built using `make` command and a set of targets (see [`MAKE.md`][make-md] and [`MAKEVARS.md`][makevars-md]).
 
 The [Travis][travis-ci] process automation system for continuous-integration enables the execution of the build process and tools in a cloud environment. Travis expectations and limitations effect the CI/CD process.  Please see [`TRAVIS.md`][travis-md] for more information.
 
-### 1.2 `Dockerfile` && `build.json`
+### 1.2 `Dockerfile` & `build.json`
 
 The `Dockerfile` controls the container build process.  A critical component of that process is the `FROM` directive, which indicates the container from which to build.  The `build.json` configuration file provides a mapping for each architecture the _service_ supports.  For example, an Alpine-based LINUX container might include the following:
 
@@ -48,7 +48,7 @@ LABEL \
     org.label-schema.vendor="David C Martin <github@dcmartin.com>"
 ```
 
-### 1.3 `service.json` && `userinput.json`
+### 1.3 `service.json` & `userinput.json`
 
 The `service.json` configuration template provides standard Open Horizon service metadata and state information, including:
 
@@ -109,7 +109,7 @@ Utilize `hzn` CLI to create temporary build directory and process configuration 
 
 Gather variable(s) values as specified in _service_ configuration template, `userinput.json`, or corresponding files in directory.
 
-### 2.4 `test-service.sh` && `test.sh`
+### 2.4 `test-service.sh` & `test.sh`
 
 Perform a test of the _service_ to support the test-harness (`test.sh`) for any service; the script name is dependent on the _service_ `label`.  All services share a common `'test-service.sh` script, symbolically linked using the service label, e.g. `test-yolo2msghub.sh`.
 
