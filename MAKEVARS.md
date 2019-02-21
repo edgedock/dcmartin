@@ -58,6 +58,23 @@ This variable may be used on the command-line to control the build, for example:
 + `DOCKER_TAG` - tag for container; defaults to `$(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)` [**automatic**]
 + `DOCKER_PORT` - port mapping for local container; from default is first from `ports` in `service.json`
 
+## TEST
+
+These variables control the testing of th service:
+
++ `TEST_JQ_FILTER` - filter to apply to `jq` command when running make `check`
++ `TEST_NODE_FILTER` - filter to apply when running make `testnodes`
++ `TEST_TIMEOUT` - number of seconds to wait for a node connection
++ `TEST_MACHINES` - list of nodes by TCP/IP addressable address (IP, FQDN, ..)
+
+```
+## TEST
+TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
+TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
+TEST_TIMEOUT = 10
+TEST_MACHINES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
+```
+
 ## BUILD
 
 These variables are complicated and subject to change.
