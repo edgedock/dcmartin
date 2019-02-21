@@ -11,7 +11,7 @@ hzn key create IBM dcmartin@us.ibm.com
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].
 
-# 1. Service `make` targets
+# 1. `make` targets
 
 + `service-start` - starts the services and required services
 + `service-stop` - stops the services and required services
