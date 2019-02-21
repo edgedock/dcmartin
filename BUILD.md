@@ -1,16 +1,5 @@
 # `BUILD.md` - build process automation
 
-Services are defined within a directory hierarchy of this [repository][repository].  Services include:
-
-+ [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
-+ [`wan`][wan-service] - provide Wide-Area-Network information
-+ [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
-+ [`yolo`][yolo-service] - recognize `person` and other entities from image
-+ [`yolo2masgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
-+ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
-
-While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent build automation process.  Further information about _service_ and _pattern_ building is available at [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md].
-
 ## 1. Build control files
 
 Within each directory is a set of files to control the build process:
