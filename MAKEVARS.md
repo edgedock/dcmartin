@@ -68,7 +68,6 @@ These variables control the testing of th service:
 + `TEST_MACHINES` - list of nodes by TCP/IP addressable address (IP, FQDN, ..)
 
 ```
-## TEST
 TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
 TEST_TIMEOUT = 10
