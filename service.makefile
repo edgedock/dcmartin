@@ -122,8 +122,9 @@ service-test:
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
-service-publish: build $(APIKEY) $(KEYS) ${DIR}
+service-publish: build $(APIKEY) $(KEYS) ${DIR} $(SERVICE_ARCH_SUPPORT)
 	@echo "--- INFO -- publishing service $(SERVICE_NAME)"
+	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
 service-verify: $(APIKEY) $(KEYS)
@@ -135,7 +136,9 @@ service-verify: $(APIKEY) $(KEYS)
 ## PATTERNS
 ##
 
-pattern-publish: ${APIKEY) ${DIR}
+$(DIR)/pattern.json: ${DIR}
+	
+pattern-publish: ${APIKEY) # ${DIR} $(DIR)/pattern.json service-publish
 	@echo "--- INFO -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" service-publish; \
@@ -159,7 +162,7 @@ testnodes: $(TEST_MACHINES)
 
 $(TEST_MACHINES):
 	@echo "--- INFO -- start testing ${SERVICE_NAME} on ${@} port $(SERVICE_PORT) at $$(date)"
-	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl --connect-timeout $(TEST_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
+	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl -m 30 --connect-timeout $(TEST_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
 
 unregister:
 	@echo "--- INFO -- unregistering ${TEST_MACHINES}"

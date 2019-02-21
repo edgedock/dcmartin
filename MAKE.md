@@ -123,10 +123,12 @@ The **make** command by **default** performs `build`,`run`,`check`; other availa
 + `run` - run container locally; map `ports` as in `service.json`
 + `check` - checks the service locally on mapped port
 + `push` - push the container to Docker registry; __requires__ `DOCKER_ID` and `docker login`
-+ `publish` - publish service to _exchange_; __requires__ `hzn` CLI
-+ `verify` - verify service on exchange; __requires__ `hzn` CLI
-+ `start` - intiates service and required services locally; __requires__ `hzn` CLI
-+ `test` - tests the service output using `test-{service}.sh` for conformant payload
++ `service-publish` - publish service to _exchange_; __requires__ `hzn` CLI
++ `service-verify` - verify service on exchange; __requires__ `hzn` CLI
++ `service-start` - intiates service and required services locally; __requires__ `hzn` CLI
++ `service-test` - tests the service output using `test-{service}.sh` for conformant payload
++ `pattern-publish` - publish pattern to _exchange_; __requires__ `hzn` CLI
++ `pattern-validate` - validate pattern on exchange; __requires__ `hzn` CLI
 + `clean` - remove all generated artefacts, including running containers and images
 +  `distclean` - remove all residuals, including variable and key files
 
@@ -187,13 +189,13 @@ This target pushes the local Docker container to [Docker hub][docker-hub]
 
 [docker-hub]: http://hub.docker.com/
 
-### 3.5 `publish`
+### 3.5 `service-publish`
 This target publishes containers in Docker hub to the Open Horizon _exchange_.
 
-### 3.6 `verify`
+### 3.6 `service-verify`
 This target verifies the service(s) in the Open Horizon _exchange_.
 
-### 3.7 `test`
+### 3.7 `service-test`
 This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _service_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
 
 ```
@@ -253,7 +255,7 @@ Start service: service(s) cpu with instance id prefix 19c8bf62b10e5eb63bf0a46ba6
 Running service.
 ```
 
-### 3.9 `pattern`
+### 3.9 `pattern-publish`
 
 The `pattern` target will publish the _service_ as a _pattern_ in the _exchange_.  A `pattern.json` file must be present. 
 

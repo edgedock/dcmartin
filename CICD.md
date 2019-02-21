@@ -181,17 +181,15 @@ Automated test harness (`test.sh`) and automated, default, service test script (
 
 To avoid utilization of the same pattern _name_ when building the software on varying branches in the repository, an additional `TAG` is introduced to append to all artifacts built in the repository.  The `fixpattern.sh` script appends the value, if and only if defined, to the pattern _name_ for both the `hzn exchange pattern publish` command and derived, transient, `horizon/pattern.json` file.
 
+# MORE INFORMATION
 
+Please refer to [`SERVICE.md`][service-md] for more information on building services.
+Please refer to [`PATTERN.md`][pattern-md] for more information on building patterns.
+
+
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
-
-
-
- 
-
- 
-  
-
-  
-  [open-horizon-github]: http://github.com/open-horizon
-  [open-horizon-examples-github]: http://github.com/open-horizon/examples
+[open-horizon-github]: http://github.com/open-horizon
+[open-horizon-examples-github]: http://github.com/open-horizon/examples
 

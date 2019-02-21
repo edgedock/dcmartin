@@ -4,7 +4,7 @@
   "description": "Sends JSON payloads from `yolo` service to IBM Message Hub",
   "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo2msghub",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "arch": null,
   "public": true,
   "sharable": "singleton",
@@ -12,7 +12,7 @@
     { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
     { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
     { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
-    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null }
+    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null }
   ],
   "userInput": [
     { "name": "YOLO2MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },

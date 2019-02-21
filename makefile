@@ -25,13 +25,13 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = build push check run remove clean publish verify stop
+TARGETS = build push check run remove clean distclean service-publish service-verify service-stop
 
 ## actual
 
 default: $(ALL) check
 
-all: build publish verify start test pattern validate
+all: build service-publish service-verify service-start service-test pattern-publish pattern-validate
 
 $(ALL):
 	@echo "--- INFO -- making $@"
@@ -55,13 +55,13 @@ test:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-pattern:
+pattern-publish:
 	@echo "--- INFO -- publishing $(PATTERNS)"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \
 	done
 
-validate: 
+pattern-validate: 
 	@echo "--- INFO -- validating $(PATTERNS)"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) -C $$dir $@; \

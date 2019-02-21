@@ -24,9 +24,9 @@ if [ ! -s "${CONFIG}" ]; then
   exit 1
 fi
 
-IBM_CLOUD_APIKEY=$(jq -r '.exchanges[]|select(.id=="alpha")|.password' "${CONFIG}")
-if [ -z "${IBM_CLOUD_APIKEY}" ] || [ "${IBM_CLOUD_APIKEY}" == "null" ]; then
-  echo "*** ERROR $0 $$ -- invalid IBM_CLOUD_APIKEY" &> /dev/stderr
+HZN_EXCHANGE_APIKEY=$(jq -r '.exchanges[]|select(.id=="alpha")|.password' "${CONFIG}")
+if [ -z "${HZN_EXCHANGE_APIKEY}" ] || [ "${HZN_EXCHANGE_APIKEY}" == "null" ]; then
+  echo "*** ERROR $0 $$ -- invalid HZN_EXCHANGE_APIKEY" &> /dev/stderr
   exit 1
 fi
   
@@ -36,13 +36,13 @@ if [ -z "${HZN_EXCHANGE_URL}" ] || [ "${HZN_EXCHANGE_URL}" == "null" ]; then
   exit 1
 fi
 
-IBM_CLOUD_LOGIN_EMAIL=$(jq -r '.exchanges[]|select(.id=="alpha")|.org' "${CONFIG}")
-if [ -z "${IBM_CLOUD_LOGIN_EMAIL}" ] || [ "${IBM_CLOUD_LOGIN_EMAIL}" == "null" ]; then
-  echo "*** ERROR $0 $$ -- invalid IBM_CLOUD_LOGIN_EMAIL" &> /dev/stderr
+HZN_EXCHANGE_ORG=$(jq -r '.exchanges[]|select(.id=="alpha")|.org' "${CONFIG}")
+if [ -z "${HZN_EXCHANGE_ORG}" ] || [ "${HZN_EXCHANGE_ORG}" == "null" ]; then
+  echo "*** ERROR $0 $$ -- invalid HZN_EXCHANGE_ORG" &> /dev/stderr
   exit 1
 fi
 
-ALL=$(curl -sL -u "${IBM_CLOUD_LOGIN_EMAIL}/iamapikey:${IBM_CLOUD_APIKEY}" "${HZN_EXCHANGE_URL}/orgs/${IBM_CLOUD_LOGIN_EMAIL}/nodes")
+ALL=$(curl -sL -u "${HZN_EXCHANGE_ORG}/iamapikey:${HZN_EXCHANGE_APIKEY}" "${HZN_EXCHANGE_URL}/orgs/${HZN_EXCHANGE_ORG}/nodes")
 NODES=$(echo "${ALL}" | jq '{"nodes":[.nodes | objects | keys[]] | unique}' | jq -r '.nodes[]')  
 OUTPUT='{"nodes":['
 i=0; for NODE in ${NODES}; do 
