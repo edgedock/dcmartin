@@ -47,9 +47,9 @@ BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD
 ## TEST
 TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
-TEST_TIMEOUT = 10
+TEST_NODE_TIMEOUT = 10
 # temporary
-TEST_MACHINES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
+TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
 
 ##
 ## targets
@@ -157,16 +157,16 @@ pattern-validate:
 ## TESTING
 ##
 
-testnodes: $(TEST_MACHINES)
-	@echo "--- INFO -- finish testing $(SERVICE_NAME) on ${TEST_MACHINES} at $$(date)"
+testnodes: $(TEST_NODE_NAMES)
+	@echo "--- INFO -- finish testing $(SERVICE_NAME) on ${TEST_NODE_NAMES} at $$(date)"
 
-$(TEST_MACHINES):
+$(TEST_NODE_NAMES):
 	@echo "--- INFO -- start testing ${SERVICE_NAME} on ${@} port $(SERVICE_PORT) at $$(date)"
-	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl -m 30 --connect-timeout $(TEST_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
+	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl -m 30 --connect-timeout $(TEST_NODE_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
 
 unregister:
-	@echo "--- INFO -- unregistering ${TEST_MACHINES}"
-	@for machine in $(TEST_MACHINES); do \
+	@echo "--- INFO -- unregistering ${TEST_NODE_NAMES}"
+	@for machine in $(TEST_NODE_NAMES); do \
 	  echo "--- INFO -- unregistering $${machine}" $$(date); \
 	  ssh $${machine} 'hzn unregister -fr &> /dev/null &'; \
 	done
@@ -188,4 +188,4 @@ distclean: clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-verify $(TEST_MACHINES) $(SERVICE_ARCH_SUPPORT) clean distclean
+.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean

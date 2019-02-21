@@ -60,12 +60,12 @@ This variable may be used on the command-line to control the build, for example:
 
 ## TEST
 
-These variables control the testing of th service:
+These variables control the testing of the _service_ or _pattern_:
 
-+ `TEST_JQ_FILTER` - filter to apply to `jq` command when running make `check`
-+ `TEST_NODE_FILTER` - filter to apply when running make `testnodes`
-+ `TEST_TIMEOUT` - number of seconds to wait for a node connection
-+ `TEST_MACHINES` - list of nodes by TCP/IP addressable address (IP, FQDN, ..)
++ `TEST_JQ_FILTER` - filter to apply to `jq` command when testing the _service_
++ `TEST_NODE_FILTER` - filter to apply when testing the _pattern_
++ `TEST_NODE_TIMEOUT` - number of seconds to wait for a node connection
++ `TEST_NODE_NAMES` - list of nodes by TCP/IP addressable address (IP, FQDN, ..)
 
 ```
 TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
