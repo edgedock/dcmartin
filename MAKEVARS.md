@@ -2,7 +2,7 @@
 
 **This content is informational only; there is usually no need to specify any of these variables when executing the build process.**
 
-## Horizon controls
+# Horizon controls
 
 + `CMD` - location of `hzn` command
 + `HZN` - Open Horizon _exchange_ URL; defaults to  `https://alpha.edge-fabric.com/v1/`
