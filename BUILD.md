@@ -167,6 +167,7 @@ The default target for the `make` process will `build` the container images, `ru
 [build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+[make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 [travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
 [travis-ci]: https://travis-ci.org/
