@@ -28,78 +28,52 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 # 2. Build
 
-The `make` program is used to build; there is no software installation required by default -- except `make`, `git`, `curl`, `jq`, and [Docker][docker-start]. The automated CI/CD process utilizes [Travis CI][travis-ci] with this [YAML][travis-yaml]; please refer to [`TRAVIS.md`][travis-md] for more information. There is an accelerated [video][build-pattern-video] of building a pattern.
-
-### Quick Start
-A _quick_ start for Debian LINUX (Ubuntu or Raspbian) is to install `docker` and the build tools:
-
-```
-wget -qO - get.docker.com  | sh
-sudo addgroup $(whoami) docker
-sudo apt install -y git make curl jq
-```
-**NOTE**:  Then `logout` and login to establish `docker` group privileges, clone the GIT repo, and `make` the software:
-
-```
-mkdir ~/gitdir
-cd ~/gitdir
-git clone http://github.com/dcmartin/open-horizon
-cd open-horizon
-make
-```
+The `make` program is used to build; the software required: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  More information about the build process at [`BUILD.md`][build-md].
 
 The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in [`MAKE.md`][make-md].   
 
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
-[travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md
+[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
 [travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
 [travis-ci]: https://travis-ci.org/
 [build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
-# 3. Services
+# 3. Services & Patterns
 
-There are sample services available:
+Services are defined within a directory hierarchy of this [repository][repository].  Services include:
 
-1. [`cpu`][cpu-service] -  CPU usage as a percentage
-1. [`wan`][wan-service] -  Wide Area Network information
-1. [`hal`][hal-service] -  Hardware Abstraction Layer information
-1. [`yolo`][yolo-service] -  Entity recognition and counting
++ [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
++ [`wan`][wan-service] - provide Wide-Area-Network information
++ [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
++ [`yolo`][yolo-service] - recognize `person` and other entities from image
++ [`yolo2masgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka (**pattern** available)
++ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT (**pattern** available)
+
+While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   The build automation process is futher described in [`BUILD.md`][build-md].  See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
 [cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
-
-# 4. Patterns
-
-There are sample patterns available:
-
-1. [`yolo2msghub`][yolo2msghub-pattern] - Capture image, detect & count entity, publish to a Kafka broker
-1. [`motion2mqtt`][motion2mqtt-pattern] - Motion detection, image capture, and publish to a MQTT broker
-
-[yolo2msghub-pattern]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
-[motion2mqtt-pattern]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
+[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
 
 # 5. Open Horizon
 
-Refer to these [instructions][setup]; quick-start for Ubuntu/Debian/Raspbian LINUX below. There is an installation [package][macos-install] for macOS.
+Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].  
+
+A _quick-start_ for Ubuntu/Debian/Raspbian LINUX below.
 
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
 
+[setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+
 ## 5.1 Credentials
 
-**Note:** _You will need an IBM Cloud [account][ibm-registration]_
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.
-
-Publishing services or patterns requires a public/private key-pair generated by the `hzn` command-line-interface (CLI).  Specify company (e.g. `IBM`) and organization (e.g. `dcmartin@us.ibm.com`) as command-line arguments; for example:
-
-```
-hzn key create IBM dcmartin@us.ibm.com
-```
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your [IBMid][ibm-registration]
 
 ## 5.2 Further Information 
 
@@ -151,4 +125,9 @@ David C Martin (github@dcmartin.com)
 [macos-install]: http://pkg.bluehorizon.network/macos
 [open-horizon]: http://github.com/open-horizon/
 [repository]: https://github.com/dcmartin/open-horizon
-[setup]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+[setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+
+
+
