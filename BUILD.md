@@ -92,10 +92,10 @@ In addition, there are a set of build support scripts that provide required serv
 + `docker-run.sh` - standardized local execution of Docker containers per `service.json` configuration template
 + `mkdepend.sh` - utilizes `hzn` CLI to create build artefacts
 + `checkvars.sh`- process _service_ variables for `userinput.json`
-+ `exchange-test.sh` - test _exchange_ for _service_ pre-requisites; (**note:** linked as `service-test.sh`)
-+ `fixpattern.sh` - process _pattern_ configuration template (see [`PATTERN.md`][pattern-md])
 + `test-service.sh`- test _service_ output (**note:** linked as `test-<service>.sh`)
 + `test.sh` - test harness for processing output from `test-service.sh`
++ `exchange-test.sh` - test _exchange_ for _service_ or _pattern_ pre-requisites; (**note:** linked as `{pattern,service}-test.sh`)
++ `fixpattern.sh` - process _pattern_ configuration template (see [`PATTERN.md`][pattern-md])
 
 ### 2.1 `docker-run.sh`
 
@@ -115,7 +115,15 @@ Perform a test of the _service_ to support the test-harness (`test.sh`) for any 
 
 ### 2.5 `service-test.sh` (_aka_ `exchange-test.sh`)
 
-One script with two names for interrogating the _exchange_.  When invoked as `service-test.sh`, which is symbolically linked to `exchange-test.sh`, the _service_ is tested to determine if all required services are up-to-date with respect to organization, architecture, and semantic version number.  Out-of-date service configurations will fail with an error message.
+One script with three names for interrogating the _exchange_.  When invoked as `service-test.sh`, which is symbolically linked to `exchange-test.sh`, the _service_ is tested to determine if all required services are up-to-date with respect to organization, architecture, and semantic version number.  Out-of-date service configurations will fail with an error message.
+
+### 2.6 `fixpattern.sh`
+
+Process the _pattern_ configuration template with any additional `TAG` information.  See [`MAKE.md`][make-md] for more information on `TAG`.
+
+### 2.7 `pattern-test.sh` (_aka_ `exchange-test.sh`)
+
+One script with three names for interrogating the _exchange_.  When invoked as `pattern-test.sh`, which is symbolically linked to `exchange-test.sh`, the _pattern_ is tested to determine if all services are up-to-date with respect to organization, architecture, and semantic version number.  Out-of-date pattern configurations will fail with an error message.
 
 ## 3. Build process automation
 
