@@ -40,22 +40,18 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 + `url` - `com.github.dcmartin.open-horizon.motion2mqtt`
 + `version` - `0.0.1`
 
-#### Required variables
-
-+ `MOTION_DEVICE_DB` - device group name (aka database)
-+ `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `127.0.0.1`
-
 #### Optional variables
 
-+ `MOTION_DEVICE_NAME` - device name (aka hostname)
-+ `MOTION_MQTT_PORT` - port #; defaults to `1883`
-+ `MOTION_MQTT_USERNAME` - MQTT username; no default; required; ignored if no security
-+ `MOTION_MQTT_PASSWORD` - MQTT password; no default; required; ignored if no security
++ `MOTION_DEVICE_DB` - device database name (aka top-level topic); defaults to `motion`
++ `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `mqtt`
++ `MOTION_DEVICE_NAME` - device name; defaults to `HZN_DEVICE_ID` or `hostname`
++ `MOTION_MQTT_PORT` - port number; defaults to `1883`
++ `MOTION_MQTT_USERNAME` - MQTT username; defaults to ""
++ `MOTION_MQTT_PASSWORD` - MQTT password; defaults to ""
 + `MOTION_POST_PICTURES` - post pictures; default `off`; options include `on`, `best`, and `center`
 + `MOTION_LOG_LEVEL` - level of logging for motion2mqtt; default `2`
 + `MOTION_LOG_TYPE` - type of logging for motion2mqtt; default `all`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
-
 
 ## How To Use
 
