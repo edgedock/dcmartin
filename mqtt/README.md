@@ -38,7 +38,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `version` - `0.0.1`
 
 #### Optional variables
-+ `MQTT_OPTION` - some option (TBD)
++ `MQTT_PERIOD` - update time in seconds for server statistics
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 + `DEBUG` - force debug settings; boolean; default `false`
 
@@ -67,25 +67,48 @@ Copy this [repository][repository], change to the `mqtt` directory, then use the
     "pattern": "",
     "ram": 0
   },
-  "date": 1549596687,
+  "date": 1550798064,
   "service": "mqtt",
-  "hostname": "06ab8e7ac516-172017000002",
-  "pid": 21,
+  "pid": 13,
   "mqtt": {
-    "date": 1549596748,
+    "date": 1550798079,
     "log_level": "info",
     "debug": false,
     "period": 30,
-    "pid": 24,
-    "found": {
-      "discovered": [
-        {
-          "data": "Hello, World!",
-          "address": "172.17.0.2"
+    "pid": 17,
+    "version": "mosquitto version 1.4.15",
+    "broker": {
+      "bytes": {
+        "received": 45836001021,
+        "sent": 43188059313
+      },
+      "clients": {
+        "connected": 1
+      },
+      "load": {
+        "messages": {
+          "sent": {
+            "one": 21.91,
+            "five": 105.69,
+            "fifteen": 215.26
+          },
+          "received": {
+            "one": 30.31,
+            "five": 146.31,
+            "fifteen": 373
+          }
         }
-      ],
-      "version": "1.0",
-      "udp_port": 5959
+      },
+      "publish": {
+        "messages": {
+          "received": 481086,
+          "sent": 173971,
+          "dropped": 0
+        }
+      },
+      "subscriptions": {
+        "count": 132
+      }
     }
   }
 }
