@@ -69,33 +69,6 @@ Copy this [repository][repository], change to the `hzn-ubuntu` directory, then u
 }
 ```
 
-# Open Horizon
-
-This service may be published to an Open Horizon exchange for an organization.  Please see the documentation for additional details.
-
-## User Input (options)
-Nodes should _register_ using a derivative of the template `userinput.json` [file][userinput].  Options include:
-+ `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
-+ `DEBUG` - force debugging mode; boolean; default `false`
-
-## About Open Horizon
-
-Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.
-
-## Credentials
-
-**Note:** _You will need an IBM Cloud [account][ibm-registration]_
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your IBMid.  An API key will be provided for an IBM sponsored Kafka service during the alpha phase.  The same API key is used for both the CPU and SDR addon-patterns.
-
-# Setup
-
-Refer to these [instructions][setup].  Installation package for macOS is also [available][macos-install]
-
-# Further Information
-
-Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
-
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format

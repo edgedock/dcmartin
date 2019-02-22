@@ -127,6 +127,12 @@ service-publish: build $(APIKEY) $(KEYS) ${DIR} $(SERVICE_ARCH_SUPPORT)
 	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
+service-publish-all:
+	@echo "--- INFO -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" service-publish; \
+	done
+
 service-verify: $(APIKEY) $(KEYS)
 	@echo "--- INFO -- verifying service $(SERVICE_NAME) in ${SERVICE_ORG}"
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
@@ -136,15 +142,11 @@ service-verify: $(APIKEY) $(KEYS)
 ## PATTERNS
 ##
 
-$(DIR)/pattern.json: ${DIR}
-	
-pattern-publish: ${APIKEY) # ${DIR} $(DIR)/pattern.json service-publish
-	@echo "--- INFO -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
-	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" service-publish; \
-	done
+${DIR}/pattern.json: pattern.json ${DIR}
 	@echo "--- INFO -- updating pattern ${SERVICE_NAME} for ${SERVICE_ORG} on ${HEU}"
 	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
+
+pattern-publish: ${APIKEY} ${DIR}/pattern.json service-publish-all
 	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
@@ -188,4 +190,4 @@ distclean: clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean
+.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-publish-all service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean
