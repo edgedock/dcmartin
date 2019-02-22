@@ -1,0 +1,15 @@
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.herald",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "MQTT_PERIOD": 30,
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    }
+  ]
+}

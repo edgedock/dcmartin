@@ -1,0 +1,9 @@
+{
+    "squash": false,
+    "build_from": {
+        "arm64": "dcmartin/arm64_base-alpine:0.0.1",
+        "amd64": "dcmartin/amd64_base-alpine:0.0.1",
+        "arm": "dcmartin/arm_base-alpine:0.0.1"
+    },
+    "args": {}
+}
