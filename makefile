@@ -16,7 +16,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine base-ubuntu base-hzncli herald mqtt
+SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt base-hzncli
 PATTERNS = yolo2msghub motion2mqtt
 
 ALL = $(SERVICES) $(PATTERNS)
@@ -29,7 +29,7 @@ TARGETS = build push check run remove clean distclean service-publish service-ve
 
 ## actual
 
-default: $(ALL) check
+default: $(ALL)
 
 all: build service-publish service-verify service-start service-test pattern-publish pattern-validate
 
