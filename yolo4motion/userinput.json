@@ -1,0 +1,15 @@
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.yolo4mqtt",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "YOLO4MOTION_ENTITY": "all",
+        "LOG_LEVEL": "debug",
+        "DEBUG": false
+      }
+    }
+  ]
+}
