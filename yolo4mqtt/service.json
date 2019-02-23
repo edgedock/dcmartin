@@ -1,0 +1,43 @@
+{
+  "org": "dcmartin@us.ibm.com",
+  "label": "yolo4mqtt",
+  "description": "Listen to MQTT topic and run YOLO on image received",
+  "documentation": "https://github.com/dcmartin/open-horizon/yolo4mqtt/README.md",
+  "url": "com.github.dcmartin.open-horizon.yolo4mqtt",
+  "version": "0.0.1",
+  "arch": null,
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [
+    { "url": "com.github.dcmartin.open-horizon.mqtt", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null }
+  ],
+  "userInput": [
+    { "name": "YOLO4MQTT_HOST", "label": "MQTT host", "type": "string", "defaultValue": "mqtt" },
+    { "name": "YOLO4MQTT_TOPIC", "label": "topic to listen", "type": "string", "defaultValue": "motion/+/+/image" },
+    { "name": "YOLO4MQTT_INTERVAL", "label": "time between intervals in milliseconds", "type": "number", "defaultValue": "500" },
+    { "name": "YOLO4MQTT_USE_MOCK", "label": "use mock data true/false", "type": "boolean", "defaultValue": "false" },
+    { "name": "YOLO_SCALE", "label": "size WIDTHxHEIGHT for image", "type": "string", "defaultValue": "320x240" },
+    { "name": "YOLO_ENTITY", "label": "entity to count", "type": "string", "defaultValue": "all" },
+    { "name": "YOLO_THRESHOLD", "label": "threshold for detection", "type": "number", "defaultValue": "0.25" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug true/false", "type": "boolean", "defaultValue": "false" }
+  ],
+  "deployment": {
+    "services": {
+      "yolo4mqtt": {
+        "environment": [
+          "SERVICE_LABEL=yolo4mqtt"
+        ],
+        "devices": [],
+        "image": null,
+        "privileged": true
+      }
+    }
+  },
+  "tmpfs": {
+    "size": 81920000
+  },
+  "ports": {
+    "80/tcp": 8591
+  }
+}
