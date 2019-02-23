@@ -81,7 +81,7 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) $(APIKEY)
 ##
 
 build: Dockerfile build.json service.json rootfs Makefile
-	@echo "--- INFO -- building container ${SERVICE_NAME} with tag ${DOCKER_TAG}"
+	@echo "--- INFO -- building service ${SERVICE_NAME} with Docker tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
 run: remove service-stop
@@ -109,7 +109,7 @@ ${SERVICE_ARCH_SUPPORT}:
 	@echo "--- INFO -- building service ${SERVICE_NAME} for architecture $@ with tag ${DOCKER_TAG}"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$@" build
 
-service-start: remove service-stop push ${DIR}
+service-start: remove service-stop ${DIR}
 	@echo "--- INFO -- starting ${SERVICE_NAME} from $(DIR)"
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
