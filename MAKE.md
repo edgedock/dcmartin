@@ -130,7 +130,7 @@ The **make** command by **default** performs `build`,`run`,`check`; other availa
 The command line directives are optional, but may be specified to control the architecture and naming of the artefacts.  By default the native architecture is automatically detected and `TAG` is empty.
 
 + `BUILD_ARCH` - specify the architecture for the build process per `build.json` options
-+ `TAG` - a _string_ value appened to _almost_ all artefacts, including Docker images, service `url`, ..
++ `TAG` - a _string_ value appended to _almost_ all artefacts, including Docker images, service `url`, ..
 
 These options may be specified when invoking the `make` command (see below) or statically specified by creating a file with the same name in the top-level directory, e.g. `echo 'experimental' > TAG`)
 
