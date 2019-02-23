@@ -1,4 +1,4 @@
-# `yolo4mqtt` - You Only Look Once service
+# `yolo4mqtt` - You Only Look Once and listen to MQTT service
 
 Provides entity count information as micro-service; updates periodically (default `0` seconds).  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
