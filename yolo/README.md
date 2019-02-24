@@ -104,9 +104,10 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
 }
 
 ```
+
 ## Example
 
-![mock-output.jpg](mock-output.jpg?raw=true "YOLO")
+![mock-output.jpg](samples/mock-output.jpg?raw=true "YOLO")
 
 ## Changelog & Releases
 
