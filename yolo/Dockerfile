@@ -12,21 +12,36 @@ ENV \
     TERM="xterm"
 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
+  ca-certificates \
   curl \
   build-essential \
   socat \
+  imagemagick \
   fswebcam \
   jq \
   git
 
+# configure darknet
+ARG DARKNET=/darknet
+ARG DARKNET_GIT="http://github.com/pjreddie/darknet"
+ENV DARKNET=${DARKNET} DARKNET_GIT=${DARKNET_GIT}
+
 # Copy darknet
-COPY rootfs/darknet /darknet
+# COPY rootfs/darknet ${DARKNET}
+
+# Clone darknet
+RUN mkdir -p ${DARKNET} 
+RUN cd ${DARKNET} && git clone ${DARKNET_GIT} .
 
 # Build darknet
 RUN \
-    cd /darknet \
+    cd ${DARKNET} \
     \
     && make
+
+RUN curl -sSL -o "${DARKNET}/yolov2-tiny-voc.weights" "http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
+RUN curl -sSL -o "${DARKNET}/yolov2.weights" "https://pjreddie.com/media/files/yolov2.weights"
+RUN curl -sSL -o "${DARKNET}/yolov3.weights" "https://pjreddie.com/media/files/yolov3.weights"
 
 FROM darknet
 

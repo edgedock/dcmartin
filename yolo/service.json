@@ -4,7 +4,7 @@
   "description": "Provides hardware abstraction layer as service",
   "documentation": "https://github.com/dcmartin/open-horizon/yolo/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "arch": null,
   "public": true,
   "sharable": "singleton",
@@ -12,6 +12,9 @@
   "userInput": [
     { "name": "YOLO_PERIOD", "label": "seconds between updates", "type": "int", "defaultValue": "0" },
     { "name": "YOLO_ENTITY", "label": "entity to count", "type": "string", "defaultValue": "person" },
+    { "name": "YOLO_THRESHOLD", "label": "threshold of probability; 0.0 to 1.0", "type": "number", "defaultValue": "0.25" },
+    { "name": "YOLO_SCALE", "label": "scaling of image; none or WIDTHxHEIGHT", "type": "string", "defaultValue": "none" },
+    { "name": "YOLO_CONFIG", "label": "YOLO configuration type: tiny, v2, v3", "type": "string", "defaultValue": "tiny" },
     { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
     { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
   ],

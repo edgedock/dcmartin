@@ -7,7 +7,8 @@
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "YOLO_PERIOD": 0,
-        "YOLO_ENTITY": "person",
+        "YOLO_CONFIG": "tiny",
+        "YOLO_ENTITY": "all",
         "LOG_LEVEL": "info",
         "DEBUG": false
       }
