@@ -84,6 +84,18 @@ build: Dockerfile build.json service.json rootfs Makefile
 	@echo "--- INFO -- building service ${SERVICE_NAME} with Docker tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
+build-all:
+	@echo "--- INFO -- building service ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" build; \
+	done
+
+logs:
+	@docker logs -f "${DOCKER_NAME}"
+
+stop:
+	@docker stop "${DOCKER_NAME}"
+
 run: remove service-stop
 	@echo "--- INFO -- running container ${DOCKER_NAME} for service ${SERVICE_NAME}"
 	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
