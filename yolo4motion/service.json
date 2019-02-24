@@ -19,10 +19,10 @@
     { "name": "YOLO4MOTION_TOPIC", "label": "topic to listen; default: group/device/camera", "type": "string", "defaultValue": "motion/+/+" },
     { "name": "YOLO4MOTION_TOPIC_EVENT", "label": "event topic", "type": "string", "defaultValue": "event/end" },
     { "name": "YOLO4MOTION_TOPIC_IMAGE", "label": "image topic", "type": "string", "defaultValue": "image" },
-    { "name": "YOLO4MOTION_INTERVAL", "label": "time between intervals in milliseconds", "type": "number", "defaultValue": "500" },
     { "name": "YOLO4MOTION_USE_MOCK", "label": "use mock data true/false", "type": "boolean", "defaultValue": "false" },
-    { "name": "YOLO_SCALE", "label": "size WIDTHxHEIGHT for image", "type": "string", "defaultValue": "320x240" },
+    { "name": "YOLO_CONFIG", "label": "configuration: tiny, v2, v3", "type": "string", "defaultValue": "tiny" },
     { "name": "YOLO_ENTITY", "label": "entity to count", "type": "string", "defaultValue": "all" },
+    { "name": "YOLO_SCALE", "label": "size WIDTHxHEIGHT for image", "type": "string", "defaultValue": "none" },
     { "name": "YOLO_THRESHOLD", "label": "threshold for detection", "type": "number", "defaultValue": "0.25" },
     { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
     { "name": "DEBUG", "label": "debug true/false", "type": "boolean", "defaultValue": "false" }

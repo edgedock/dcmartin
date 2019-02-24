@@ -7,10 +7,18 @@ if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 JPG="${TMP}/image.$$.jpg"
 OUT="${TMP}/image.$$.out"
 
-if [ -z "${YOLO_ENTITY:-}" ]; then YOLO_ENTITY=all; fi
+# defaults for testing
+if [ -z "${YOLO_PERIOD:-}" ]; then YOLO_PERIOD=0; fi
+if [ -z "${YOLO_ENTITY:-}" ]; then YOLO_ENTITY=person; fi
 if [ -z "${YOLO_THRESHOLD:-}" ]; then YOLO_THRESHOLD=0.25; fi
-if [ -z "${YOLO4MOTION_INTERVAL:-}" ]; then YOLO4MOTION_INTERVAL=500; fi
 if [ -z "${YOLO_SCALE:-}" ]; then YOLO_SCALE="320x240"; fi
+if [ -z "${YOLO_DATA}" ]; then YOLO_DATA="cfg/voc.data"; fi
+if [ -z "${YOLO_NAMES}" ]; then YOLO_NAMES="data/coco.data"; fi
+if [ -z "${YOLO_CONFIG}" ]; then YOLO_CONFIG="cfg/yolov2-tiny-voc.cfg"; fi
+if [ -z "${YOLO_WEIGHTS}" ]; then YOLO_WEIGHTS="yolov2-tiny-voc.weights"; fi
+
+# more defaults for testing
+if [ -z "${YOLO4MOTION_HOST:-}" ]; then YOLO4MOTION_GROUP='localhost'; fi
 if [ -z "${YOLO4MOTION_GROUP:-}" ]; then YOLO4MOTION_GROUP='motion'; fi
 if [ -z "${YOLO4MOTION_DEVICE:-}" ]; then YOLO4MOTION_DEVICE='+'; fi
 if [ -z "${YOLO4MOTION_CAMERA:-}" ]; then YOLO4MOTION_CAMERA='+'; fi
@@ -18,15 +26,17 @@ if [ -z "${YOLO4MOTION_TOPIC:-}" ]; then YOLO4MOTION_TOPIC="${YOLO4MOTION_GROUP}
 if [ -z "${YOLO4MOTION_TOPIC_EVENT:-}" ]; then YOLO4MOTION_TOPIC_EVENT='event/end'; fi
 if [ -z "${YOLO4MOTION_TOPIC_IMAGE:-}" ]; then YOLO4MOTION_TOPIC_IMAGE='image'; fi
 
-if [ -z "${DARKNET:-}" ]; then DARKNET="/darknet"; else echo "** WARNING: DARKNET from environment: ${DARKNET}" &> /dev/stderr; fi
+# build configuation
+CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","config":"'${YOLO_CONFIG}'","weights":"'${YOLO_WEIGHTS}'","threshold":'${YOLO_THRESHOLD}'}'
+CONFIG=$(echo "${CONFIG}" | jq '.host="'${YOLO4MOTION_HOST}'"|.topic="'${YOLO4MOTION_TOPIC}'"|.group="'${YOLO4MOTION_GROUP}'"|.device="'${YOLO4MOTION_DEVICE}'"|.camera="'${YOLO4MOTION_CAMERA}'"|.topic_event="'${YOLO4MOTION_TOPIC_EVENT}'"|.topic_image="'${YOLO4MOTION_TOPIC_IMAGE}'"')
 
-CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"host":"'${YOLO4MOTION_HOST}'","topic":"'${YOLO4MOTION_TOPIC}'","entity":"'${YOLO_ENTITY}'","threshold":'${YOLO_THRESHOLD}'}'
+# update service output to configuration
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
+# start in darknet
 cd ${DARKNET}
 
 # get names of entities that can be detected
-YOLO_NAMES="data/coco.names"
 if [ -s "${YOLO_NAMES}" ]; then
   NAMES=$(cat "${YOLO_NAMES}")
 fi
@@ -46,10 +56,9 @@ mv -f ${TMP}/$$ ${TMP}/${SERVICE_LABEL}.json
 
 if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- listening to ${YOLO4MOTION_HOST} on topic: ${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TOPIC_EVENT}" &> /dev/stderr; fi
 
-PAYLOAD="${TMP}/${0##*/}.$(($(date +%s%N)/1000000)).jpg" 
-
 # listen forever
 mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TOPIC_EVENT}" | while read; do
+  # check for da nana
   if [ -z "${REPLY}" ]; then continue; fi
   DEVICE=$(echo "${REPLY}" | jq -r '.device')
   CAMERA=$(echo "${REPLY}" | jq -r '.camera')
@@ -57,17 +66,20 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- invalid event; continuing:" $(echo "${REPLY}" | jq -c '.') &> /dev/stderr; fi
     continue
   fi
+
   # initiate output
   OUTPUT=$(echo "${CONFIG}" | jq '.event='"${REPLY}")
+  # initiate payload
+  PAYLOAD="${TMP}/${0##*/}.$$.jpg"
 
   ## MOCK or NOT
   if [ "${YOLO4MOTION_USE_MOCK:-}" == 'true' ]; then 
     TOPIC="mock"
-    MOCKS=( dog giraffe kite personx4 eagle horses person scream )
+    MOCKS=( dog giraffe kite eagle horses person scream )
     if [ -z "${MOCK_COUNT}" ]; then MOCK_COUNT=1; else MOCK_COUNT=$((MOCK_COUNT+1)); fi
     MOCK_INDEX=$((MOCK_COUNT % ${#MOCKS[@]}))
     MOCK="${MOCKS[${MOCK_INDEX}]}"
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- using mock data" &> /dev/stderr; fi
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- using mock ${MOCK}" &> /dev/stderr; fi
     cp -f "data/${MOCK}.jpg" ${PAYLOAD}
     # update output to be mock
     OUTPUT=$(echo "${OUTPUT}" | jq '.mock="'${MOCK}'"')
@@ -87,8 +99,8 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
   INFO=$(identify "${JPG}" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq -c '.')
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- INFO: ${INFO}" &> /dev/stderr; fi
 
-  ## do YOLO (tiny)
-  ./darknet detector test cfg/voc.data cfg/yolov2-tiny-voc.cfg yolov2-tiny-voc.weights "${JPG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMP}/darknet.$$.out"
+  ## do YOLO
+  ./darknet detector test "${YOLO_DATA}" "${YOLO_CONFIG}" "${YOLO_WEIGHTS}" "${JPG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMP}/darknet.$$.out"
   # extract processing time in seconds
   TIME=$(cat "${OUT}" | egrep "Predicted" | sed 's/.*Predicted in \([^ ]*\).*/\1/')
   if [ -z "${TIME}" ]; then TIME=0; fi
@@ -108,21 +120,21 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
       FOUND=$(cat "${OUT}.$$" | awk -F: '{ print $1 }' | sort | uniq)
       if [ ! -z "${FOUND}" ]; then
         if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected:" $(echo "${FOUND}" | fmt -1000) &> /dev/stderr; fi
-	JSON=
-	for F in ${FOUND}; do
-	  if [ -z "${JSON:-}" ]; then JSON='['; else JSON="${JSON}"','; fi
-	  C=$(egrep '^'"${F}" "${OUT}.$$" | wc -l | awk '{ print $1 }')
-	  COUNT='{"entity":"'"${F}"'","count":'${C}'}'
-	  JSON="${JSON}""${COUNT}"
-	  TOTAL=$((TOTAL+C))
-	done
-	rm -f "${OUT}.$$" 
-	if [ -z "${JSON}" ]; then JSON='null'; else JSON="${JSON}"']'; fi
-	DETECTED="${JSON}"
+        JSON=
+        for F in ${FOUND}; do
+          if [ -z "${JSON:-}" ]; then JSON='['; else JSON="${JSON}"','; fi
+          C=$(egrep '^'"${F}" "${OUT}.$$" | wc -l | awk '{ print $1 }')
+          COUNT='{"entity":"'"${F}"'","count":'${C}'}'
+          JSON="${JSON}""${COUNT}"
+          TOTAL=$((TOTAL+C))
+        done
+        rm -f "${OUT}.$$" 
+        if [ -z "${JSON}" ]; then JSON='null'; else JSON="${JSON}"']'; fi
+        DETECTED="${JSON}"
       else
         if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected nothing; TOPIC: ${TOPIC:-}" &> /dev/stderr; fi
-	DETECTED='null'
-	continue
+        DETECTED='null'
+        continue
       fi
       ;;
     *)
@@ -145,11 +157,11 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
   base64 -w 0 -i predictions.jpg >> "${IMAGE}"
   echo '"}' >> "${IMAGE}"
 
-
+  # cleanup
   rm -f "${JPG}" "${OUT}" predictions.jpg
 
-  # make it atomic
-  PAYLOAD="${TMP}/${0##*/}.$(($(date +%s%N)/1000000)).json" 
+  # initiate payload
+  PAYLOAD="${TMP}/${0##*/}.$$.json"
   echo "${OUTPUT}" | jq '.date='$(date +%s)'|.time='${TIME}'|.info='${INFO}'|.detected='${DETECTED}'|.entity="'${YOLO_ENTITY}'"|.count='${TOTAL}'|.scale="'${YOLO_SCALE}'"' > "${PAYLOAD}"
 
   # add two files
