@@ -9,11 +9,18 @@ OUT="${TMP}/image.$$.out"
 
 if [ -z "${YOLO_ENTITY:-}" ]; then YOLO_ENTITY=all; fi
 if [ -z "${YOLO_THRESHOLD:-}" ]; then YOLO_THRESHOLD=0.25; fi
-if [ -z "${YOLO4MQTT_INTERVAL:-}" ]; then YOLO4MQTT_INTERVAL=500; fi
+if [ -z "${YOLO4MOTION_INTERVAL:-}" ]; then YOLO4MOTION_INTERVAL=500; fi
 if [ -z "${YOLO_SCALE:-}" ]; then YOLO_SCALE="320x240"; fi
+if [ -z "${YOLO4MOTION_GROUP:-}" ]; then YOLO4MOTION_GROUP='motion'; fi
+if [ -z "${YOLO4MOTION_DEVICE:-}" ]; then YOLO4MOTION_DEVICE='+'; fi
+if [ -z "${YOLO4MOTION_CAMERA:-}" ]; then YOLO4MOTION_CAMERA='+'; fi
+if [ -z "${YOLO4MOTION_TOPIC:-}" ]; then YOLO4MOTION_TOPIC="${YOLO4MOTION_GROUP}/${YOLO4MOTION_DEVICE}/${YOLO4MOTION_CAMERA}"; fi
+if [ -z "${YOLO4MOTION_TOPIC_EVENT:-}" ]; then YOLO4MOTION_TOPIC_EVENT='event/end'; fi
+if [ -z "${YOLO4MOTION_TOPIC_IMAGE:-}" ]; then YOLO4MOTION_TOPIC_IMAGE='image'; fi
+
 if [ -z "${DARKNET:-}" ]; then DARKNET="/darknet"; else echo "** WARNING: DARKNET from environment: ${DARKNET}" &> /dev/stderr; fi
 
-CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"host":"'${YOLO4MQTT_HOST}'","topic":"'${YOLO4MQTT_TOPIC}'","entity":"'${YOLO_ENTITY}'","threshold":'${YOLO_THRESHOLD}'}'
+CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"host":"'${YOLO4MOTION_HOST}'","topic":"'${YOLO4MOTION_TOPIC}'","entity":"'${YOLO_ENTITY}'","threshold":'${YOLO_THRESHOLD}'}'
 echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
 
 cd ${DARKNET}
@@ -37,19 +44,12 @@ CONFIG=$(echo "${CONFIG}" | jq '.names='"${JSON}")
 echo "${CONFIG}" | jq '.date='$(date +%s) > ${TMP}/$$
 mv -f ${TMP}/$$ ${TMP}/${SERVICE_LABEL}.json
 
-if [ -z "${YOLO4MQTT_GROUP:-}" ]; then YOLO4MQTT_GROUP='+'; fi
-if [ -z "${YOLO4MQTT_DEVICE:-}" ]; then YOLO4MQTT_DEVICE='+'; fi
-if [ -z "${YOLO4MQTT_CAMERA:-}" ]; then YOLO4MQTT_CAMERA='+'; fi
-if [ -z "${YOLO4MQTT_TOPIC:-}" ]; then YOLO4MQTT_TOPIC="${YOLO4MQTT_GROUP}/${YOLO4MQTT_DEVICE}/${YOLO4MQTT_CAMERA}"; fi
-if [ -z "${YOLO4MQTT_TOPIC_EVENT:-}" ]; then YOLO4MQTT_TOPIC_EVENT='event/end'; fi
-if [ -z "${YOLO4MQTT_TOPIC_IMAGE:-}" ]; then YOLO4MQTT_TOPIC_IMAGE='image'; fi
-
-if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- listening to ${YOLO4MQTT_HOST} on topic: ${YOLO4MQTT_TOPIC}/${YOLO4MQTT_TOPIC_EVENT}" &> /dev/stderr; fi
+if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- listening to ${YOLO4MOTION_HOST} on topic: ${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TOPIC_EVENT}" &> /dev/stderr; fi
 
 PAYLOAD="${TMP}/${0##*/}.$(($(date +%s%N)/1000000)).jpg" 
 
 # listen forever
-mosquitto_sub -h "${YOLO4MQTT_HOST}" -t "${YOLO4MQTT_TOPIC}/${YOLO4MQTT_TOPIC_EVENT}" | while read; do
+mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TOPIC_EVENT}" | while read; do
   if [ -z "${REPLY}" ]; then continue; fi
   DEVICE=$(echo "${REPLY}" | jq -r '.device')
   CAMERA=$(echo "${REPLY}" | jq -r '.camera')
@@ -61,21 +61,22 @@ mosquitto_sub -h "${YOLO4MQTT_HOST}" -t "${YOLO4MQTT_TOPIC}/${YOLO4MQTT_TOPIC_EV
   OUTPUT=$(echo "${CONFIG}" | jq '.event='"${REPLY}")
 
   ## MOCK or NOT
-  if [ "${YOLO4MQTT_USE_MOCK:-}" == 'true' ]; then 
+  if [ "${YOLO4MOTION_USE_MOCK:-}" == 'true' ]; then 
+    TOPIC="mock"
     MOCKS=( dog giraffe kite personx4 eagle horses person scream )
     if [ -z "${MOCK_COUNT}" ]; then MOCK_COUNT=1; else MOCK_COUNT=$((MOCK_COUNT+1)); fi
     MOCK_INDEX=$((MOCK_COUNT % ${#MOCKS[@]}))
     MOCK="${MOCKS[${MOCK_INDEX}]}"
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- using mock data" &> /dev/stderr; fi
     cp -f "data/${MOCK}.jpg" ${PAYLOAD}
-    # initiate output
+    # update output to be mock
     OUTPUT=$(echo "${OUTPUT}" | jq '.mock="'${MOCK}'"')
   else 
     # build image topic
-    TOPIC="${YOLO4MQTT_GROUP}/${DEVICE}/${CAMERA}/${YOLO4MQTT_TOPIC_IMAGE}"
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- listening to ${YOLO4MQTT_HOST} on topic: ${TOPIC}" &> /dev/stderr; fi
+    TOPIC="${YOLO4MOTION_GROUP}/${DEVICE}/${CAMERA}/${YOLO4MOTION_TOPIC_IMAGE}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- listening to ${YOLO4MOTION_HOST} on topic: ${TOPIC}" &> /dev/stderr; fi
     # get image
-    mosquitto_sub -C 1 -h "${YOLO4MQTT_HOST}" -t "${TOPIC}"  > "${PAYLOAD}"
+    mosquitto_sub -C 1 -h "${YOLO4MOTION_HOST}" -t "${TOPIC}"  > "${PAYLOAD}"
   fi
 
   # scale image
@@ -119,8 +120,9 @@ mosquitto_sub -h "${YOLO4MQTT_HOST}" -t "${YOLO4MQTT_TOPIC}/${YOLO4MQTT_TOPIC_EV
 	if [ -z "${JSON}" ]; then JSON='null'; else JSON="${JSON}"']'; fi
 	DETECTED="${JSON}"
       else
-        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected nothing" &> /dev/stderr; fi
-        DETECTED='null'
+        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected nothing; TOPIC: ${TOPIC:-}" &> /dev/stderr; fi
+	DETECTED='null'
+	continue
       fi
       ;;
     *)
@@ -131,13 +133,41 @@ mosquitto_sub -h "${YOLO4MQTT_HOST}" -t "${YOLO4MQTT_TOPIC}/${YOLO4MQTT_TOPIC_EV
       DETECTED='['"${COUNT}"']'
       ;;
   esac
+
+  # send annotated image back to MQTT
+  TOPIC="${YOLO4MOTION_GROUP}/${DEVICE}/${CAMERA}/${YOLO4MOTION_TOPIC_IMAGE}/${YOLO_ENTITY}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- publishing to ${YOLO4MOTION_HOST} on topic: ${TOPIC}" &> /dev/stderr; fi
+  mosquitto_pub -h "${YOLO4MOTION_HOST}" -t "${TOPIC}" -f predictions.jpg
+
   # capture annotated image as BASE64 encoded string
-  IMAGE=$(base64 -w 0 -i predictions.jpg)
+  IMAGE="${TMP}/predictions.$$.json"
+  echo -n '{"image":"' > "${IMAGE}"
+  base64 -w 0 -i predictions.jpg >> "${IMAGE}"
+  echo '"}' >> "${IMAGE}"
+
+
   rm -f "${JPG}" "${OUT}" predictions.jpg
 
   # make it atomic
-  echo "${OUTPUT}" | jq '.date='$(date +%s)'|.time='${TIME}'|.info='${INFO}'|.detected='${DETECTED}'|.entity="'${YOLO_ENTITY}'"|.count='${TOTAL}'|.scale="'${YOLO_SCALE}'"|.image="'${IMAGE}'"' > ${TMP}/$$
-  mv -f ${TMP}/$$ ${TMP}/${SERVICE_LABEL}.json
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMP}/${SERVICE_LABEL}.json:" $(jq -c '.image="redacted"|.names="redacted"' "${TMP}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
+  PAYLOAD="${TMP}/${0##*/}.$(($(date +%s%N)/1000000)).json" 
+  echo "${OUTPUT}" | jq '.date='$(date +%s)'|.time='${TIME}'|.info='${INFO}'|.detected='${DETECTED}'|.entity="'${YOLO_ENTITY}'"|.count='${TOTAL}'|.scale="'${YOLO_SCALE}'"' > "${PAYLOAD}"
 
+  # add two files
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${IMAGE}" $(jq -c '.image=(.image!=null)' ${IMAGE}) &> /dev/stderr; fi
+  jq -s add "${PAYLOAD}" "${IMAGE}" > "${PAYLOAD}.$$" && mv -f "${PAYLOAD}.$$" "${PAYLOAD}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- PAYLOAD: ${PAYLOAD}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${PAYLOAD}") &> /dev/stderr; fi
+
+  if [ -s "${PAYLOAD}" ]; then
+    mv -f "${PAYLOAD}" "${TMP}/${SERVICE_LABEL}.json"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMP}/${SERVICE_LABEL}.json:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${TMP}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
+
+    # send annotated event back to MQTT
+    TOPIC="${YOLO4MOTION_GROUP}/${DEVICE}/${CAMERA}/${YOLO4MOTION_TOPIC_EVENT}/${YOLO_ENTITY}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- publishing to ${YOLO4MOTION_HOST} on topic: ${TOPIC}" &> /dev/stderr; fi
+    mosquitto_pub -h "${YOLO4MOTION_HOST}" -t "${TOPIC}" -f "${TMP}/${SERVICE_LABEL}.json"
+
+  else
+    if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR $0 $$ -- failed to create PAYLOAD" &> /dev/stderr; fi
+  fi
+  rm -f "${IMAGE}"
 done

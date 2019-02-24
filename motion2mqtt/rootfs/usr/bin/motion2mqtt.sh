@@ -167,6 +167,7 @@ while true; do
 	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: found GIF: ${IMAGE_PATH}; creating ${GIF_B64_FILE}" &> /dev/stderr; fi
 	      base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"event":{"base64":"\1"}}}|' > "${GIF_B64_FILE}"
 	    fi
+	    rm -f "${IMAGE_PATH}"
 	    # find posted picture
 	    POSTED_IMAGE_JSON=$(jq -r '.image?' "${FULLPATH}")
 	    if [ ! -z "${POSTED_IMAGE_JSON}" ] && [ "${POSTED_IMAGE_JSON}" != 'null' ]; then
@@ -183,15 +184,7 @@ while true; do
 	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
 	    fi
 	    # cleanup
-	    for I in ${IMAGES}; do
-	      IP="${FULLPATH%/*}/${I}.jpg"
-	      if [ -e "${IP}" ]; then 
-		rm -f "${IP}" "${IP%%.*}.json"
-	      else
-		echo "+++ WARN $0 $$ -- no file at ${IP}" &> /dev/stderr
-	      fi
-	    done
-	    rm -f "${FULLPATH}"
+	    find "${FULLPATH%/*}" -name "${FULLPATH%.*}*" -print | xargs rm -f
 	  fi
 	  ;;
 	*)

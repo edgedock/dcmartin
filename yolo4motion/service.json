@@ -13,7 +13,12 @@
   ],
   "userInput": [
     { "name": "YOLO4MOTION_HOST", "label": "MQTT host", "type": "string", "defaultValue": "mqtt" },
-    { "name": "YOLO4MOTION_TOPIC", "label": "topic to listen", "type": "string", "defaultValue": "motion/+/+/image" },
+    { "name": "YOLO4MOTION_GROUP", "label": "group for pub/sub", "type": "string", "defaultValue": "motion" },
+    { "name": "YOLO4MOTION_DEVICE", "label": "device for pub/sub", "type": "string", "defaultValue": "+" },
+    { "name": "YOLO4MOTION_CAMERA", "label": "camera for pub/sub", "type": "string", "defaultValue": "+" },
+    { "name": "YOLO4MOTION_TOPIC", "label": "topic to listen; default: group/device/camera", "type": "string", "defaultValue": "motion/+/+" },
+    { "name": "YOLO4MOTION_TOPIC_EVENT", "label": "event topic", "type": "string", "defaultValue": "event/end" },
+    { "name": "YOLO4MOTION_TOPIC_IMAGE", "label": "image topic", "type": "string", "defaultValue": "image" },
     { "name": "YOLO4MOTION_INTERVAL", "label": "time between intervals in milliseconds", "type": "number", "defaultValue": "500" },
     { "name": "YOLO4MOTION_USE_MOCK", "label": "use mock data true/false", "type": "boolean", "defaultValue": "false" },
     { "name": "YOLO_SCALE", "label": "size WIDTHxHEIGHT for image", "type": "string", "defaultValue": "320x240" },
@@ -41,3 +46,4 @@
     "80/tcp": 8591
   }
 }
+
