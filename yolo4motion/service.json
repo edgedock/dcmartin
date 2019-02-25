@@ -20,7 +20,7 @@
     { "name": "YOLO4MOTION_TOPIC_EVENT", "label": "event topic", "type": "string", "defaultValue": "event/end" },
     { "name": "YOLO4MOTION_TOPIC_IMAGE", "label": "image topic", "type": "string", "defaultValue": "image" },
     { "name": "YOLO4MOTION_USE_MOCK", "label": "use mock data true/false", "type": "boolean", "defaultValue": "false" },
-    { "name": "YOLO_CONFIG", "label": "configuration: tiny, v2, v3", "type": "string", "defaultValue": "tiny" },
+    { "name": "YOLO_CONFIG", "label": "entity to count", "type": "string", "defaultValue": "v3" },
     { "name": "YOLO_ENTITY", "label": "entity to count", "type": "string", "defaultValue": "all" },
     { "name": "YOLO_SCALE", "label": "size WIDTHxHEIGHT for image", "type": "string", "defaultValue": "none" },
     { "name": "YOLO_THRESHOLD", "label": "threshold for detection", "type": "number", "defaultValue": "0.25" },

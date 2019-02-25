@@ -3,10 +3,6 @@
 # TMP
 if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
 
-# temporary image and output
-JPG="${TMP}/image.$$.jpg"
-OUT="${TMP}/image.$$.out"
-
 # source yolo functions
 source /usr/bin/yolo-tools.sh
 

@@ -13,7 +13,6 @@ ENV \
 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   bc \
-  imagemagick \
   inotify-tools \
   mosquitto \
   mosquitto-clients

@@ -8,6 +8,10 @@ if [ -z "${YOLO_SCALE:-}" ]; then YOLO_SCALE="320x240"; fi
 if [ -z "${YOLO_CONFIG}" ]; then YOLO_CONFIG="tiny"; fi
 if [ -z "${DARKNET}" ]; then echo "*** ERROR -- $0 $$ -- DARKNET unspecified; set environment variable for testing"; fi
 
+# temporary image and output
+JPG="${TMP}/${0##*/}.$$.jpeg"
+OUT="${TMP}/${0##*/}.$$.out"
+
 yolo_init() 
 {
   # build configuation
