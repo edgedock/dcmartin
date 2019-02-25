@@ -9,8 +9,11 @@ if [ -z "${YOLO_CONFIG}" ]; then YOLO_CONFIG="tiny"; fi
 if [ -z "${DARKNET}" ]; then echo "*** ERROR -- $0 $$ -- DARKNET unspecified; set environment variable for testing"; fi
 
 # temporary image and output
-JPG="${TMP}/${0##*/}.$$.jpeg"
+JPEG="${TMP}/${0##*/}.$$.jpeg"
 OUT="${TMP}/${0##*/}.$$.out"
+
+# same for all configurations
+YOLO_NAMES="${DARKNET}/data/coco.names"
 
 yolo_init() 
 {
@@ -53,15 +56,13 @@ yolo_config()
       exit 1
     ;;
   esac
+  if [ ! -s "${YOLO_WEIGHTS}" ]; then
+    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- YOLO config: ${1}; updating ${YOLO_WEIGHTS} from ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
+    curl -m 60 -fsSL ${DARKNET_WEIGHTS} -o ${YOLO_WEIGHTS}
     if [ ! -s "${YOLO_WEIGHTS}" ]; then
-      if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- YOLO config: ${1}; updating ${YOLO_WEIGHTS} from ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
-      curl -m 60 -fsSL ${DARKNET_WEIGHTS} -o ${YOLO_WEIGHTS}
-      if [ ! -s "${YOLO_WEIGHTS}" ]; then
-        if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- YOLO config: ${1}; failed to download: ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
-      fi
+      if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- YOLO config: ${1}; failed to download: ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
     fi
-  # same for all configurations
-  YOLO_NAMES="${DARKNET}/data/coco.names"
+  fi
 }
 
 yolo_process()
@@ -85,20 +86,20 @@ yolo_process()
 
   # scale image
   if [ "${YOLO_SCALE}" != 'none' ]; then
-    convert -scale "${YOLO_SCALE}" "${PAYLOAD}" "${JPG}"
+    convert -scale "${YOLO_SCALE}" "${PAYLOAD}" "${JPEG}"
   else
-    mv -f "${PAYLOAD}" "${JPG}"
+    mv -f "${PAYLOAD}" "${JPEG}"
   fi
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- JPEG: ${JPG}; size:" $(wc -c "${JPG}" | awk '{ print $1 }') &> /dev/stderr; fi
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- JPEG: ${JPEG}; size:" $(wc -c "${JPEG}" | awk '{ print $1 }') &> /dev/stderr; fi
 
   # get image information
-  INFO=$(identify "${JPG}" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq -c '.')
+  INFO=$(identify "${JPEG}" | awk '{ printf("{\"type\":\"%s\",\"size\":\"%s\",\"bps\":\"%s\",\"color\":\"%s\"}", $2, $3, $5, $6) }' | jq -c '.')
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- INFO: ${INFO}" &> /dev/stderr; fi
   OUTPUT=$(echo "${OUTPUT}" | jq '.info='"${INFO}")
 
   ## do YOLO
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- DARKNET: ./darknet detector test ${YOLO_DATA} ${YOLO_CFG_FILE} ${YOLO_WEIGHTS} ${JPG} -thresh ${YOLO_THRESHOLD}" &> /dev/stderr; fi
-  ./darknet detector test "${YOLO_DATA}" "${YOLO_CFG_FILE}" "${YOLO_WEIGHTS}" "${JPG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMP}/darknet.$$.out"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- DARKNET: ./darknet detector test ${YOLO_DATA} ${YOLO_CFG_FILE} ${YOLO_WEIGHTS} ${JPEG} -thresh ${YOLO_THRESHOLD}" &> /dev/stderr; fi
+  ./darknet detector test "${YOLO_DATA}" "${YOLO_CFG_FILE}" "${YOLO_WEIGHTS}" "${JPEG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMP}/darknet.$$.out"
   # extract processing time in seconds
   TIME=$(cat "${OUT}" | egrep "Predicted" | sed 's/.*Predicted in \([^ ]*\).*/\1/')
   if [ -z "${TIME}" ]; then TIME=0; fi
@@ -157,7 +158,7 @@ yolo_process()
   rm -f "${TEMP}"
 
   # cleanup
-  rm -f "${JPG}" "${OUT}" predictions.jpg
+  rm -f "${JPEG}" "${OUT}" predictions.jpg
 
   # return base64 encode image JSON path
   echo "${IMAGE}"
