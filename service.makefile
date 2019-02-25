@@ -113,6 +113,12 @@ push: build $(DOCKER_LOGIN)
 	@echo "--- INFO -- pushing container ${DOCKER_TAG} for service ${SERVICE_NAME}"
 	@docker push ${DOCKER_TAG}
 
+push-all:
+	@echo "--- INFO -- pushing service ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) ORG=$(ORG) DOCKER_ID=$(DOCKER_ID) BUILD_ARCH="$${arch}" push; \
+	done
+
 ##
 ## SERVICES
 ##

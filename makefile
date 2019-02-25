@@ -25,7 +25,7 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = build push check run remove clean distclean service-publish service-verify service-stop
+TARGETS = build-all push-all check run remove clean distclean service-publish service-verify service-stop
 
 ## actual
 
