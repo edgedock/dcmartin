@@ -26,40 +26,80 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
-# 2. Build
-
-The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. 
-
-More information is available in [`MAKE.md`][make-md] and [`BUILD.md`][build-md].
-
-[docker-start]: https://www.docker.com/get-started
-[make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
-[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
-[travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
-[travis-ci]: https://travis-ci.org/
-[build-pattern-video]: https://youtu.be/cv_rOdxXidA
-
-# 3. Services & Patterns
+# 2. Services & Patterns
 
 Services are defined within a directory hierarchy of this [repository][repository].  Services include:
 
 + [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
 + [`wan`][wan-service] - provide Wide-Area-Network information
 + [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
-+ [`yolo`][yolo-service] - recognize `person` and other entities from image
-+ [`yolo2masgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka (**pattern** available)
++ [`yolo`][yolo-service] - recognize entities from USB camera
++ [`mqtt`][mqtt-service] - MQTT broker
++ [`yolo4motion`][yolo4motion-service] - listen to MQTT messages from `motion2mqtt` and recognize entities
++ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka (**pattern** available)
 + [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT (**pattern** available)
-
-While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   The build automation process is futher described in [`BUILD.md`][build-md].  See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
 [cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
 [yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
 [motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
 
-# 5. Open Horizon
+# 3. Build & Test
+
+The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
+
+## 3.1 Build
+
+The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
+
+1. Clone this [repository][repository]
+2. Modify `makefile` variables `HZN_ORG_ID` and `DOCKER_HUB_ID` (see [`MAKEVARS.md`][makevars-md] )
+3. Install `hzn` command-line tool and create code signing keys (public and private)
+4. Generate and download IBM Cloud API Key as `apiKey.json`
+3. Initiate build with `make` command (see [`MAKE.md`][make-md] )
+5. Publish service(s) with `make service-publish`
+6. Publish pattern(s) with `make pattern-publish`
+
+## 3.2 Test
+
+Each service may be tested individually using the following `make` targets:
+
++ `check` - test the service individually using `TEST_JQ_FILTER` for `jq` command; returns response JSON
++ `service-test` - test the service and all required services; tests status response JSON for conformance
+
+## 3.3 Deploy (see [video][horizon-video-setup])
+
+Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-md].  Credentials may be established for development using keys created for node configuration; refer to [`NETWORK.md`][network-md]  for more details.  Nodes may be interrogated for service status  (n.b. `TEST_NODE_NAMES` variable) with the following `make` targets:
+
++ `test-nodes` - test response JSON using `TEST_NODE_FILTER` for `jq` command
++ `list-nodes` - execute `hzn node list`
+
+Observe  system with the following commands for listing nodes, services, and patterns:
+
++ `./setup/lsnodes.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
++ `./setup/lsservices.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
++ `./setup/lspatterns.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
+
+Individual patterns have specialized receiving scripts which can be invoked:
+
++ `./yolo2msghub/kafkat.sh` - listens to Kafka messages sent by the `yolo2msghub` service
+
+[horizon-video-setup]: https://youtu.be/IfR-XY603JY
+[docker-start]: https://www.docker.com/get-started
+[make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
+[setup-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
+[network-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/NETWORK.md
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
+[travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
+[travis-ci]: https://travis-ci.org/
+[build-pattern-video]: https://youtu.be/cv_rOdxXidA
+
+# 4. Open Horizon
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].  
 
@@ -71,11 +111,11 @@ wget -qO - ibm.biz/horizon-setup | sudo bash
 
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 
-## 5.1 Credentials
+## 4.1 Credentials
 
 Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your [IBMid][ibm-registration]
 
-## 5.2 Further Information 
+## 4.2 Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 

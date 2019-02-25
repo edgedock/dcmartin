@@ -1,34 +1,43 @@
 # `MAKEVARS.md` - variables defined in `make` files
 
-**This content is informational only; there is usually no need to specify any of these variables when executing the build process.**
+# Manual variables
 
-# Horizon controls
+## `DOCKER_HUB_ID`
 
-+ `CMD` - location of `hzn` command
-+ `HZN` - Open Horizon _exchange_ URL; defaults to  `https://alpha.edge-fabric.com/v1/`
-+ `DIR` - directory name for temporary build files; defaults to `horizon`
+Please specify the appropriate identifier for your container registry; defaults to `whoami`.  This variable should be changed prior to attempting to `push` a Docker image.
 
-## `ORG`, `URL`
-These variables are used to control which organization services and patterns are directed.  The `URL` provides a unique path for services.  These variables should be changed prior to attempting to `publish` either a service or a pattern.
+## `HZN_ORG_ID`
 
-+ `ORG` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
-+ `URL` - base of identifier for each service, e.g. `com.github.dcmartin.open-horizon`
+This variable controls which organization services and patterns are directed.  This variable should be changed prior to attempting to `service-publish` or `pattern-publish`.
 
-## `TAG`
-This variable is used to control naming of artefacts.
++ `HZN_ORG_ID` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
+
+## Code signing
+
+These variables indicate the files used for code signing.  These files are generated using the `hzn` command-line-interface and preferably stored in the `open-horizon/` directory.  These keys are necessary for any `service-publish` or `pattern-publish` targets.
+
++ `PRIVATE_KEY_FILE` - filename of private key for code signing; defaults to `IBM-*.key` or `PRIVATE_KEY_FILE`
++ `PUBLIC_KEY_FILE` - filename of public key for code signing; defaults to `IBM-*.pem` or `PUBLIC_KEY_FILE`
+
+## IBM Cloud API Key
+This variable provides the IBM Cloud API key; it is the contents of the `APIKEY` file which itself is derived from`apiKey` if an IBM Cloud API key JSON file is stored in `open-horizon/apiKey.json` 
+
++ `APIKEY`- contents of `APIKEY` file; created from `apiKey` in `apiKey.json` 
+
+## `TAG` & `BUILD_ARCH`
+
+These variables control identification and naming as well as architecture for build:
 
 + `TAG` - tag, if any, for build artefacts; defaults to empty unless `TAG` file found or specified as environment variable
++ `BUILD_ARCH` -   defined in the `build.json` configuration file
 
-## `BUILD_ARCH`
-This variable controls the architecture for which artefacts are built; options are defined in the `build.json` configuration file.
-
-+ `BUILD_ARCH` -  may be one of `arm`, `arm64`, or `amd64`
-
-This variable may be used on the command-line to control the build, for example:
+They may be used on the command-line to control the build, for example:
 
 ```
-% make BUILD_ARCH=arm64 TAG=test publish start
+% make BUILD_ARCH=arm64 TAG=test service-publish
 ```
+
+# Automatic variables
 
 ## Service definitions
 
@@ -36,42 +45,33 @@ This variable may be used on the command-line to control the build, for example:
 + `SERVICE_LABEL` - _label_ for service; defaults to `label` from `service.json`
 + `SERVICE_NAME` - name to use for service artefacts w/ `TAG` if exists; defaults to `SERVICE_LABEL`
 + `SERVICE_VERSION` - semantic version `#.#.#` for service; defaults to `version` from `service.json`
-+ `SERVICE_TAG` - identifier for service as recorded in Open Horizon _exchange_ [**automatic**]
-+ `SERVICE_PORT` - status port for service; identified as first entry from `specific_ports` in `service.json` [**automatic**]
-+ `SERVICE_URI` - unique identifier for _service_ in _exchange_; defaults to `url` from `service.json` [**automatic**]
-+ `SERVICE_URL` - unique identifier for _service_ in _exchange_ w/ `TAG` if exists; defaults to `SERVICE_URI` [**automatic**]
-+ `SERVICE_REQVARS` - list of required variables from `service.json`; [**automatic**]
-
-## Code signing
-
-+ `PRIVATE_KEY_FILE` - filename of private key for code signing; defaults to `IBM-*.key` or `PRIVATE_KEY_FILE`
-+ `PUBLIC_KEY_FILE` - filename of public key for code signing; defaults to `IBM-*.pem` or `PUBLIC_KEY_FILE`
-
-## IBM Cloud API Key
-
-+ `APIKEY`- IBM Cloud platform API key; defaults to `apiKey` from `apiKey.json` or contents of `APIKEY` file
++ `SERVICE_TAG` - identifier for service as recorded in Open Horizon _exchange_
++ `SERVICE_PORT` - status port for service; identified as first entry from `specific_ports` in `service.json`
++ `SERVICE_URI` - unique identifier for _service_ in _exchange_; defaults to `url` from `service.json`
++ `SERVICE_URL` - unique identifier for _service_ in _exchange_ w/ `TAG` if exists; defaults to `SERVICE_URI`
++ `SERVICE_REQVARS` - list of required variables from `service.json`
 
 ## Docker
 
-+ `DOCKER_ID` - identifier for login to container registry; defaults to output of `whoami`
-+ `DOCKER_NAME` - identifier for container; defaults to `${BUILD_ARCH}/${SERVICE_NAME}` [**automatic**]
-+ `DOCKER_TAG` - tag for container; defaults to `$(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)` [**automatic**]
++ `DOCKER_HUB_ID` - identifier for login to container registry; defaults to output of `whoami`
++ `DOCKER_NAME` - identifier for container; defaults to `${BUILD_ARCH}/${SERVICE_NAME}`
++ `DOCKER_TAG` - tag for container; defaults to `$(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)` 
 + `DOCKER_PORT` - port mapping for local container; from default is first from `ports` in `service.json`
 
 ## TEST
 
 These variables control the testing of the _service_ or _pattern_:
 
-+ `TEST_JQ_FILTER` - filter to apply to `jq` command when testing the _service_
-+ `TEST_NODE_FILTER` - filter to apply when testing the _pattern_
++ `TEST_JQ_FILTER` - filter to apply to `jq` command when testing the _service_; defaults to first line of `TEST_JQ_FILTER` file
++ `TEST_NODE_FILTER` - filter to apply when testing nodes; defaults to first line of `TEST_NODE_FILTER` file
 + `TEST_NODE_TIMEOUT` - number of seconds to wait for a node connection
-+ `TEST_NODE_NAMES` - list of nodes by TCP/IP addressable address (IP, FQDN, ..)
++ `TEST_NODE_NAMES` - list of nodes or contents of file `TEST_TMP_MACHINES`; defaults to `localhost`
 
 ```
 TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
 TEST_TIMEOUT = 10
-TEST_MACHINES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
+TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
 ```
 
 ## BUILD
