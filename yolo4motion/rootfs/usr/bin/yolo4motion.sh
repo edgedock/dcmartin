@@ -68,9 +68,9 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
   # send annotated image back to MQTT
   TOPIC="${YOLO4MOTION_GROUP}/${DEVICE}/${CAMERA}/${YOLO4MOTION_TOPIC_IMAGE}/${YOLO_ENTITY}"
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- publishing to ${YOLO4MOTION_HOST} on topic: ${TOPIC}" &> /dev/stderr; fi
-  jq -r '.image' "${IMAGE}" | base64 --decode > "${TMP}/${0##*/}.predictions.jpg"
-  mosquitto_pub -h "${YOLO4MOTION_HOST}" -t "${TOPIC}" -f "${TMP}/${0##*/}.predictions.jpg"
-  rm -f "${TMP}/${0##*/}.predictions.jpg"
+  jq -r '.image' "${IMAGE}" | base64 --decode > "${TMP}/${0##*/}.$$.jpeg"
+  mosquitto_pub -h "${YOLO4MOTION_HOST}" -t "${TOPIC}" -f "${TMP}/${0##*/}.$$.jpeg"
+  rm -f "${TMP}/${0##*/}.$$.jpeg"
 
   # initiate payload
   PAYLOAD="${TMP}/${0##*/}.$$.json"
