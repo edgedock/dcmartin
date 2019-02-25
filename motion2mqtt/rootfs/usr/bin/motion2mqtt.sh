@@ -40,9 +40,10 @@ fi
 
 start_motion() {
   DIR=/var/lib/motion
-  rm -fr "${DIR}"
-  mkdir -p "${TMP}/${0##*/}"
-  ln -s "${TMP}/${0##*/}" "${DIR}"
+  TEMPDIR="${TMP}/${0##*/}"
+  rm -fr "${DIR}" "${TEMPDIR}"
+  mkdir -p "${TEMPDIR}"
+  ln -s "${TEMPDIR}" "${DIR}"
   # start motion
   CMD=$(command -v motion)
   if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot find motion executable; exiting" &> /dev/stderr; fi
