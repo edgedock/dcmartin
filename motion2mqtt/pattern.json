@@ -3,11 +3,35 @@
   "description": "motion2mqtt as a pattern",
   "public": true,
   "services": [
-    { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "amd64", "serviceVersions": [ { "version": "0.0.4" } ] },
-    { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm", "serviceVersions": [ { "version": "0.0.4" } ] },
-    { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.4" } ] },
-    { "serviceUrl": "com.github.dcmartin.open-horizon.yolo4motion", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "amd64", "serviceVersions": [ { "version": "0.0.1" } ] },
-    { "serviceUrl": "com.github.dcmartin.open-horizon.yolo4motion", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm", "serviceVersions": [ { "version": "0.0.1" } ] },
-    { "serviceUrl": "com.github.dcmartin.open-horizon.yolo4motion", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.1" } ] }
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "amd64",
+      "serviceVersions": [
+        {
+          "version": "0.0.6"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm",
+      "serviceVersions": [
+        {
+          "version": "0.0.6"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm64",
+      "serviceVersions": [
+        {
+          "version": "0.0.6"
+        }
+      ]
+    }
   ]
 }

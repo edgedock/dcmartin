@@ -384,11 +384,11 @@ while ( $i <= $#jpgs )
 
   # update image JSON
   set IMGJSON = "$jpgs[$i]:r.json"
-  set TMPJSON = "${tmpdir}/$jpgs[$i]:t:r.json"
+  set TEMPJSON = "${tmpdir}/$jpgs[$i]:t:r.json"
   set diff = '{"pixels":'${p}',"size":'${size}'}'
-  jq '.diff='"${diff}" "${IMGJSON}" > "${TMPJSON}"
-  jq -c '.' "${TMPJSON}" >! "${IMGJSON}"
-  rm -f "${TMPJSON}"
+  jq '.diff='"${diff}" "${IMGJSON}" > "${TEMPJSON}"
+  jq -c '.' "${TEMPJSON}" >! "${IMGJSON}"
+  rm -f "${TEMPJSON}"
 
   # debug
   if ($?DEBUG) then
@@ -524,15 +524,15 @@ set date = `date +%s`
 if ( $?POST_IMAGE_JSON ) then
   set noglob
   set PIJ = ( `jq -c '.' "${POST_IMAGE_JSON}"` )
-  jq '.image='"${PIJ}"'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
+  jq '.image='"${PIJ}"'|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${tmpdir}/pij.$$.json"
   unset noglob
 else
-  jq '|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${TMP}/$$"
+  jq '|.elapsed='${elapsed}'|.end='${LAST}'|.date='${date}'|.images='"${images}" "${EVENT_JSON}" > "${tmpdir}/pij.$$.json"
 endif
 
 rm -f "${EVENT_JSON}"
-jq -c '.' "${TMP}/$$" > "${EVENT_JSON}"
-rm -f "${TMP}/$$"
+jq -c '.' "${tmpdir}/pij.$$.json" > "${EVENT_JSON}"
+rm -f "${tmpdir}/pij.$$.json"
 
 #############
 

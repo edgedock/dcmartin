@@ -45,8 +45,8 @@ BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
 
 ## TEST
-TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell head -1 TEST_JQ_FILTER),)
-TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell head -1 TEST_NODE_FILTER),)
+TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell egrep -v '^\#' TEST_JQ_FILTER | head -1),)
+TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell egrep -v '^\#' TEST_NODE_FILTER | head -1),)
 TEST_NODE_TIMEOUT = 10
 # temporary
 TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
@@ -57,7 +57,7 @@ TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHIN
 
 default: build run check
 
-all: build run check service-publish service-start service-test pattern-publish pattern-validate
+all: build-all push-all service-publish service-start service-test pattern-publish pattern-validate
 
 ##
 ## support
@@ -119,6 +119,10 @@ push-all:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
 	done
 
+test:
+	@echo "--- MAKE -- testing ${SERVICE_NAME}"
+	@./test.sh
+
 ##
 ## SERVICES
 ##
@@ -127,15 +131,14 @@ ${SERVICE_ARCH_SUPPORT}:
 	@echo "--- MAKE -- building service ${SERVICE_NAME} for architecture $@ with tag ${DOCKER_TAG}"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$@" build
 
-service-start: remove service-stop ${DIR}
+service-start: remove service-stop push ${DIR}
 	@echo "--- MAKE -- starting ${SERVICE_NAME} from $(DIR)"
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
 
-service-test:
-	@echo "--- MAKE -- testing ${SERVICE_NAME}"
-	@./test.sh
+service-test: service-start
+	@$(MAKE) test
 
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 # hzn config
 if [ -z "${HZN}" ]; then
@@ -33,10 +33,10 @@ if [ -z "${PID:-}" ]; then PID=0; fi
 
 # output from the service
 if [ -z "${SERVICE_LABEL:-}" ]; then echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" &> /dev/stderr; exit 1; fi
-SERVICE_OUTPUT_FILE="${TMP}/${SERVICE_LABEL}.json"
+SERVICE_OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
 
 # start the response body
-RESPONSE_FILE="${TMP}/${0##*/}.json"
+RESPONSE_FILE="${TMPDIR}/${0##*/}.json"
 
 # wait for service
 WAITER='expeditor'
@@ -45,6 +45,7 @@ if [ -z "${CMD}" ]; then echo "*** ERROR $0 $$ -- cannot locate ${WAITER}.sh; ex
 PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
 if [ -z "${PID:-}" ]; then
   echo "${HZN}" > "${RESPONSE_FILE}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG ?? $0 $$ -- RESPONSE FILE:" $(cat ${RESPONSE_FILE}) &> /dev/stderr; fi
   ${CMD} "${SERVICE_OUTPUT_FILE}" "${RESPONSE_FILE}" &> /dev/stderr &
 fi
 

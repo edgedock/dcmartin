@@ -11,6 +11,7 @@ if [ -z "${YOLO4MOTION_CAMERA:-}" ]; then YOLO4MOTION_CAMERA='+'; fi
 if [ -z "${YOLO4MOTION_TOPIC:-}" ]; then YOLO4MOTION_TOPIC="${YOLO4MOTION_GROUP}/${YOLO4MOTION_DEVICE}/${YOLO4MOTION_CAMERA}"; fi
 if [ -z "${YOLO4MOTION_TOPIC_EVENT:-}" ]; then YOLO4MOTION_TOPIC_EVENT='event/end'; fi
 if [ -z "${YOLO4MOTION_TOPIC_IMAGE:-}" ]; then YOLO4MOTION_TOPIC_IMAGE='image'; fi
+if [ -z "${YOLO4MOTION_TOO_OLD:-}" ]; then YOLO4MOTION_TOO_OLD=300; fi
 
 # source yolo functions
 source /usr/bin/yolo-tools.sh
@@ -35,6 +36,9 @@ mosquitto_sub -h "${YOLO4MOTION_HOST}" -t "${YOLO4MOTION_TOPIC}/${YOLO4MOTION_TO
 
   # test for null
   if [ ! -z "${REPLY}" ]; then 
+    DATE=$(echo "${REPLY}" | jq -r '.date')
+    NOW=$(date +%s)
+    if [ $((NOW - DATE)) -gt ${YOLO4MOTION_TOO_OLD} ]; then echo "+++ WARN -- $0 $$ -- too old: ${REPLY}" &> /dev/stderr; continue; fi
     DEVICE=$(echo "${REPLY}" | jq -r '.device')
     CAMERA=$(echo "${REPLY}" | jq -r '.camera')
     if [ -z "${DEVICE}" ] || [ -z "${CAMERA}" ] || [ "${DEVICE}" == 'null' ] || [ "${CAMERA}" == 'null' ]; then

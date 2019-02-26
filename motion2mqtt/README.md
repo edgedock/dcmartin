@@ -101,7 +101,63 @@ The `motion2mqtt` value will initially be incomplete until the service completes
 % curl -sSL http://localhost:8082
 ```
 
-should result in a completed service payload (n.b. `base64` encoded JPEG and GIF images have been redacted):
+should result in a partial service payload:
+
+```
+{
+  "motion2mqtt": {
+    "date": 1551144408,
+    "log_level": "info",
+    "debug": true,
+    "db": "newman",
+    "name": "davidsimac.local",
+    "timezone": "America/Los_Angeles",
+    "mqtt": {
+      "host": "horizon.dcmartin.com",
+      "port": "1883",
+      "username": "username",
+      "password": "password"
+    },
+    "motion": {
+      "post": "center"
+    },
+    "period": 30,
+    "services": [
+      "cpu"
+    ],
+    "pid": 34,
+    "cpu": {
+      "date": 1551144406,
+      "log_level": "info",
+      "debug": false,
+      "period": 60,
+      "interval": 1,
+      "percent": 66.32
+    }
+  },
+  "hzn": {
+    "agreementid": "99c2448bfcd40495ee7acdeaea2906e660c19d6b4019a8e37c80b6a7c9fc7db7",
+    "arch": "amd64",
+    "cpus": 1,
+    "device_id": "davidsimac.local",
+    "exchange_url": "https://alpha.edge-fabric.com/v1",
+    "host_ips": [
+      "127.0.0.1",
+      "192.168.1.27",
+      "192.168.1.26",
+      "9.80.93.5"
+    ],
+    "organization": "dcmartin@us.ibm.com",
+    "pattern": "",
+    "ram": 1024
+  },
+  "date": 1551144407,
+  "service": "motion2mqtt",
+  "pattern": null
+}
+```
+
+When deployed as a pattern, additional information is provided (n.b. `base64` encoded JPEG and GIF images have been redacted):
 
 ```
 {
@@ -111,13 +167,7 @@ should result in a completed service payload (n.b. `base64` encoded JPEG and GIF
     "cpus": 1,
     "device_id": "test-sdr-4",
     "exchange_url": "https://alpha.edge-fabric.com/v1/",
-    "host_ips": [
-      "127.0.0.1",
-      "169.254.184.120",
-      "192.168.0.1",
-      "192.168.1.47",
-      "172.17.0.1"
-    ],
+    "host_ips": [ "127.0.0.1", "169.254.184.120", "192.168.0.1", "192.168.1.47", "172.17.0.1" ],
     "organization": "dcmartin@us.ibm.com",
     "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
     "ram": 0
@@ -132,75 +182,10 @@ should result in a completed service payload (n.b. `base64` encoded JPEG and GIF
       "description": "motion2mqtt as a pattern",
       "public": true,
       "services": [
-        {
-          "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta",
-          "serviceOrgid": "dcmartin@us.ibm.com",
-          "serviceArch": "amd64",
-          "serviceVersions": [
-            {
-              "version": "0.0.1",
-              "deployment_overrides": "",
-              "deployment_overrides_signature": "",
-              "priority": {},
-              "upgradePolicy": {}
-            }
-          ],
-          "dataVerification": {
-            "metering": {}
-          },
-          "nodeHealth": {
-            "missing_heartbeat_interval": 600,
-            "check_agreement_status": 120
-          }
-        },
-        {
-          "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta",
-          "serviceOrgid": "dcmartin@us.ibm.com",
-          "serviceArch": "arm",
-          "serviceVersions": [
-            {
-              "version": "0.0.1",
-              "deployment_overrides": "",
-              "deployment_overrides_signature": "",
-              "priority": {},
-              "upgradePolicy": {}
-            }
-          ],
-          "dataVerification": {
-            "metering": {}
-          },
-          "nodeHealth": {
-            "missing_heartbeat_interval": 600,
-            "check_agreement_status": 120
-          }
-        },
-        {
-          "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta",
-          "serviceOrgid": "dcmartin@us.ibm.com",
-          "serviceArch": "arm64",
-          "serviceVersions": [
-            {
-              "version": "0.0.1",
-              "deployment_overrides": "",
-              "deployment_overrides_signature": "",
-              "priority": {},
-              "upgradePolicy": {}
-            }
-          ],
-          "dataVerification": {
-            "metering": {}
-          },
-          "nodeHealth": {
-            "missing_heartbeat_interval": 600,
-            "check_agreement_status": 120
-          }
-        }
-      ],
-      "agreementProtocols": [
-        {
-          "name": "Basic"
-        }
-      ],
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "amd64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } } ],
+      "agreementProtocols": [ { "name": "Basic" } ],
       "lastUpdated": "2019-02-16T15:34:16.133Z[UTC]"
     }
   },
@@ -212,12 +197,7 @@ should result in a completed service payload (n.b. `base64` encoded JPEG and GIF
     "db": "newman",
     "name": "test-sdr-4",
     "timezone": "GMT",
-    "mqtt": {
-      "host": "horizon.dcmartin.com",
-      "port": "1883",
-      "username": "",
-      "password": ""
-    },
+    "mqtt": { "host": "horizon.dcmartin.com", "port": "1883", "username": "", "password": "" },
     "motion": {
       "post": "best",
       "event": {
@@ -225,73 +205,19 @@ should result in a completed service payload (n.b. `base64` encoded JPEG and GIF
         "camera": "default",
         "event": "59",
         "start": 1550508445,
-        "image": {
-          "device": "test-sdr-4",
-          "camera": "default",
-          "type": "jpeg",
-          "date": 1550508446,
-          "seqno": "03",
-          "event": "59",
-          "id": "20190218164726-59-03",
-          "center": {
-            "x": 600,
-            "y": 262
-          },
-          "width": 64,
-          "height": 120,
-          "size": 5362,
-          "noise": 17
-        },
+        "image": { "device": "test-sdr-4", "camera": "default", "type": "jpeg", "date": 1550508446, "seqno": "03", "event": "59", "id": "20190218164726-59-03", "center": { "x": 600, "y": 262 }, "width": 64, "height": 120, "size": 5362, "noise": 17 },
         "elapsed": 3,
         "end": 1550508448,
         "date": 1550508574,
-        "images": [
-          "20190218164725-59-00",
-          "20190218164725-59-01",
-          "20190218164725-59-02",
-          "20190218164725-59-03",
-          "20190218164726-59-00",
-          "20190218164726-59-01",
-          "20190218164726-59-02",
-          "20190218164726-59-03",
-          "20190218164727-59-00",
-          "20190218164727-59-01",
-          "20190218164728-59-00"
-        ],
+        "images": [ "20190218164725-59-00", "20190218164725-59-01", "20190218164725-59-02", "20190218164725-59-03", "20190218164726-59-00", "20190218164726-59-01", "20190218164726-59-02", "20190218164726-59-03", "20190218164727-59-00", "20190218164727-59-01", "20190218164728-59-00" ],
         "base64": "<redacted>"
       },
-      "image": {
-        "device": "test-sdr-4",
-        "camera": "default",
-        "type": "jpeg",
-        "date": 1550508446,
-        "seqno": "03",
-        "event": "59",
-        "id": "20190218164726-59-03",
-        "center": {
-          "x": 600,
-          "y": 262
-        },
-        "width": 64,
-        "height": 120,
-        "size": 5362,
-        "noise": 17,
-        "base64": "<redacted>"
-      }
+      "image": { "device": "test-sdr-4", "camera": "default", "type": "jpeg", "date": 1550508446, "seqno": "03", "event": "59", "id": "20190218164726-59-03", "center": { "x": 600, "y": 262 }, "width": 64, "height": 120, "size": 5362, "noise": 17, "base64": "<redacted>" }
     },
     "period": 300,
-    "services": [
-      "cpu"
-    ],
+    "services": [ "cpu" ],
     "pid": 37,
-    "cpu": {
-      "date": 1550508327,
-      "log_level": "info",
-      "debug": false,
-      "period": 60,
-      "interval": 1,
-      "percent": 58.32
-    }
+    "cpu": { "date": 1550508327, "log_level": "info", "debug": false, "period": 60, "interval": 1, "percent": 58.32 }
   }
 }
 ```

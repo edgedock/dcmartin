@@ -18,6 +18,12 @@ The build process for each service is identical.  The _default_ `make` target is
 + `service-publish` - publishes the service in the exchange
 + `service-verify` - verifies the published service in the exchange
 
+## `make` everything
+
+```
+make build-all push-all service-publish-all pattern-publish
+```
+
 ## `service-start`
 
 This target will ensure that the service is built and then initiate the service using the `hzn` CLI commands.  All services specified, including required services, will also be initiated and appropriate virtual private networks will be established.  Please refer to the Open Horizon documentation for more details on the `hzn` command-line-interface.
