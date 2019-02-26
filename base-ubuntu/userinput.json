@@ -6,8 +6,6 @@
       "url": "com.github.dcmartin.open-horizon.base-ubuntu",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
-        "LOG_LEVEL": "info",
-        "DEBUG": false
       }
     }
   ]
