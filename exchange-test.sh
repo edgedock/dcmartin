@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBUG=true
+DEBUG=
 
 if [ -z "${HZN_EXCHANGE_URL}" ]; then HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
 
