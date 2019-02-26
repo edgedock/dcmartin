@@ -20,7 +20,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine herald mqtt # yolo4motion # base-ubuntu base-hzncli
+SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt base-hzncli
 PATTERNS = yolo2msghub motion2mqtt
 
 ALL = $(SERVICES) $(PATTERNS)
@@ -29,7 +29,7 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = build-all push-all check run remove clean distclean service-publish service-verify service-start service-test service-stop
+TARGETS = build-all push-all check test run remove clean distclean service-publish service-verify service-start service-test service-stop
 
 ## actual
 
@@ -44,18 +44,6 @@ $(ALL):
 $(TARGETS):
 	@echo "--- MAKE -- making $@ in ${ALL}"
 	@for dir in $(ALL); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
-	done
-
-start: build publish
-	@echo "--- MAKE -- starting $(PATTERNS)"
-	@for dir in $(PATTERNS); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
-	done
-
-test:
-	@echo "--- MAKE -- testing $(PATTERNS)"
-	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
