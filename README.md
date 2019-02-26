@@ -48,7 +48,7 @@ Services are defined within a directory hierarchy of this [repository][repositor
 [yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
 [motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
 
-# 3. Build & Test
+# 3. Build, Test & Deploy
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
