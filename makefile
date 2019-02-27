@@ -59,4 +59,12 @@ pattern-validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
+
+sync: ../ibm/open-horizon
+	@echo ">>> MAKE -- synching ${ALL}"
+	@rsync -aXv makefile service.makefile *.sh ../ibm/open-horizon
+	@for dir in $(ALL); do \
+	  rsync -aXv --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
+	done
+	
