@@ -34,16 +34,29 @@ Services are defined within a directory hierarchy of this [repository][repositor
 + [`wan`][wan-service] - provide Wide-Area-Network information
 + [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
 + [`yolo`][yolo-service] - recognize entities from USB camera
-+ [`mqtt`][mqtt-service] - MQTT broker
-+ [`yolo4motion`][yolo4motion-service] - listen to MQTT messages from `motion2mqtt` and recognize entities
++ [`mqtt`][mqtt-service] - MQTT message broker service
++ [`herald`][herald-service] - multi-cast data received from other heralds on local-area-network
++ [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
 + [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka (**pattern** available)
 + [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT (**pattern** available)
+
+There are also some _base_ service containers:
+
++ [`base-alpine`][base-alpine] - base service container for Alpine LINUX
++ [`base-ubuntu`][base-ubuntu] - base service container for Ubuntu LINUX
++ [`base-hzncli`][base-hzncli] - base service container with `hzn` CLI installed; Ubuntu LINUX
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
 [cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+[base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
+[base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
+[base-hzncli]: https://github.com/dcmartin/open-horizon/tree/master/base-hzncli/README.md
+
+[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
 [mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
+
 [yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
 [yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
 [motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
