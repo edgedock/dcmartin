@@ -32,7 +32,7 @@
         "environment": [
           "SERVICE_LABEL=yolo4motion"
         ],
-        "specific_ports": [ { "HostPort": "8591:80/tcp", "HostIP": "0.0.0.0" } ],
+        "specific_ports": [],
         "devices": [],
         "image": null,
         "privileged": true

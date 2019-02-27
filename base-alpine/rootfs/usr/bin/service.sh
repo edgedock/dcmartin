@@ -17,9 +17,7 @@ if [ -z "${HZN}" ]; then
   fi
 fi
 
-BODY="${HZN}"
-
-# git pid
+# get pid
 if [ ! -z "${SERVICE_LABEL:-}" ]; then
   CMD=$(command -v "${SERVICE_LABEL:-}.sh")
   if [ ! -z "${CMD}" ]; then
@@ -32,11 +30,24 @@ else
   exit 1
 fi
 
-if [ -s ${TMP}/${SERVICE_LABEL}.json ]; then OUT=$(jq '.' ${TMP}/${SERVICE_LABEL}.json); else OUT='null'; fi
-BODY=$(echo "${BODY}" | jq '.'${SERVICE_LABEL}'='"${OUT}")
+RESPONSE_FILE="${TMP}/${0##*/}.${SERVICE_LABEL}.json"
+echo "${HZN}" > "${RESPONSE_FILE}"
 
-HEADERS="Content-Type: application/json; charset=ISO-8859-1"
-HTTP="HTTP/1.1 200 OK\r\n${HEADERS}\r\n\r\n${BODY}\r\n"
+SERVICE_FILE="${TMP}/${SERVICE_LABEL}.json"
+if [ -s "${SERVICE_FILE}" ]; then 
+  TSF="${TMP}/${0##*/}.${SERVICE_LABEL}.$$"
+  echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
+  cat "${SERVICE_FILE}" >> "${TSF}"
+  echo '}' >> "${TSF}"
+  jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMP}/$$.$$" && mv -f "${TMP}/$$.$$" "${RESPONSE_FILE}"
+  rm -f "${TSF}"
+fi
 
-# Emit the HTTP response
-echo -e $HTTP
+SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
+
+echo "HTTP/1.1 200 OK"
+echo "Content-Type: application/json; charset=ISO-8859-1"
+echo "Content-length: ${SIZ}" 
+echo "Access-Control-Allow-Origin: *"
+echo ""
+cat "${RESPONSE_FILE}"

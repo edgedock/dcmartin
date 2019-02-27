@@ -57,7 +57,7 @@ TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHIN
 
 default: build run check
 
-all: build push service-test service-publish service-verify 
+all: service-test service-stop service-publish service-verify service-publish-all
 
 ##
 ## support
@@ -138,7 +138,7 @@ service-start: remove service-stop push ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
 
 service-test: service-start
-	@$(MAKE) test
+	-@$(MAKE) test
 
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi

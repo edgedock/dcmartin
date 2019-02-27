@@ -20,7 +20,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt yolo4motion # base-hzncli
+SERVICES = cpu hal wan yolo base-alpine  herald mqtt # yolo4motion # base-ubuntu base-hzncli
 PATTERNS = yolo2msghub motion2mqtt
 SETUP = setup
 
@@ -30,17 +30,15 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = build push check test run remove clean distclean service-publish service-verify service-start service-test service-stop service-clean
+TARGETS = all build push check test run remove clean distclean service-publish service-verify service-start service-test service-stop service-clean
 
 ## actual
 
 default: $(ALL)
 
-all: build service-test service-stop service-publish service-verify pattern-publish pattern-validate
-
 $(ALL):
 	@echo ">>> MAKE -- making $@"
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $@ all
+	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $@
 
 $(TARGETS):
 	@echo ">>> MAKE -- making $@ in ${ALL}"
@@ -62,11 +60,11 @@ pattern-validate:
 
 .PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync cloc
 
-sync: ../ibm/open-horizon .gitignore cloc ${ALL} ${SETUP}
+sync: ../ibm/open-horizon .gitignore cloc 
 	@echo ">>> MAKE -- synching ${ALL}"
 	@rsync -aXv makefile service.makefile *.sh ../ibm/open-horizon
 	@for dir in $(ALL) ${SETUP}; do \
-	  rsync -aXv --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
+	  rsync -a --info=name --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
 	done
 	
 cloc: .gitignore

@@ -21,7 +21,7 @@
         "environment": [ "SERVICE_LABEL=cpu" ],
         "image": null,
         "privileged": true,
-        "specific_ports": [ { "HostPort": "8581:80/tcp", "HostIP": "0.0.0.0" } ]
+        "specific_ports": []
       }
     }
   },

@@ -16,7 +16,7 @@
         "environment": [
           "SERVICE_LABEL=base"
         ],
-        "specific_ports": [ { "HostPort": "8580:80/tcp", "HostIP": "0.0.0.0" } ],
+        "specific_ports": [],
         "image": null,
         "privileged": true
       }
