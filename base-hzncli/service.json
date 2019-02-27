@@ -20,6 +20,7 @@
         "environment": [
           "SERVICE_LABEL=hzncli"
         ],
+        "specific_ports": [ { "HostPort": "8588:80/tcp", "HostIP": "0.0.0.0" } ],
         "image": null,
         "privileged": true
       }

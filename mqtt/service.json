@@ -21,6 +21,7 @@
           "SERVICE_LABEL=mqtt"
         ],
         "specific_ports": [
+          { "HostPort": "8590:80/tcp", "HostIP": "0.0.0.0" }
         ],
         "image": null,
         "privileged": true

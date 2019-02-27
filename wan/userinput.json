@@ -3,12 +3,9 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.cpu",
+      "url": "com.github.dcmartin.open-horizon.wan",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
-        "WAN_PERIOD": 1800,
-        "LOG_LEVEL": "info",
-        "DEBUG": true
       }
     }
   ]

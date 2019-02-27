@@ -22,7 +22,8 @@
         ],
         "specific_ports": [
           { "HostPort": "5959/udp", "HostIP": "0.0.0.0" },
-          { "HostPort": "5960/tcp", "HostIP": "0.0.0.0" }
+          { "HostPort": "5960/tcp", "HostIP": "0.0.0.0" },
+          { "HostPort": "8589:80/tcp", "HostIP": "0.0.0.0" }
         ],
         "image": null,
         "privileged": true

@@ -21,6 +21,7 @@
            "SERVICE_LABEL=hal"
         ],
         "image": null,
+        "specific_ports": [ { "HostPort": "8582:80/tcp", "HostIP": "0.0.0.0" } ],
         "privileged": true
       }
     }

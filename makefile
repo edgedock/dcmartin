@@ -20,7 +20,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt base-hzncli
+SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt yolo4motion # base-hzncli
 PATTERNS = yolo2msghub motion2mqtt
 
 ALL = $(SERVICES) $(PATTERNS)
@@ -29,32 +29,32 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = build-all push-all check test run remove clean distclean service-publish service-verify service-start service-test service-stop
+TARGETS = build push check test run remove clean distclean service-publish service-verify service-start service-test service-stop service-clean
 
 ## actual
 
 default: $(ALL)
 
-all: build service-publish service-verify service-start service-test pattern-publish pattern-validate
+all: build service-test service-stop service-publish service-verify pattern-publish pattern-validate
 
 $(ALL):
-	@echo "--- MAKE -- making $@"
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $@
+	@echo ">>> MAKE -- making $@"
+	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $@ all
 
 $(TARGETS):
-	@echo "--- MAKE -- making $@ in ${ALL}"
+	@echo ">>> MAKE -- making $@ in ${ALL}"
 	@for dir in $(ALL); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
 pattern-publish:
-	@echo "--- MAKE -- publishing $(PATTERNS)"
+	@echo ">>> MAKE -- publishing $(PATTERNS)"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
 pattern-validate: 
-	@echo "--- MAKE -- validating $(PATTERNS)"
+	@echo ">>> MAKE -- validating $(PATTERNS)"
 	@for dir in $(PATTERNS); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done

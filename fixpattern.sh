@@ -3,7 +3,7 @@
 # where
 if [ -z "${1}" ]; then DIR="horizon"; else DIR="${1}"; fi
 if [ ! -d "${DIR}" ]; then
-  echo "*** ERROR $0 $$ -- no directory ${DIR}" &> /dev/stderr
+  echo "*** ERROR -- $0 $$ -- no directory ${DIR}" &> /dev/stderr
   exit 1
 fi
 
@@ -22,6 +22,6 @@ if [ -s "${PATTERN}" ]; then
   fi
   mv -f "${PATTERN}.$$" "${DIR}/${PATTERN}"
 else
-  echo "+++ WARN $0 $$ -- cannot find pattern JSON template: ${PATTERN}" &> /dev/stderr
+  echo "*** ERROR -- $0 $$ -- cannot find pattern JSON template: ${PATTERN}" &> /dev/stderr
   exit 1
 fi

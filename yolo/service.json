@@ -24,6 +24,7 @@
         "environment": [
           "SERVICE_LABEL=yolo"
         ],
+        "specific_ports": [ { "HostPort": "8584:80/tcp", "HostIP": "0.0.0.0" } ],
         "devices": [
           "/dev/video0:/dev/video0"
         ],

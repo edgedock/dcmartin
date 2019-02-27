@@ -37,9 +37,9 @@
         ],
         "binds": null,
         "specific_ports": [
-          { "HostPort": "8082/tcp", "HostIP": "0.0.0.0" },
-          { "HostPort": "8080/tcp", "HostIP": "0.0.0.0" },
-          { "HostPort": "8081/tcp", "HostIP": "0.0.0.0" }
+          { "HostPort": "8082:8082/tcp", "HostIP": "0.0.0.0" },
+          { "HostPort": "8080:8080/tcp", "HostIP": "0.0.0.0" },
+          { "HostPort": "8081:8081/tcp", "HostIP": "0.0.0.0" }
         ],
         "image": null,
         "privileged": true,

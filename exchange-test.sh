@@ -1,11 +1,9 @@
 #!/bin/bash
 
-DEBUG=
-
-if [ -z "${HZN_EXCHANGE_URL}" ]; then HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
+if [ -z "${HZN_EXCHANGE_URL}" ]; then export HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
 
 DIR="${1}"
-if [ -z "${DIR}" ]; then DIR="horizon"; echo "+++ WARN -- $0 $$ -- directory not specified; using ${DIR}" &> /dev/stderr; fi
+if [ -z "${DIR}" ]; then DIR="horizon"; echo "--- INFO -- $0 $$ -- directory not specified; using ${DIR}" &> /dev/stderr; fi
 if [ ! -d "${DIR}" ]; then echo "*** ERROR -- $0 $$ -- cannot find directory ${DIR}" &> /dev/stderr; exit 1; fi
 
 ###
@@ -29,6 +27,17 @@ hzn_exchange()
     ITEMS="${ITEMS}"']}'
   fi
   echo "${ITEMS}"
+}
+
+hzn_exchange_delete_service()
+{
+  ID="${1}"
+  STATUS=1
+  URL="${HZN_EXCHANGE_URL}/orgs/${SERVICE_ORG}/services/${ID##*/}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- DELETE ${ID} from ${SERVICE_ORD}" &> /dev/stderr; DRY_RUN='--dry-run'; fi
+  RESULT=$(curl -fsSL -X DELETE -u "${SERVICE_ORG}/iamapikey:$(cat APIKEY)" "${URL}")
+  STATUS=$?
+  echo "${STATUS}"
 }
 
 exchange_services() {
@@ -111,16 +120,16 @@ test_service_images() {
   SERVICES=$(jq '[.deployment.services|to_entries[]|{"id":.key,"image":.value.image}]' "${SERVICE_FILE}")
   for service in $(echo "${SERVICES}" | jq -r '.[].id'); do
     if [ "{DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- checking registry for service ${service}" &> /dev/stderr; fi
-    STATUS=$(is_image_in_registry "${service}")
-    if [ "${STATUS}" == 'true' ]; then
-      if [ "{DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found image ${IMAGE} in registry; status: ${STATUS}" &> /dev/stderr; fi
+    RESPONSE=$(is_image_in_registry "${service}")
+    if [ "${RESPONSE}" == 'true' ]; then
+      if [ "{DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found image ${IMAGE} in registry; status: ${RESPONSE}" &> /dev/stderr; fi
     else
-      STATUS=false
-      if [ "{DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- no existing image ${IMAGE} in registry; status: ${STATUS}" &> /dev/stderr; fi
+      RESPONSE=false
+      if [ "{DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- no existing image ${IMAGE} in registry; status: ${RESPONSE}" &> /dev/stderr; fi
     fi
-    echo "${STATUS}"
+    echo "${RESPONSE}"
   done
-  echo "${STATUS}"
+  echo "${RESPONSE}"
 }
 
 semver_gt() {
@@ -161,7 +170,7 @@ service_test() {
 	url=$(echo "${rsie}" | jq -r '.url')
 	arch=$(echo "${rsie}" | jq -r '.arch')
 
-	for ver in $(exchange_services | jq -r '.services[]|select(.url=="'${url}'" and .arch=="'${arch}'")|.version'); do
+	for ver in $(exchange_services | jq -r '.services[]|select((.url=="'${url}'") and (.arch=="'${arch}'"))|.version'); do
 	  if [ $(semver_gt "${ver}" "${version}") == 'true' ]; then
 	    STATUS=1
 	    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- NEWER: exchange: ${ver}; service: ${version}; url: ${url}; arch: ${arch}; status: ${STATUS}" &> /dev/stderr; fi
@@ -170,7 +179,7 @@ service_test() {
       fi
     done
   else
-    echo "+++ WARN -- $0 $$ -- no required services found in service JSON" &> /dev/stderr
+    echo "--- INFO -- $0 $$ -- no required services found in service JSON" &> /dev/stderr
   fi
   echo "${STATUS}"
 }
@@ -194,20 +203,20 @@ get_pattern_file_services() {
 pattern_services_in_exchange() {
   pattern_services="${*}"
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- pattern services: ${pattern_services}" &> /dev/stderr; fi
-  STATUS='true'
+  RESPONSE='true'
   if [ ! -z "${pattern_services}" ]; then
     for PS in ${pattern_services}; do
       if [ $(is_service_in_exchange "${PS}") != 'true' ]; then
-        STATUS='false'
-	if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- no existing service ${PS} in exchange; status: ${STATUS}" &> /dev/stderr; fi
+        RESPONSE='false'
+	if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- no existing service ${PS} in exchange; status: ${RESPONSE}" &> /dev/stderr; fi
       else
-	if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found service ${PS} in exchange; status: ${STATUS}" &> /dev/stderr; fi
+	if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found service ${PS} in exchange; status: ${RESPONSE}" &> /dev/stderr; fi
       fi
     done
   else
     echo "+++ WARN -- $0 $$ -- no services found in pattern JSON" &> /dev/stderr
   fi
-  echo "${STATUS}"
+  echo "${RESPONSE}"
 }
 
 ## pattern_test
@@ -247,14 +256,59 @@ pattern_test() {
   echo "${STATUS}"
 }
 
+service_clean_all ()
+{
+  STATUS=0
+  SERVICES=$(exchange_services | jq -r '.services[].label' | sort | uniq)
+  for S in ${SERVICES}; do
+    service_clean "${S}"
+  done
+  echo "${STATUS}"
+}
+
+service_clean ()
+{
+  label="${1}"
+  echo "--- INFO -- $0 $$ -- cleaning ${SERVICE_LABEL}" &> /dev/stderr
+  STATUS=0
+  SERVICES=$(exchange_services | jq '[.services[]|select(.label=="'"${label}"'")]')
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found services: " $(echo "${SERVICES}" | jq '.|length') &> /dev/stderr; fi
+  if [ "${SERVICES}" != '[]' ]; then
+    URLS=$(echo "${SERVICES}" | jq -r '.[].url' | sort | uniq)
+    for U in ${URLS}; do
+      ARCHS=$(echo "${SERVICES}" | jq -r '.[].arch' | sort | uniq)
+      for A in ${ARCHS}; do
+	MAX=
+        VERSIONS=$(echo "${SERVICES}" | jq -r '.[].version' | sort | uniq)
+        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- versions:" $(echo "${VERSIONS}" | fmt) &> /dev/stderr; fi
+        for V in ${VERSIONS}; do
+          if [ -z "${MAX:-}" ]; then MAX=${V}; else if [ $(semver_gt "${V}" "${MAX}") == 'true' ]; then MAX="${V}"; fi; fi
+        done
+        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${U} and ${A}: maximum ${MAX}" &> /dev/stderr; fi
+        IDS=$(echo "${SERVICES}" | jq -r '.[]|select((.arch=="'${A}'") and (.url=="'${U}'"))|.id')
+        for ID in ${IDS}; do
+          if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ID: ${ID}" &> /dev/stderr; fi
+          SVC=$(echo "${SERVICES}" | jq '.[]|select(.id=="'${ID}'")')
+          VER=$(echo "${SVC}" | jq -r '.version')
+          if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- VER: ${VER}" &> /dev/stderr; fi
+          if [ $(semver_gt "${MAX}" "${VER}") == 'true' ]; then
+            echo "+++ WARN -- $0 $$ -- service ${ID} is out-of-date; cleaning" &> /dev/stderr
+	    STATUS=$(hzn_exchange_delete_service "${ID}")
+            if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- DELETE status: ${STATUS}" &> /dev/stderr; fi
+          fi
+        done
+      done
+    done
+  fi
+  echo "${STATUS}"
+}
+
 ###
 ### MAIN
 ###
 
 ## get name of script
 SCRIPT_NAME="${0##*/}" && SCRIPT_NAME="${SCRIPT_NAME%.*}"
-
-
 
 STATUS=1
 EXCHANGE_SERVICES=
@@ -283,20 +337,32 @@ case ${SCRIPT_NAME} in
 	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no pattern: ${PATTERN_FILE}; status: ${STATUS}" &> /dev/stderr; fi
         fi
 	;;
-  service-test) 
+  service-*) 
 	if [ -s "${SERVICE_FILE}" ]; then
           SERVICE_LABEL=$(read_service_file | jq -r '.label')
 	  SERVICE_ARCH=$(read_service_file | jq -r '.arch')
 	  SERVICE_URL=$(read_service_file | jq -r '.url')
 	  SERVICE_VER=$(read_service_file | jq -r '.version')
 	  ID="${SERVICE_ORG}/${SERVICE_URL}_${SERVICE_VER}_${SERVICE_ARCH}"
-	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- testing service ${ID}" &> /dev/stderr; fi
-	  STATUS=$(service_test "${ID}")
 	else
 	  STATUS=0
 	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no service: ${SERVICE_FILE}; status: ${STATUS}" &> /dev/stderr; fi
 	fi
-	;;
+	case ${SCRIPT_NAME} in
+  	  service-test)
+	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- testing service ${ID}" &> /dev/stderr; fi
+	    STATUS=$(service_test "${ID}")
+	    ;;
+  	  service-clean)
+	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- cleaning service ${SERVICE_LABEL}" &> /dev/stderr; fi
+	    STATUS=$(service_clean "${SERVICE_LABEL}")
+	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- status ${STATUS}" &> /dev/stderr; fi
+	    ;;
+	  *)
+	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- invalid service script: ${SCRIPT_NAME}" &> /dev/stderr; fi
+	    ;;
+        esac
+        ;;
   *)
 	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- invalid script: ${SCRIPT_NAME}" &> /dev/stderr; fi
 	;;

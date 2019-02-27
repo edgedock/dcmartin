@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.herald",
+      "url": "com.github.dcmartin.open-horizon.mqtt",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "MQTT_PERIOD": 30,
