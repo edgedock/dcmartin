@@ -1,6 +1,6 @@
 # `MAKEVARS.md` - variables defined in `make` files
 
-# Manual variables
+# 1. Manual variables
 
 ## `DOCKER_HUB_ID`
 
@@ -9,20 +9,6 @@ Please specify the appropriate identifier for your container registry; defaults 
 ## `HZN_ORG_ID`
 
 This variable controls which organization services and patterns are directed.  This variable should be changed prior to attempting to `service-publish` or `pattern-publish`.
-
-+ `HZN_ORG_ID` - organization in which the services and patterns are published, e.g. `dcmartin@us.ibm.com`
-
-## Code signing
-
-These variables indicate the files used for code signing.  These files are generated using the `hzn` command-line-interface and preferably stored in the `open-horizon/` directory.  These keys are necessary for any `service-publish` or `pattern-publish` targets.
-
-+ `PRIVATE_KEY_FILE` - filename of private key for code signing; defaults to `IBM-*.key` or `PRIVATE_KEY_FILE`
-+ `PUBLIC_KEY_FILE` - filename of public key for code signing; defaults to `IBM-*.pem` or `PUBLIC_KEY_FILE`
-
-## IBM Cloud API Key
-This variable provides the IBM Cloud API key; it is the contents of the `APIKEY` file which itself is derived from`apiKey` if an IBM Cloud API key JSON file is stored in `open-horizon/apiKey.json` 
-
-+ `APIKEY`- contents of `APIKEY` file; created from `apiKey` in `apiKey.json` 
 
 ## `TAG` & `BUILD_ARCH`
 
@@ -36,8 +22,22 @@ They may be used on the command-line to control the build, for example:
 ```
 % make BUILD_ARCH=arm64 TAG=test service-publish
 ```
+## 1.1 Code signing
 
-# Automatic variables
+These variables indicate the files used for code signing.  These files are generated using the `hzn` command-line-interface and preferably stored in the `open-horizon/` directory.  These keys are necessary for any `service-publish` or `pattern-publish` targets.
+
++ `PRIVATE_KEY_FILE` - filename of private key for code signing; defaults to `IBM-*.key` or `PRIVATE_KEY_FILE`
++ `PUBLIC_KEY_FILE` - filename of public key for code signing; defaults to `IBM-*.pem` or `PUBLIC_KEY_FILE`
+
+## 1.2 IBM Cloud API Key
+
+This variable provides the IBM Cloud API key; it is the contents of the `APIKEY` file which itself is derived from`apiKey` if an IBM Cloud API key JSON file is stored in `open-horizon/apiKey.json`  IBM Cloud API keys can be generated and downloaded from the IBM Cloud `IAM` [service][ibm-iam].
+
+[ibm-iam]: http://cloud.ibm.com/iam
+
++ `APIKEY`- contents of `APIKEY` file; created from `apiKey` in `apiKey.json` 
+
+# 2. Automatic variables
 
 ## Service definitions
 
