@@ -57,7 +57,7 @@ TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHIN
 
 default: build run check
 
-all: build push service-test service-publish service-verify pattern-publish pattern-validate
+all: build push service-test service-publish service-verify 
 
 ##
 ## support

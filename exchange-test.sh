@@ -214,7 +214,7 @@ pattern_services_in_exchange() {
       fi
     done
   else
-    echo "+++ WARN -- $0 $$ -- no services found in pattern JSON" &> /dev/stderr
+    echo "--- INFO -- $0 $$ -- no services found in pattern JSON" &> /dev/stderr
   fi
   echo "${RESPONSE}"
 }
@@ -320,13 +320,13 @@ if [ ! -s "${BUILD_FILE}" ]; then echo "*** ERROR -- $0 $$ -- build JSON ${BUILD
 ARCH_SUPPORT=$(jq -r '.build_from|to_entries[].key' "${BUILD_FILE}")
 
 SERVICE_FILE="${2}"
-if [ -z "${SERVICE_FILE}" ]; then SERVICE_FILE="${DIR}/service.definition.json"; echo "+++ WARN -- $0 $$ -- service JSON not specified; using ${SERVICE_FILE}" &> /dev/stderr; fi
+if [ -z "${SERVICE_FILE}" ]; then SERVICE_FILE="${DIR}/service.definition.json"; echo "--- INFO -- $0 $$ -- service JSON not specified; using ${SERVICE_FILE}" &> /dev/stderr; fi
 SERVICE_ORG=$(jq -r '.org' "${SERVICE_FILE}")
 
 case ${SCRIPT_NAME} in 
   pattern-test)
 	PATTERN_FILE="${3}"
-	if [ -z "${PATTERN_FILE}" ]; then PATTERN_FILE="${DIR}/pattern.json"; echo "+++ WARN -- $0 $$ -- pattern JSON not specified; using ${PATTERN_FILE}" &> /dev/stderr; fi
+	if [ -z "${PATTERN_FILE}" ]; then PATTERN_FILE="${DIR}/pattern.json"; echo "--- INFO -- $0 $$ -- pattern JSON not specified; using ${PATTERN_FILE}" &> /dev/stderr; fi
 	if [ -s "${PATTERN_FILE}" ]; then
 	  PATTERN_LABEL=$(read_pattern_file | jq -r '.label')
 	  ID="${SERVICE_ORG}/${PATTERN_LABEL}"
