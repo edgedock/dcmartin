@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.yolo4mqtt",
+      "url": "com.github.dcmartin.open-horizon.yolo4motion",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "YOLO_ENTITY": "all",
