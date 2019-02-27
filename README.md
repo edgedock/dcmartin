@@ -119,26 +119,6 @@ Credentials are required to participate; request access on the IBM Applied Scien
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
-## CLOC
-
-```
---------------------------------------------------------------------------------
-Language                      files          blank        comment           code
---------------------------------------------------------------------------------
-JSON                             54              3              0           6512
-Bourne Shell                     58            721            725           4946
-Markdown                         24            751              0           3286
-Dockerfile                       12            111             58            456
-YAML                              2             29             13            354
-make                              2             67             49            179
-Bourne Again Shell                3             15             15            106
-Python                            1             10             20             48
-Expect                            1              0              0              5
---------------------------------------------------------------------------------
-SUM:                            157           1707            880          15892
---------------------------------------------------------------------------------
-```
-
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
@@ -168,6 +148,24 @@ David C Martin (github@dcmartin.com)
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+
+## [`CLOC.md`][cloc-md]
+
+[cloc-md]: https://github.com/dcmartin/open-horizon/blob/master/CLOC.md
+
+Language|files|blank|comment|code
+:-------|-------:|-------:|-------:|-------:
+JSON|54|3|0|6512
+Bourne Shell|58|721|725|4946
+Markdown|24|751|0|3284
+Dockerfile|12|111|58|456
+YAML|2|29|13|354
+make|2|67|49|182
+Bourne Again Shell|3|15|15|106
+Python|1|10|20|48
+Expect|1|0|0|5
+--------|--------|--------|--------|--------
+SUM:|157|1707|880|15893
 
 
 

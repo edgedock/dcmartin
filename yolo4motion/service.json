@@ -9,7 +9,6 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    { "url": "com.github.dcmartin.open-horizon.mqtt", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null }
   ],
   "userInput": [
     { "name": "YOLO4MOTION_HOST", "label": "MQTT host", "type": "string", "defaultValue": "mqtt" },

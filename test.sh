@@ -41,7 +41,7 @@ while true; do
     if [ ! -z "$(command -v ${CMD})" ]; then
       TEST=$(echo "${OUT}" | ${CMD})
       if [ "${TEST:-}" == 'true' ]; then
-        echo "--- SUCCESS -- $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr
+        echo "!!! SUCCESS -- $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr
         exit 0
       else
         echo "*** ERROR -- $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr

@@ -22,6 +22,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 
 SERVICES = cpu hal wan yolo base-alpine base-ubuntu herald mqtt yolo4motion # base-hzncli
 PATTERNS = yolo2msghub motion2mqtt
+SETUP = setup
 
 ALL = $(SERVICES) $(PATTERNS)
 
@@ -59,12 +60,15 @@ pattern-validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync cloc
 
-sync: ../ibm/open-horizon
+sync: ../ibm/open-horizon .gitignore cloc ${ALL} ${SETUP}
 	@echo ">>> MAKE -- synching ${ALL}"
 	@rsync -aXv makefile service.makefile *.sh ../ibm/open-horizon
-	@for dir in $(ALL); do \
+	@for dir in $(ALL) ${SETUP}; do \
 	  rsync -aXv --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
 	done
 	
+cloc: .gitignore
+	@echo ">>> MAKE -- counting source code"
+	@cloc --md --exclude-list-file=.gitignore . > CLOC.md
