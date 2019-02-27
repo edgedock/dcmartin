@@ -1,5 +1,16 @@
 # `BUILD.md` - build process automation
 
+## Introduction
+
+This [repository][repository] is built using the `make` software; please refer to [`MAKE.md`][make-md] for more information.  The top-level [`makefile`][makefile] (n.b. lower-case) controls build across all services; please refer to [`SERVICE.md`][service-md] for additional details.
+
+Top-level `make` targets:
+
++ `default` - perform the default target for each service
++ `all` - build, publish, and verify all services for all appropriate architectures
++ `pattern-publish` - publish all patterns specified
++ `pattern-validate` - validate all patterns specified
+
 ## 1. Build control files
 
 Within each directory is a set of files to control the build process:
@@ -162,6 +173,8 @@ The default target for the `make` process will `build` the container images, `ru
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
+[makefile]: https://github.com/dcmartin/open-horizon/blob/master/makefile
 
 [travis-md]: https://github.com/dcmartin/open-horizon/blob/master/TRAVIS.md
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
