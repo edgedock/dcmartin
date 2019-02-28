@@ -95,8 +95,8 @@ Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-m
 Observe  system with the following commands for listing nodes, services, and patterns:
 
 + `./setup/lsnodes.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
-+ `./setup/lsservices.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
-+ `./setup/lspatterns.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
++ `./setup/lsservices.sh` - lists all services in the organization according to the `setup/horizon.json` configuration file
++ `./setup/lspatterns.sh` - lists all patterns in the organization according to the `setup/horizon.json` configuration file
 
 Individual patterns have specialized receiving scripts which can be invoked:
 
@@ -127,7 +127,7 @@ wget -qO - ibm.biz/horizon-setup | sudo bash
 
 ## 4.1 Credentials
 
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing an IBM Cloud Platform API key, which can be [created][ibm-apikeys] using your [IBMid][ibm-registration]
+Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing your [IBMid][ibm-registration] email and IBM Cloud account GUID.
 
 ## 4.2 Further Information 
 

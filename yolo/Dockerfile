@@ -32,9 +32,6 @@ ENV DARKNET_V2_WEIGHTS_URL="https://pjreddie.com/media/files/yolov2.weights"
 ENV DARKNET_V3_WEIGHTS="${DARKNET}/yolov3.weights"
 ENV DARKNET_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
 
-# Copy darknet
-# COPY rootfs/darknet ${DARKNET}
-
 # Clone darknet
 RUN mkdir -p ${DARKNET} 
 RUN cd ${DARKNET} && git clone ${DARKNET_GIT} .
