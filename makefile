@@ -30,7 +30,7 @@ ALL = $(SERVICES) $(PATTERNS)
 ## targets
 ##
 
-TARGETS = all build push check test run remove clean distclean service-publish service-verify service-start service-test service-stop service-clean
+TARGETS = all build push check test run stop remove clean distclean service-publish service-verify service-start service-test service-stop service-clean
 
 ## actual
 

@@ -70,10 +70,13 @@ The services and patterns in this [repository][repository] may be built and test
 The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
 
 1. Clone this [repository][repository]
+2. Initiate build with `make` command (see [`MAKE.md`][make-md] )
+
+To make any _service_ or _pattern_ target perform the following:
+
 2. Modify `makefile` variables `HZN_ORG_ID` and `DOCKER_HUB_ID` (see [`MAKEVARS.md`][makevars-md] )
 3. Install `hzn` command-line tool and create code signing keys (public and private)
 4. Generate and download IBM Cloud API Key as `apiKey.json`
-3. Initiate build with `make` command (see [`MAKE.md`][make-md] )
 5. Publish service(s) with `make service-publish`
 6. Publish pattern(s) with `make pattern-publish`
 
