@@ -8,28 +8,28 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/amd64_motion2mqtt "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_motion2mqtt-beta
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_motion2mqtt-beta.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_motion2mqtt
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_motion2mqtt.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/arm_motion2mqtt "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_motion2mqtt-beta
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_motion2mqtt-beta.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_motion2mqtt
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_motion2mqtt.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt-beta "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_motion2mqtt-beta.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt-beta "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_motion2mqtt.svg)](https://microbadger.com/images/dcmartin/arm64_motion2mqtt "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_motion2mqtt-beta
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_motion2mqtt-beta.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_motion2mqtt
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_motion2mqtt.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -169,22 +169,22 @@ When deployed as a pattern, additional information is provided (n.b. `base64` en
     "exchange_url": "https://alpha.edge-fabric.com/v1/",
     "host_ips": [ "127.0.0.1", "169.254.184.120", "192.168.0.1", "192.168.1.47", "172.17.0.1" ],
     "organization": "dcmartin@us.ibm.com",
-    "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
+    "pattern": "dcmartin@us.ibm.com/motion2mqtt",
     "ram": 0
   },
   "date": 1550451493,
   "service": "motion2mqtt",
   "pattern": {
-    "key": "dcmartin@us.ibm.com/motion2mqtt-beta",
+    "key": "dcmartin@us.ibm.com/motion2mqtt",
     "value": {
       "owner": "dcmartin@us.ibm.com/dcmartin@us.ibm.com",
-      "label": "motion2mqtt-beta",
+      "label": "motion2mqtt",
       "description": "motion2mqtt as a pattern",
       "public": true,
       "services": [
-        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "amd64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
-        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
-        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt-beta", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } } ],
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "amd64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } },
+        { "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.1", "deployment_overrides": "", "deployment_overrides_signature": "", "priority": {}, "upgradePolicy": {} } ], "dataVerification": { "metering": {} }, "nodeHealth": { "missing_heartbeat_interval": 600, "check_agreement_status": 120 } } ],
       "agreementProtocols": [ { "name": "Basic" } ],
       "lastUpdated": "2019-02-16T15:34:16.133Z[UTC]"
     }
