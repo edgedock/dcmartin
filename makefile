@@ -20,8 +20,8 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine herald mqtt # yolo4motion # base-ubuntu base-hzncli
-PATTERNS = yolo2msghub # motion2mqtt
+SERVICES = cpu hal wan yolo base-alpine herald mqtt yolo4motion base-ubuntu # base-hzncli
+PATTERNS = yolo2msghub motion2mqtt
 SETUP = setup
 
 ALL = $(SERVICES) $(PATTERNS)

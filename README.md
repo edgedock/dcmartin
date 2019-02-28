@@ -81,7 +81,8 @@ The `make` program is used to build; software requirements are: `make`, `git`, `
 
 Each service may be tested individually using the following `make` targets:
 
-+ `check` - test the service individually using `TEST_JQ_FILTER` for `jq` command; returns response JSON
++ `check` - check the service individually using `TEST_JQ_FILTER` for `jq` command; returns response JSON
++ `test` - test the service individually; tests status response JSON for conformance
 + `service-test` - test the service and all required services; tests status response JSON for conformance
 
 ## 3.3 Deploy (see [video][horizon-video-setup])
