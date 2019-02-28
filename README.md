@@ -4,7 +4,7 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 [design-md]: https://github.com/dcmartin/open-horizon/tree/master/DESIGN.md
 
-# 1. Status
+# 1. [Status][status-md]
 
 ![](https://img.shields.io/github/license/dcmartin/open-horizon.svg?style=flat)
 ![](https://img.shields.io/github/release/dcmartin/open-horizon.svg?style=flat)
@@ -162,6 +162,7 @@ David C Martin (github@dcmartin.com)
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+[status-md]: https://github.com/dcmartin/open-horizon/blob/master/STATUS.md
 
 ## [`CLOC.md`][cloc-md]
 
