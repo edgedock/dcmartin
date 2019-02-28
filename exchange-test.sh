@@ -1,10 +1,7 @@
 #!/bin/bash
 
 if [ -z "${HZN_EXCHANGE_URL}" ]; then export HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
-
-DIR="${1}"
-if [ -z "${DIR}" ]; then DIR="horizon"; echo "--- INFO -- $0 $$ -- directory not specified; using ${DIR}" &> /dev/stderr; fi
-if [ ! -d "${DIR}" ]; then echo "*** ERROR -- $0 $$ -- cannot find directory ${DIR}" &> /dev/stderr; exit 1; fi
+if [ ! -s "APIKEY" ]; then if [ -s "apiKey.json" ]; then jq -r '.apiKey' "apiKey.json" > APIKEY; fi; else echo "*** ERROR -- $0 $$ -- no APIKEY found; exiting" &> /dev/stderr; fi
 
 ###
 ### EXCHANGE
@@ -29,13 +26,20 @@ hzn_exchange()
   echo "${ITEMS}"
 }
 
-hzn_exchange_delete_service()
+exchange_service_images()
+{
+  echo $(exchange_services | jq '[.services[]|{"label":.label,"id":.id,"image":(.deployment|fromjson|.services|to_entries[].value.image)}]')
+}
+
+exchange_service_delete()
 {
   ID="${1}"
+  SO=
   STATUS=1
-  URL="${HZN_EXCHANGE_URL}/orgs/${SERVICE_ORG}/services/${ID##*/}"
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- DELETE ${ID} from ${SERVICE_ORD}" &> /dev/stderr; DRY_RUN='--dry-run'; fi
-  RESULT=$(curl -fsSL -X DELETE -u "${SERVICE_ORG}/iamapikey:$(cat APIKEY)" "${URL}")
+  if [ "${ID}" != "${ID##*/}" ]; then SO="${ID%/*}"; ID=${ID##*/}; echo "+++ WARN $0 $$ -- organization ${SO}; service identifier: ${ID}" &> /dev/stderr; else SO="${SERVICE_ORG}"; fi
+  URL="${HZN_EXCHANGE_URL}/orgs/${SO}/services/${ID}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- DELETE ${ID} from ${SO}" &> /dev/stderr; DRY_RUN='--dry-run'; fi
+  RESULT=$(curl -fsSL -X DELETE -u "${SO}/iamapikey:$(cat APIKEY)" "${URL}")
   STATUS=$?
   echo "${STATUS}"
 }
@@ -293,7 +297,7 @@ service_clean ()
           if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- VER: ${VER}" &> /dev/stderr; fi
           if [ $(semver_gt "${MAX}" "${VER}") == 'true' ]; then
             echo "+++ WARN -- $0 $$ -- service ${ID} is out-of-date; cleaning" &> /dev/stderr
-	    STATUS=$(hzn_exchange_delete_service "${ID}")
+	    STATUS=$(exchange_service_delete "${ID}")
             if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- DELETE status: ${STATUS}" &> /dev/stderr; fi
           fi
         done
@@ -315,16 +319,57 @@ EXCHANGE_SERVICES=
 EXCHANGE_PATTERNS=
 PATTERN_SERVICES=
 
-BUILD_FILE="build.json"
-if [ ! -s "${BUILD_FILE}" ]; then echo "*** ERROR -- $0 $$ -- build JSON ${BUILD_FILE} not found; exiting" &> /dev/stderr; exit 1; fi
-ARCH_SUPPORT=$(jq -r '.build_from|to_entries[].key' "${BUILD_FILE}")
-
-SERVICE_FILE="${2}"
-if [ -z "${SERVICE_FILE}" ]; then SERVICE_FILE="${DIR}/service.definition.json"; echo "--- INFO -- $0 $$ -- service JSON not specified; using ${SERVICE_FILE}" &> /dev/stderr; fi
-SERVICE_ORG=$(jq -r '.org' "${SERVICE_FILE}")
-
 case ${SCRIPT_NAME} in 
-  pattern-test)
+  exchange-*)
+    case ${SCRIPT_NAME} in
+      exchange-service-delete)
+	SERVICE_ID="${1}"
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- deleting service ${SERVICE_ID}" &> /dev/stderr; fi
+	STATUS=$(exchange_service_delete "${SERVICE_ID}")
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- status ${STATUS}" &> /dev/stderr; fi
+	;;
+      exchange-service-list)
+	if [ -z "${SERVICE_FILE:-}" ]; then SERVICE_ORG="${HZN_ORG_ID:-}"; else SERVICE_ORG=$(jq -r '.org' "${SERVICE_FILE}"); fi
+        if [ -z "${SERVICE_ORG}" ]; then echo "*** ERROR -- $0 $$ -- service organization unknown; set HZN_ORG_ID; exiting" &> /dev/stderr; exit 1; fi
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- listing services in ${SERVICE_ORG}" &> /dev/stderr; fi
+	SERVICES=$(exchange_services | jq '.services')
+        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found services: " $(echo "${SERVICES}" | jq '.|length') &> /dev/stderr; fi
+	LABELS=$(echo "${SERVICES}" | jq -r '.[].label' | sort | uniq)
+	OUT='{"services":['
+	for LABEL in ${LABELS}; do
+	  if [ ! -z "${LOUT}" ]; then LOUT="${LOUT}"','; fi
+	  LOUT="${LOUT}"'{"label":"'${LABEL}'","containers":['
+          SIDS=$(echo "${SERVICES}" | jq -r '.[]|select(.label=="'${LABEL}'").id')
+          for SID in ${SIDS}; do
+	    if [ ! -z "${SOUT}" ]; then SOUT="${SOUT}"','; fi
+	    IMAGE=$(echo "${SERVICES}" | jq -r '.[]|select(.id=="'${SID}'").deployment|fromjson|.services|to_entries[].value.image')
+            SOUT="${SOUT}"'{"id":"'${SID}'","image":"'${IMAGE}'"}'
+          done
+          LOUT="${LOUT}""${SOUT}"']}'
+	  SOUT=
+	done
+        OUT="${OUT}""${LOUT}"']}'
+        echo "${OUT}" | jq
+	STATUS=$?
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- status ${STATUS}" &> /dev/stderr; fi
+	;;
+      *)
+        if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- invalid exchange script: ${SCRIPT_NAME}" &> /dev/stderr; fi
+        ;;
+    esac
+    ;;
+  *)
+    BUILD_FILE="build.json"
+    if [ ! -s "${BUILD_FILE}" ]; then echo "*** ERROR -- $0 $$ -- build JSON ${BUILD_FILE} not found; exiting" &> /dev/stderr; exit 1; fi
+    ARCH_SUPPORT=$(jq -r '.build_from|to_entries[].key' "${BUILD_FILE}")
+    DIR="${1}"
+    if [ -z "${DIR}" ]; then DIR="horizon"; echo "--- INFO -- $0 $$ -- directory not specified; using ${DIR}" &> /dev/stderr; fi
+    if [ ! -d "${DIR}" ]; then echo "*** ERROR -- $0 $$ -- cannot find directory ${DIR}" &> /dev/stderr; exit 1; fi
+    SERVICE_FILE="${2}"
+    if [ -z "${SERVICE_FILE}" ]; then SERVICE_FILE="${DIR}/service.definition.json"; echo "--- INFO -- $0 $$ -- service JSON not specified; using ${SERVICE_FILE}" &> /dev/stderr; fi
+    SERVICE_ORG=$(jq -r '.org' "${SERVICE_FILE}")
+    case ${SCRIPT_NAME} in
+      pattern-test)
 	PATTERN_FILE="${3}"
 	if [ -z "${PATTERN_FILE}" ]; then PATTERN_FILE="${DIR}/pattern.json"; echo "--- INFO -- $0 $$ -- pattern JSON not specified; using ${PATTERN_FILE}" &> /dev/stderr; fi
 	if [ -s "${PATTERN_FILE}" ]; then
@@ -332,14 +377,14 @@ case ${SCRIPT_NAME} in
 	  ID="${SERVICE_ORG}/${PATTERN_LABEL}"
 	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- testing pattern ${ID}" &> /dev/stderr; fi
 	  STATUS=$(pattern_test "${ID}")
-        else
+	else
 	  STATUS=0
 	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no pattern: ${PATTERN_FILE}; status: ${STATUS}" &> /dev/stderr; fi
-        fi
+	fi
 	;;
-  service-*) 
+      service-*) 
 	if [ -s "${SERVICE_FILE}" ]; then
-          SERVICE_LABEL=$(read_service_file | jq -r '.label')
+	  SERVICE_LABEL=$(read_service_file | jq -r '.label')
 	  SERVICE_ARCH=$(read_service_file | jq -r '.arch')
 	  SERVICE_URL=$(read_service_file | jq -r '.url')
 	  SERVICE_VER=$(read_service_file | jq -r '.version')
@@ -349,11 +394,11 @@ case ${SCRIPT_NAME} in
 	  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no service: ${SERVICE_FILE}; status: ${STATUS}" &> /dev/stderr; fi
 	fi
 	case ${SCRIPT_NAME} in
-  	  service-test)
+	  service-test)
 	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- testing service ${ID}" &> /dev/stderr; fi
 	    STATUS=$(service_test "${ID}")
 	    ;;
-  	  service-clean)
+	  service-clean)
 	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- cleaning service ${SERVICE_LABEL}" &> /dev/stderr; fi
 	    STATUS=$(service_clean "${SERVICE_LABEL}")
 	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- status ${STATUS}" &> /dev/stderr; fi
@@ -361,11 +406,13 @@ case ${SCRIPT_NAME} in
 	  *)
 	    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- invalid service script: ${SCRIPT_NAME}" &> /dev/stderr; fi
 	    ;;
-        esac
-        ;;
-  *)
+	esac
+	;;
+      *)
 	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- invalid script: ${SCRIPT_NAME}" &> /dev/stderr; fi
 	;;
+    esac
+    ;;
 esac
 
 exit ${STATUS}
