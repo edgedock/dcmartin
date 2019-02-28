@@ -1,40 +1,40 @@
-# `base-hzncli` - container with Horizon CLI (Ubuntu)
+# `hzncli` - container with Horizon CLI (Ubuntu)
 
 This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_base-hzncli.svg)](https://microbadger.com/images/dcmartin/amd64_base-hzncli "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_base-hzncli.svg)](https://microbadger.com/images/dcmartin/amd64_base-hzncli "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_hzncli.svg)](https://microbadger.com/images/dcmartin/amd64_hzncli "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_hzncli.svg)](https://microbadger.com/images/dcmartin/amd64_hzncli "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_base-hzncli
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_base-hzncli.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_hzncli
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_hzncli.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_base-hzncli.svg)](https://microbadger.com/images/dcmartin/arm_base-hzncli "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_base-hzncli.svg)](https://microbadger.com/images/dcmartin/arm_base-hzncli "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_hzncli.svg)](https://microbadger.com/images/dcmartin/arm_hzncli "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_hzncli.svg)](https://microbadger.com/images/dcmartin/arm_hzncli "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_base-hzncli
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_base-hzncli.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_hzncli
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_hzncli.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_base-hzncli.svg)](https://microbadger.com/images/dcmartin/arm64_base-hzncli "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_base-hzncli.svg)](https://microbadger.com/images/dcmartin/arm64_base-hzncli "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_hzncli.svg)](https://microbadger.com/images/dcmartin/arm64_hzncli "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_hzncli.svg)](https://microbadger.com/images/dcmartin/arm64_hzncli "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_base-hzncli
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_base-hzncli.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_hzncli
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_hzncli.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+[arm-shield]: https://img.shields.io/badge/armhf-no-red.svg
 
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
-+ `url` - `com.github.dcmartin.open-horizon.base-hzncli`
++ `url` - `com.github.dcmartin.open-horizon.hzncli`
 + `version` - `0.0.1`
 
 #### Optional variables

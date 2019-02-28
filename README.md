@@ -44,7 +44,7 @@ There are also some _base_ service containers:
 
 + [`base-alpine`][base-alpine] - base service container for Alpine LINUX
 + [`base-ubuntu`][base-ubuntu] - base service container for Ubuntu LINUX
-+ [`base-hzncli`][base-hzncli] - base service container with `hzn` CLI installed; Ubuntu LINUX
++ [`hzncli`][base-hzncli] - base service container with `hzn` CLI installed; Ubuntu LINUX
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
