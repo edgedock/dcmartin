@@ -57,7 +57,7 @@ TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHIN
 
 default: build run check
 
-all: service-test service-stop service-publish service-verify service-publish-all
+all: service-test service-stop service-publish service-verify
 
 ##
 ## support
@@ -81,14 +81,8 @@ ${DIR}: service.json userinput.json $(SERVICE_REQVARS) $(APIKEY)
 ##
 
 build: Dockerfile build.json service.json rootfs Makefile
-	@echo ">>> MAKE -- building service ${SERVICE_NAME} with Docker tag ${DOCKER_TAG}"
+	@echo ">>> MAKE -- building service ${SERVICE_NAME} for architecture ${BUILD_ARCH} with Docker tag ${DOCKER_TAG}"
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
-
-build-all:
-	@echo ">>> MAKE -- building service ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
-	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" build; \
-	done
 
 logs:
 	@docker logs -f "${DOCKER_NAME}"
@@ -113,14 +107,10 @@ push: build $(DOCKER_LOGIN)
 	@echo ">>> MAKE -- pushing container ${DOCKER_TAG} for service ${SERVICE_NAME}"
 	@docker push ${DOCKER_TAG}
 
-push-all:
-	@echo ">>> MAKE -- pushing service ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
-	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
-	done
+test.${BUILD_ARCH}.out: service-test
 
 test:
-	@echo ">>> MAKE -- testing ${SERVICE_NAME}"
+	@echo ">>> MAKE -- testing ${SERVICE_NAME} for architecture ${BUILD_ARCH}"
 	@./test.sh
 
 ##
@@ -128,7 +118,7 @@ test:
 ##
 
 ${SERVICE_ARCH_SUPPORT}:
-	@echo ">>> MAKE -- building service ${SERVICE_NAME} for architecture $@ with tag ${DOCKER_TAG}"
+	@echo ">>> MAKE -- building service ${SERVICE_NAME} for architecture $@"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$@" build
 
 service-start: remove service-stop push ${DIR}
@@ -138,20 +128,20 @@ service-start: remove service-stop push ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
 
 service-test: service-start
-	-@$(MAKE) test
+	-@$(MAKE) test > ./test.${BUILD_ARCH}.out
 
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
-service-publish: build $(APIKEY) $(KEYS) ${DIR} $(SERVICE_ARCH_SUPPORT)
-	@echo ">>> MAKE -- publishing service $(SERVICE_NAME)"
+publish-service: ./test.${BUILD_ARCH}.out $(APIKEY) $(KEYS)
+	@echo ">>> MAKE -- publishing service $(SERVICE_NAME) with architecture ${BUILD_ARCH}"
 	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
-service-publish-all:
+service-publish:
 	@echo ">>> MAKE -- publishing services for pattern ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" service-publish; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" publish-service; \
 	done
 
 service-verify: $(APIKEY) $(KEYS)
@@ -167,7 +157,7 @@ service-clean: ${DIR}
 ## PATTERNS
 ##
 
-pattern-publish: ${APIKEY} service-publish-all
+pattern-publish: ${APIKEY} service-publish
 	@echo ">>> MAKE -- updating pattern ${SERVICE_NAME} for ${SERVICE_ORG} on ${HEU}"
 	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
@@ -221,4 +211,4 @@ distclean: clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check push depend service-start service-stop service-test service-publish service-publish-all service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean
+.PHONY: default all build run check test push service-start service-stop service-test service-publish publish-service service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean

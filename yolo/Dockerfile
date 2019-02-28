@@ -25,6 +25,12 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
 ARG DARKNET=/darknet
 ARG DARKNET_GIT="http://github.com/pjreddie/darknet"
 ENV DARKNET=${DARKNET} DARKNET_GIT=${DARKNET_GIT}
+ENV DARKNET_TINY_WEIGHTS="${DARKNET}/yolov2-tiny-voc.weights"
+ENV DARKNET_TINY_WEIGHTS_URL="http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
+ENV DARKNET_V2_WEIGHTS="${DARKNET}/yolov2.weights"
+ENV DARKNET_V2_WEIGHTS_URL="https://pjreddie.com/media/files/yolov2.weights"
+ENV DARKNET_V3_WEIGHTS="${DARKNET}/yolov3.weights"
+ENV DARKNET_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
 
 # Copy darknet
 # COPY rootfs/darknet ${DARKNET}
@@ -38,10 +44,6 @@ RUN \
     cd ${DARKNET} \
     \
     && make
-
-RUN curl -sSL -o "${DARKNET}/yolov2-tiny-voc.weights" "http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
-RUN curl -sSL -o "${DARKNET}/yolov2.weights" "https://pjreddie.com/media/files/yolov2.weights"
-RUN curl -sSL -o "${DARKNET}/yolov3.weights" "https://pjreddie.com/media/files/yolov3.weights"
 
 FROM darknet
 

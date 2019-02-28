@@ -20,8 +20,8 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-SERVICES = cpu hal wan yolo base-alpine  herald mqtt # yolo4motion # base-ubuntu base-hzncli
-PATTERNS = yolo2msghub motion2mqtt
+SERVICES = cpu hal wan yolo base-alpine herald mqtt # yolo4motion # base-ubuntu base-hzncli
+PATTERNS = yolo2msghub # motion2mqtt
 SETUP = setup
 
 ALL = $(SERVICES) $(PATTERNS)
@@ -62,7 +62,7 @@ pattern-validate:
 
 sync: ../ibm/open-horizon .gitignore cloc 
 	@echo ">>> MAKE -- synching ${ALL}"
-	@rsync -aXv makefile service.makefile *.sh ../ibm/open-horizon
+	@rsync -av makefile service.makefile *.md *.sh .gitignore .travis.yml ../ibm/open-horizon
 	@for dir in $(ALL) ${SETUP}; do \
 	  rsync -a --info=name --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
 	done

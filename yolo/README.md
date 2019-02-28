@@ -38,11 +38,12 @@ Provides entity count information as micro-service; updates periodically (defaul
 + `version` - `0.0.2`
 
 #### Optional variables
++ `YOLO_CONFIG` - configuration of YOLO; `tiny`, `v2`, or `v3`
 + `YOLO_ENTITY` - entity to count; defaults to `all`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
-+ `YOLO_CONFIG` - configuration: `tiny`, `v2`, or `v3`
 + `YOLO_THRESHOLD` - minimum probability; default `0.25`; range `0.0` to `1.0`
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
++ `DEBUG` - turn on debugging output; `true` or `false`; default `false`
 
 ## How To Use
 

@@ -34,20 +34,20 @@ yolo_config()
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- YOLO config: ${1}" &> /dev/stderr; fi
   case ${1} in
     tiny)
-      DARKNET_WEIGHTS="http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
-      YOLO_WEIGHTS="${DARKNET}/yolov2-tiny-voc.weights"
+      DARKNET_WEIGHTS="${DARKNET_TINY_WEIGHTS_URL}"
+      YOLO_WEIGHTS="${DARKNET_TINY_WEIGHTS}"
       YOLO_CFG_FILE="${DARKNET}/cfg/yolov2-tiny-voc.cfg"
       YOLO_DATA="${DARKNET}/cfg/voc.data"
     ;;
     v2)
-      DARKNET_WEIGHTS="https://pjreddie.com/media/files/yolov2.weights"
-      YOLO_WEIGHTS="${DARKNET}/yolov2.weights"
+      DARKNET_WEIGHTS="${DARKNET_V2_WEIGHTS_URL}"
+      YOLO_WEIGHTS="${DARKNET_V3_WEIGHTS}"
       YOLO_CFG_FILE="${DARKNET}/cfg/yolov2.cfg"
       YOLO_DATA="${DARKNET}/cfg/coco.data"
     ;;
     v3)
-      DARKNET_WEIGHTS="https://pjreddie.com/media/files/yolov3.weights"
-      YOLO_WEIGHTS="${DARKNET}/yolov3.weights"
+      DARKNET_WEIGHTS="${DARKNET_V3_WEIGHTS_URL}"
+      YOLO_WEIGHTS="${DARKNET_V3_WEIGHTS}"
       YOLO_CFG_FILE="${DARKNET}/cfg/yolov3.cfg"
       YOLO_DATA="${DARKNET}/cfg/coco.data"
     ;;

@@ -47,6 +47,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `YOLO2MSGHUB_BROKER` - message hub brokers
 + `LOCALHOST_PORT` - port for access; default **8587**
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`). 
++ `DEBUG` - including debugging output; `true` or `false`; default: `false`
 
 ### Pattern registration
 Register nodes using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name; **contents should be JSON**, e.g. quoted strings; extract from downloaded API keys using `jq` command:  
@@ -55,11 +56,11 @@ Register nodes using a derivative of the template [`userinput.json`][userinput].
 % jq '.api_key' {kafka-apiKey-file} > YOLO2MSGHUB_APIKEY
 ```
 
-**NOTE:** Refer to _Required services_ for their variables.
+**NOTE:** Refer to _Required Services_ for their variables.
 
 #### Example registration
 ```
-% hzn register -u {org}/iamapikey:{apikey} -n {nodeid}:{token} -e {org} -f userinput.json
+% hzn register -u ${HZN_ORG_ID}/iamapikey:{apikey} -n {nodeid}:{token} -e ${HZN_ORG_ID} -f userinput.json
 ```
 
 ## Required services
