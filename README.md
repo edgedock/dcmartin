@@ -52,7 +52,7 @@ There are also some _base_ service containers:
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
 [base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
 [base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
-[base-hzncli]: https://github.com/dcmartin/open-horizon/tree/master/base-hzncli/README.md
+[base-hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
 
 [herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
 [mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
