@@ -21,7 +21,7 @@ The build process for each service is identical.  The _default_ `make` target is
 ## `make` everything
 
 ```
-make build-all push-all service-publish-all pattern-publish
+make build push service-publish pattern-publish
 ```
 
 ## `service-start`
