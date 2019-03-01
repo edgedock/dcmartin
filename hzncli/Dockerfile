@@ -20,7 +20,7 @@ RUN apt-get update -y \
   && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list \
   && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key \
   && curl -fsSL "${PUBLICKEY_URL}" | apt-key add - \
-  && echo "deb [arch=arm,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}" \
+  && echo "deb [arch=armhf,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" >> "${APT_LIST}" \
   && apt-get update -y \
   && apt-get install -y horizon-cli \
   && rm -fr \

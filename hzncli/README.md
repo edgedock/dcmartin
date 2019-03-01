@@ -30,7 +30,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[arm-shield]: https://img.shields.io/badge/armhf-no-red.svg
+[arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
