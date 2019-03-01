@@ -1,40 +1,41 @@
 #!/bin/bash
 
-if [ ! -z "${1}" ]; then
-  HOST="${1}"
+if [ -z "${1}" ]; then
+  echo "*** ERROR -- $0 $$ -- no Docker tag specified; exiting" &> /dev/stderr
+  exit 1
+fi
+DOCKER_TAG="${1}"
+
+CID=$(docker ps --format '{{.Names}} {{.Image}}' | egrep "${DOCKER_TAG}" | awk '{ print $1 }')
+if [ -z "${CID}" ]; then
+  echo "*** ERROR -- $0 $$ -- cannot find running container with tag: ${DOCKER_TAG}" &> /dev/stderr
+  exit 1
+fi
+
+if [ ! -z "${2}" ]; then
+  HOST="${2}"
 else
   HOST="127.0.0.1"
   echo "--- INFO -- $0 $$ -- No host specified; assuming ${HOST}"
 fi
 
-if [ "${HOST%:*}" == "${HOST}" ]; then
-  PORT=$(jq -r '.ports?|to_entries|first|.value?' service.json)
-  echo "--- INFO -- $0 $$ -- No port specified; assuming port ${PORT}"
-  HOST="${HOST}:${PORT}"
-fi
-
-if [[ ${HOST} =~ http* ]]; then
-  echo "T"
-else
-  PROT="http"
-  echo "--- INFO -- $0 $$ -- No protocol specified; assuming ${PROT}"
-  HOST="${PROT}://${HOST}"
-fi
-
 if [ -z "${SERVICE_LABEL:-}" ]; then SERVICE_LABEL=${PWD##*/}; fi
 CMD="${PWD}/test-${SERVICE_LABEL}.sh"
+if [ -z $(command -v "${CMD}") ]; then
+  echo "+++ WARN -- $0 $$ -- no test script: ${CMD}; exiting" &> /dev/stderr
+  exit 0
+fi
 
 if [ -z ${TIMEOUT:-} ]; then TIMEOUT=5; fi
-DATE=$(($(date +%s)+${TIMEOUT}))
 
-echo "--- INFO -- $0 $$ -- Testing ${HOST} at" $(date)
+echo "--- INFO -- $0 $$ -- Testing ${SERVICE_LABEL} in container tagged: ${DOCKER_TAG} at" $(date)
 
 I=0
 
 while true; do
-  OUT=$(curl -m ${TIMEOUT} -sSL "${HOST}")
+  OUT=$(docker exec "${CID}" curl -m ${TIMEOUT} -sSL "${HOST}")
   if [ $? != 0 ]; then
-    echo "ERROR: curl failed to http://${HOST}" &> /dev/stderr
+    echo "*** ERROR -- $0 $$ -- curl failed to http://${HOST}" &> /dev/stderr
     exit 1
   fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then

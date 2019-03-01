@@ -110,8 +110,8 @@ push: build $(DOCKER_LOGIN)
 test.${BUILD_ARCH}.out: service-test
 
 test:
-	@echo ">>> MAKE -- testing ${SERVICE_NAME} for architecture ${BUILD_ARCH}"
-	@./test.sh
+	@echo ">>> MAKE -- testing ${SERVICE_NAME} for architecture ${BUILD_ARCH} with ${DOCKER_TAG}"
+	./test.sh "${DOCKER_TAG}"
 
 ##
 ## SERVICES
@@ -186,13 +186,20 @@ list-nodes:
 	  ssh $${machine} 'hzn node list'; \
 	done
 
-
 unregister:
 	@echo ">>> MAKE -- unregistering ${TEST_NODE_NAMES}"
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE -- unregistering $${machine}" $$(date); \
 	  ssh $${machine} 'hzn unregister -fr &> /dev/null &'; \
 	done
+
+nodes-update:
+	@echo ">>> MAKE -- unregistering ${TEST_NODE_NAMES}"
+	@for machine in $(TEST_NODE_NAMES); do \
+	  echo ">>> MAKE -- unregistering $${machine}" $$(date); \
+	  echo "hali4@ian" | ssh $${machine} 'sudo --stdin apt upgrade -y'; \
+	done
+
 
 ##
 ## CLEANUP
