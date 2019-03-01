@@ -97,9 +97,9 @@ Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-m
 
 Observe  system with the following commands for listing nodes, services, and patterns:
 
-+ `./setup/lsnodes.sh` - lists all nodes in the organization according to the `setup/horizon.json` configuration file
-+ `./setup/lsservices.sh` - lists all services in the organization according to the `setup/horizon.json` configuration file
-+ `./setup/lspatterns.sh` - lists all patterns in the organization according to the `setup/horizon.json` configuration file
++ `./setup/lsnodes.sh` - lists all nodes in the organization according to `setup/horizon.json`
++ `./setup/lsservices.sh` - lists all services in the organization according to `setup/horizon.json`
++ `./setup/lspatterns.sh` - lists all patterns in the organization according to `setup/horizon.json`
 
 Individual patterns have specialized receiving scripts which can be invoked:
 
