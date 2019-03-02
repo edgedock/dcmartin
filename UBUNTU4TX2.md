@@ -62,7 +62,6 @@ cd ~/JP33/64_TX2/Linux_for_Tegra
 sudo ./apply_binaries.sh
 ```
 
-## Step 5
 When that command completes, reset the TX2 into recovery mode with a USB cable connected and run the following command:
 
 ```
@@ -70,9 +69,9 @@ sudo ./flash.sh jetson-tx2 mmcblk0p1
 ```
 If this command results in failure, check whether the nVidia TX is connected by running the `lsusb` command; there should be an entry for `nVidia`.
 
-Keep the VMware virtual machine running; it's needed in **Step 9**
+Keep the VMware virtual machine running; it's needed in **Step A**
 
-## Step 6
+## Step 5
 After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
 
 ```
@@ -81,7 +80,7 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 ```
 
-## Step 7 \[optional\]
+## Step 6 \[optional\]
 Add external SSD hard drive:
 
 ```
@@ -117,7 +116,7 @@ rm -fr /home
 ln -s /sda/home /home
 ```
 
-## Step 8
+## Step 7
 Secure built-in accounts `nvidia` and `ubuntu`, create new account, add group permissions:
 
 ```
@@ -130,11 +129,22 @@ sudo addgroup <yourid> docker
 
 Logout of `nvidia` account and re-login with `<yourid>`.
 
-## Step 9
+## Step 8
 
-Install CUDA from `JP411`:
+Copy `~/JP411/jetpack_download/` directory from VMware Ubuntu host to TX2; on the VMware host enter:
 
 ```
+scp -r ~/JP411/jetpack_download/ <yourid>@<tx2-ip-address>:.
+```
+
+If you don't know the IP address of your TX2, run the `ip addr` command on the TX2.
+
+## Step 9
+
+Install CUDA and OpenCV packages copied from VMware host to the TX2. On the TX2 enter:
+
+```
+cd ~/jetpack_download
 dpkg --install cuda-repo-l4t-10-0-local-10.0.117_1.0-1_arm64.deb
 sudo apt install -y libtbb2
 dpkg --install libopencv_3.3.1_arm64.deb 
