@@ -28,7 +28,6 @@ Each JetPack will download a variety of additional items that may be necessary i
 ```
 % cd ~/JP33 
 % bash JetPack-L4T-3.3-linux-x64_b39.run
-
 ```
 
 A graphical user-interface provides the ability to configure the JetPack and download additional software; default is _full_ and is recommended.  Once the software has been downloaded and the application indicates it is ready to proceed, quit the JetPack.
