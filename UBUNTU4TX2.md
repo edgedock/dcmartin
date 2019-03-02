@@ -14,7 +14,6 @@ To maintain separation, create two different directories, one for each version:
 
 ```
 % mkdir ~/JP33 ~/JP411
-
 ```
 
 Then move the downloaded JetPacks into the respective directory:
