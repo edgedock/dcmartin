@@ -167,6 +167,17 @@ apt install -y cuda-nvtx-10-0
 apt install -y libnvidia-common-390
 ```
 
+## Step 10
+Remove old `docker` and install new `docker-ce`
+
+```
+sudo -s
+apt remove -y docker
+apt purge -y docker
+apt install -y aptutils
+wget -qO - get.docker.com | sudo bash
+```
+
 ## Step X
 Install Open Horizon
 
