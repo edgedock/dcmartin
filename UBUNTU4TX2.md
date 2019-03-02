@@ -71,32 +71,61 @@ If this command results in failure, check whether the nVidia TX is connected by 
 After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
 
 ```
-sudo add-apt-repository universe
 sudo apt update -y
 sudo apt upgrade -y
+sudo apt autoremove -y
 ```
 
 ## Step 7
-Install Docker and nVidia container support
+Add external SSD hard drive:
 
 ```
-sudo apt remove docker
-sudo apt install -y jq curl
-curl get.docker.com | sudo bash
+sudo -s
+mkdir /sda
+echo '/dev/sda /sda /ext4' >> /etc/fstab
+mount -a
 ```
 
-Install `nvidia-container-runtime`
+Install `rsync`
 
 ```
-curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | \
-  sudo apt-key add -
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | \
-  sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
-sudo apt-get update
+sudo apt install -y rsync
 ```
 
-## Step 8
+Relocate `/var/lib/docker` to SSD:
+
+```
+sudo -s
+systemctl stop docker
+rsync -a /var/lib/docker /sda/docker
+rm -fr /var/lib/docker
+ln -s /sda/docker /var/lib/docker
+systemctl start docker
+```
+
+Relocate `/home` to SSD:
+
+```
+sudo -s
+rsync -a /home /sda/home
+rm -fr /home
+ln -s /sda/home /home
+```
+
+## Step 9
+Secure built-in accounts `nvidia` and `ubuntu`, create new account, add group permissions:
+
+```
+sudo passwd nvidia
+sudo passwd ubuntu
+sudo adduser <yourid>
+sudo addgroup <yourid> sudo
+sudo addgroup <yourid> docker
+```
+
+Logout of `nvidia` account and re-login with `<yourid>`.
+
+## Step X
 Install Open Horizon
 
 ```
