@@ -79,10 +79,10 @@ After the TX2 has been flashed with the new image, reboot the TX2 using the _res
 sudo nmap -sn -T5 192.168.1.0/24 | egrep -B2 -i 'nvidia'
 ```
 
-Once the TX2 has booted and is identified on the network, copy the `~/JP411/jetpack_download/` directory from the VMware Ubuntu host to the TX2; use default _login_ `nvidia` with _password_ `nvidia`.
+Once the TX2 has booted and is identified on the network, copy the `~/JP411/jetpack_download/` directory from the VMware Ubuntu host to the TX2; use default _login_ `nvidia` with _password_ `nvidia`; for example, if the TX2 addreess is `192.168.1.31`:
 
 ```
-scp -r ~/JP411/jetpack_download/ nvidia@<tx2-address>:.
+scp -r ~/JP411/jetpack_download/ nvidia@192.168.1.31:.
 ```
 
 After this step the VMware virtual machine host is no longer required.
