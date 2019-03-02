@@ -1,6 +1,6 @@
 # Install on nVidia TX2 w/ Ubuntu 18
 
-The nVidia TX2 is configured using the nVidia JetPack.  The latest version for TX2 is version 3.3 and is Ubuntu 16.04.  To install you will need both the v3.3 JetPack as well as the current 4.1.1.  Both may be downloaded from the nVidia Developer [portal][nvidia-developer].  These instructions depend on the utilization of a VMWare Fusion or Workstation virtual machine running Ubuntu version 14.04 LTS. Other virtual machine systems may work (n.b. USB connectivity is required), but Ubuntu 14.04 is **mandatory**.
+The nVidia TX2 is configured using the nVidia JetPack.  The latest version for TX2 is version 3.3 and is Ubuntu 16.04.  To install you will need both the v3.3 JetPack as well as the current 4.1.1.  Both may be downloaded from the [nVidia Developer portal][nvidia-developer].  These instructions depend on the utilization of a VMWare Fusion or Workstation virtual machine running Ubuntu version 14.04 LTS. Other virtual machine systems may work (n.b. USB connectivity is required) as well as other versions of Ubuntu on the host computer; refer to the nVidia Developer portal for more information.
 
 [nvidia-developer]: https://developer.nvidia.com/embedded/jetpack
 
