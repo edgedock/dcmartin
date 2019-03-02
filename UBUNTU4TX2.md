@@ -73,13 +73,19 @@ If this command results in failure, check whether the nVidia TX is connected by 
 
 ## Step 5
 
-Copy `~/JP411/jetpack_download/` directory from VMware Ubuntu host to TX2; on the VMware host use the `scp` command with default _login_ `nvidia` and _password_ `nvidia`:
+After the TX2 has been flashed with the new image, reboot the TX2 using the _reset_ button (n.b. the one closest to the corner).  Wait until the TX2 boots; ff you don't know the TX2 network address, search the connected local-area-network (LAN); for example, find all devices on the LAN identified by `nvidia`:
 
 ```
-scp -r ~/JP411/jetpack_download/ nvidia@<tx2-ip-address>:.
+sudo nmap -sn -T5 192.168.1.0/24 | egrep -B2 -i 'nvidia'
 ```
 
-If you don't know the IP address of your TX2, run the `ip addr` command on the TX2.  After this step the VMware virtual machine host is no longer required.
+Once the TX2 has booted and is identified on the network, copy the `~/JP411/jetpack_download/` directory from the VMware Ubuntu host to the TX2; use default _login_ `nvidia` with _password_ `nvidia`.
+
+```
+scp -r ~/JP411/jetpack_download/ nvidia@<tx2-address>:.
+```
+
+After this step the VMware virtual machine host is no longer required.
 
 ## Step 6
 After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
@@ -139,19 +145,19 @@ sudo addgroup <yourid> docker
 
 Logout of `nvidia` account and re-login with `<yourid>`.
 
-## Step 9
+## Step 9 \[optional\]
 
-Install CUDA and OpenCV packages copied from VMware host to the TX2. On the TX2 enter:
+Install CUDA, OpenCV, and other packages copied from VMware host. On the TX2 enter:
 
 ```
 cd ~/jetpack_download
 sudo -s
-dpkg --install cuda-repo-l4t-10-0-local-10.0.117_1.0-1_arm64.deb
-apt install -y libtbb2
-dpkg --install libopencv_3.3.1_arm64.deb
 add-apt-repository ppa:graphics-drivers
 apt update -y
 apt upgrade -y
+apt install -y libtbb2
+dpkg --install libopencv_3.3.1_arm64.deb
+dpkg --install cuda-repo-l4t-10-0-local-10.0.117_1.0-1_arm64.deb
 apt install -y cuda-license-10-0
 apt install -y cuda-cublas-10-0
 dpkg --install libcudnn7-dev_7.3.1.20-1+cuda10.0_arm64.deb
