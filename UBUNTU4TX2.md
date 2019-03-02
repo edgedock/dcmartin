@@ -39,11 +39,6 @@ cd ~/JP411
 bash JetPack-L4T-4.1.1-linux-x64_b57.run
 ```
 
-**Note:** Direct links to the [file-system][jetpack-411-filesystem] and [drivers][jetpack-411-drivers] compressed `tar` archives.
-
-[jetpack-411-filesystem]: https://developer.nvidia.com/embedded/dlc/l4t-sample-root-filesystem-31-1-0
-[jetpack-411-drivers]: https://developer.nvidia.com/embedded/dlc/l4t-jetson-xavier-driver-package-31-1-0
-
 ## Step 3
 Once both JetPacks have been configured and downloaded, remove the original `rootfs/` directory, make a new one, then uncompress and copy the contents of the newer release operating system:
 
@@ -55,6 +50,11 @@ bunzip2 -c ~/JP411/jetpack_download/Tegra_Linux_Sample-Root-Filesystem_R3.1.1.0_
 bunzip2 -c ~/JP411/jetpack_download/Jetson_Linux_R3.1.1.0_aarch64.tbz2 \
   | ( cd ~/JP33/64_TX2 ; sudo tar xf - )
 ```
+
+**Note:** Direct links to the [file-system][jetpack-411-filesystem] and [drivers][jetpack-411-drivers] compressed `tar` archives.
+
+[jetpack-411-filesystem]: https://developer.nvidia.com/embedded/dlc/l4t-sample-root-filesystem-31-1-0
+[jetpack-411-drivers]: https://developer.nvidia.com/embedded/dlc/l4t-jetson-xavier-driver-package-31-1-0
 
 ## Step 4
 Once the copy is complete, change directory and run the following command to configure the binaries:
