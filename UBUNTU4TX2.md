@@ -1,6 +1,6 @@
-# Install Ubuntu 18 (Bionic) on nVidia TX2
+# Install nVidia TX2
 
-The nVidia TX2 is configured using the nVidia JetPack.  The latest version for TX2 is version 3.3 and is Ubuntu 16.04.  To install Ubuntu 18.04 (Bionic) you will need both the v3.3 JetPack as well as the current 4.1.1.  Both may be downloaded from the nVidia Developer [portal][nvidia-developer].  These instructions depend on the utilization of a VMWare Fusion or Workstation virtual machine running Ubuntu version 14.04 LTS. Other virtual machine systems may work (n.b. USB connectivity is required), but Ubuntu 14.04 is **mandatory**.
+The nVidia TX2 is configured using the nVidia JetPack.  The latest version for TX2 is version 3.3 and is Ubuntu 16.04.  To install you will need both the v3.3 JetPack as well as the current 4.1.1.  Both may be downloaded from the nVidia Developer [portal][nvidia-developer].  These instructions depend on the utilization of a VMWare Fusion or Workstation virtual machine running Ubuntu version 14.04 LTS. Other virtual machine systems may work (n.b. USB connectivity is required), but Ubuntu 14.04 is **mandatory**.
 
 [nvidia-developer]: https://developer.nvidia.com/embedded/jetpack
 
@@ -60,8 +60,22 @@ When that command completes, reset the TX2 into recovery mode with a USB cable c
 ```
 % sudo ./flash.sh jetson-tx2 mmcblk0p1
 ```
-
 If this command results in failure, check whether the nVidia TX is connected by running the `lsusb` command; there should be an entry for `nVidia`.
+
+## Step 6
+After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
+
+```
+% sudo add-apt-repository universe
+% sudo apt update -y
+% sudo apt upgrade -y
+% sudo apt install -y jq
+% sudo apt remove docker
+% wget -qO get.docker.com | sudo bash
+% wget -qO ibm.biz/horizon-setup | sudo bash
+```
+
+
 
 
 
