@@ -171,7 +171,7 @@ apt install -y libnvidia-common-390
 Install Open Horizon
 
 ```
-wget -qO ibm.biz/horizon-setup | sudo bash
+wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
 
 
