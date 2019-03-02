@@ -76,7 +76,7 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 ```
 
-## Step 7 (**optional**)
+## Step 7 \[optional\]
 Add external SSD hard drive:
 
 ```
@@ -112,7 +112,7 @@ rm -fr /home
 ln -s /sda/home /home
 ```
 
-## Step 9
+## Step 8
 Secure built-in accounts `nvidia` and `ubuntu`, create new account, add group permissions:
 
 ```
@@ -125,7 +125,7 @@ sudo addgroup <yourid> docker
 
 Logout of `nvidia` account and re-login with `<yourid>`.
 
-## Step X
+## Step 9
 Install Open Horizon
 
 ```

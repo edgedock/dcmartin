@@ -107,47 +107,16 @@
     { "id": "u1810-s", "type": "server", "arch": "amd64", "distribution": "ubuntu-18.10-server" }
   ],
   "distributions": [
-    {
-      "id": "ubuntu-18.04.1",
-      "kernel_version": "4.15",
-      "release_date": "2018-07-26",
-      "version": "Bionic Beaver",
-      "type": "debian",
-      "client": {
-        "hostname": "beaver",
-        "sudo": "password",
-        "username": "ubuntu",
-        "password": "bionic"
-      }
-    },
-    {
-      "id": "ubuntu-18.10",
-      "kernel_version": "4.18",
-      "release_date": "2018-10-18",
-      "version": "Cosmic Cuttlefish",
-      "type": "debian",
-      "client": {
-        "hostname": "cuttlefish",
-        "sudo": "password",
-        "username": "ubuntu",
-        "password": "cosmic"
-      }
-    },
-    {
-      "id": "raspbian-stretch-lite",
-      "kernel_version": "4.14",
-      "release_date": "2018-11-13",
-      "version": "November 2018",
-      "release_notes": "http://downloads.raspberrypi.org/raspbian/release_notes.txt",
-      "url": "http://director.downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip",
-      "type": "debian",
-      "client": {
-        "hostname": "raspberrypi",
-        "sudo": "silent",
-        "username": "pi",
-        "password": "raspberry"
-      }
-    }
+    { "id": "ubuntu-18.04", "kernel_version": "4.15", "release_date": "2018-07-26", "version": "Bionic Beaver", "type": "debian",
+      "client": { "hostname": "beaver", "sudo": "password", "username": "root", "password": "toor" } },
+    { "id": "ubuntu-18.10", "kernel_version": "4.18", "release_date": "2018-10-18", "version": "Cosmic Cuttlefish", "type": "debian",
+      "client": { "hostname": "cuttlefish", "sudo": "password", "username": "root", "password": "toor" } },
+    { "id": "ubuntu-16.04", "kernel_version": "", "release_date": "", "version": "Xenial Xerus", "type": "debian",
+      "client": { "hostname": "", "sudo": "password", "username": "root", "password": "toor" } },
+    { "id": "tx2-18.04", "kernel_version": "4.15", "release_date": "2018-07-26", "version": "Bionic Beaver", "type": "debian",
+      "client": { "hostname": "jetson-.*", "sudo": "password", "username": "nvidia", "password": "nvidia" } },
+    { "id": "raspbian-stretch-lite", "kernel_version": "4.14", "release_date": "2018-11-13", "version": "November 2018", "release_notes": "http://downloads.raspberrypi.org/raspbian/release_notes.txt", "url": "http://director.downloads.raspberrypi.org/rasbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip", "type": "debian",
+      "client": { "hostname": "raspberrypi", "sudo": "silent", "username": "pi", "password": "raspberry" } }
   ],
   "exchanges": [
     { "id": "none" },
