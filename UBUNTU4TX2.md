@@ -76,7 +76,7 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 ```
 
-## Step 7
+## Step 7 (**optional**)
 Add external SSD hard drive:
 
 ```
