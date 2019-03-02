@@ -39,6 +39,8 @@ cd ~/JP411
 bash JetPack-L4T-4.1.1-linux-x64_b57.run
 ```
 
+**Note:** Direct links to the [file-system][jetpack-411-filesystem] and [drivers][jetpack-411-drivers] compressed `tar` archives.
+
 [jetpack-411-filesystem]: https://developer.nvidia.com/embedded/dlc/l4t-sample-root-filesystem-31-1-0
 [jetpack-411-drivers]: https://developer.nvidia.com/embedded/dlc/l4t-jetson-xavier-driver-package-31-1-0
 
@@ -69,9 +71,17 @@ sudo ./flash.sh jetson-tx2 mmcblk0p1
 ```
 If this command results in failure, check whether the nVidia TX is connected by running the `lsusb` command; there should be an entry for `nVidia`.
 
-Keep the VMware virtual machine running; it's needed in **Step A**
-
 ## Step 5
+
+Copy `~/JP411/jetpack_download/` directory from VMware Ubuntu host to TX2; on the VMware host use the `scp` command with default _login_ `nvidia` and _password_ `nvidia`:
+
+```
+scp -r ~/JP411/jetpack_download/ nvidia@<tx2-ip-address>:.
+```
+
+If you don't know the IP address of your TX2, run the `ip addr` command on the TX2.  After this step the VMware virtual machine host is no longer required.
+
+## Step 6
 After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
 
 ```
@@ -80,7 +90,7 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 ```
 
-## Step 6 \[optional\]
+## Step 7 \[optional\]
 Add external SSD hard drive:
 
 ```
@@ -116,7 +126,7 @@ rm -fr /home
 ln -s /sda/home /home
 ```
 
-## Step 7
+## Step 8
 Secure built-in accounts `nvidia` and `ubuntu`, create new account, add group permissions:
 
 ```
@@ -128,16 +138,6 @@ sudo addgroup <yourid> docker
 ```
 
 Logout of `nvidia` account and re-login with `<yourid>`.
-
-## Step 8
-
-Copy `~/JP411/jetpack_download/` directory from VMware Ubuntu host to TX2; on the VMware host enter:
-
-```
-scp -r ~/JP411/jetpack_download/ <yourid>@<tx2-ip-address>:.
-```
-
-If you don't know the IP address of your TX2, run the `ip addr` command on the TX2.
 
 ## Step 9
 
