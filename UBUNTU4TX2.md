@@ -174,6 +174,12 @@ apt install -y cuda-nvtx-10-0
 apt install -y libnvidia-common-390
 ```
 
+```
+sudo dpkg --install cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb
+sudo dpkg --install libcudnn7_7.1.5.14-1+cuda9.0_arm64.deb
+
+```
+
 ## Step 10
 Remove old `docker` and install new `docker-ce`
 
