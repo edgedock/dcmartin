@@ -74,12 +74,17 @@ After rebooting the TX2, login with default login `nvidia` with password `nvidia
 sudo add-apt-repository universe
 sudo apt update -y
 sudo apt upgrade -y
-sudo apt install -y jq
-sudo apt remove docker
-wget -qO get.docker.com | sudo bash
 ```
 
 ## Step 7
+Install Docker and nVidia container support
+
+```
+sudo apt remove docker
+sudo apt install -y jq curl
+curl get.docker.com | sudo bash
+```
+
 Install `nvidia-container-runtime`
 
 ```
