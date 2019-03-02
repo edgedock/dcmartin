@@ -88,9 +88,10 @@ scp -r ~/JP411/jetpack_download/ nvidia@192.168.1.31:.
 After this step the VMware virtual machine host is no longer required.
 
 ## Step 6
-After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
+Log into the TX2 with with default login `nvidia` with password `nvidia` and update, for example with TX addresss of `192.168.1.31`:
 
 ```
+ssh 192.168.1.31 -l nvidia
 sudo apt update -y
 sudo apt upgrade -y
 sudo apt autoremove -y
