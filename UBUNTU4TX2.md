@@ -40,10 +40,12 @@ Repeat the process for the newer version:
 ```
 
 ## Step 3
-Once both JetPacks have been configured and downloaded, copy the contents of the newer release to the older:
+Once both JetPacks have been configured and downloaded, uncompress and copy the contents of the newer release operating system and _root_ file-system to the older:
 
 ```
-% sudo rsync -a ~/JP411/Xavier/Linux_for_Tegra/rootfs ~/JP33/64_TX2/Linux_for_Tegra/rootfs
+% rm -fr ~/JP33/64_TX2/Linux_for_Tegra/rootfs
+% mkdir ~/JP33/64_TX2/Linux_for_Tegra/rootfs
+% bunzip2 -c ~/JP411/jetpack_download/Tegra_Linux_Sample-Root-Filesystem_R3.1.1.0_aarch64.tbz2 | ( cd ~/JP33/64_TX2/Linux_for_Tegra/rootfs/ ; tar xf - )
 ```
 
 ## Step 4
