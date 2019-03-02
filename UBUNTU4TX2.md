@@ -147,7 +147,17 @@ Install CUDA and OpenCV packages copied from VMware host to the TX2. On the TX2 
 cd ~/jetpack_download
 dpkg --install cuda-repo-l4t-10-0-local-10.0.117_1.0-1_arm64.deb
 sudo apt install -y libtbb2
-dpkg --install libopencv_3.3.1_arm64.deb 
+dpkg --install libopencv_3.3.1_arm64.deb
+sudo add-apt-repository ppa:graphics-drivers
+apt update -y
+apt upgrade -y
+apt install -y cuda-license-10-0
+apt install -y cuda-cublas-10-0
+dpkg --install libcudnn7-dev_7.3.1.20-1+cuda10.0_arm64.deb
+dpkg --install libnvinfer5_5.0.3-1+cuda10.0_arm64.deb 
+dpkg --install libnvinfer-dev_5.0.3-1+cuda10.0_arm64.deb 
+dpkg --install libnvinfer-samples_5.0.3-1+cuda10.0_all.deb
+dpkg --install tensorrt_5.0.3.2-1+cuda10.0_arm64.deb 
 ```
 
 ## Step X
