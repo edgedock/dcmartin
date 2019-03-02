@@ -39,6 +39,9 @@ cd ~/JP411
 bash JetPack-L4T-4.1.1-linux-x64_b57.run
 ```
 
+[jetpack-411-filesystem]: https://developer.nvidia.com/embedded/dlc/l4t-sample-root-filesystem-31-1-0
+[jetpack-411-drivers]: https://developer.nvidia.com/embedded/dlc/l4t-jetson-xavier-driver-package-31-1-0
+
 ## Step 3
 Once both JetPacks have been configured and downloaded, remove the original `rootfs/` directory, make a new one, then uncompress and copy the contents of the newer release operating system:
 
@@ -66,6 +69,8 @@ When that command completes, reset the TX2 into recovery mode with a USB cable c
 sudo ./flash.sh jetson-tx2 mmcblk0p1
 ```
 If this command results in failure, check whether the nVidia TX is connected by running the `lsusb` command; there should be an entry for `nVidia`.
+
+Keep the VMware virtual machine running; it's needed in **Step 9**
 
 ## Step 6
 After rebooting the TX2, login with default login `nvidia` with password `nvidia` and update:
@@ -126,6 +131,16 @@ sudo addgroup <yourid> docker
 Logout of `nvidia` account and re-login with `<yourid>`.
 
 ## Step 9
+
+Install CUDA from `JP411`:
+
+```
+dpkg --install cuda-repo-l4t-10-0-local-10.0.117_1.0-1_arm64.deb
+sudo apt install -y libtbb2
+dpkg --install libopencv_3.3.1_arm64.deb 
+```
+
+## Step X
 Install Open Horizon
 
 ```
