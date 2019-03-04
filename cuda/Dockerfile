@@ -154,7 +154,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
 	protobuf-compiler \
 	python-all-dev \
 	python-dev \
-	python-pip
+	python-pip \
+	libfreetype6-dev \
+	pkg-config
 
 # Pip for python stuff
 RUN pip install --upgrade --no-cache-dir pip setuptools wheel
