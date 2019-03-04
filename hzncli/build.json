@@ -1,9 +1,9 @@
 {
     "squash": false,
     "build_from": {
-        "amd64": "dcmartin/amd64_base-ubuntu:0.0.1",
-        "arm": "dcmartin/arm_base-ubuntu:0.0.1",
-        "arm64": "dcmartin/arm64_base-ubuntu:0.0.1"
+        "amd64": "ubuntu:xenial",
+        "arm": "arm32v7/ubuntu:xenial",
+        "arm64": "arm64v8/ubuntu:xenial"
     },
     "args": {}
 }
