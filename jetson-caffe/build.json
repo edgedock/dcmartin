@@ -1,0 +1,7 @@
+{
+    "squash": false,
+    "build_from": {
+        "arm64": "arm64v8/ubuntu:xenial-20190122"
+    },
+    "args": {}
+}

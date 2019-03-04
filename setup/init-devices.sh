@@ -300,10 +300,10 @@ for MAC in ${MACS}; do
   mid=$(echo "$node_conf" | jq -r '.machine')
   did=$(jq -r '.machines[]|select(.id=="'$mid'").distribution' "${CONFIG}") 
   dist=$(jq '.distributions[]|select(.id=="'$did'")' "${CONFIG}")
-  client_hostname=$(echo "$dist" | jq -r '.client.hostname')
   client_username=$(echo "$dist" | jq -r '.client.username')
   client_password=$(echo "$dist" | jq -r '.client.password')
-  client_distro=$(echo "$dist" | jq '{"id":.id,"kernel_version":.kernel_version,"release_date":.release_date,"version":.version}')
+  client_sudo=$(echo "$dist" | jq '.sudo')
+  client_distro=$(echo "$dist" | jq '{"id":.id}')
 
   if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: machine = $mid; distribution = $did" &> /dev/stderr; fi
 
@@ -384,11 +384,15 @@ for MAC in ${MACS}; do
     cat "config-ssh.tmpl" \
       | sed 's|%%DEVICE_NAME%%|'"${device}"'|g' \
       | sed 's|%%CLIENT_USERNAME%%|'"${client_username}"'|g' \
-      | sed 's|%%CLIENT_HOSTNAME%%|'"${client_hostname}"'|g' \
       | sed 's|%%DEVICE_TOKEN%%|'"${token}"'|g' \
       > "${config_script}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: copying SSH script ${config_script}" &> /dev/stderr; fi
     scp -o "CheckHostIP=no" -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
+    if [ "${client_sudo}" != 'silent' ]; then
+      cmd="echo ${client_password} | sudo --stdin"
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
+      result=$(ssh -o "BatchMode=yes" -o "CheckHostIP=no" -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")
+    fi
     cmd="sudo bash ./${config_script##*/}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
     result=$(ssh -o "BatchMode=yes" -o "CheckHostIP=no" -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")

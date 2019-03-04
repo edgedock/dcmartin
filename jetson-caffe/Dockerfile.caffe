@@ -57,8 +57,9 @@ RUN apt-get install -y --no-install-recommends \
 
 # Install conda and Intel Caffe conda package
 WORKDIR /root/
-RUN wget -c https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
-    bash Miniconda2-latest-Linux-x86_64.sh -b && \
+RUN wget -c https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+
+RUN bash Miniconda2-latest-Linux-x86_64.sh -b && \
     ./miniconda2/bin/conda config --add channels intel && \
     ./miniconda2/bin/conda install -c intel caffe && \
     rm -rf /root/miniconda2/pkgs/* && \
