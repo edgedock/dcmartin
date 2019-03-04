@@ -1,57 +1,92 @@
-#FROM aarch64/ubuntu
-FROM arm64v8/ubuntu:xenial-20180123 as cuda-base
+# from Ubuntu 16.04
+FROM arm64v8/ubuntu:xenial-20190122 as jetsontx2-xenial-drivers
 
 # Update packages, install some useful packages
 RUN apt update && apt install -y \
 	apt-utils \
 	bzip2 \
-	curl \
 	sudo \
-	unp \
+	curl \
   && apt-get clean && rm -rf /var/cache/apt
 
-ARG ROOTFS=https://developer.nvidia.com/embedded/dlc/l4t-sample-root-filesystem-31-1-0
-ARG DRIVER=https://developer.nvidia.com/embedded/dlc/l4t-jetson-xavier-driver-package-31-1-0
+###
+### Linux for Tegra R28.2.1 - from https://developer.nvidia.com/embedded/linux-tegra-r2821
+###
 
-# Install drivers first
-WORKDIR /tmp
+ARG DRIVER=https://developer.nvidia.com/embedded/dlc/tx2-driver-package-r2821
+# ARG DRIVER=https://developer.download.nvidia.com/embedded/L4T/r28_Release_v2.1/Tegra186_Linux_R28.2.1_aarch64.tbz2?13qZ4v6KW-jZhShNacOKJuPQokXaJovAgsQDweNHk8WGu4th8Sz3K1mrnuh_Pkckrp6B0-HmmEpopd_dt-BliMjOMzA6U-jOdf5puStXvE_WrICmI66emlPmizA1XIGVobM8oUeektM8e_SCFJUH3KTU6-K62gY-yIEVoXM7jcM
+
+# creates the Linux_for_Tegra/ directory 
 RUN curl -sSL ${DRIVER} | tar xpfj - 
-RUN cd ./Linux_for_Tegra/rootfs && curl -sSL ${ROOTFS} | tar xpfj - 
-RUN ./Linux_for_Tegra/apply_binaries.sh -r ./Linux_for_Tegra/rootfs
-RUN rm -fr \
-	./Linux_for_Tegra/rootfs/var/cache/ \
-	./Linux_for_Tegra/rootfs/usr/lib/libreoffice/ \
-	./Linux_for_Tegra/rootfs/usr/lib/chromium-browser/ \
-	./Linux_for_Tegra/rootfs/usr/lib/thunderbird/
-RUN cd ./Linux_for_Tegra/rootfs && for d in bin boot dev home lib media mnt opt root run sbin srv tmp usr var; do tar cf - "${d}" | ( cd "/${d}" ; tar xpf - ); done
+RUN ./Linux_for_Tegra/apply_binaries.sh -r /
 RUN rm -fr ./Linux_for_Tegra
 
-WORKDIR /
+## Clean up (don't remove cuda libs... used by child containers)
+RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
+
+###
+### JETPACK 
+###
+
+FROM jetsontx2-xenial-drivers as jetsontx2-jetpack33
+
+# from https://layers.openembedded.org/layerindex/recipe/87651/
 ARG JETPACK_URL=https://developer.download.nvidia.com/devzone/devcenter/mobile/jetpack_l4t/3.3/lw.xd42/JetPackL4T_33_b39
 
-# libcudnn
-ARG LIB=libcudnn7_7.1.5.14-1+cuda9.0_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
+# retrieve all packages in JetPack
+RUN for DEB in \
+	cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb \
+	libcudnn7_7.1.5.14-1+cuda9.0_arm64.deb \
+	libcudnn7-dev_7.1.5.14-1+cuda9.0_arm64.deb \
+	libcudnn7-doc_7.1.5.14-1+cuda9.0_arm64.deb \
+	libopencv_3.3.1_t186_arm64.deb \
+	libopencv-dev_3.3.1_t186_arm64.deb \
+	libopencv-samples_3.3.1_t186_arm64.deb \
+	libopencv-python_3.3.1_t186_arm64.deb \
+	libgie-dev_4.1.3-1+cuda9.0_arm64.deb \
+	libnvinfer-dev_4.1.3-1+cuda9.0_arm64.deb \
+	libnvinfer-samples_4.1.3-1+cuda9.0_arm64.deb \
+	libnvinfer4_4.1.3-1+cuda9.0_arm64.deb \
+	libvisionworks-repo_1.6.0.500n_arm64.deb \
+	libvisionworks-sfm-repo_0.90.3_arm64.deb \
+	libvisionworks-tracking-repo_0.88.1_arm64.deb \
+	tensorrt_4.0.2.0-1+cuda9.0_arm64.deb \
+	; \
+	do URL=${JETPACK_URL}/${DEB}; \
+		curl -sSL ${URL} -o ${DEB}; \
+	done
 
-# libcudnn-dev
-ARG LIB=libcudnn7-dev_7.1.5.14-1+cuda9.0_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
+## Clean up (don't remove cuda libs... used by child containers)
+RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
 
-# cuda-repo
-ARG LIB=cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
+###
+### CUDA
+###
 
+FROM jetsontx2-jetpack33 as jetsontx2-cuda9
+
+# install cuda-repo and cudnn
+RUN for DEB in \
+	cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb \
+	libcudnn7_7.1.5.14-1+cuda9.0_arm64.deb \
+	libcudnn7-dev_7.1.5.14-1+cuda9.0_arm64.deb \
+	; do dpkg --install ${DEB}; done
+
+# add GPG key from cuda-repo
 RUN apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
-RUN apt-get update && apt-get install -y --allow-unauthenticated cuda-toolkit-9.0
 
+# install cuda-toolkit
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
+	cuda-toolkit-9.0
+
+## Re-link libs in /usr/lib/<arch>/tegra
 RUN ln -sf /usr/lib/aarch64-linux-gnu/tegra/libGL.so /usr/lib/aarch64-linux-gnu/libGL.so
-RUN ln -s /usr/lib/aarch64-linux-gnu/libcuda.so /usr/lib/aarch64-linux-gnu/libcuda.so.1
+RUN ln -sf /usr/lib/aarch64-linux-gnu/libcuda.so /usr/lib/aarch64-linux-gnu/libcuda.so.1
+
+# add to link library path
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/aarch64-linux-gnu/tegra
 
 ## Clean up (don't remove cuda libs... used by child containers)
 RUN apt-get -y autoremove && apt-get -y autoclean
@@ -61,39 +96,14 @@ RUN rm -rf /var/cache/apt
 ### OPENCV
 ###
 
-FROM cuda-base as opencv-base
+FROM jetsontx2-cuda9 as jetsontx2-opencv
 
-RUN apt-get install -y \
-	pkg-config \
-	libavcodec-ffmpeg56 \
-	libavformat-ffmpeg56 \
-	libswscale-ffmpeg3 \
-	libtbb2 \
-	libcairo2 \
-	libgdk-pixbuf2.0-0 \
-	libglib2.0-0 \
-	libgtk2.0-0 \
-	libjasper1 \
-	libjpeg8 \
-	libtbb-dev
-
-WORKDIR /
-ARG JETPACK_URL=https://developer.download.nvidia.com/devzone/devcenter/mobile/jetpack_l4t/3.3/lw.xd42/JetPackL4T_33_b39
-
-ARG LIB=libopencv_3.3.1_t186_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
-
-ARG LIB=libopencv-dev_3.3.1_t186_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
-
-ARG LIB=libopencv-python_3.3.1_t186_arm64.deb
-ARG URL=${JETPACK_URL}/${LIB}
-RUN curl -sSL ${URL} -o ${LIB}
-RUN dpkg --install ${LIB}
+RUN for DEB in \
+	libopencv_3.3.1_t186_arm64.deb \
+	libopencv-dev_3.3.1_t186_arm64.deb \
+	libopencv-samples_3.3.1_t186_arm64.deb \
+	libopencv-python_3.3.1_t186_arm64.deb \
+	; do dpkg --install ${DEB}; done
 
 ## Clean up (don't remove cuda libs... used by child containers)
 RUN apt-get -y autoremove && apt-get -y autoclean
@@ -103,9 +113,9 @@ RUN rm -rf /var/cache/apt
 ### DARKNET
 ###
 
-FROM opencv-base as darknet-opencv-base
+FROM jetsontx2-opencv as jetsontx2-darknet
 
-RUN apt install -y git
+RUN DEBIAN_FRONTEND=noninteractive && apt install -y git
 
 # configure darknet
 ARG DARKNET=/darknet
@@ -122,20 +132,26 @@ ENV DARKNET_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
 RUN mkdir -p ${DARKNET} 
 RUN cd ${DARKNET} && git clone ${DARKNET_GIT} .
 
+RUN \
+    echo "++++++++++++++++++++++" \
+    find /usr -name "libcuda*" -print \
+    echo "++++++++++++++++++++++"
+
 # Build darknet
 RUN \
     cd ${DARKNET} \
     \
     && PATH=/usr/local/cuda/bin:$PATH \
     \
-    && mkdir -p /usr/local/cuda \
+    && LD_LIBRARY_PATH=/usr/local/cuda/lib:$LD_LIBRARY_PATH && ldconfig \
     \
-    && ln -s /usr/lib/aarch64-linux-gnu/tegra /usr/local/cuda/lib64 \
-    \
-    && make -j 4 GPU=1 CUDNN=1 OPENCV=0 OPENMP=0 DEBUG=0 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:
+    && make -j 4 GPU=1 CUDNN=1 OPENCV=1 OPENMP=0 DEBUG=0
 
+###
+### CAFFE
+###
 
-FROM cuda-base as caffe-base
+FROM jetsontx2-cuda9 as jetsontx2-caffe
 
 RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
 	build-essential \
@@ -189,3 +205,42 @@ RUN make distribute
 
 # Clean up
 RUN apt-get -y autoremove && apt-get -y autoclean
+
+###
+### MORE
+###
+
+RUN apt-get install -y \
+	pkg-config \
+	libavcodec-ffmpeg56 \
+	libavcodec-ffmpeg-extra56 \
+	libavformat-ffmpeg56 \
+	libswscale-ffmpeg3 \
+	libtbb2 \
+	libcairo2 \
+	libgdk-pixbuf2.0-0 \
+	libglib2.0-0 \
+	libgtk2.0-0 \
+	libjasper1 \
+	libjpeg8 \
+	libtbb-dev
+
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
+	freeglut3-dev \
+	libx11-dev \
+	x11proto-dev \
+	libxext-dev \ 
+	libxfixes-dev \
+	libxmu-dev \
+	libglu1-mesa-dev \
+	cuda-documentation-9-0 \
+	cuda-samples-9-0 \
+	libxi6 \
+	libxi-dev \
+	x11proto-input-dev \
+	x11proto-core-dev
+
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
+	libgl1-mesa-dev \
+	libgl-dev 
+
