@@ -125,38 +125,6 @@ RUN \
     \
     && make -j 4 GPU=1 CUDNN=1 OPENCV=0 OPENMP=0 DEBUG=0
 
-
-###
-### OPENCV
-###
-
-FROM jetsontx2-cuda9 as jetsontx2-opencv
-
-RUN apt-get update && apt-get install -y \
-	pkg-config
-
-RUN apt-get update && apt-get install -y \
-	libavcodec-ffmpeg56 \
-	libavcodec-ffmpeg-extra56 \
-	libavformat-ffmpeg56 \
-	libswscale-ffmpeg3 \
-	libtbb2 \
-	libcairo2 \
-	libgdk-pixbuf2.0-0 \
-	libglib2.0-0 \
-	libgtk2.0-0 \
-	libjasper1 \
-	libjpeg8 \
-	libtbb-dev
-
-
-RUN for DEB in \
-	libopencv_3.3.1_t186_arm64.deb \
-	libopencv-dev_3.3.1_t186_arm64.deb \
-	libopencv-samples_3.3.1_t186_arm64.deb \
-	libopencv-python_3.3.1_t186_arm64.deb \
-	; do dpkg --install ${DEB}; done
-
 ## Clean up (don't remove cuda libs... used by child containers)
 RUN apt-get -y autoremove && apt-get -y autoclean
 RUN rm -rf /var/cache/apt
@@ -219,6 +187,43 @@ RUN make distribute
 
 # Clean up
 RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
+
+###
+### OPENCV
+###
+
+FROM jetsontx2-cuda9 as jetsontx2-opencv
+
+RUN apt-get update && apt-get install -y \
+	pkg-config
+
+RUN apt-get update && apt-get install -y \
+	libavcodec-ffmpeg56 \
+	libavcodec-ffmpeg-extra56 \
+	libavformat-ffmpeg56 \
+	libswscale-ffmpeg3 \
+	libtbb2 \
+	libcairo2 \
+	libgdk-pixbuf2.0-0 \
+	libglib2.0-0 \
+	libgtk2.0-0 \
+	libjasper1 \
+	libjpeg8 \
+	libtbb-dev
+
+
+RUN for DEB in \
+	libopencv_3.3.1_t186_arm64.deb \
+	libopencv-dev_3.3.1_t186_arm64.deb \
+	libopencv-samples_3.3.1_t186_arm64.deb \
+	libopencv-python_3.3.1_t186_arm64.deb \
+	; do dpkg --install ${DEB}; done
+
+## Clean up 
+RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
+
 
 ###
 ### MORE
