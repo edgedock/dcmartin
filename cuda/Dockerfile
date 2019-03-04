@@ -130,10 +130,53 @@ RUN apt-get -y autoremove && apt-get -y autoclean
 RUN rm -rf /var/cache/apt
 
 ###
+### OPENCV
+###
+
+FROM jetsontx2-cuda9 as jetsontx2-opencv
+
+RUN apt-get update && apt-get install -y \
+	pkg-config
+
+RUN apt-get update && apt-get install -y \
+	libavcodec-ffmpeg56 \
+	#libavcodec-ffmpeg-extra56 \
+	libavformat-ffmpeg56 \
+	libavutil-ffmpeg54 \
+	libswscale-ffmpeg3
+
+RUN apt-get update && apt-get install -y \
+	libcairo2 \
+	libgdk-pixbuf2.0-0 \
+	libgtk2.0-0
+
+RUN apt-get update && apt-get install -y \
+	libpng12-0
+
+RUN apt-get update && apt-get install -y \
+	libtbb2 \
+	libglib2.0-0 \
+	libjasper1 \
+	libjpeg8>=8c \
+	libtbb-dev
+
+RUN for DEB in \
+	libopencv_3.3.1_t186_arm64.deb \
+	libopencv-dev_3.3.1_t186_arm64.deb \
+	libopencv-samples_3.3.1_t186_arm64.deb \
+	libopencv-python_3.3.1_t186_arm64.deb \
+	; do dpkg --install ${DEB}; done
+
+
+## Clean up 
+RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
+
+###
 ### CAFFE
 ###
 
-FROM jetsontx2-cuda9 as jetsontx2-caffe
+FROM jetsontx2-opencv as jetsontx2-caffe
 
 RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
 	build-essential \
@@ -155,7 +198,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
 	python-all-dev \
 	python-dev \
 	python-pip \
-	libfreetype6-dev \
 	pkg-config
 
 # Pip for python stuff
@@ -190,42 +232,6 @@ RUN make distribute
 # Clean up
 RUN apt-get -y autoremove && apt-get -y autoclean
 RUN rm -rf /var/cache/apt
-
-###
-### OPENCV
-###
-
-FROM jetsontx2-cuda9 as jetsontx2-opencv
-
-RUN apt-get update && apt-get install -y \
-	pkg-config
-
-RUN apt-get update && apt-get install -y \
-	libavcodec-ffmpeg56 \
-	libavcodec-ffmpeg-extra56 \
-	libavformat-ffmpeg56 \
-	libswscale-ffmpeg3 \
-	libtbb2 \
-	libcairo2 \
-	libgdk-pixbuf2.0-0 \
-	libglib2.0-0 \
-	libgtk2.0-0 \
-	libjasper1 \
-	libjpeg8 \
-	libtbb-dev
-
-
-RUN for DEB in \
-	libopencv_3.3.1_t186_arm64.deb \
-	libopencv-dev_3.3.1_t186_arm64.deb \
-	libopencv-samples_3.3.1_t186_arm64.deb \
-	libopencv-python_3.3.1_t186_arm64.deb \
-	; do dpkg --install ${DEB}; done
-
-## Clean up 
-RUN apt-get -y autoremove && apt-get -y autoclean
-RUN rm -rf /var/cache/apt
-
 
 ###
 ### MORE
