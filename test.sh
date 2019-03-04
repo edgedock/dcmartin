@@ -39,6 +39,7 @@ while true; do
     exit 1
   fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
+    echo "${OUT}" > "test.json"
     if [ ! -z "$(command -v ${CMD})" ]; then
       TEST=$(echo "${OUT}" | ${CMD})
       if [ "${TEST:-}" == 'true' ]; then
