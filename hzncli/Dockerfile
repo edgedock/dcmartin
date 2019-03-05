@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ubuntu
+ARG BUILD_FROM=ubuntu:xenial
 
 FROM $BUILD_FROM
 

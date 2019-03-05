@@ -3,7 +3,7 @@
   "services": [
     {
       "org": "dcmartin@us.ibm.com",
-      "url": "com.github.dcmartin.open-horizon.base-hzncli",
+      "url": "com.github.dcmartin.open-horizon.hzncli",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "HZNCLI_PERIOD": 120,
