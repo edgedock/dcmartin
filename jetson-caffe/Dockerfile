@@ -93,43 +93,6 @@ RUN apt-get -y autoremove && apt-get -y autoclean
 RUN rm -rf /var/cache/apt
 
 ###
-### DARKNET
-###
-
-FROM jetsontx2-cuda9 as jetsontx2-darknet
-
-RUN DEBIAN_FRONTEND=noninteractive && apt install -y git
-
-# configure darknet
-ARG DARKNET=/darknet
-ARG DARKNET_GIT="http://github.com/pjreddie/darknet"
-ENV DARKNET=${DARKNET} DARKNET_GIT=${DARKNET_GIT}
-ENV DARKNET_TINY_WEIGHTS="${DARKNET}/yolov2-tiny-voc.weights"
-ENV DARKNET_TINY_WEIGHTS_URL="http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
-ENV DARKNET_V2_WEIGHTS="${DARKNET}/yolov2.weights"
-ENV DARKNET_V2_WEIGHTS_URL="https://pjreddie.com/media/files/yolov2.weights"
-ENV DARKNET_V3_WEIGHTS="${DARKNET}/yolov3.weights"
-ENV DARKNET_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
-
-# Clone darknet
-RUN mkdir -p ${DARKNET} 
-RUN cd ${DARKNET} && git clone ${DARKNET_GIT} .
-
-# Build darknet
-RUN \
-    cd ${DARKNET} \
-    \
-    && PATH=/usr/local/cuda/bin:$PATH \
-    \
-    && LD_LIBRARY_PATH=/usr/local/cuda/lib:$LD_LIBRARY_PATH && ldconfig \
-    \
-    && make -j 4 GPU=1 CUDNN=1 OPENCV=0 OPENMP=0 DEBUG=0
-
-## Clean up (don't remove cuda libs... used by child containers)
-RUN apt-get -y autoremove && apt-get -y autoclean
-RUN rm -rf /var/cache/apt
-
-###
 ### OPENCV
 ###
 
@@ -140,7 +103,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y \
 	libavcodec-ffmpeg56 \
-	#libavcodec-ffmpeg-extra56 \
 	libavformat-ffmpeg56 \
 	libavutil-ffmpeg54 \
 	libswscale-ffmpeg3
@@ -166,7 +128,6 @@ RUN for DEB in \
 	libopencv-samples_3.3.1_t186_arm64.deb \
 	libopencv-python_3.3.1_t186_arm64.deb \
 	; do dpkg --install ${DEB}; done
-
 
 ## Clean up 
 RUN apt-get -y autoremove && apt-get -y autoclean
@@ -207,23 +168,35 @@ RUN pip install --no-cache-dir pillow matplotlib h5py protobuf scipy scikit-imag
 
 WORKDIR /
 RUN git clone https://github.com/BVLC/caffe
+
 WORKDIR /caffe
 RUN apt-get install -y python-setuptools
 WORKDIR /caffe/python
 RUN for req in $(cat requirements.txt); do pip install --no-cache-dir $req; done
+
+## BUILD CAFFE
+
 WORKDIR /caffe
-RUN cp Makefile.config.example Makefile.config
+
+# configuration (CUDNN, OPENCV, OPENCV_VERSION 3)
+RUN cat Makefile.config.example \
+	| sed 's/^# USE_CUDNN :=.*/USE_CUDNN:=1/' \
+	| sed 's/^# USE_OPENCV :=.*/USE_OPENCV:=1/' \
+	| sed 's/^# OPENCV_VERSION :=.*/OPENCV_VERSION:=3/' \
+	#| sed 's/^# USE_LMDB:=.*/USE_LMDB:=0/' \
+	#| sed 's/^# USE_HDF5:=.*/USE_HDF5:=0/' \
+	# CUDA9.0: comment out "compute_20" line in Makefile.config (this arch obsolete)
+	| sed 's/-gencode arch=compute_20,code=sm_20/#-gencode arch=compute_20,code=sm_20/' \
+	> Makefile.config
 
 # Prep make with correct Python include dirs
 RUN sed -i "s/INCLUDE_DIRS := \$(PYTHON_INCLUDE) \/usr\/local\/include/INCLUDE_DIRS := \$(PYTHON_INCLUDE) \/usr\/local\/include \/usr\/local\/lib\/python2.7\/dist-packages\/numpy\/core\/include \/usr\/include\/hdf5\/serial/g" Makefile.config
-RUN sed -i "s/# USE_CUDNN := 1/USE_CUDNN := 1/g" Makefile.config
 
-# CUDA9.0 update: Comment out "compute_20" lines in makefile.config (this arch obsolete)
-RUN sed -i "s/-gencode arch=compute_20,code=sm_20/#-gencode arch=compute_20,code=sm_20/g" Makefile.config
 RUN sed -i "s/LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5/LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_serial_hl hdf5_serial opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs/g" Makefile
 
 # Build
 RUN ldconfig
+RUN make lib -j4
 RUN make all -j4
 RUN make pycaffe -j4
 RUN make test -j4
@@ -232,27 +205,3 @@ RUN make distribute
 # Clean up
 RUN apt-get -y autoremove && apt-get -y autoclean
 RUN rm -rf /var/cache/apt
-
-###
-### MORE
-###
-
-RUN apt-get update && apt-get install -y --allow-unauthenticated \
-	freeglut3-dev \
-	libx11-dev \
-	x11proto-dev \
-	libxext-dev \ 
-	libxfixes-dev \
-	libxmu-dev \
-	libglu1-mesa-dev \
-	cuda-documentation-9-0 \
-	cuda-samples-9-0 \
-	libxi6 \
-	libxi-dev \
-	x11proto-input-dev \
-	x11proto-core-dev
-
-RUN apt-get update && apt-get install -y --allow-unauthenticated \
-	libgl1-mesa-dev \
-	libgl-dev 
-
