@@ -40,18 +40,19 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
   -X "sasl.password=${APIKEY:16}" \
   -t "${TOPIC}" | while read -r; do
     if [ -n "${REPLY}" ]; then
-      echo "${REPLY}" >> $0.$$.json
-      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> $0.$$.out)
+      PAYLOAD=${0##*/}.$$.json
+      echo "${REPLY}" > ${PAYLOAD}
+      VALID=$(echo "${REPLY}" | ./test-yolo2msghub.sh 2> ${PAYLOAD%.*}.out)
     else
-      echo "+++ WARN $0 $$ -- null payload"
+      if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN $0 $$ -- null payload" &> /dev/stderr; fi
       continue
     fi
     if [ "${VALID}" != 'true' ]; then
-      echo "+++ WARN $0 $$ -- invalid payload: ${REPLY}"
+      echo "+++ WARN $0 $$ -- invalid payload" &> /dev/stderr
       continue
     fi
-    ID=$(echo "${REPLY}" | jq -r '.hzn.device_id')
-    DATE=$(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.date')
+    ID=$(jq -r '.hzn.device_id' ${PAYLOAD})
+    DATE=$(jq -r '.yolo2msghub.yolo.date' ${PAYLOAD})
     THIS=$(echo "${DEVICES}" | jq '.[]|select(.id=="'${ID}'")')
     if [ -z "${THIS}" ] || [ "${THIS}" == 'null' ]; then
       THIS='{"id":"'${ID}'","date":'${DATE}',"count":0}'
@@ -65,29 +66,29 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
 
     DEVICES=$(echo "${DEVICES}" | jq '(.[]|select(.id=="'${ID}'"))|='"${THIS}")
 
-    if [ $(echo "${REPLY}" | jq '.yolo2msghub.yolo!=null') == 'true' ]; then
-      if [ $(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.mock') != 'true' ]; then
+    if [ $(jq '.yolo2msghub.yolo!=null' ${PAYLOAD}) == 'true' ]; then
+      if [ $(jq -r '.yolo2msghub.yolo.mock' ${PAYLOAD}) == 'null' ]; then
         if [ ${DATE} -gt ${LAST} ]; then
-          COUNT=$(echo "${REPLY}" | jq -r '.yolo2msghub.yolo.count')
+          COUNT=$(jq -r '.yolo2msghub.yolo.count' ${PAYLOAD})
           if [ ${COUNT} -gt 0 ]; then
-            echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}"
+            echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}" &> /dev/stderr
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
-            echo "${REPLY}" | jq -r '.yolo2msghub.yolo.image' | base64 --decode > $0.$$.${ID}.jpeg
-            # if [ ! -z $(command -v open) ]; then open $0.$$.jpeg; fi
+            jq -r '.yolo2msghub.yolo.image' ${PAYLOAD} | base64 --decode > ${0##*/}.$$.${ID}.jpeg
+            if [ ! -z $(command -v open) ]; then open ${0##*/}.$$.${ID}.jpeg; fi
           else
-            echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person"
+            echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person" &> /dev/stderr
           fi
           THIS=$(echo "${THIS}" | jq '.date='${DATE})
           DEVICES=$(echo "${DEVICES}" | jq '(.[]|select(.id=="'${ID}'"))|='"${THIS}")
           DEVICES=$(echo "${DEVICES}" | jq '.|sort_by(.count)|reverse')
         fi
       else
-        echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: mock"
+        echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: mock" $(jq -c '.yolo2msghub.yolo.detected' ${PAYLOAD}) &> /dev/stderr
       fi
     else
-      echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no yolo output"
+      echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no yolo output" &> /dev/stderr
     fi
-    echo "${DEVICES}" | jq -c '.'
+    echo "${DEVICES}" | jq -c '.' &> /dev/stderr
 done
-rm -f $0.$$.*
+rm -f ${0##*/}.$$.*

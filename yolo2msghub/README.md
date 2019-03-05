@@ -95,26 +95,208 @@ Clone or fork this [repository][repository], change to the `yolo2msghub` directo
 % make
 ```
 
-The default `make` command will `build`,`run`, and `check` this service.  A container with the name `{arch}_yolo2msghub`, e.g. `amd64_yolo2msghub` on Intel/AMD PC/MAC/LINUX, will be created (n.b. running containers can be listed through `docker ps`). Results from a successful `make check` yield a sample payload:
+The default `make` command will `build`,`run`, and `check` this service.  A container with the name `{arch}_yolo2msghub`, e.g. `amd64_yolo2msghub` on Intel/AMD PC/MAC/LINUX, will be created (n.b. running containers can be listed through `docker ps`).
+
+## make `check`
+Check service status output using the `TEST_JQ_FILTER` file contents as JSON output format.
 
 ```
 {
-  "hostname": "a60b406943d4-172017000007",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "yolo2msghub",
-  "device": "davidsimac.local-amd64_yolo2msghub",
-  "pid": 8,
   "yolo2msghub": {
     "log_level": "info",
-    "debug": "false",
+    "debug": false,
     "services": [
-      { "name": "yolo", "url": "http://yolo:80" },
-      { "name": "hal", "url": "http://hal:80" },
-      { "name": "cpu", "url": "http://cpu:80" },
-      { "name": "wan", "url": "http://wan:80" }
-    ]
-  }
+      {
+        "name": "yolo",
+        "url": "http://yolo"
+      },
+      {
+        "name": "hal",
+        "url": "http://hal"
+      },
+      {
+        "name": "cpu",
+        "url": "http://cpu"
+      },
+      {
+        "name": "wan",
+        "url": "http://wan"
+      }
+    ],
+    "period": 30,
+    "cpu": false,
+    "wan": false,
+    "hal": false,
+    "yolo": false
+  },
+  "hzn": {
+    "agreementid": "388f1b3d8bcc95564a17199da446bc77f0b483044ba27ced534a334d081cfb41",
+    "arch": "amd64",
+    "cpus": 1,
+    "device_id": "davidsimac.local",
+    "exchange_url": "https://alpha.edge-fabric.com/v1",
+    "host_ips": [
+      "127.0.0.1",
+      "192.168.1.27",
+      "192.168.1.26",
+      "9.80.93.175",
+      "192.168.52.1",
+      "192.168.29.1",
+      "192.168.55.105",
+      "169.254.245.125"
+    ],
+    "organization": "dcmartin@us.ibm.com",
+    "pattern": "",
+    "ram": 1024
+  },
+  "date": 1551814617,
+  "service": "yolo2msghub"
 }
+```
+## make `test`
+Interrogate the service through direct access to Docker container and retrieve service status on designated port; process output through `test.sh` test harness using `test-yolo2msghub.sh` script.   Output conformant JSON attribute names and types.
+
+```
+{
+  "yolo2msghub": {
+    "wan": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number"
+    },
+    "cpu": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number",
+      "interval": "number",
+      "percent": "number"
+    },
+    "hal": {
+      "date": "number",
+      "log_level": "string",
+      "debug": "boolean",
+      "period": "number",
+      "lshw": {
+        "id": "string",
+        "class": "string",
+        "claimed": "boolean",
+        "handle": "string",
+        "description": "string",
+        "product": "string",
+        "version": "string",
+        "serial": "string",
+        "width": "number",
+        "configuration": {
+          "configuration": "object"
+        },
+        "capabilities": {
+          "capabilities": "object"
+        },
+        "children": [
+          "object",
+          "object"
+        ]
+      },
+      "lsusb": [],
+      "lscpu": {
+        "Architecture": "string",
+        "CPU_op_modes": "string",
+        "Byte_Order": "string",
+        "CPUs": "string",
+        "On_line_CPUs_list": "string",
+        "Threads_per_core": "string",
+        "Cores_per_socket": "string",
+        "Sockets": "string",
+        "Vendor_ID": "string",
+        "CPU_family": "string",
+        "Model": "string",
+        "Model_name": "string",
+        "Stepping": "string",
+        "CPU_MHz": "string",
+        "BogoMIPS": "string",
+        "L1d_cache": "string",
+        "L1i_cache": "string",
+        "L2_cache": "string",
+        "L3_cache": "string",
+        "Flags": "string"
+      },
+      "lspci": [
+        "object",
+        "object",
+        "object",
+        "object",
+        "object",
+        "object",
+        "object",
+        "object",
+        "object"
+      ],
+      "lsblk": [
+        "object",
+        "object",
+        "object",
+        "object"
+      ]
+    },
+    "yolo": "null",
+    "log_level": "string",
+    "debug": "boolean",
+    "services": [
+      "object",
+      "object",
+      "object",
+      "object"
+    ],
+    "period": "number",
+    "date": "number"
+  },
+  "hzn": {
+    "agreementid": "string",
+    "arch": "string",
+    "cpus": "number",
+    "device_id": "string",
+    "exchange_url": "string",
+    "host_ips": [
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string",
+      "string"
+    ],
+    "organization": "string",
+    "pattern": "string",
+    "ram": "number"
+  },
+  "date": "number",
+  "service": "string"
+}
+
+```
+## make `test-nodes`
+
+Access the service status on identified nodes (n.b. `TEST_TMP_MACHINES`) on designated port and process output using first non-commented line from file `TEST_NODE_FILTER`; for example if the service was started with `service-start` the results would not include `pattern` information.
+
+```
+>>> MAKE -- start testing yolo2msghub on localhost port 8587:8587 at Tue Mar  5 11:50:50 PST 2019
+ELAPSED: 0
+{"name":null}
+{"hzn":{"agreementid":"0756cfe35e7b2e1891c1174d37e34587d8a878f8ff7a02bcfe72e94eee27600e","arch":"amd64","cpus":1,"device_id":"davidsimac.local","exchange_url":"https://alpha.edge-fabric.com/v1","host_ips":["127.0.0.1","192.168.1.27","192.168.1.26","9.80.93.175","192.168.52.1","192.168.29.1","192.168.55.105","169.254.245.125"],"organization":"dcmartin@us.ibm.com","pattern":"","ram":1024}}
+{"period":30}
+{"date":1551814993}
+{"pattern":{"label":null}}
+{"pattern":{"updated":null}}
+{"horizon":{"pattern":""}}
+{"cpu":true}
+{"cpu":99.75}
+{"hal":true}
+{"wan":true}
+{"yolo":true}
+>>> MAKE -- finish testing yolo2msghub on localhost at Tue Mar  5 11:50:50 PST 2019
 ```
 
 # Changelog & Releases
