@@ -19,6 +19,20 @@ else
   echo "--- INFO -- $0 $$ -- No host specified; assuming ${HOST}"
 fi
 
+if [ "${HOST%:*}" == "${HOST}" ]; then
+  PORT=$(jq -r '.ports?|to_entries|first|.value?' service.json)
+  echo "+++ WARN $0 $$ -- No port specified; assuming port ${PORT}"
+  HOST="${HOST}:${PORT}"
+fi
+
+if [[ ${HOST} =~ http* ]]; then
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- protocol specified" &> /dev/stderr; fi
+else
+  PROT="http"
+  echo "+++ WARN $0 $$ -- No protocol specified; assuming ${PROT}"
+  HOST="${PROT}://${HOST}"
+fi
+
 if [ -z "${SERVICE_LABEL:-}" ]; then SERVICE_LABEL=${PWD##*/}; fi
 CMD="${PWD}/test-${SERVICE_LABEL}.sh"
 if [ -z $(command -v "${CMD}") ]; then
