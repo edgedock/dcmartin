@@ -1,7 +1,15 @@
 #!/bin/bash
 
 if [ -z "${HZN_EXCHANGE_URL}" ]; then export HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
-if [ ! -s "APIKEY" ]; then if [ -s "apiKey.json" ]; then jq -r '.apiKey' "apiKey.json" > APIKEY; fi; else echo "*** ERROR -- $0 $$ -- no APIKEY found; exiting" &> /dev/stderr; fi
+if [ ! -s "APIKEY" ]; then 
+  if [ -s "../apiKey.json" ]; then 
+    jq -r '.apiKey' "../apiKey.json" > APIKEY
+  else 
+    echo "+++ WARN -- $0 $$ -- no apiKey.json" &> /dev/stderr
+  fi
+else
+    echo "--- INFO -- $0 $$ -- APIKEY found" &> /dev/stderr
+fi
 
 ###
 ### EXCHANGE

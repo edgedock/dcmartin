@@ -29,6 +29,12 @@ These variables indicate the files used for code signing.  These files are gener
 + `PRIVATE_KEY_FILE` - filename of private key for code signing; defaults to `IBM-*.key` or `PRIVATE_KEY_FILE`
 + `PUBLIC_KEY_FILE` - filename of public key for code signing; defaults to `IBM-*.pem` or `PUBLIC_KEY_FILE`
 
+Use the following command with appropriate alternatives; any values are acceptable:
+
+```
+hzn key create MYORG my-email@my-domain.tld
+```
+
 ## 1.2 IBM Cloud API Key
 
 This variable provides the IBM Cloud API key; it is the contents of the `APIKEY` file which itself is derived from`apiKey` if an IBM Cloud API key JSON file is stored in `open-horizon/apiKey.json`  IBM Cloud API keys can be generated and downloaded from the IBM Cloud `IAM` [service][ibm-iam].
