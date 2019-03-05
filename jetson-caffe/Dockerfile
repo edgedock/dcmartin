@@ -150,6 +150,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthe
 	libfreetype6-dev \
 	libpng12-dev \
 	libgoogle-glog-dev \
+	libhdf5-dev \
 	libhdf5-serial-dev \
 	libleveldb-dev \
 	liblmdb-dev \
@@ -178,29 +179,34 @@ RUN for req in $(cat requirements.txt); do pip install --no-cache-dir $req; done
 
 WORKDIR /caffe
 
-# configuration (CUDNN, OPENCV, OPENCV_VERSION 3)
+# configuration
+ARG MAKE_ARGS="USE_CUDNN=1 USE_LEVELDB=1 USE_LMDB=1 USE_HDF5=1 USE_OPENCV=1 OPENCV_VERSION=3"
+
+# configure Makefile.config
 RUN cat Makefile.config.example \
-	| sed 's/^# USE_CUDNN :=.*/USE_CUDNN:=1/' \
-	| sed 's/^# USE_OPENCV :=.*/USE_OPENCV:=1/' \
-	| sed 's/^# OPENCV_VERSION :=.*/OPENCV_VERSION:=3/' \
-	#| sed 's/^# USE_LMDB:=.*/USE_LMDB:=0/' \
-	#| sed 's/^# USE_HDF5:=.*/USE_HDF5:=0/' \
 	# CUDA9.0: comment out "compute_20" line in Makefile.config (this arch obsolete)
 	| sed 's/-gencode arch=compute_20,code=sm_20/#-gencode arch=compute_20,code=sm_20/' \
 	> Makefile.config
 
-# Prep make with correct Python include dirs
-RUN sed -i "s/INCLUDE_DIRS := \$(PYTHON_INCLUDE) \/usr\/local\/include/INCLUDE_DIRS := \$(PYTHON_INCLUDE) \/usr\/local\/include \/usr\/local\/lib\/python2.7\/dist-packages\/numpy\/core\/include \/usr\/include\/hdf5\/serial/g" Makefile.config
-
-RUN sed -i "s/LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_hl hdf5/LIBRARIES += glog gflags protobuf boost_system boost_filesystem m hdf5_serial_hl hdf5_serial opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs/g" Makefile
+# extra include directories
+ARG EXTRA_INCLUDE_DIR="/usr/local/include /usr/local/lib/python2.7/dist-packages/numpy/core/include /usr/include/hdf5/serial"
+RUN sed -i "s|^INCLUDE_DIRS := \(.*\)|INCLUDE_DIRS := \1 ${EXTRA_INCLUDE_DIR}|" Makefile.config
 
 # Build
-RUN ldconfig
-RUN make lib -j4
-RUN make all -j4
-RUN make pycaffe -j4
-RUN make test -j4
-RUN make distribute
+RUN echo 'obj: $(OBJS)' >> Makefile
+RUN make ${MAKE_ARGS} obj -j4
+
+# extra library directories
+ARG EXTRA_LIBRARY_DIR="/usr/local/lib /usr/local/cuda/lib64 /usr/lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu/hdf5/serial/lib"
+RUN sed -i "s|^LIBRARY_DIRS := \(.*\)|LIBRARY_DIRS := \1 ${EXTRA_LIBRARY_DIR}|" Makefile.config
+
+# link, etc..
+RUN make ${MAKE_ARGS} lib -j4
+RUN make ${MAKE_ARGS} tools -j4
+RUN make ${MAKE_ARGS} examples -j4
+RUN make ${MAKE_ARGS} pycaffe -j4
+RUN make ${MAKE_ARGS} test -j4
+RUN make ${MAKE_ARGS} distribute
 
 # Clean up
 RUN apt-get -y autoremove && apt-get -y autoclean
