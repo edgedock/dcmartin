@@ -38,7 +38,7 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.motion2mqtt`
-+ `version` - `0.0.1`
++ `version` - `0.0.10`
 
 #### Optional variables
 

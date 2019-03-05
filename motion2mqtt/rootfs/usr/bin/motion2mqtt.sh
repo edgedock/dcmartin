@@ -54,7 +54,7 @@ restart_motion()
   fi
   if [ -z "${PID:-}" ]; then 
     if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- starting ${CMD} with ${PIDFILE}" &> /dev/stderr; fi
-    ${CMD} -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -p "${PIDFILE}" -l /dev/stderr &
+    ${CMD} -n -b ${MOTION_LOG_LEVEL} -k ${MOTION_LOG_TYPE} -c /etc/motion/motion.conf -p "${PIDFILE}" -l ${TMPDIR}/motion.log &
     while [ ! -s "${PIDFILE}" ]; do
       if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on ${PIDFILE}" &> /dev/stderr; fi
       sleep 1
