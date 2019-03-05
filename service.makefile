@@ -1,5 +1,5 @@
 ## ARCHITECTURE
-BUILD_ARCH ?= $(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/')
+BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/'))
 
 ## HZN
 CMD := $(shell whereis hzn | awk '{ print $1 }')
@@ -101,7 +101,7 @@ remove:
 check:
 	@echo ">>> MAKE -- checking ${SERVICE_NAME} on ${DOCKER_PORT}"
 	@rm -f check.json
-	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq -c "$${JQ_FILTER}" check.json
+	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
 push: build $(DOCKER_LOGIN)
 	@echo ">>> MAKE -- pushing container ${DOCKER_TAG} for service ${SERVICE_NAME}"
@@ -160,7 +160,7 @@ service-clean: ${DIR}
 pattern-publish: ${APIKEY} service-publish
 	@echo ">>> MAKE -- updating pattern ${SERVICE_NAME} for ${SERVICE_ORG} on ${HEU}"
 	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
+	-@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 pattern-validate:
