@@ -49,7 +49,7 @@ I=0
 while true; do
   OUT=$(docker exec "${CID}" curl -m ${TIMEOUT} -sSL "${HOST}")
   if [ $? != 0 ]; then
-    echo "*** ERROR -- $0 $$ -- curl failed to http://${HOST}" &> /dev/stderr
+    echo "*** ERROR -- $0 $$ -- curl failed to ${HOST}" &> /dev/stderr
     exit 1
   fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
