@@ -20,7 +20,7 @@ else
 fi
 
 if [ "${HOST%:*}" == "${HOST}" ]; then
-  PORT=$(jq -r '.ports?|to_entries|first|.value?' service.json)
+  PORT=$(jq -r '.ports?|to_entries|first|.key?' service.json | sed 's|\(.*\)/.*|\1|')
   echo "+++ WARN $0 $$ -- No port specified; assuming port ${PORT}"
   HOST="${HOST}:${PORT}"
 fi
