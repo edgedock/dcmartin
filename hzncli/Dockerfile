@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ubuntu:xenial
+ARG BUILD_FROM=dcmartin/base-ubuntu
 
 FROM $BUILD_FROM
 
@@ -12,9 +12,6 @@ ENV \
     TERM="xterm"
 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
-  curl \
-  jq \
-  socat \
   ca-certificates \
   gnupg
 
