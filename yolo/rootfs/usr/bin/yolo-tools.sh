@@ -18,7 +18,7 @@ YOLO_NAMES="${DARKNET}/data/coco.names"
 yolo_init() 
 {
   # build configuation
-  CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","threshold":'${YOLO_THRESHOLD}'}'
+  CONFIG='{"version":"'"${SERVICE_VERSION:-}"'","log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","threshold":'${YOLO_THRESHOLD}'}'
   # get names of entities that can be detected
   if [ -s "${YOLO_NAMES}" ]; then
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- processing ${YOLO_NAMES}" &> /dev/stderr; fi
@@ -33,23 +33,29 @@ yolo_config()
 {
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- YOLO config: ${1}" &> /dev/stderr; fi
   case ${1} in
-    tiny)
-      DARKNET_WEIGHTS="${DARKNET_TINY_WEIGHTS_URL}"
-      YOLO_WEIGHTS="${DARKNET_TINY_WEIGHTS}"
-      YOLO_CFG_FILE="${DARKNET_TINY_CONFIG}"
-      YOLO_DATA="${DARKNET}/cfg/coco.data"
+    tiny|tiny-v2)
+      DARKNET_WEIGHTS="${DARKNET_TINYV2_WEIGHTS_URL}"
+      YOLO_WEIGHTS="${DARKNET_TINYV2_WEIGHTS}"
+      YOLO_CFG_FILE="${DARKNET_TINYV2_CONFIG}"
+      YOLO_DATA="${DARKNET_TINYV2_DATA}"
+    ;;
+    tiny-v3)
+      DARKNET_WEIGHTS="${DARKNET_TINYV3_WEIGHTS_URL}"
+      YOLO_WEIGHTS="${DARKNET_TINYV3_WEIGHTS}"
+      YOLO_CFG_FILE="${DARKNET_TINYV3_CONFIG}"
+      YOLO_DATA="${DARKNET_TINYV3_DATA}"
     ;;
     v2)
       DARKNET_WEIGHTS="${DARKNET_V2_WEIGHTS_URL}"
       YOLO_WEIGHTS="${DARKNET_V2_WEIGHTS}"
       YOLO_CFG_FILE="${DARKNET_V2_CONFIG}"
-      YOLO_DATA="${DARKNET}/cfg/coco.data"
+      YOLO_DATA="${DARKNET_V2_DATA}"
     ;;
     v3)
       DARKNET_WEIGHTS="${DARKNET_V3_WEIGHTS_URL}"
       YOLO_WEIGHTS="${DARKNET_V3_WEIGHTS}"
       YOLO_CFG_FILE="${DARKNET_V3_CONFIG}"
-      YOLO_DATA="${DARKNET}/cfg/coco.data"
+      YOLO_DATA="${DARKNET_V3_DATA}"
     ;;
     *)
       if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- invalid YOLO_CONFIG: ${1}; exiting" &> /dev/stderr; fi

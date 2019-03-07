@@ -26,16 +26,24 @@ ARG DARKNET=/darknet
 ARG DARKNET_GIT="http://github.com/pjreddie/darknet"
 ENV DARKNET=${DARKNET} DARKNET_GIT=${DARKNET_GIT}
 
-ENV DARKNET_TINY_WEIGHTS="${DARKNET}/yolov3-tiny.weights"
-ENV DARKNET_TINY_CONFIG="${DARKNET}/cfg/yolov3-tiny.cfg"
-ENV DARKNET_TINY_WEIGHTS_URL="http://pjreddie.com/media/files/yolov3-tiny.weights"
+ENV DARKNET_TINYV2_WEIGHTS="${DARKNET}/yolov2-tiny-voc.weights"
+ENV DARKNET_TINYV2_CONFIG="${DARKNET}/cfg/yolov2-tiny-voc.cfg"
+ENV DARKNET_TINYV2_DATA="${DARKNET}/cfg/voc.data"
+ENV DARKNET_TINYV2_WEIGHTS_URL="http://pjreddie.com/media/files/yolov2-tiny-voc.weights"
+
+ENV DARKNET_TINYV3_WEIGHTS="${DARKNET}/yolov3-tiny.weights"
+ENV DARKNET_TINYV3_CONFIG="${DARKNET}/cfg/yolov3-tiny.cfg"
+ENV DARKNET_TINYV3_DATA="${DARKNET}/cfg/codo.data"
+ENV DARKNET_TINYV3_WEIGHTS_URL="http://pjreddie.com/media/files/yolov3-tiny.weights"
 
 ENV DARKNET_V2_WEIGHTS="${DARKNET}/yolov2.weights"
 ENV DARKNET_V2_CONFIG="${DARKNET}/cfg/yolov2.cfg"
+ENV DARKNET_V2_DATA="${DARKNET}/cfg/coco.data"
 ENV DARKNET_V2_WEIGHTS_URL="https://pjreddie.com/media/files/yolov2.weights"
 
 ENV DARKNET_V3_WEIGHTS="${DARKNET}/yolov3.weights"
 ENV DARKNET_V3_CONFIG="${DARKNET}/cfg/yolov3.cfg"
+ENV DARKNET_V3_DATA="${DARKNET}/cfg/coco.data"
 ENV DARKNET_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
 
 # Clone darknet

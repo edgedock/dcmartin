@@ -32,7 +32,7 @@ while true; do
   if [ -z "${ITERATION:-}" ]; then ITERATION=0; else ITERATION=$((ITERATION+1)); fi
   YOLO_JSON_FILE=$(yolo_process "${JPEG_FILE}" "${ITERATION}")
 
-  if [ ! -s "${YOLO_JSON_FILE}" ]; then
+  if [ -s "${YOLO_JSON_FILE}" ]; then
     # initialize output with configuration
     JSON_FILE="${TMP}/${0##*/}.$$.json"
     echo "${CONFIG}" | jq '.date='$(date +%s)'|.entity="'${YOLO_ENTITY}'"' > "${JSON_FILE}"
