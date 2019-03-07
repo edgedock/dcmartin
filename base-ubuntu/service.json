@@ -4,7 +4,7 @@
   "description": "Provides base container with Ubuntu LINUX",
   "documentation": "https://github.com/dcmartin/open-horizon/base-ubuntu/README.md",
   "url": "com.github.dcmartin.open-horizon.base-ubuntu",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "arch": null,
   "public": true,
   "sharable": "singleton",
@@ -14,7 +14,7 @@
     "services": {
       "base-ubuntu": {
         "environment": [
-          "SERVICE_LABEL=base"
+          "SERVICE_LABEL=base","SERVICE_VERSION=0.0.2"
         ],
         "specific_ports": null,
         "image": null,

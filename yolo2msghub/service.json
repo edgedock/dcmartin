@@ -27,7 +27,7 @@
     "services": {
       "yolo2msghub": {
         "environment": [
-          "SERVICE_LABEL=yolo2msghub"
+          "SERVICE_LABEL=yolo2msghub","SERVICE_VERSION=0.0.9"
         ],
         "devices": null,
         "binds": null,

@@ -4,7 +4,7 @@
   "description": "Provide wide-area-network (WAN) information",
   "documentation": "https://github.com/dcmartin/open-horizon/wan/README.md",
   "url": "com.github.dcmartin.open-horizon.wan",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "arch": null,
   "public": true,
   "sharable": "singleton",
@@ -18,7 +18,7 @@
     "services": {
       "wan": {
         "environment": [
-           "SERVICE_LABEL=wan"
+           "SERVICE_LABEL=wan","SERVICE_VERSION=0.0.2"
         ],
         "specific_ports": [],
         "image": null,

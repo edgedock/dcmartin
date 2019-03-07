@@ -8,7 +8,7 @@ touch "${TMPDIR}/${SERVICE_LABEL}.json"
 
 SERVICES_JSON='[{"name":"cpu","url":"http://cpu"}]'
 
-if [ -z "${MOTION_DEVICE_NAME:-}" ]; then
+if [ -z "${MOTION_DEVICE_NAME:-}" ] || [ "${MOTION_DEVICE_NAME}" == 'default' ]; then
   if [ -z "${HZN_DEVICE_ID}" ]; then
     IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
     MOTION_DEVICE_NAME="$(hostname)-${IPADDR}"

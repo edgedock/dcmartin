@@ -1,4 +1,4 @@
-ARG BUILD_FROM=alpine:3.8
+ARG BUILD_FROM=dcmartin/amd64_base-alpine:0.0.2
 
 FROM $BUILD_FROM
 
@@ -13,10 +13,6 @@ ENV \
 
 RUN \
     set -o pipefail \
-    \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
-    && echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
     \
     && apk add --no-cache \
         apk-tools \
@@ -46,7 +42,7 @@ LABEL \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.build-arch="${BUILD_ARCH}" \
     org.label-schema.name="hal" \
-    org.label-schema.description="base alpine container" \
+    org.label-schema.description="harware abstraction layer" \
     org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/hal/" \
     org.label-schema.vcs-ref="${BUILD_REF}" \
     org.label-schema.version="${BUILD_VERSION}" \

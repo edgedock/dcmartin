@@ -18,7 +18,7 @@
   "deployment": {
     "services": {
       "cpu": {
-        "environment": [ "SERVICE_LABEL=cpu" ],
+        "environment": [ "SERVICE_LABEL=cpu","SERVICE_VERSION=0.0.2" ],
         "image": null,
         "privileged": true,
         "specific_ports": []

@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ubuntu:bionic
+ARG BUILD_FROM=dcmartin/amd64_base-ubuntu:0.0.2
 
 FROM $BUILD_FROM as darknet
 

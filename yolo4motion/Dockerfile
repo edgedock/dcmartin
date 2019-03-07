@@ -1,4 +1,4 @@
-ARG BUILD_FROM=dcmartin/amd64_yolo:0.0.1
+ARG BUILD_FROM=dcmartin/amd64_yolo:0.0.5
 
 FROM $BUILD_FROM
 
@@ -14,7 +14,6 @@ ENV \
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   bc \
   inotify-tools \
-  mosquitto \
   mosquitto-clients
 
 # Copy usr

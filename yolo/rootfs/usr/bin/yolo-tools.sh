@@ -18,7 +18,7 @@ YOLO_NAMES="${DARKNET}/data/coco.names"
 yolo_init() 
 {
   # build configuation
-  CONFIG='{"version":"'"${SERVICE_VERSION:-}"'","log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","threshold":'${YOLO_THRESHOLD}'}'
+  CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","threshold":'${YOLO_THRESHOLD}'}'
   # get names of entities that can be detected
   if [ -s "${YOLO_NAMES}" ]; then
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- processing ${YOLO_NAMES}" &> /dev/stderr; fi

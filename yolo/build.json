@@ -1,9 +1,9 @@
 {
-    "squash": false,
-    "build_from": {
-        "amd64": "ubuntu:bionic",
-        "arm": "arm32v7/ubuntu:bionic",
-        "arm64": "arm64v8/ubuntu:bionic"
-    },
-    "args": {}
+  "squash": false,
+  "build_from": {
+    "amd64": "dcmartin/amd64_base-ubuntu:0.0.2",
+    "arm": "dcmartin/arm_base-ubuntu:0.0.2",
+    "arm64": "dcmartin/arm64_base-ubuntu:0.0.2"
+  },
+  "args": {}
 }

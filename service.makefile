@@ -217,12 +217,12 @@ redo-nodes:
 ##
 
 clean: remove service-stop
-	@echo ">>> MAKE -- cleaning service ${SERVICE_NAME} including image for ${DOCKER_TAG}" &> /dev/stderr
+	@echo ">>> MAKE -- cleaning: ${SERVICE_NAME}; tag: ${DOCKER_TAG}" &> /dev/stderr
 	@rm -fr ${DIR} check.json build.out test.*.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: clean
-	@echo ">>> MAKE -- cleaning for distribution" &> /dev/stderr
+	@echo ">>> MAKE -- cleaning: distribution" &> /dev/stderr
 	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS) ${SERVICE_VARIABLES} TEST_TMP_*
 
 ##

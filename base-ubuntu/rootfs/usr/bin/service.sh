@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 # hzn config
 if [ -z "${HZN}" ]; then
@@ -30,16 +30,16 @@ else
   exit 1
 fi
 
-RESPONSE_FILE="${TMP}/${0##*/}.${SERVICE_LABEL}.json"
+RESPONSE_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.json"
 echo "${HZN}" > "${RESPONSE_FILE}"
 
-SERVICE_FILE="${TMP}/${SERVICE_LABEL}.json"
+SERVICE_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
 if [ -s "${SERVICE_FILE}" ]; then 
-  TSF="${TMP}/${0##*/}.${SERVICE_LABEL}.$$"
+  TSF="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$"
   echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
   cat "${SERVICE_FILE}" >> "${TSF}"
   echo '}' >> "${TSF}"
-  jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMP}/$$.$$" && mv -f "${TMP}/$$.$$" "${RESPONSE_FILE}"
+  jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMPDIR}/$$.$$" && mv -f "${TMPDIR}/$$.$$" "${RESPONSE_FILE}"
   rm -f "${TSF}"
 fi
 

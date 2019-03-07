@@ -16,7 +16,7 @@
     "services": {
       "caffe": {
         "environment": [
-          "SERVICE_LABEL=caffe"
+          "SERVICE_LABEL=caffe","SERVICE_VERSION=0.0.1"
         ],
         "specific_ports": [],
         "image": null,

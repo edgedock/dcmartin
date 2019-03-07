@@ -1,4 +1,4 @@
-ARG BUILD_FROM=dcmartin/base-ubuntu
+ARG BUILD_FROM=dcmartin/amd64_base-ubuntu:0.0.2
 
 FROM $BUILD_FROM
 
@@ -43,8 +43,8 @@ LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.build-arch="${BUILD_ARCH}" \
-    org.label-schema.name="hzncli-ubuntu" \
-    org.label-schema.description="horizon CLI base for ubuntu" \
+    org.label-schema.name="hzncli" \
+    org.label-schema.description="horizon CLI base" \
     org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/hzncli-ubuntu/" \
     org.label-schema.vcs-ref="${BUILD_REF}" \
     org.label-schema.version="${BUILD_VERSION}" \
