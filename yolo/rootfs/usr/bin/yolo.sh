@@ -24,28 +24,32 @@ while true; do
   DATE=$(date +%s)
 
   # path to image payload
-  PAYLOAD="${TMP}/${0##*/}.$$.jpg"
+  JPEG_FILE="${TMP}/${0##*/}.$$.jpg"
   # capture image payload from /dev/video0
-  fswebcam --no-banner "${PAYLOAD}" &> /dev/null
+  fswebcam --no-banner "${JPEG_FILE}" &> /dev/null
 
   # process image payload into JSON
   if [ -z "${ITERATION:-}" ]; then ITERATION=0; else ITERATION=$((ITERATION+1)); fi
-  IMAGE=$(yolo_process "${PAYLOAD}" "${ITERATION}")
+  YOLO_JSON_FILE=$(yolo_process "${JPEG_FILE}" "${ITERATION}")
 
-  # initialize output with configuration
-  PAYLOAD="${TMP}/${0##*/}.$$.json"
-  echo "${CONFIG}" | jq '.date='$(date +%s)'|.entity="'${YOLO_ENTITY}'"' > "${PAYLOAD}"
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- PAYLOAD: ${PAYLOAD}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${PAYLOAD}") &> /dev/stderr; fi
+  if [ ! -s "${YOLO_JSON_FILE}" ]; then
+    # initialize output with configuration
+    JSON_FILE="${TMP}/${0##*/}.$$.json"
+    echo "${CONFIG}" | jq '.date='$(date +%s)'|.entity="'${YOLO_ENTITY}'"' > "${JSON_FILE}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- JSON_FILE: ${JSON_FILE}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${JSON_FILE}") &> /dev/stderr; fi
 
-  # add two files
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- IMAGE: ${IMAGE}" $(jq -c '.image=(.image!=null)' ${IMAGE}) &> /dev/stderr; fi
-  jq -s add "${PAYLOAD}" "${IMAGE}" > "${PAYLOAD}.$$" && mv -f "${PAYLOAD}.$$" "${PAYLOAD}"
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- PAYLOAD: ${PAYLOAD}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${PAYLOAD}") &> /dev/stderr; fi
+    # add two files
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- YOLO_JSON_FILE: ${YOLO_JSON_FILE}" $(jq -c '.image=(.image!=null)' ${YOLO_JSON_FILE}) &> /dev/stderr; fi
+    jq -s add "${JSON_FILE}" "${YOLO_JSON_FILE}" > "${JSON_FILE}.$$" && mv -f "${JSON_FILE}.$$" "${JSON_FILE}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- JSON_FILE: ${JSON_FILE}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${JSON_FILE}") &> /dev/stderr; fi
 
-  # make it atomic
-  if [ -s "${PAYLOAD}" ]; then
-    mv -f "${PAYLOAD}" "${TMP}/${SERVICE_LABEL}.json"
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMP}/${SERVICE_LABEL}.json:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${TMP}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
+    # make it atomic
+    if [ -s "${JSON_FILE}" ]; then
+      mv -f "${JSON_FILE}" "${TMP}/${SERVICE_LABEL}.json"
+      if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMP}/${SERVICE_LABEL}.json:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${TMP}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
+    fi
+  else
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- nothing seen" &> /dev/stderr; fi
   fi
 
   # wait for ..
