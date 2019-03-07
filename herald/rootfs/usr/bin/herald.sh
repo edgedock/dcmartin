@@ -29,8 +29,8 @@ while true; do
   echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
   mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
-  SLEEP=$((HERALD_PERIOD - $(($(date +%s) - DATE))))
-  if [ ${SLEEP} > 0 ]; then
-    sleep ${SLEEP}
+  SECONDS=$((HERALD_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SECONDS} -gt 0 ]; then
+    sleep ${SECONDS}
   fi
 done

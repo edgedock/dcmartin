@@ -36,8 +36,8 @@ while true; do
     mv -f "${OUT_FILE}" "${TMPDIR}/${SERVICE_LABEL}.json"
   fi
   # wait for ..
-  SLEEP=$((HZNCLI_PERIOD - $(($(date +%s) - DATE))))
-  if [ ${SLEEP} > 0 ]; then
-    sleep ${SLEEP}
+  SECONDS=$((HZNCLI_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SECONDS} -gt 0 ]; then
+    sleep ${SECONDS}
   fi
 done

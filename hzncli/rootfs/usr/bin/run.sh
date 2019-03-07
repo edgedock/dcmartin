@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 # hzn config
 export HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID}'","arch":"'${HZN_ARCH}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID}'","exchange_url":"'${HZN_EXCHANGE_URL}'","host_ips":['$(echo "${HZN_HOST_IPS}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION}'","pattern":"'${HZN_PATTERN}'","ram":'${HZN_RAM:-0}'},"date":'$(date +%s)',"service":"'${SERVICE_LABEL:-}'"}'
 
 # make a file
-echo "${HZN}" > "${TMP}/config.json"
+echo "${HZN}" > "${TMPDIR}/config.json"
 
 # label
 if [ ! -z "${SERVICE_LABEL:-}" ] && [ ! -z $(command -v "${SERVICE_LABEL:-}.sh" ) ]; then

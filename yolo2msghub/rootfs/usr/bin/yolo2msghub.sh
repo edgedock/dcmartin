@@ -69,9 +69,9 @@ while true; do
     echo "+++ WARN $0 $$ -- kafka invalid" &> /dev/stderr
   fi
   # wait for ..
-  SLEEP=$((YOLO2MSGHUB_PERIOD - $(($(date +%s) - DATE))))
-  if [ ${SLEEP} > 0 ]; then
-    sleep ${SLEEP}
+  SECONDS=$((YOLO2MSGHUB_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SECONDS} -gt 0 ]; then
+    sleep ${SECONDS}
   fi
 done
 

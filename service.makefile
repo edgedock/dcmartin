@@ -57,7 +57,7 @@ TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHIN
 
 default: build run check
 
-all: service-test service-stop service-publish service-verify
+all: service-build service-push service-test service-stop service-publish service-verify
 
 ##
 ## support
@@ -107,10 +107,8 @@ push: build $(DOCKER_LOGIN)
 	@echo ">>> MAKE -- pushing container ${DOCKER_TAG} for service ${SERVICE_NAME}"
 	@docker push ${DOCKER_TAG}
 
-test.${BUILD_ARCH}.out: service-test
-
 test:
-	@echo ">>> MAKE -- testing ${SERVICE_NAME} for architecture ${BUILD_ARCH} with ${DOCKER_TAG}"
+	@echo ">>> MAKE -- running test.sh with container ${DOCKER_TAG}"
 	./test.sh "${DOCKER_TAG}"
 
 ##
@@ -121,19 +119,32 @@ ${SERVICE_ARCH_SUPPORT}:
 	@echo ">>> MAKE -- building service ${SERVICE_NAME} for architecture $@"
 	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$@" build
 
-service-start: remove service-stop push ${DIR}
+service-build: ${SERVICE_ARCH_SUPPORT}
+
+service-push: 
+	@echo ">>> MAKE -- pushing containers for service ${SERVICE_NAME} for architectures ${SERVICE_ARCH_SUPPORT}"
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
+	done
+
+service-start: remove service-stop ${DIR}
 	@echo ">>> MAKE -- starting ${SERVICE_NAME} from $(DIR)"
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
 
-service-test: service-start
-	-@$(MAKE) test > ./test.${BUILD_ARCH}.out
+service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
+	-@${MAKE} service-stop
+
+test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
+	@echo ">>> MAKE -- testing service ${SERVICE_NAME} version ${SERVICE_VERSION} for $(BUILD_ARCH)"
+	-@$(MAKE) test > ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
+	@${MAKE} service-stop
 
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
-publish-service: ./test.${BUILD_ARCH}.out $(APIKEY) $(KEYS)
+publish-service: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out $(APIKEY) $(KEYS)
 	@echo ">>> MAKE -- publishing service $(SERVICE_NAME) with architecture ${BUILD_ARCH}"
 	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
@@ -207,7 +218,7 @@ nodes-update:
 
 clean: remove service-stop
 	@echo ">>> MAKE -- cleaning service ${SERVICE_NAME} including image for ${DOCKER_TAG}"
-	@rm -fr ${DIR} check.json build.out 
+	@rm -fr ${DIR} check.json build.out test.*.*.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: clean

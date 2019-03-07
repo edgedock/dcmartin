@@ -50,8 +50,8 @@ while true; do
 
   # wait for ..
   SECONDS=$((YOLO_PERIOD - $(($(date +%s) - DATE))))
-  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- sleep ${SECONDS}" &> /dev/stderr; fi
   if [ ${SECONDS} -gt 0 ]; then
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- sleep ${SECONDS}" &> /dev/stderr; fi
     sleep ${SECONDS}
   fi
 

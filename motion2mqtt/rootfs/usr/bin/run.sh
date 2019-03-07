@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 ##
 ## hzn_pattern() - find the pattern with the given name; searches HZN_ORGANIZATION only
@@ -22,7 +22,7 @@ hzn_pattern() {
 export HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID:-}'","arch":"'${HZN_ARCH:-}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID:-}'","exchange_url":"'${HZN_EXCHANGE_URL:-}'","host_ips":['$(echo "${HZN_HOST_IPS:-}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION:-}'","pattern":"'${HZN_PATTERN:-}'","ram":'${HZN_RAM:-0}'},"date":'$(date +%s)',"service":"'${SERVICE_LABEL:-}'","pattern":'$(hzn_pattern "${HZN_PATTERN:-}")'}'
 
 # make a file
-echo "${HZN}" > "${TMP}/config.json"
+echo "${HZN}" > "${TMPDIR}/config.json"
 
 # label
 if [ ! -z "${SERVICE_LABEL:-}" ]; then

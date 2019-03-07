@@ -36,19 +36,19 @@ yolo_config()
     tiny)
       DARKNET_WEIGHTS="${DARKNET_TINY_WEIGHTS_URL}"
       YOLO_WEIGHTS="${DARKNET_TINY_WEIGHTS}"
-      YOLO_CFG_FILE="${DARKNET}/cfg/yolov2-tiny-voc.cfg"
-      YOLO_DATA="${DARKNET}/cfg/voc.data"
+      YOLO_CFG_FILE="${DARKNET_TINY_CONFIG}"
+      YOLO_DATA="${DARKNET}/cfg/coco.data"
     ;;
     v2)
       DARKNET_WEIGHTS="${DARKNET_V2_WEIGHTS_URL}"
-      YOLO_WEIGHTS="${DARKNET_V3_WEIGHTS}"
-      YOLO_CFG_FILE="${DARKNET}/cfg/yolov2.cfg"
+      YOLO_WEIGHTS="${DARKNET_V2_WEIGHTS}"
+      YOLO_CFG_FILE="${DARKNET_V2_CONFIG}"
       YOLO_DATA="${DARKNET}/cfg/coco.data"
     ;;
     v3)
       DARKNET_WEIGHTS="${DARKNET_V3_WEIGHTS_URL}"
       YOLO_WEIGHTS="${DARKNET_V3_WEIGHTS}"
-      YOLO_CFG_FILE="${DARKNET}/cfg/yolov3.cfg"
+      YOLO_CFG_FILE="${DARKNET_V3_CONFIG}"
       YOLO_DATA="${DARKNET}/cfg/coco.data"
     ;;
     *)

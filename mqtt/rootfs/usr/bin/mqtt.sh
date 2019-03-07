@@ -51,8 +51,8 @@ while true; do
   echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/${0##*/}.$$"
   mv -f "${TMP}/${0##*/}.$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
-  SLEEP=$((MQTT_PERIOD - $(($(date +%s) - DATE))))
-  if [ ${SLEEP} > 0 ]; then
-    sleep ${SLEEP}
+  SECONDS=$((MQTT_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SECONDS} -gt 0 ]; then
+    sleep ${SECONDS}
   fi
 done

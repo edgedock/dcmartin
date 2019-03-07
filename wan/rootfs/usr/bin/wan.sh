@@ -18,8 +18,8 @@ while true; do
   echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMP}/$$"
   mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
   # wait for ..
-  SLEEP=$((WAN_PERIOD - $(($(date +%s) - DATE))))
-  if [ ${SLEEP} > 0 ]; then
-    sleep ${SLEEP}
+  SECONDS=$((WAN_PERIOD - $(($(date +%s) - DATE))))
+  if [ ${SECONDS} -gt 0 ]; then
+    sleep ${SECONDS}
   fi
 done

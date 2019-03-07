@@ -38,16 +38,57 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `url` - `com.github.dcmartin.open-horizon.yolo2msghub`
 + `version` - `0.0.1`
 
-#### Required variables
+### Required variables
 + `YOLO2MSGHUB_APIKEY` - message hub API key
 
-#### Optional variables
+### Optional variables
 + `YOLO2MSGHUB_PERIOD` - seconds between updates; defaults to `30`
 + `YOLO2MSGHUB_ADMIN_URL` - administrative URL for REStful API
 + `YOLO2MSGHUB_BROKER` - message hub brokers
 + `LOCALHOST_PORT` - port for access; default **8587**
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`). 
 + `DEBUG` - including debugging output; `true` or `false`; default: `false`
+
+#### Example `userinput.json`
+
+```
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "YOLO2MSGHUB_APIKEY": null, "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.yolo",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "YOLO_ENTITY": "person", "YOLO_PERIOD": 60, "YOLO_CONFIG": "tiny", "YOLO_THRESHOLD": 0.25 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.cpu",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "CPU_PERIOD": 60 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.wan",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "WAN_PERIOD": 900 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.hal",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "HAL_PERIOD": 1800 }
+    }
+  ]
+}
+```
+
 
 ### Pattern registration
 Register nodes using a derivative of the template [`userinput.json`][userinput].  Variables may be modified in the `userinput.json` file, _or_ may be defined in a file of the same name; **contents should be JSON**, e.g. quoted strings; extract from downloaded API keys using `jq` command:  
