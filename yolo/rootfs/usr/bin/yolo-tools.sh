@@ -105,51 +105,53 @@ yolo_process()
   if [ -z "${TIME}" ]; then TIME=0; fi
   OUTPUT=$(echo "${OUTPUT}" | jq '.time="'${TIME}'"')
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- TIME: ${TIME}" &> /dev/stderr; fi
-
-  if [ ! -s "${OUT}" ]; then
-    echo "+++ WARN $0 $$ -- no output: ${OUT}; continuing" &> /dev/stderr
+  # test for output
+  if [ -s "${OUT}" ]; then
+    TOTAL=0
+    case ${YOLO_ENTITY} in
+      all)
+	# find entities in output
+	cat "${OUT}" | tr '\n' '\t' | sed 's/.*Predicted in \([^ ]*\) seconds. */time: \1/' | tr '\t' '\n' | tail +2 > "${OUT}.$$"
+	FOUND=$(cat "${OUT}.$$" | awk -F: '{ print $1 }' | sort | uniq)
+	if [ ! -z "${FOUND}" ]; then
+	  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected:" $(echo "${FOUND}" | fmt -1000) &> /dev/stderr; fi
+	  JSON=
+	  for F in ${FOUND}; do
+	    if [ -z "${JSON:-}" ]; then JSON='['; else JSON="${JSON}"','; fi
+	    C=$(egrep '^'"${F}" "${OUT}.$$" | wc -l | awk '{ print $1 }')
+	    COUNT='{"entity":"'"${F}"'","count":'${C}'}'
+	    JSON="${JSON}""${COUNT}"
+	    TOTAL=$((TOTAL+C))
+	  done
+	  rm -f "${OUT}.$$"
+	  if [ -z "${JSON}" ]; then JSON='null'; else JSON="${JSON}"']'; fi
+	  DETECTED="${JSON}"
+	else
+	  if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected nothing" &> /dev/stderr; fi
+	  DETECTED='null'
+	fi
+	;;
+      *)
+	# count single entity
+	C=$(egrep '^'"${YOLO_ENTITY}" "${OUT}" | wc -l | awk '{ print $1 }')
+	COUNT='{"entity":"'"${YOLO_ENTITY}"'","count":'${C}'}'
+	TOTAL=$((TOTAL+C))
+	DETECTED='['"${COUNT}"']'
+	;;
+    esac
+    OUTPUT=$(echo "${OUTPUT}" | jq '.count='${TOTAL}'|.detected='"${DETECTED}"'|.time='${TIME})
+  else
+    echo "+++ WARN $0 $$ -- no output:" $(cat ${OUT}) &> /dev/stderr
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- darknet failed:" $(cat "${TMP}/darknet.$$.out") &> /dev/stderr; fi
-    exit
+    OUTPUT=$(echo "${OUTPUT}" | jq '.count=0|.detected=null|.time=0')
   fi
-
-  TOTAL=0
-  case ${YOLO_ENTITY} in
-    all)
-      # find entities in output
-      cat "${OUT}" | tr '\n' '\t' | sed 's/.*Predicted in \([^ ]*\) seconds. */time: \1/' | tr '\t' '\n' | tail +2 > "${OUT}.$$"
-      FOUND=$(cat "${OUT}.$$" | awk -F: '{ print $1 }' | sort | uniq)
-      if [ ! -z "${FOUND}" ]; then
-        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected:" $(echo "${FOUND}" | fmt -1000) &> /dev/stderr; fi
-        JSON=
-        for F in ${FOUND}; do
-          if [ -z "${JSON:-}" ]; then JSON='['; else JSON="${JSON}"','; fi
-          C=$(egrep '^'"${F}" "${OUT}.$$" | wc -l | awk '{ print $1 }')
-          COUNT='{"entity":"'"${F}"'","count":'${C}'}'
-          JSON="${JSON}""${COUNT}"
-          TOTAL=$((TOTAL+C))
-        done
-        rm -f "${OUT}.$$"
-        if [ -z "${JSON}" ]; then JSON='null'; else JSON="${JSON}"']'; fi
-        DETECTED="${JSON}"
-      else
-        if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- detected nothing" &> /dev/stderr; fi
-        DETECTED='null'
-      fi
-      ;;
-    *)
-      # count single entity
-      C=$(egrep '^'"${YOLO_ENTITY}" "${OUT}" | wc -l | awk '{ print $1 }')
-      COUNT='{"entity":"'"${YOLO_ENTITY}"'","count":'${C}'}'
-      TOTAL=$((TOTAL+C))
-      DETECTED='['"${COUNT}"']'
-      ;;
-  esac
-  OUTPUT=$(echo "${OUTPUT}" | jq '.count='${TOTAL}'|.detected='"${DETECTED}"'|.time='${TIME})
 
   # capture annotated image as BASE64 encoded string
   IMAGE="${TMP}/predictions.$$.json"
   echo -n '{"image":"' > "${IMAGE}"
-  base64 -w 0 -i predictions.jpg >> "${IMAGE}"
+  if [ -s "predictions.jpg" ]; then
+    base64 -w 0 -i predictions.jpg >> "${IMAGE}"
+  fi
   echo '"}' >> "${IMAGE}"
 
   TEMP="${TMP}/${0##*/}.$$.json"
