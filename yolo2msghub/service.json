@@ -1,7 +1,7 @@
 {
   "org": "dcmartin@us.ibm.com",
   "label": "yolo2msghub",
-  "description": "Sends JSON payloads from `yolo` service to IBM Message Hub",
+  "description": "Sends JSON payloads from yolo service to Kafka",
   "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo2msghub",
   "version": "0.0.9",
