@@ -219,7 +219,7 @@ nodes-update:
 
 clean: remove service-stop
 	@echo ">>> MAKE -- cleaning service ${SERVICE_NAME} including image for ${DOCKER_TAG}" &> /dev/stderr
-	@rm -fr ${DIR} check.json build.out test.*.*.out
+	@rm -fr ${DIR} check.json build.out test.*.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: clean
