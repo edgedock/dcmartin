@@ -8,20 +8,146 @@ hzn key create MYORG my-email@my-domain.tld
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].
 
-# `make` targets
+# Building a service
+
+Each of the services in this [repository][repository] are built using a common `Makefile`, which shared via symbolic link to the [`service.makefile`][service-makefile] in the repository top-level.  In addition, all services share a common design (see [`DESIGN.md`][design-md]) and a shared implementation architecture for simplicity.  Each service is composed of multiple artifacts:
+
++ `build.json` - a definition of the architecture labels and the associated image from which to build (see [`BUILD.md`][build-md]).
++ `service.json` - a template of the service definition for components and configuration
++ `userinput.json` - a template for registration configuration
+
+## `service.json`
+
+The service template definition includes four (4) important fields that are used in service identification:
+
++ `org` - the organization for the service
++ `version` - the version of the service; this value is encoded for [semantic versioning][semver]
++ `url` - a unique identifier for the service (e.g. `com.github.dcmartin.open-horizon`)
++ `arch` - an architecture label (e.g. `amd64`)
+
+The value of these fields are combined together to uniquely identify each service in the exchange; for example: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo2msghub_0.0.8_amd64`.
+
+#### `label`
+In addition to these identifying attributes, the `label` field identifies the service in a more human-readable form.  This field should be URL _encoded_ if spaces or other special characters are required.
+
+```
+  "label": "yolo2msghub",
+```
+
+#### `requiredServices` 
+This field is an array of identifying attributes for each service on which the service depends.  The `arch` field is `null` and will be populated according to the architecture when built.
+
+```
+  "requiredServices": [
+    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.4", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.1", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null }
+  ],
+```
+
+#### `userInput`
+This field is an array of variables that may be used to configure the service; variables with a `defaultValue` of `null` are mandatory.
+
+```
+  "userInput": [
+    { "name": "YOLO2MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },
+    { "name": "YOLO2MSGHUB_ADMIN_URL", "label": "administrative URL", "type": "string", "defaultValue": "https://kafka-admin-prod02.messagehub.services.us-south.bluemix.net:443"},
+    { "name": "YOLO2MSGHUB_BROKER", "label": "message hub broker list", "type": "string", "defaultValue": "kafka05-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093" },
+    { "name": "YOLO2MSGHUB_PERIOD", "label": "update interval", "type": "int", "defaultValue": "30" },
+    { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8587" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
+  ],
+```
+
+#### `deployment`
+This field is a dictionary of `services` that are included in the service deployment.  Each entry in the dictionary provides specifics, including key name (e.g. `yolo2msghub` in example below) as well as other deployment options and configuration.  The `environment` section is deprecated, but used in these services design to convey the service's `label` value.
+
+```
+  "deployment": {
+    "services": {
+      "yolo2msghub": {
+        "environment": [
+          "SERVICE_LABEL=yolo2msghub"
+        ],
+        "devices": null,
+        "binds": null,
+        "specific_ports": [ { "HostPort": "8587:8587/tcp", "HostIP": "0.0.0.0" } ],
+        "image": null,
+        "privileged": false
+      }
+    }
+  },
+```
+
+[service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
+[semver]: https://semver.org/
+
+## `userinput.json`
+
+The template for registration configuration includes specification of environment variables that will be defined for the service and any required services; for example, the `yolo2msghub/userinput.json` specifies variables for four (4) services:
+
+```
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "YOLO2MSGHUB_APIKEY": null, "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.yolo",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "YOLO_ENTITY": "person", "YOLO_PERIOD": 60, "YOLO_CONFIG": "tiny", "YOLO_THRESHOLD": 0.25 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.cpu",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "CPU_PERIOD": 60 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.wan",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "WAN_PERIOD": 900 }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.hal",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": { "HAL_PERIOD": 1800 }
+    }
+  ]
+}
+```
+
+## `make` targets
 
 The build process for each service is identical.  The _default_ `make` target is to `build`, `run`, and `check` the  service.  These targets only support a single Docker container image do _not_ include the required services.  More information is available in [`BUILD.md`][build-md] and [`MAKE.md`][make-md].
 
-+ `service-start` - starts the services and required services
-+ `service-test` - tests the service output using `test-{service}.sh` for conformant payload
++ `service-build` - build Docker container images for all supported architectures
++ `service-push` - push the Docker container images to registry (n.b. `DOCKER_HUB_ID`; see [`MAKEVARS.md`][makevars-md])
++ `service-publish` - publishes the service in the exchange with references to the Docker containers in the registry
++ `service-start` - starts the services and required services 
++ `service-test` - tests the _started_ service using `test-{service}.sh` for conformant status payload
 + `service-stop` - stops the services and required services
-+ `service-publish` - publishes the service in the exchange
 + `service-verify` - verifies the published service in the exchange
+
+## `service-build`
+
+This target will build the service for all supported architectures by the Docker host; additional emulation using QEMU is a work-in-progress.
+
+This target should be exercised after the service has passwd `build`, `run`, and `check` targets on the default architecture (see `build.json` for each service).
 
 ## `make` everything
 
 ```
-make build push service-publish pattern-publish
+make service-push service-publish
 ```
 
 ## `service-start`
