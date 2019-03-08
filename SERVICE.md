@@ -8,15 +8,66 @@ hzn key create MYORG my-email@my-domain.tld
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].
 
-# Building a service
+# 1. Building a service
 
-Each of the services in this [repository][repository] are built using a common `Makefile`, which shared via symbolic link to the [`service.makefile`][service-makefile] in the repository top-level.  In addition, all services share a common design (see [`DESIGN.md`][design-md]) and a shared implementation architecture for simplicity.  Each service is composed of multiple artifacts:
+Each of the services in this [repository][repository] are built using a common `Makefile`, which shared via symbolic link to the [`service.makefile`][service-makefile] in the repository top-level.  In addition, all services share a common design (see [`DESIGN.md`][design-md]) and a shared implementation architecture for simplicity.  
+
+### Step 1
+When the service is properly configured (see _Configuring a service_) the build process for a service is straight-forward:
+
+```
+make service-build
+```
+### Step 2
+If all supported architectures are built successfully, each may be tested:
+
+```
+make service-test
+```
+### Step 3
+Finally, if all tests complete successfully, the service may be published:
+
+```
+make service-publish
+```
+
+# 2. Configuring a service
+
+Each service is composed of multiple artifacts:
 
 + `build.json` - a definition of the architecture labels and the associated image from which to build (see [`BUILD.md`][build-md]).
 + `service.json` - a template of the service definition for components and configuration
 + `userinput.json` - a template for registration configuration
 
-## `service.json`
+## 2.1 `build.json` - build configuration definition
+The build definition contains information used when building the Docker container, notably a specification of supported architecture labels and corresponding `BUILD_FROM` Docker container image tags, for example the `base-ubuntu` example (see below) indicates three (3) supported architectures with corresponding tags.  Most of the services in this [repository][repository] utilize _base_ containers that are also in this repository.  For example, `yolo4motion` utilizes `yolo`, and `yolo` is built from the `base-ubuntu` container:
+
+### `base-ubuntu/build.json`
+```
+    "build_from": {
+        "amd64": "ubuntu:bionic",
+        "arm": "arm32v7/ubuntu:bionic",
+        "arm64": "arm64v8/ubuntu:bionic"
+    },
+```
+### `yolo/build.json`
+```
+  "build_from": {
+    "amd64": "dcmartin/amd64_base-ubuntu:0.0.2",
+    "arm": "dcmartin/arm_base-ubuntu:0.0.2",
+    "arm64": "dcmartin/arm64_base-ubuntu:0.0.2"
+  },
+```
+### `yolo4motion/build.json`
+```
+  "build_from": {
+    "arm64": "dcmartin/arm64_yolo:0.0.5",
+    "amd64": "dcmartin/amd64_yolo:0.0.5",
+    "arm": "dcmartin/arm_yolo:0.0.5"
+  },
+```
+
+## 2.2 `service.json` - service configuration _template_
 
 The service template definition includes four (4) important fields that are used in service identification:
 
@@ -25,16 +76,27 @@ The service template definition includes four (4) important fields that are used
 + `url` - a unique identifier for the service (e.g. `com.github.dcmartin.open-horizon`)
 + `arch` - an architecture label (e.g. `amd64`)
 
-The value of these fields are combined together to uniquely identify each service in the exchange; for example: `dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo2msghub_0.0.8_amd64`.
-
-#### `label`
-In addition to these identifying attributes, the `label` field identifies the service in a more human-readable form.  This field should be URL _encoded_ if spaces or other special characters are required.
+The value of these fields are combined together to uniquely identify each service in the exchange; for example:
 
 ```
+dcmartin@us.ibm.com/com.github.dcmartin.open-horizon.yolo2msghub_0.0.9_amd64
+```
+
+In addition to these identifying attributes, the `label` field identifies the service in a more human-readable form.  This field should be URL _encoded_ if spaces or other special characters are required.  Note that the `arch` attribute in the service configuration template is `null`; that value will be generated during the build process. For additional information on the service definition attributes, please refer to the documentation.
+
+```
+  "org": "dcmartin@us.ibm.com",
+  "version": "0.0.9",
+  "url": "com.github.dcmartin.open-horizon.yolo2msghub",
+  "arch": null,
   "label": "yolo2msghub",
+  "description": "Sends JSON payloads from yolo service to Kafka",
+  "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
+  "public": true,
+  "sharable": "singleton",
 ```
 
-#### `requiredServices` 
+#### 2.2.1`requiredServices` 
 This field is an array of identifying attributes for each service on which the service depends.  The `arch` field is `null` and will be populated according to the architecture when built.
 
 ```
@@ -46,7 +108,7 @@ This field is an array of identifying attributes for each service on which the s
   ],
 ```
 
-#### `userInput`
+#### 2.2.2 `userInput`
 This field is an array of variables that may be used to configure the service; variables with a `defaultValue` of `null` are mandatory.
 
 ```
@@ -61,7 +123,7 @@ This field is an array of variables that may be used to configure the service; v
   ],
 ```
 
-#### `deployment`
+#### 2.2.3 `deployment`
 This field is a dictionary of `services` that are included in the service deployment.  Each entry in the dictionary provides specifics, including key name (e.g. `yolo2msghub` in example below) as well as other deployment options and configuration.  The `environment` section is deprecated, but used in these services design to convey the service's `label` value.
 
 ```
@@ -84,7 +146,7 @@ This field is a dictionary of `services` that are included in the service deploy
 [service-makefile]: https://github.com/dcmartin/open-horizon/blob/master/service.makefile
 [semver]: https://semver.org/
 
-## `userinput.json`
+## 2.3 `userinput.json`
 
 The template for registration configuration includes specification of environment variables that will be defined for the service and any required services; for example, the `yolo2msghub/userinput.json` specifies variables for four (4) services:
 
@@ -126,35 +188,26 @@ The template for registration configuration includes specification of environmen
 }
 ```
 
-## `make` targets
+# 3. `make` targets
 
-The build process for each service is identical.  The _default_ `make` target is to `build`, `run`, and `check` the  service.  These targets only support a single Docker container image do _not_ include the required services.  More information is available in [`BUILD.md`][build-md] and [`MAKE.md`][make-md].
+The build process for each service is identical.  The _default_ `make` target is to `build`, `run`, and `check` the  service locally using the native architecture.  These targets only support a single Docker container image do _not_ include the required services.  More information is available in [`BUILD.md`][build-md] and [`MAKE.md`][make-md].
 
 + `service-build` - build Docker container images for all supported architectures
 + `service-push` - push the Docker container images to registry (n.b. `DOCKER_HUB_ID`; see [`MAKEVARS.md`][makevars-md])
-+ `service-publish` - publishes the service in the exchange with references to the Docker containers in the registry
 + `service-start` - starts the services and required services 
 + `service-test` - tests the _started_ service using `test-{service}.sh` for conformant status payload
 + `service-stop` - stops the services and required services
++ `service-publish` - publish the service in the exchange for all supported architectures
 + `service-verify` - verifies the published service in the exchange
 
-## `service-build`
+## 3.1 `service-build` & `service-push`
 
-This target will build the service for all supported architectures by the Docker host; additional emulation using QEMU is a work-in-progress.
-
-This target should be exercised after the service has passwd `build`, `run`, and `check` targets on the default architecture (see `build.json` for each service).
-
-## `make` everything
-
-```
-make service-push service-publish
-```
-
-## `service-start`
+These targets will build and push, respectively, the service for all supported architectures; multi-architecture emulation using QEMU is TBD.
+## 3.2 `service-start`
 
 This target will ensure that the service is built and then initiate the service using the `hzn` CLI commands.  All services specified, including required services, will also be initiated and appropriate virtual private networks will be established.  Please refer to the Open Horizon documentation for more details on the `hzn` command-line-interface.
 
-## `service-test`
+## 3.3 `service-test`
 
 This target may be used against the local container, the local service (n.b. see `start` target), or any node running the _service_.  The service is accessed on its external `port` without mapping.  The payload is processed into a JSON type structure, including _object_, _array_, _number_, _string_.
 
@@ -188,15 +241,15 @@ This target may be used against the local container, the local service (n.b. see
 }
 ```
 
-## `service-stop`
+## 3.4 `service-stop`
 
 This target will stop the services and all required services initiated using the `service-start` target.
 
-## `service-publish`
+## 3.5 `service-publish`
 
-This target will publish the service to the exchange, checking that appropriate modifications of the service `version` and its required services have been made.
+This target pushes the Docker container images into the registry and publishes the service with the identifier (see above) and the corresponding registry image tag, e.g. `dcmartin/arm64_yolo2msghub_0.0.9`.
 
-## `service-verify`
+## 3.6 `service-verify`
 
 This target will verify that the service is published into the exchange.
 

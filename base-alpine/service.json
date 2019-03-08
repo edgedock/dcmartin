@@ -14,7 +14,7 @@
     "services": {
       "base-alpine": {
         "environment": [
-          "SERVICE_LABEL=base","SERVICE_VERSION=0.0.2"
+          "SERVICE_LABEL=base-alpine","SERVICE_VERSION=0.0.2"
         ],
         "specific_ports": [],
         "image": null,

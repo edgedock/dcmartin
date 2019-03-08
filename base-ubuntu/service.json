@@ -14,7 +14,7 @@
     "services": {
       "base-ubuntu": {
         "environment": [
-          "SERVICE_LABEL=base","SERVICE_VERSION=0.0.2"
+          "SERVICE_LABEL=base-ubuntu","SERVICE_VERSION=0.0.2"
         ],
         "specific_ports": null,
         "image": null,
