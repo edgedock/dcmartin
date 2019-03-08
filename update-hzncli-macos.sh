@@ -3,7 +3,6 @@
 HZN_PKG_URL="http://pkg.bluehorizon.network/"
 VERSION=$(curl -fsSL 'http://pkg.bluehorizon.network/macos/' | egrep 'horizon-cli' | sed 's/.*-cli-\(.*\)\.pkg<.*/\1/' | sort | uniq | tail -1)
 
-
 if [ -z "${1}" ]; then echo "--- INFO -- $0 $$ -- no version specified; defaulting to ${VERSION}" &> /dev/stderr; else VERSION="${1}"; fi
 
 if [ "${VENDOR:-}" == 'apple' ] && [ "${OSTYPE:-}" == 'darwin' ]; then
