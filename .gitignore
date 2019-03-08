@@ -27,3 +27,4 @@ cpuconf*
 horizon.json
 horizon/
 sdrconf*
+MQTT2KAFKA_*

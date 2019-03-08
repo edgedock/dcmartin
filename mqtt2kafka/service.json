@@ -1,0 +1,90 @@
+{
+  "org": "dcmartin@us.ibm.com",
+  "label": "mqtt2kafka",
+  "description": "Route traffic from MQTT to Kafka",
+  "documentation": "https://github.com/dcmartin/open-horizon/mqtt2kafka/README.md",
+  "url": "com.github.dcmartin.open-horizon.mqtt2kafka",
+  "version": "0.0.1",
+  "arch": null,
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [
+    { "url": "com.github.dcmartin.open-horizon.mqtt", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null }
+  ],
+  "userInput": [
+    {
+      "name": "MQTT2KAFKA_HOST",
+      "label": "IP or FQDN for mqtt host",
+      "type": "string",
+      "defaultValue": "mqtt"
+    },
+    {
+      "name": "MQTT2KAFKA_PORT",
+      "label": "port number",
+      "type": "int",
+      "defaultValue": "1883"
+    },
+    {
+      "name": "MQTT2KAFKA_USERNAME",
+      "label": "username",
+      "type": "string",
+      "defaultValue": ""
+    },
+    {
+      "name": "MQTT2KAFKA_PASSWORD",
+      "label": "password",
+      "type": "string",
+      "defaultValue": ""
+    },
+    {
+      "name": "MQTT2KAFKA_APIKEY",
+      "label": "message hub API key",
+      "type": "string",
+      "defaultValue": null
+    },
+    {
+      "name": "MQTT2KAFKA_ADMIN_URL",
+      "label": "administrative URL",
+      "type": "string",
+      "defaultValue": "https://kafka-admin-prod02.messagehub.services.us-south.bluemix.net:443"
+    },
+    {
+      "name": "MQTT2KAFKA_BROKER",
+      "label": "message hub broker list",
+      "type": "string",
+      "defaultValue": "kafka05-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "label": "specify logging level",
+      "type": "string",
+      "defaultValue": "info"
+    },
+    {
+      "name": "DEBUG",
+      "label": "debug on/off",
+      "type": "boolean",
+      "defaultValue": "false"
+    }
+  ],
+  "deployment": {
+    "services": {
+      "mqtt2kafka": {
+        "environment": [
+          "SERVICE_LABEL=mqtt2kafka",
+          "SERVICE_VERSION=0.0.1"
+        ],
+        "specific_ports": [],
+        "image": null,
+        "privileged": false
+      }
+    }
+  },
+  "tmpfs": {
+    "size": 8192000
+  },
+  "ports": {
+    "80/tcp": 8594
+  }
+}

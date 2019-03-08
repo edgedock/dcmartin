@@ -1,0 +1,1 @@
+../fixpattern.sh
