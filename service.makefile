@@ -135,6 +135,7 @@ service-start: remove service-stop ${DIR}
 service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
 	@echo ">>> MAKE -- tested: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) &> /dev/stderr
 	-@${MAKE} service-stop
+	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 
 test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
 	@echo ">>> MAKE -- testing service ${SERVICE_NAME} version ${SERVICE_VERSION} for $(BUILD_ARCH)" &> /dev/stderr
@@ -144,12 +145,11 @@ test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
-publish-service: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out $(APIKEY) $(KEYS)
+publish-service: $(APIKEY) $(KEYS)
 	@echo ">>> MAKE -- publishing: $(SERVICE_NAME); architecture: ${BUILD_ARCH}" &> /dev/stderr
-	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
-service-publish:
+service-publish: 
 	@echo ">>> MAKE -- publishing: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" publish-service; \
@@ -168,10 +168,12 @@ service-clean: ${DIR}
 ## PATTERNS
 ##
 
+pattern-test:
+	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
+
 pattern-publish: ${APIKEY} pattern.json
 	@echo ">>> MAKE -- publishing: ${SERVICE_NAME}; organization: ${SERVICE_ORG}; exchange: ${HEU}" &> /dev/stderr
 	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
-	-@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 pattern-validate: pattern.json
