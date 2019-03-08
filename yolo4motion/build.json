@@ -1,7 +1,7 @@
 {
   "squash": false,
   "build_from": {
-    "amd64": "dcmartin/arm64_com.github.dcmartin.open-horizon.yolo:0.0.5",
+    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.yolo:0.0.5",
     "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.yolo:0.0.5",
     "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.yolo:0.0.5"
   },

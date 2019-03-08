@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 # source yolo functions
 source /usr/bin/yolo-tools.sh
@@ -11,8 +11,8 @@ CONFIG=$(yolo_init)
 yolo_config ${YOLO_CONFIG}
 
 # update service status
-echo "${CONFIG}" | jq '.date='$(date +%s) > ${TMP}/$$
-mv -f ${TMP}/$$ ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" | jq '.date='$(date +%s) > ${TMPDIR}/$$
+mv -f ${TMPDIR}/$$ ${TMPDIR}/${SERVICE_LABEL}.json
 
 # start in darknet
 cd ${DARKNET}
@@ -24,7 +24,7 @@ while true; do
   DATE=$(date +%s)
 
   # path to image payload
-  JPEG_FILE="${TMP}/${0##*/}.$$.jpg"
+  JPEG_FILE="${TMPDIR}/${0##*/}.$$.jpg"
   # capture image payload from /dev/video0
   fswebcam --no-banner "${JPEG_FILE}" &> /dev/null
 
@@ -34,7 +34,7 @@ while true; do
 
   if [ -s "${YOLO_JSON_FILE}" ]; then
     # initialize output with configuration
-    JSON_FILE="${TMP}/${0##*/}.$$.json"
+    JSON_FILE="${TMPDIR}/${0##*/}.$$.json"
     echo "${CONFIG}" | jq '.date='$(date +%s)'|.entity="'${YOLO_ENTITY}'"' > "${JSON_FILE}"
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- JSON_FILE: ${JSON_FILE}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${JSON_FILE}") &> /dev/stderr; fi
 
@@ -45,8 +45,8 @@ while true; do
 
     # make it atomic
     if [ -s "${JSON_FILE}" ]; then
-      mv -f "${JSON_FILE}" "${TMP}/${SERVICE_LABEL}.json"
-      if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMP}/${SERVICE_LABEL}.json:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${TMP}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
+      mv -f "${JSON_FILE}" "${TMPDIR}/${SERVICE_LABEL}.json"
+      if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- ${TMPDIR}/${SERVICE_LABEL}.json:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${TMPDIR}/${SERVICE_LABEL}.json") &> /dev/stderr; fi
     fi
   else
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- nothing seen" &> /dev/stderr; fi

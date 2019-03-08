@@ -1,0 +1,37 @@
+{
+  "global": [],
+  "services": [
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.mqtt2kafka",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "MQTT2KAFKA_APIKEY": null,
+        "MQTT2KAFKA_USERNAME": "",
+        "MQTT2KAFKA_PASSWORD": "",
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.mqtt",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "MQTT_PERIOD": 30,
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    },
+    {
+      "org": "dcmartin@us.ibm.com",
+      "url": "com.github.dcmartin.open-horizon.wan",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {
+        "WAN_PERIOD": 3600,
+        "LOG_LEVEL": "info",
+        "DEBUG": false
+      }
+    }
+  ]
+}
