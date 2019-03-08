@@ -1188,6 +1188,141 @@ c1a2b5e17511: Layer already exists
 ```
 ```
 
+## 4.6 `make all`
+
+To rebuild the service (and pattern if applicable)
+
+```
+>>> MAKE -- 11:54:26 -- pushing: yolo2msghub; architectures: amd64 arm arm64
+>>> MAKE -- 11:54:27 -- building: yolo2msghub; tag: dcmartin/amd64_yolo2msghub:0.0.9
+>>> MAKE -- 11:54:29 -- pushing: yolo2msghub; tag dcmartin/amd64_yolo2msghub:0.0.9
+The push refers to repository [docker.io/dcmartin/amd64_yolo2msghub]
+30f7e29283cb: Pushed 
+becc468bc73e: Layer already exists 
+c1a2b5e17511: Layer already exists 
+4758067d99e3: Layer already exists 
+4b7d93055d87: Layer already exists 
+663e8522d78b: Layer already exists 
+283fb404ea94: Layer already exists 
+bebe7ce6215a: Layer already exists 
+0.0.9: digest: sha256:8e848df954d6842ca9b819772a84e7c66d6f29d7473bffe78eef6667bc9c9996 size: 1989
+>>> MAKE -- 11:54:37 -- building: yolo2msghub; tag: dcmartin/arm_yolo2msghub:0.0.9
+>>> MAKE -- 11:54:40 -- pushing: yolo2msghub; tag dcmartin/arm_yolo2msghub:0.0.9
+The push refers to repository [docker.io/dcmartin/arm_yolo2msghub]
+30f7e29283cb: Mounted from dcmartin/amd64_yolo2msghub 
+2a4f055b2213: Layer already exists 
+c1a2b5e17511: Layer already exists 
+d35828dda5a2: Layer already exists 
+76c291cb7a07: Layer already exists 
+318f75c7806d: Layer already exists 
+f9ea0020b31c: Layer already exists 
+8173237b52d4: Layer already exists 
+0.0.9: digest: sha256:1e299a8ebe11c3573e9192bc6bf2b43cd1db8c4d9ecceeb6a83e60f82105fdaa size: 1989
+>>> MAKE -- 11:54:46 -- building: yolo2msghub; tag: dcmartin/arm64_yolo2msghub:0.0.9
+>>> MAKE -- 11:54:49 -- pushing: yolo2msghub; tag dcmartin/arm64_yolo2msghub:0.0.9
+The push refers to repository [docker.io/dcmartin/arm64_yolo2msghub]
+30f7e29283cb: Mounted from dcmartin/arm_yolo2msghub 
+d27b4ee759dc: Layer already exists 
+c1a2b5e17511: Layer already exists 
+54bebf6eee8f: Layer already exists 
+4d4364c8fc58: Layer already exists 
+c46f525186dd: Layer already exists 
+2507b251c488: Layer already exists 
+8619c5882d3a: Layer already exists 
+0.0.9: digest: sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f size: 1989
+>>> MAKE -- 11:54:55 -- publishing: yolo2msghub; architectures: amd64 arm arm64
+>>> MAKE -- 11:54:55 -- publishing: yolo2msghub; architecture: amd64
+Signing service...
+Pushing dcmartin/arm64_yolo2msghub:0.0.9...
+The push refers to repository [docker.io/dcmartin/arm64_yolo2msghub]
+30f7e29283cb: Preparing
+d27b4ee759dc: Preparing
+c1a2b5e17511: Preparing
+54bebf6eee8f: Preparing
+4d4364c8fc58: Preparing
+c46f525186dd: Preparing
+2507b251c488: Preparing
+8619c5882d3a: Preparing
+c46f525186dd: Waiting
+2507b251c488: Waiting
+8619c5882d3a: Waiting
+c1a2b5e17511: Layer already exists
+54bebf6eee8f: Layer already exists
+4d4364c8fc58: Layer already exists
+30f7e29283cb: Layer already exists
+d27b4ee759dc: Layer already exists
+2507b251c488: Layer already exists
+8619c5882d3a: Layer already exists
+c46f525186dd: Layer already exists
+0.0.9: digest: sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f size: 1989
+Using 'dcmartin/arm64_yolo2msghub@sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f' in 'deployment' field instead of 'dcmartin/arm64_yolo2msghub:0.0.9'
+Updating com.github.dcmartin.open-horizon.yolo2msghub_0.0.9_arm64 in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
+>>> MAKE -- 11:55:02 -- publishing: yolo2msghub; architecture: arm
+Signing service...
+Pushing dcmartin/arm64_yolo2msghub:0.0.9...
+The push refers to repository [docker.io/dcmartin/arm64_yolo2msghub]
+30f7e29283cb: Preparing
+d27b4ee759dc: Preparing
+c1a2b5e17511: Preparing
+54bebf6eee8f: Preparing
+4d4364c8fc58: Preparing
+c46f525186dd: Preparing
+2507b251c488: Preparing
+8619c5882d3a: Preparing
+c46f525186dd: Waiting
+2507b251c488: Waiting
+8619c5882d3a: Waiting
+c1a2b5e17511: Layer already exists
+4d4364c8fc58: Layer already exists
+d27b4ee759dc: Layer already exists
+30f7e29283cb: Layer already exists
+54bebf6eee8f: Layer already exists
+c46f525186dd: Layer already exists
+8619c5882d3a: Layer already exists
+2507b251c488: Layer already exists
+0.0.9: digest: sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f size: 1989
+Using 'dcmartin/arm64_yolo2msghub@sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f' in 'deployment' field instead of 'dcmartin/arm64_yolo2msghub:0.0.9'
+Updating com.github.dcmartin.open-horizon.yolo2msghub_0.0.9_arm64 in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
+>>> MAKE -- 11:55:07 -- publishing: yolo2msghub; architecture: arm64
+Signing service...
+Pushing dcmartin/arm64_yolo2msghub:0.0.9...
+The push refers to repository [docker.io/dcmartin/arm64_yolo2msghub]
+30f7e29283cb: Preparing
+d27b4ee759dc: Preparing
+c1a2b5e17511: Preparing
+54bebf6eee8f: Preparing
+4d4364c8fc58: Preparing
+c46f525186dd: Preparing
+2507b251c488: Preparing
+8619c5882d3a: Preparing
+c46f525186dd: Waiting
+2507b251c488: Waiting
+8619c5882d3a: Waiting
+c1a2b5e17511: Layer already exists
+d27b4ee759dc: Layer already exists
+54bebf6eee8f: Layer already exists
+4d4364c8fc58: Layer already exists
+30f7e29283cb: Layer already exists
+2507b251c488: Layer already exists
+c46f525186dd: Layer already exists
+8619c5882d3a: Layer already exists
+0.0.9: digest: sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f size: 1989
+Using 'dcmartin/arm64_yolo2msghub@sha256:1f905bc7551e39e6b90a3f2a6d22333575856385fb17addbd203f7d74b49a68f' in 'deployment' field instead of 'dcmartin/arm64_yolo2msghub:0.0.9'
+Updating com.github.dcmartin.open-horizon.yolo2msghub_0.0.9_arm64 in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the service in the exchange...
+>>> MAKE -- 11:55:13 -- verifying: yolo2msghub; organization: dcmartin@us.ibm.com
+true
+All signatures verified
+>>> MAKE -- 11:55:15 -- publishing: yolo2msghub; organization: dcmartin@us.ibm.com; exchange: https://alpha.edge-fabric.com/v1
+Updating yolo2msghub in the exchange...
+Storing IBM-6d570b1519a1030ea94879bbe827db0616b9f554-public.pem with the pattern in the exchange...
+>>> MAKE -- 11:55:18 -- validating: yolo2msghub; organization: dcmartin@us.ibm.com; exchange: https://alpha.edge-fabric.com/v1
+All signatures verified
+Found pattern dcmartin@us.ibm.com/yolo2msghub
+```
+
 ## Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
