@@ -1,10 +1,14 @@
 ## ARCHITECTURE
 BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/'))
 
-## HZN
+## IDENTIFICATION
 HZN_ORG_ID ?= $(if $(wildcard ../HZN_ORG_ID),$(shell cat ../HZN_ORG_ID),$(shell whoami)@us.ibm.com)
 DOCKER_HUB_ID ?= $(if $(wildcard ../DOCKER_HUB_ID),$(shell cat ../DOCKER_HUB_ID),$(shell whoami))
 
+## GIT
+GIT_REMOTE_URL=$(shell git remote get-url origin)
+
+## HZN
 CMD := $(shell whereis hzn | awk '{ print $1 }')
 HEU := $(if ${HZN_EXCHANGE_URL},${HZN_EXCHANGE_URL},$(if $(CMD),$(shell $(CMD) node list 2> /dev/null | jq -r '.configuration.exchange_api'),))
 HEU := $(if ${HEU},${HEU},"https://alpha.edge-fabric.com/v1")

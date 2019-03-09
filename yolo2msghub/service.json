@@ -4,12 +4,12 @@
   "description": "Sends JSON payloads from yolo service to Kafka",
   "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
   "url": "com.github.dcmartin.open-horizon.yolo2msghub",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "arch": null,
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.5", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.6", "arch": null },
     { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null },
     { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null },
     { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null }
