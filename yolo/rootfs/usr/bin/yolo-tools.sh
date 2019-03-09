@@ -64,7 +64,7 @@ yolo_config()
   esac
   if [ ! -s "${YOLO_WEIGHTS}" ]; then
     if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- YOLO config: ${1}; updating ${YOLO_WEIGHTS} from ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
-    curl -m 60 -fsSL ${DARKNET_WEIGHTS} -o ${YOLO_WEIGHTS}
+    curl -fsSL ${DARKNET_WEIGHTS} -o ${YOLO_WEIGHTS}
     if [ ! -s "${YOLO_WEIGHTS}" ]; then
       if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- YOLO config: ${1}; failed to download: ${DARKNET_WEIGHTS}" &> /dev/stderr; fi
     fi
