@@ -5,7 +5,7 @@
       "org": "dcmartin@us.ibm.com",
       "url": "com.github.dcmartin.open-horizon.yolo2msghub",
       "versionRange": "[0.0.0,INFINITY)",
-      "variables": { "YOLO2MSGHUB_APIKEY": null, "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
+      "variables": { "YOLO2MSGHUB_APIKEY": "", "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
     },
     {
       "org": "dcmartin@us.ibm.com",
