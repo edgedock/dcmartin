@@ -59,15 +59,15 @@ pattern-validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync cloc
+.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
 
-sync: ../ibm/open-horizon .gitignore cloc 
+sync: ../ibm/open-horizon .gitignore CLOC.md 
 	@echo ">>> MAKE -- synching ${ALL}"
 	@rsync -av makefile service.makefile *.md *.sh .gitignore .travis.yml ../ibm/open-horizon
 	@for dir in $(ALL) ${SETUP}; do \
 	  rsync -a --info=name --exclude='service.json' --exclude='userinput.json' --exclude='pattern.json' --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
 	done
 	
-cloc: .gitignore
+CLOC.md: .gitignore .
 	@echo ">>> MAKE -- counting source code"
 	@cloc --md --exclude-list-file=.gitignore . > CLOC.md

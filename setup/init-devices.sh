@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DEBUG=true
-VERBOSE=
+if [ -z ${DEBUG} ]; then DEBUG=; fi
+if [ -z ${VERBOSE} ]; then VERBOSE=; fi
 
 ###
 ### default EXCHANGE URL
@@ -389,9 +389,8 @@ for MAC in ${MACS}; do
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: copying SSH script ${config_script}" &> /dev/stderr; fi
     scp -o "CheckHostIP=no" -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${config_script}" "${client_username}@${client_ipaddr}:." &> /dev/null
     if [ "${client_sudo}" != 'silent' ]; then
-      cmd="echo ${client_password} | sudo --stdin"
-      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
-      result=$(ssh -o "BatchMode=yes" -o "CheckHostIP=no" -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null" -i "$private_keyfile" "${client_username}@${client_ipaddr}" "${cmd}")
+      if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: cannot handle non-silent sudo (yet); continuing" &> /dev/stderr; fi
+      continue
     fi
     cmd="sudo bash ./${config_script##*/}"
     if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: invoking ${cmd}" &> /dev/stderr; fi
@@ -577,18 +576,20 @@ for MAC in ${MACS}; do
   ## CONFIG PATTERN (or reconfigure)
   ##
 
-  echo "$(date '+%T') INFO $0 $$ -- ${id}: PATTERN configuring" &> /dev/stderr
   # get pattern
   ptid=$(echo "$conf" | jq -r '.pattern?')
   if [[ -z $ptid || $ptid == 'null' ]]; then
     echo "*** ERROR $0 $$ -- ${id}: pattern not specified in configuration: $conf" &> /dev/stderr
     continue
+  else
+    echo "$(date '+%T') INFO $0 $$ -- ${id}: PATTERN: ${ptid}" &> /dev/stderr
   fi
-  if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: pattern identifier $ptid" &> /dev/stderr; fi
   pattern=$(jq '.patterns[]|select(.id=="'$ptid'")' "${CONFIG}")
   if [[ -z "${pattern}" || "${pattern}" == "null" ]]; then
     echo "*** ERROR $0 $$ -- ${id}: pattern $ptid not found in patterns" &> /dev/stderr
     continue
+  else
+    if [ -n "${DEBUG}" ]; then echo "??? DEBUG: ${id}: pattern found: ${pattern}" &> /dev/stderr; fi
   fi
 
   # pattern for registration

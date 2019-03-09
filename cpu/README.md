@@ -5,28 +5,28 @@ Provides CPU usage information as micro-service; updates periodically (default `
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_cpu.svg)](https://microbadger.com/images/dcmartin/amd64_cpu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_cpu.svg)](https://microbadger.com/images/dcmartin/amd64_cpu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_cpu
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_cpu.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_cpu.svg)](https://microbadger.com/images/dcmartin/arm_cpu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_cpu.svg)](https://microbadger.com/images/dcmartin/arm_cpu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_cpu
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_cpu.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_com.github.dcmartin.open-horizon.cpu
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_com.github.dcmartin.open-horizon.cpu.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_cpu.svg)](https://microbadger.com/images/dcmartin/arm64_cpu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_cpu.svg)](https://microbadger.com/images/dcmartin/arm64_cpu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_cpu
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_cpu.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.cpu.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -35,7 +35,7 @@ Provides CPU usage information as micro-service; updates periodically (default `
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.cpu`
-+ `version` - `0.0.1`
++ `version` - `0.0.2`
 
 #### Optional variables
 + `CPU_PERIOD` - seconds between updates; defaults to `60`

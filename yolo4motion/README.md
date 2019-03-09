@@ -5,28 +5,28 @@ Provides entity count information as micro-service; updates periodically (defaul
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_yolo4motion.svg)](https://microbadger.com/images/dcmartin/amd64_yolo4motion "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_yolo4motion.svg)](https://microbadger.com/images/dcmartin/amd64_yolo4motion "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_yolo4motion
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_yolo4motion.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.yolo4motion.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm_yolo4motion "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm_yolo4motion "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_yolo4motion
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_yolo4motion.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm64_yolo4motion "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm64_yolo4motion "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_yolo4motion
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_yolo4motion.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.yolo4motion.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -57,7 +57,7 @@ Copy this [repository][repository], change to the `yolo4motion` directory, then 
   "hostname": "abec6ffa6455-172017000002",
   "org": "dcmartin@us.ibm.com",
   "pattern": "yolo4motion",
-  "device": "test-cpu-2-arm_yolo4motion",
+  "device": "test-cpu-2-arm_com.github.dcmartin.open-horizon.yolo4motion",
   "pid": 9,
   "yolo4motion": {
     "log_level": "info",
@@ -76,7 +76,7 @@ The `yolo4motion` payload will be incomplete until the service completes; subseq
   "hostname": "abec6ffa6455-172017000002",
   "org": "dcmartin@us.ibm.com",
   "pattern": "yolo4motion",
-  "device": "test-cpu-2-arm_yolo4motion",
+  "device": "test-cpu-2",
   "pid": 9,
   "yolo4motion": {
     "log_level": "info",

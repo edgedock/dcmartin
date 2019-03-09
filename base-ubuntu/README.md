@@ -5,28 +5,28 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Status
 
 ![Supports amd64 Architecture][amd64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/amd64_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/amd64_base-ubuntu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/amd64_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/amd64_base-ubuntu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-amd64]][docker-amd64]
 
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_base-ubuntu
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_base-ubuntu.svg
+[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu
+[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu.svg
 
 ![Supports armhf Architecture][arm-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm_base-ubuntu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm_base-ubuntu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm]][docker-arm]
 
-[docker-arm]: https://hub.docker.com/r/dcmartin/arm_base-ubuntu
-[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_base-ubuntu.svg
+[docker-arm]: https://hub.docker.com/r/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu
+[pulls-arm]: https://img.shields.io/docker/pulls/dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu.svg
 
 ![Supports aarch64 Architecture][arm64-shield]
-[![](https://images.microbadger.com/badges/image/dcmartin/arm64_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm64_base-ubuntu "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/dcmartin/arm64_base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm64_base-ubuntu "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu "Get your own version badge on microbadger.com")
 [![Docker Pulls][pulls-arm64]][docker-arm64]
 
-[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_base-ubuntu
-[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_base-ubuntu.svg
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu.svg
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -35,7 +35,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.base-ubuntu`
-+ `version` - `0.0.1`
++ `version` - `0.0.2`
 
 #### Optional variables
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
@@ -43,7 +43,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 
 ## How To Use
 
-Specify `dcmartin/base-ubuntu:latest` in service `build.json`
+Specify `dcmartin/com.github.dcmartin.open-horizon.base-ubuntu:0.0.2` in service `build.json`
 
 ### Building this continer
 
@@ -82,11 +82,6 @@ based on the following:
 ## Authors & contributors
 
 [David C Martin][dcmartin] (github@dcmartin.com)
-
-[userinput]: https://github.com/dcmartin/open-horizon/blob/master/base/userinput.json
-[service-json]: https://github.com/dcmartin/open-horizon/blob/master/base/service.json
-[build-json]: https://github.com/dcmartin/open-horizon/blob/master/base/build.json
-[dockerfile]: https://github.com/dcmartin/open-horizon/blob/master/base/Dockerfile
 
 
 [dcmartin]: https://github.com/dcmartin

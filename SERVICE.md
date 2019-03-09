@@ -1,9 +1,11 @@
 # `SERVICE.md` - _Service_ build process automation
 
+# 0. Requirements
+
 The `make` targets for services **require** a Docker hub account, credentials for the exchange, and installation of the Open Horizon command-line-interface (CLI) application: `hzn`; it is also recommended that the account be a member of the `docker` group.  For quick reference, refer to examples below.  **On _macOS_ do not store Docker hub credentials securely on the OSX keychain**; check Docker preferences.
 
 ```
-sudo addgroup dcmartin docker
+sudo addgroup yourlogin docker
 docker login
 jq -r '.apiKey' apiKey.json > APIKEY
 export DOCKER_HUB_ID=dcmartin
@@ -55,31 +57,39 @@ Each service is composed of multiple artifacts:
 + `userinput.json` - a template for registration configuration
 
 ## 2.1 `build.json` - build configuration definition
-The build definition contains information used when building the Docker container, notably a specification of supported architecture labels and corresponding `BUILD_FROM` Docker container image tags, for example the `base-ubuntu` example (see below) indicates three (3) supported architectures with corresponding tags.  Most of the services in this [repository][repository] utilize _base_ containers that are also in this repository.  For example, `yolo4motion` utilizes `yolo`, and `yolo` is built from the `base-ubuntu` container:
+The build definition contains information used when building the Docker container, notably a specification of supported architecture labels and corresponding `BUILD_FROM` Docker container image tags, for example the `base-ubuntu` example (see below) indicates three (3) supported architectures with corresponding tags.  Most of the services in this [repository][repository] utilize _base_ containers that are also in this repository.  For example, `yolo4motion` utilizes `yolo`, and `yolo` is built from the `base-ubuntu` container.
+
+**NOTE:** Version attributions for the `BUILD_FROM` target is drawn from version of the parent service, e.g. `version` in the `yolo/service.json` service configuration template value of `0.0.7`; see below:
 
 ### `base-ubuntu/build.json`
 ```
-    "build_from": {
-        "amd64": "ubuntu:bionic",
-        "arm": "arm32v7/ubuntu:bionic",
-        "arm64": "arm64v8/ubuntu:bionic"
-    },
+{
+  "build_from": {
+    "amd64": "ubuntu:bionic",
+    "arm": "arm32v7/ubuntu:bionic",
+    "arm64": "arm64v8/ubuntu:bionic"
+  }
+}
 ```
 ### `yolo/build.json`
 ```
+{
   "build_from": {
-    "amd64": "dcmartin/amd64_base-ubuntu:0.0.2",
-    "arm": "dcmartin/arm_base-ubuntu:0.0.2",
-    "arm64": "dcmartin/arm64_base-ubuntu:0.0.2"
-  },
+    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
+    "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2"
+  }
+}
 ```
 ### `yolo4motion/build.json`
 ```
+{
   "build_from": {
-    "arm64": "dcmartin/arm64_yolo:0.0.5",
-    "amd64": "dcmartin/amd64_yolo:0.0.5",
-    "arm": "dcmartin/arm_yolo:0.0.5"
+    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.yolo:0.0.7",
+    "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.yolo:0.0.7",
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.yolo:0.0.7"
   },
+}
 ```
 
 ## 2.2 `service.json` - service configuration _template_

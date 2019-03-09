@@ -28,7 +28,14 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 
 # 2. Services & Patterns
 
-Services are defined within a directory hierarchy of this [repository][repository].  Services include:
+Services are defined within a directory hierarchy of this [repository][repository].
+
+There are two services which are **available as a _pattern_** and may be registered for a node:
+
++ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
++ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
+
+Other services include:
 
 + [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
 + [`wan`][wan-service] - provide Wide-Area-Network information
@@ -36,15 +43,15 @@ Services are defined within a directory hierarchy of this [repository][repositor
 + [`yolo`][yolo-service] - recognize entities from USB camera
 + [`mqtt`][mqtt-service] - MQTT message broker service
 + [`herald`][herald-service] - multi-cast data received from other heralds on local-area-network
++ [`hzncli`][hzncli] - service container with `hzn` command-line-interface installed
 + [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
-+ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka (**pattern** available)
-+ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT (**pattern** available)
++ [`mqtt2kafka`][mqtt2kafka-service] - relay specified MQTT traffic to Kafka
++ [`jetson-caffe`][jetson-caffe-service] - BLVC Caffe with CUDA and OpenCV for nVidia Jetson TX
 
-There are also some _base_ service containers:
+There are also two _base_ containers that are used by the other services:
 
 + [`base-alpine`][base-alpine] - base service container for Alpine LINUX
 + [`base-ubuntu`][base-ubuntu] - base service container for Ubuntu LINUX
-+ [`hzncli`][base-hzncli] - base service container with `hzn` CLI installed; Ubuntu LINUX
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
@@ -52,7 +59,7 @@ There are also some _base_ service containers:
 [wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
 [base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
 [base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
-[base-hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
+[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
 
 [herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
 [mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
@@ -60,6 +67,8 @@ There are also some _base_ service containers:
 [yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
 [yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
 [motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
+[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
+[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
 
 # 3. Build, Test & Deploy
 
@@ -72,9 +81,24 @@ The `make` program is used to build; software requirements are: `make`, `git`, `
 1. Clone this [repository][repository]
 2. Initiate build with `make` command (see [`MAKE.md`][make-md] )
 
-To make any _service_ or _pattern_ target perform the following:
+**To push containers to a Docker registry:**
 
-2. Modify `makefile` variables `HZN_ORG_ID` and `DOCKER_HUB_ID` (see [`MAKEVARS.md`][makevars-md] )
+2. Create file `HZN_ORG_ID` the Open Horizon organization identifier
+3. Create file `DOCKER_HUB_ID` with Docker Hub login identifier
+1. Change `build`, `service`, and `pattern` configuration template files
+
+```
+# set environment variables
+export HZN_ORG_ID="you@yourdomain.tld"
+export DOCKER_HUB_ID="yourdockerhubid"
+# change all configuration templates
+sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" */service.json
+sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" */pattern.json
+sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" */build.json
+```
+
+**To `make` any _service_ or _pattern_ target perform the following:** (see [`SERVICE.md`][service-md])
+
 3. Install `hzn` command-line tool and create code signing keys (public and private)
 4. Generate and download IBM Cloud API Key as `apiKey.json`
 5. Publish service(s) with `make service-publish`
@@ -174,14 +198,14 @@ David C Martin (github@dcmartin.com)
 
 Language|files|blank|comment|code
 :-------|-------:|-------:|-------:|-------:
-JSON|54|3|0|6512
-Bourne Shell|58|721|725|4946
-Markdown|24|751|0|3284
-Dockerfile|12|111|58|456
-YAML|2|29|13|354
-make|2|67|49|182
+JSON|101|2|0|10840
+Markdown|28|991|0|5352
+Bourne Shell|59|721|727|5120
+Dockerfile|14|163|101|617
+make|2|72|51|194
 Bourne Again Shell|3|15|15|106
 Python|1|10|20|48
+YAML|1|0|2|28
 Expect|1|0|0|5
 --------|--------|--------|--------|--------
-SUM:|157|1707|880|15893
+SUM:|210|1974|916|22310

@@ -1,7 +1,7 @@
 *.md
 *.json
 *.out
-yolo/darknet
+darknet/
 kafkacat.sh.*
 test-config-*
 test.json
