@@ -9,10 +9,10 @@
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.7", "arch": null },
-    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null },
-    { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null },
-    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.2", "arch": null }
+    { "url": "com.github.dcmartin.open-horizon.yolo", "org": "dcmartin@us.ibm.com", "version": "0.0.8", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.wan", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.hal", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": null },
+    { "url": "com.github.dcmartin.open-horizon.cpu", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": null }
   ],
   "userInput": [
     { "name": "YOLO2MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },
@@ -27,7 +27,7 @@
     "services": {
       "yolo2msghub": {
         "environment": [
-          "SERVICE_LABEL=yolo2msghub","SERVICE_VERSION=0.0.9"
+          "SERVICE_LABEL=yolo2msghub","SERVICE_VERSION=0.0.11"
         ],
         "devices": null,
         "binds": null,

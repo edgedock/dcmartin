@@ -1,9 +1,9 @@
 {
   "squash": false,
   "build_from": {
-    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.base-alpine:0.0.2",
-    "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.base-alpine:0.0.2",
-    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.base-alpine:0.0.2"
+    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.base-alpine:0.0.3",
+    "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.base-alpine:0.0.3",
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.base-alpine:0.0.3"
   },
   "args": {}
 }
