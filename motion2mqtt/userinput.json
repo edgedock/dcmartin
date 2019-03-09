@@ -20,6 +20,10 @@
       "variables": {
         "YOLO4MOTION_GROUP": "motion",
         "YOLO4MOTION_MQTT_HOST": "mqtt",
+	"YOLO_CONFIG": "tiny",
+	"YOLO_ENTITY": "all",
+	"YOLO_SCALE": "none",
+	"YOLO_THRESHOLD": "0.25",
         "DEBUG": false
       }
     }
