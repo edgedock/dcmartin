@@ -13,6 +13,7 @@ hzn_pattern() {
     ALL=$(curl -sL -u "${HZN_ORGANIZATION}/iamapikey:${HZN_EXCHANGE_APIKEY}" "${HZN_EXCHANGE_URL}orgs/${HZN_ORGANIZATION}/patterns")
     if [ ! -z "${ALL}" ]; then
       PATTERN=$(echo "${ALL}" | jq '.patterns|to_entries[]|select(.key=="'${1}'")')
+      if [ -z "${PATTERN}" ]; then PATTERN='null'; fi
     fi
   fi
   echo "${PATTERN}"
