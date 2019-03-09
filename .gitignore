@@ -8,6 +8,7 @@ test.json
 DEBUG*
 APIKEY*
 TEST_TMP_*
+DOCKER_HUB_ID
 HZN_*
 CPU_*
 HAL_*

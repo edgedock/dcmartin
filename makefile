@@ -8,7 +8,7 @@
 
 HZN_ORG_ID ?= $(if $(wildcard HZN_ORG_ID),$(shell cat HZN_ORG_ID),dcmartin@us.ibm.com)
 URL ?= $(if $(wildcard URL),$(shell cat URL),com.github.dcmartin.open-horizon)
-DOCKER_HUB_ID ?= $(shell whoami)
+DOCKER_HUB_ID ?= $(if $(wildcard DOCKER_HUB_ID),$(shell cat DOCKER_HUB_ID),$(shell whoami))
 
 # tag this build environment
 TAG ?= $(if $(wildcard TAG),$(shell cat TAG),)

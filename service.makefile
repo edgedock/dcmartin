@@ -2,6 +2,9 @@
 BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),$(shell uname -m | sed -e 's/aarch64.*/arm64/' -e 's/x86_64.*/amd64/' -e 's/armv.*/arm/'))
 
 ## HZN
+HZN_ORG_ID ?= $(if $(wildcard ../HZN_ORG_ID),$(shell cat ../HZN_ORG_ID),$(shell whoami)@us.ibm.com)
+DOCKER_HUB_ID ?= $(if $(wildcard ../DOCKER_HUB_ID),$(shell cat ../DOCKER_HUB_ID),$(shell whoami))
+
 CMD := $(shell whereis hzn | awk '{ print $1 }')
 HEU := $(if ${HZN_EXCHANGE_URL},${HZN_EXCHANGE_URL},$(if $(CMD),$(shell $(CMD) node list 2> /dev/null | jq -r '.configuration.exchange_api'),))
 HEU := $(if ${HEU},${HEU},"https://alpha.edge-fabric.com/v1")
@@ -68,11 +71,13 @@ $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE):
 
 ## development
 
-${DIR}: service.json userinput.json $(SERVICE_REQVARS) $(APIKEY)
+${DIR}: service.json userinput.json $(APIKEY)
 	@rm -fr ${DIR}/ && mkdir -p ${DIR}/
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
 	@jq '.org="'${HZN_ORG_ID}'"|.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
+
+depend: $(APIKEY) $:DIR}
 	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./mkdepend.sh ${DIR}
 
 ##
@@ -126,7 +131,7 @@ service-push:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
 	done
 
-service-start: remove service-stop ${DIR}
+service-start: remove service-stop depend # $(SERVICE_REQVARS) 
 	@echo ">>> MAKE --" $$(date +%T) "-- starting: ${SERVICE_NAME}; directory: $(DIR)/" &> /dev/stderr
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
@@ -145,7 +150,7 @@ test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
-publish-service: $(APIKEY) $(KEYS)
+publish-service: ${DIR} $(APIKEY) $(KEYS)
 	@echo ">>> MAKE --" $$(date +%T) "-- publishing: $(SERVICE_NAME); architecture: ${BUILD_ARCH}" &> /dev/stderr
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
@@ -231,4 +236,4 @@ distclean: clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check test push service-start service-stop service-test service-publish publish-service service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean
+.PHONY: default all build run check test push service-start service-stop service-test service-publish publish-service service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean depend
