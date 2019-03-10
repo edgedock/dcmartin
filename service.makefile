@@ -207,22 +207,27 @@ list-nodes:
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- listing $${machine}" $$(date); \
 	  ssh $${machine} 'hzn node list'; \
+	  ssh $${machine} 'docker ps'; \
 	done
 
-undo-nodes:
-	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
+CONFIG := ../setup/horizon.json
+
+# export PATTERN=$$(jq -r '. as $$d|.configurations[]|select(.nodes[]?.device=="test-cpu-2").pattern as $$p|$$d|.patterns[]|select(.id==$$p).name' ${CONFIG}); 
+
+nodes: ${DIR}/userinput.json
+	@echo ">>> MAKE --" $$(date +%T) "-- registering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
+	@./checkvars.sh ${DIR}
 	@for machine in $(TEST_NODE_NAMES); do \
-	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
-	  ssh $${machine} 'hzn unregister -fr &> /dev/null &'; \
+	  echo ">>> MAKE --" $$(date +%T) "-- registering $${machine}" $$(date); \
+	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) SERVICE_NAME=${SERVICE_NAME} INPUT=${DIR}/userinput.json && ./nodereg.sh $${machine}; \
 	done
 
 redo-nodes:
-	@echo ">>> MAKE --" $$(date +%T) "-- updating nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
+	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
-	  echo "$${PASSWORD:-}" | ssh $${machine} 'sudo --stdin apt upgrade -y'; \
+	  ssh $${machine} 'hzn unregister -fr'; \
 	done
-
 
 ##
 ## CLEANUP
