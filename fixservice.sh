@@ -21,7 +21,7 @@ ARCH=$(jq -r '.arch' "${SERVICE}.json")
 
 # tagging
 if [ ! -z "${TAG:-}" ]; then
-  echo "--- INFO -- $0 $$ -- modifying service URL with ${TAG} in ${USERINPUT}.json and ${SERVICE}.json" &> /dev/stderr
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- modifying service URL with ${TAG} in ${USERINPUT}.json and ${SERVICE}.json" &> /dev/stderr; fi
   jq -c '.services=[.services[]|.url as $url|.url=$url+"-'${TAG}'"]' ${USERINPUT}.json > /tmp/$$
   mv -f /tmp/$$ ${USERINPUT}.json
   jq -c '.requiredServices=[.requiredServices[]|.url as $url|.url=$url+"-'${TAG}'"]' ${SERVICE}.json > /tmp/$$

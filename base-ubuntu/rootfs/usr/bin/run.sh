@@ -8,19 +8,19 @@ if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 ##
 
 hzn_pattern() {
-  PATTERN='null'
   if [ ! -z "${1}" ] && [ ! -z "${HZN_ORGANIZATION:-}" ] && [ ! -z "${HZN_EXCHANGE_APIKEY:-}" ] && [ ! -z "${HZN_EXCHANGE_URL:-}" ]; then
     ALL=$(curl -sL -u "${HZN_ORGANIZATION}/iamapikey:${HZN_EXCHANGE_APIKEY}" "${HZN_EXCHANGE_URL}orgs/${HZN_ORGANIZATION}/patterns")
     if [ ! -z "${ALL}" ]; then
       PATTERN=$(echo "${ALL}" | jq '.patterns|to_entries[]|select(.key=="'${1}'")')
-      if [ -z "${PATTERN}" ]; then PATTERN='null'; fi
+      if [ -z "${PATTERN}" ]; then PATTERN='"'${1}'"'; fi
     fi
   fi
-  echo "${PATTERN}"
+  if [ -z "${PATTERN:-}" ]; then PATTERN='null'; fi
+  echo ${PATTERN}
 }
 
 # hzn config
-export HZN='{"hzn":{"agreementid":"'${HZN_AGREEMENTID:-}'","arch":"'${HZN_ARCH:-}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID:-}'","exchange_url":"'${HZN_EXCHANGE_URL:-}'","host_ips":['$(echo "${HZN_HOST_IPS:-}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION:-}'","pattern":"'${HZN_PATTERN:-}'","ram":'${HZN_RAM:-0}'},"date":'$(date +%s)',"service":"'${SERVICE_LABEL:-}'","version":"'${SERVICE_VERSION:-}'","pattern":'$(hzn_pattern "${HZN_PATTERN:-}")'}'
+export HZN='{"date":'$(date +%s)',"hzn":{"agreementid":"'${HZN_AGREEMENTID:-}'","arch":"'${HZN_ARCH:-}'","cpus":'${HZN_CPUS:-0}',"device_id":"'${HZN_DEVICE_ID:-}'","exchange_url":"'${HZN_EXCHANGE_URL:-}'","host_ips":['$(echo "${HZN_HOST_IPS:-}" | sed 's/,/","/g' | sed 's/\(.*\)/"\1"/')'],"organization":"'${HZN_ORGANIZATION:-}'","ram":'${HZN_RAM:-0}',"service":"'${SERVICE_LABEL:-}'","version":"'${SERVICE_VERSION:-}'","pattern":'$(hzn_pattern "${HZN_PATTERN:-}")'}}'
 
 # make a file
 echo "${HZN}" > "${TMPDIR}/config.json"

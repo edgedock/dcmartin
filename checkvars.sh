@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # args
-if [ ! -z "${1}" ]; then DIR="${1}"; else DIR="horizon"; echo "--- INFO -- $0 $$ -- directory unspecified; default: ${DIR}" &> /dev/stderr; fi
+if [ ! -z "${1}" ]; then DIR="${1}"; else DIR="horizon"; if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory unspecified; default: ${DIR}" &> /dev/stderr; fi; fi
 if [ ! -z "${2}" ]; then 
   SERVICE_TEMPLATE="${2}"
 else
   SERVICE_TEMPLATE="service.json"
-  echo "--- INFO -- $0 $$ -- service template unspecified; default: ${SERVICE_TEMPLATE}" &> /dev/stderr
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- service template unspecified; default: ${SERVICE_TEMPLATE}" &> /dev/stderr; fi
 fi
 
 # dependencies
