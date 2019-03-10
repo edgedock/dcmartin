@@ -29,7 +29,7 @@ for evar in $(jq -r '.userInput[].name' "${SERVICE_TEMPLATE}"); do
     VAL=$(cat "${evar}")
     UI=$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'${evar}')|='${VAL} "${USERINPUT}")
     echo "${UI}" > "${USERINPUT}"
-    echo "--- INFO -- $0 $$ -- setting ${evar} to ${VAL}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${evar}=${VAL}" &> /dev/stderr; fi
   elif [ "${VAL}" == 'null' ]; then 
     echo "*** ERROR -- $0 $$ -- variable ${evar} has no default and value is null; create file named ${evar} with JSON content; exiting"
     exit 1
