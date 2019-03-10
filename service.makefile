@@ -29,8 +29,8 @@ SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json)
 SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[].key' build.json)
 
 ## KEYS
-PRIVATE_KEY_FILE := $(if $(wildcard ../IBM-*.key),$(wildcard ../IBM-*.key),PRIVATE_KEY_FILE)
-PUBLIC_KEY_FILE := $(if $(wildcard ../IBM-*.pem),$(wildcard ../IBM-*.pem),PUBLIC_KEY_FILE)
+PRIVATE_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}-*.key),$(wildcard ../${HZN_ORG_ID}-*.key),PRIVATE_KEY_FILE)
+PUBLIC_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}-*.pem),$(wildcard ../${HZN_ORG_ID}-*.pem),PUBLIC_KEY_FILE)
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
@@ -56,7 +56,7 @@ TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell egrep -v '^\#' TEST_JQ
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell egrep -v '^\#' TEST_NODE_FILTER | head -1),)
 TEST_NODE_TIMEOUT = 10
 # temporary
-TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell cat TEST_TMP_MACHINES),localhost)
+TEST_NODE_NAMES = $(if $(wildcard TEST_TMP_MACHINES),$(shell egrep -v '^\#' TEST_TMP_MACHINES),localhost)
 
 ##
 ## targets
@@ -82,7 +82,10 @@ ${DIR}: service.json userinput.json $(APIKEY)
 	@cp -f userinput.json ${DIR}/userinput.json
 	@export HZN_EXCHANGE_URL=${HEU} TAG=${TAG} && ./fixservice.sh ${DIR}
 
-depend: $(APIKEY) $:DIR}
+${DIR}/userinput.json: userinput.json ${DIR}
+	@./checkvars.sh ${DIR}
+
+depend: $(APIKEY) ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./mkdepend.sh ${DIR}
 
 ##
@@ -219,10 +222,10 @@ nodes: ${DIR}/userinput.json
 	@./checkvars.sh ${DIR}
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- registering $${machine}" $$(date); \
-	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) SERVICE_NAME=${SERVICE_NAME} INPUT=${DIR}/userinput.json && ./nodereg.sh $${machine}; \
+	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) && ./nodereg.sh $${machine} ${SERVICE_NAME} ${DIR}/userinput.json; \
 	done
 
-redo-nodes:
+undo-nodes:
 	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
