@@ -5,7 +5,7 @@ node_status()
   machine=${1}
   hzn=$(ssh ${machine} 'command -v hzn')
   if [ ! -z "${hzn}" ]; then
-    state=$(ssh ${machine} 'hzn node list 2> /dev/null' | jq -c '.')
+    state=$(ssh ${machine} 'hzn node list 2> /dev/null')
   fi
   if [ -z "${state:-}" ]; then state='null'; fi
   echo ${state}
@@ -47,12 +47,10 @@ node_unregister()
 node_register()
 {
   machine=${1}
-  echo "--- INFO -- $0 $$ -- registering ${machine} with pattern ${SERVICE_NAME}" &> /dev/stderr
+  echo "--- INFO -- $0 $$ -- registering ${machine} with pattern: ${SERVICE_NAME}; input: ${INPUT}" &> /dev/stderr
   scp ${INPUT} ${machine}:/tmp/input.json &> /dev/null
-  echo hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${HZN_ORG_ID}/${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" &> /dev/stderr
   ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${HZN_ORG_ID}/${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" &> /dev/null
 }
-
 
 node_update()
 {
@@ -88,10 +86,15 @@ node_update()
   echo ${state}
 }
 
-if [ -z "${HZN_EXCHANGE_APIKEY}" ]; then echo "*** ERROR -- $0 $$0 -- set environment variable HZN_EXCHANGE_APIKEY"; exit 1; fi
-if [ -z "${SERVICE_NAME}" ]; then echo "*** ERROR -- $0 $$0 -- set environment variable SERVICE_NAME"; exit 1; fi
 if [ -z "${HZN_ORG_ID}" ]; then echo "*** ERROR -- $0 $$0 -- set environment variable HZN_ORG_ID"; exit 1; fi
-if [ -z "${INPUT}" ]; then echo "*** ERROR -- $0 $$0 -- set environment variable INPUT"; exit 1; fi
+if [ -z "${HZN_EXCHANGE_APIKEY}" ]; then echo "*** ERROR -- $0 $$0 -- set environment variable HZN_EXCHANGE_APIKEY"; exit 1; fi
+
+if [ -z "${SERVICE_NAME}" ]; then 
+  if [ ! -z "${2}" ]; then SERVICE_NAME="${2}"; else echo "*** ERROR -- $0 $$0 -- set environment variable SERVICE_NAME"; exit 1; fi
+fi
+if [ -z "${INPUT}" ]; then 
+  if [ ! -z "${3}" ]; then INPUT="${3}"; else  echo "*** ERROR -- $0 $$0 -- set environment variable INPUT"; exit 1; fi
+fi
 
 ###
 ### MAIN

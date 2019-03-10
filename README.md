@@ -1,6 +1,6 @@
 # Open Horizon example _services_ and _patterns_
 
-Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud.  Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.
+Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud. 
 
 [design-md]: https://github.com/dcmartin/open-horizon/tree/master/DESIGN.md
 
@@ -26,9 +26,23 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
+## 1.1 Repository & Exchange
+
+These services and patterns are built and pushed to public [repositories][docker-dcmartin] on [Docker Hub][docker-hub].  and available in the exchange.  Defaults:
+
++ `HZN_EXCHANGE_URL` is `https://alpha.edge-fabric.com/v1`
++ `HZN_ORG_ID` is `dcmartin@us.ibm.com`.
++ `DOCKER_HUB_ID` is [`dcmartin`][docker-dcmartin]
++ `URL` is [`com.github.dcmartin.open-horizon`][repository]
+
+[docker-dcmartin]: https://hub.docker.com/?namespace=dcmartin
+
+**NOTE**: build, push, and publish containers, services, and patterns using appropriate values.
+
 # 2. Services & Patterns
 
-Services are defined within a directory hierarchy of this [repository][repository].
+Services are defined within a directory hierarchy of this [repository][repository]. Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.
+
 
 There are two services which are **available as a _pattern_** and may be registered for a node:
 
@@ -78,31 +92,63 @@ The services and patterns in this [repository][repository] may be built and test
 
 The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
 
-1. Clone this [repository][repository]
-2. Initiate build with `make` command (see [`MAKE.md`][make-md] )
++ Clone this [repository][repository]
++ Initiate build with `make` command (see [`MAKE.md`][make-md] )
 
-**To push containers to a Docker registry:**
+### 3.1.0 Quick-start
 
-2. Create file `HZN_ORG_ID` the Open Horizon organization identifier
-3. Create file `DOCKER_HUB_ID` with Docker Hub login identifier
-1. Change `build`, `service`, and `pattern` configuration template files
+To `make` all container images for all architectures for each and every service use the `service-push` target:
+
+```
+make service-push
+```
+
+To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry.
+
+```
+make service-publish
+```
+
+### 3.1.1 Pre-requisites to push containers 
+
+1. Set `HZN_ORG_ID` to the exchange organization identifier
+1. Set `DOCKER_HUB_ID` to the [Docker registry][docker-hub] login identifier
+2. Login to Docker registry
+1. Change `service`, `pattern`, and `build` configuration template files (as necessary)
+
+[docker-hub]: http://hub.docker.com/
 
 ```
 # set environment variables
 export HZN_ORG_ID="you@yourdomain.tld"
 export DOCKER_HUB_ID="yourdockerhubid"
-# change all configuration templates
-sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" */service.json
-sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" */pattern.json
-sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" */build.json
+# login to Docker registry (e.g. hub.docker.com)
+docker login
+```
+**NOTE**: on **macOS** the Docker application preferences should _not_ use the secure OSX keychain.
+
+```
+# login to Docker registry (e.g. hub.docker.com)
+docker login
 ```
 
-**To `make` any _service_ or _pattern_ target perform the following:** (see [`SERVICE.md`][service-md])
+The following commands automatically replace the defaults in all configuration and build templates.
 
-3. Install `hzn` command-line tool and create code signing keys (public and private)
-4. Generate and download IBM Cloud API Key as `apiKey.json`
-5. Publish service(s) with `make service-publish`
-6. Publish pattern(s) with `make pattern-publish`
+```
+# change all configuration templates
+for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" ${json}; done
+# change all build specifications
+for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
+```
+### 3.1.2 Pre-requisites to publish services
+
+1. Generate and download IBM Cloud API Key as `apiKey.json` ([cloud.ibm.com/iam][ibm-iam])
+1. Install `hzn` command-line tool and create code signing keys (public and private)
+
+```
+hzn key create ${HZN_ORG_ID} you@yourdomain.tld
+```
+[ibm-iam]: http://cloud.ibm.com/iam
 
 ## 3.2 Test
 
@@ -114,20 +160,14 @@ Each service may be tested individually using the following `make` targets:
 
 ## 3.3 Deploy (see [video][horizon-video-setup])
 
-Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-md].  Credentials may be established for development using keys created for node configuration; refer to [`NETWORK.md`][network-md]  for more details.  Nodes may be interrogated for service status  (n.b. `TEST_NODE_NAMES` variable) with the following `make` targets:
+Pattern tests using deployed nodes may be utilized with appropriate client device node configuration.  Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-md].
 
-+ `test-nodes` - test response JSON using `TEST_NODE_FILTER` for `jq` command
-+ `list-nodes` - execute `hzn node list`
++ `nodes` - configure clients with _pattern_; devices IP/FQDN specified in `TEST_TMP_MACHINES` file
++ `list-nodes` - execute `hzn node list` and `docker ps` on client devices
++ `test-nodes` - process status API from client using `jq` command and `TEST_NODE_FILTER`expression
++ `undo-nodes` - unregister client devices as nodes
 
-Observe  system with the following commands for listing nodes, services, and patterns:
-
-+ `./setup/lsnodes.sh` - lists all nodes in the organization according to `setup/horizon.json`
-+ `./setup/lsservices.sh` - lists all services in the organization according to `setup/horizon.json`
-+ `./setup/lspatterns.sh` - lists all patterns in the organization according to `setup/horizon.json`
-
-Individual patterns have specialized receiving scripts which can be invoked:
-
-+ `./yolo2msghub/kafkat.sh` - listens to Kafka messages sent by the `yolo2msghub` service
+For more information see [`PATTERN.md`][pattern-md].
 
 [horizon-video-setup]: https://youtu.be/IfR-XY603JY
 [docker-start]: https://www.docker.com/get-started

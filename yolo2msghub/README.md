@@ -340,6 +340,10 @@ ELAPSED: 0
 >>> MAKE -- finish testing yolo2msghub on localhost at Tue Mar  5 11:50:50 PST 2019
 ```
 
+## `kafkacat.sh`
+
++ `./kafkacat.sh` - listens to Kafka messages sent by the `yolo2msghub` service
+
 # Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format

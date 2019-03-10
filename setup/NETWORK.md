@@ -39,33 +39,44 @@ Run the `mkconfig.sh` script to customize configuration for local environment; b
 ```
 % ./mkconfig
 ```
+
 Check the configuration using the `chkconfig.sh` script; if `horizon.json` exists, it will be used; alternative may be specified.
+
 ```
 % ./chkconfig
 ```
+
 ***Flash SD card*** (e.g. try `http://etcher.io`) with appropriate LINUX distribution (e.g. [Raspbian Stretch Lite][rsl-download]).
 
 When SD card has been flashed, update the boot volume using the `flash_usd.sh` script.  This process specifies WiFi credentials and SSH access   Repeat process of flashing distribution and running script to produce the required number of SD cards.
+
 ```
 % ./flash_usd.sh
 ```
+
 Insert uSD card(s) into Raspberry Pi(s), power-on, wait for initial boot sequence -- approximately 60 seconds -- and run the `init-devices.sh` script to find the client devices and configure as Horizon nodes; change the network specification appropriately (e.g. ###.###.###.0/24, network dependent).
+
 ```
 % ./init-devices.sh horizon.json 192.168.1.0/24
 ```
+
 Software installation takes a long time, over five (5) minutes on a RaspberryPi3+.  Please be patient. Refer to the following example [log][example-log] for expected output.
 
 When initialization completes, inspect the Open Horizon exchange via the following command:
+
 ```
 ./lsnodes.sh | jq '.nodes[].id'
 ```
 
 ### Post-installation device access
 After `init-devices.sh` script completes each device will be accessible only using SSH.  The credentials for each device are available in the configuration file (e.g. `horizon.json`), or the `setup` directory with corresponding names, for example the `cpuconf` configuration's credentials are `cpuconf` and `cpuconf.pub`.  The following command may be used as a template to access a device; retrieve the IP address from the *log* and use the appropriate configuration credentials (e.g. `cpuconf` or `sdrconf`):
+
 ```
 ssh -l pi 192.168.1.180 -i sdrconf
 ```
+
 After accessing a device, a listing of files in the home directory yields the following:
+
 ```
 drwxr-xr-x 3 pi   pi    4096 Dec 17 21:35 .
 drwxr-xr-x 3 root root  4096 Nov 13 13:09 ..
@@ -81,6 +92,7 @@ drwx------ 2 pi   pi    4096 Dec 17 21:24 .ssh
 -rw-r--r-- 1 pi   pi    8802 Dec 17 21:28 log
 -rw-r--r-- 1 root root   201 Dec 17 21:24 passwd.exp
 ```
+
 + [`apt.log`][example-apt-log] logged the update and upgrade of existing software components, including Raspbian.
 + [`log`][example-device-log] logged the installation of Open Horizon and required software components, including Docker.
 + [`config-ssh.sh`][example-config-ssh] changed SSH configuration.
@@ -125,6 +137,7 @@ The initialization template provide the specifics for device initialization.  Th
 
 ## Option: `networks`
 List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  The first network is _always_ the **default** network used for device initialization.  Additional networks are for configured device deployment, e.g. in a home, office, or oil rig.  The non-default network configuration is _only_ applied once node has been successfully initialized.
+
 ```
   "networks": [
     {
@@ -144,6 +157,7 @@ List of network definitions of `id`, `dhcp`, `ssid`, and `password` for nodes.  
 
 ## Option: `nodes`
 A list of nodes identified by MAC address; these entries are changed during initialization to indicate status. If specified as `null` the local-area-network will be scanned for new devices. Example initial `nodes` list:
+
 ```
   "nodes": [
     { "mac": "B8:27:EB:D0:95:AD", "id": "rp1" },
@@ -162,6 +176,7 @@ A list of nodes identified by MAC address; these entries are changed during init
 List of configuration definitions of `pattern`, `exchange`, `network` for a set of `nodes`, each with `device` name and authentication `token`.  Any number of `variables` may be defined appropriate for the defined `pattern`.
 
 **Note**: _You must obtain credentials for IBM MessageHub for alpha phase_
+
 ```
   "configurations": [
     {
@@ -210,6 +225,7 @@ The edge fabric runs _patterns_ which correspond to one or more LINUX containers
 Both patterns require an API key.
 
 + MSGHUB_API_KEY - a **private** key for each user; may be shared across multiple devices
+
 ```
   "patterns": [
     {
@@ -227,6 +243,7 @@ Both patterns require an API key.
 
 ## Option: `exchanges`
 Identification, location, and credentials for IBM Edge Fabric. Use IBM Cloud login email (e.g. `youremail@yourisp.net`) and an IBM Cloud platform API key for `password`.  Generate an IBM Cloud platform API key [here][ibm-cloud-iam].
+
 ```
   "exchanges": [
     {
@@ -343,6 +360,13 @@ When the script completes, the `nodes` array is updated with the configurations 
       }
     }
 ```
+
+### Observe  system with the following commands for listing nodes, services, and patterns:
+
++ `./setup/lsnodes.sh` - lists all nodes in the organization according to `setup/horizon.json`
++ `./setup/lsservices.sh` - lists all services in the organization according to `setup/horizon.json`
++ `./setup/lspatterns.sh` - lists all patterns in the organization according to `setup/horizon.json`
+
 
 ## Changelog & Releases
 
