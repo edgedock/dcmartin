@@ -49,7 +49,7 @@ node_register()
   machine=${1}
   echo "--- INFO -- $0 $$ -- registering ${machine} with pattern: ${SERVICE_NAME}; input: ${INPUT}" &> /dev/stderr
   scp ${INPUT} ${machine}:/tmp/input.json &> /dev/null
-  ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${HZN_ORG_ID}/${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" &> /dev/null
+  ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" &> /dev/null
 }
 
 node_update()
@@ -69,7 +69,7 @@ node_update()
     configured)
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- configured with ${pattern}" &> /dev/stderr
-      if [ "${HZN_ORG_ID}/${SERVICE_NAME}" == "${pattern}" ]; then
+      if [ "${SERVICE_NAME}" == "${pattern}" ]; then
         URL=$(ssh ${machine} hzn service list | jq -r '.[].url' | while read; do if [ "${REPLY##*.}" == "${pattern##*/}" ]; then echo "${REPLY}"; fi; done)
         VER=$(ssh ${machine} hzn service list | jq -r '.[]|select(.url=="'${URL}'").version')
         echo "--- INFO -- $0 $$ -- ${machine} -- version: ${VER}; url: ${URL}" &> /dev/stderr
@@ -91,6 +91,10 @@ if [ -z "${HZN_EXCHANGE_APIKEY}" ]; then echo "*** ERROR -- $0 $$0 -- set enviro
 
 if [ -z "${SERVICE_NAME}" ]; then 
   if [ ! -z "${2}" ]; then SERVICE_NAME="${2}"; else echo "*** ERROR -- $0 $$0 -- set environment variable SERVICE_NAME"; exit 1; fi
+fi
+if [ "${SERVICE_NAME##*/}" == "${SERVICE_NAME}" ]; then
+  SERVICE_NAME="${HZN_ORG_ID}/${SERVICE_NAME}"
+  if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- missing service organization; using ${SERVICE_NAME}" &> /dev/stderr; fi
 fi
 if [ -z "${INPUT}" ]; then 
   if [ ! -z "${3}" ]; then INPUT="${3}"; else  echo "*** ERROR -- $0 $$0 -- set environment variable INPUT"; exit 1; fi
