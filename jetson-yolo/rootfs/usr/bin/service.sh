@@ -17,19 +17,6 @@ if [ -z "${HZN}" ]; then
   fi
 fi
 
-# get pid
-if [ ! -z "${SERVICE_LABEL:-}" ]; then
-  CMD=$(command -v "${SERVICE_LABEL:-}.sh")
-  if [ ! -z "${CMD}" ]; then
-    PID=$(ps | grep "${CMD}" | grep -v grep | awk '{ print $1 }' | head -1)
-  fi
-  if [ -z "${PID:-}" ]; then PID=0; fi
-  BODY=$(echo "${BODY}" | jq '.pid='"${PID}")
-else
-  echo "*** ERROR $0 $$ -- no SERVICE_LABEL; exiting" 2> /dev/stderr
-  exit 1
-fi
-
 RESPONSE_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.json"
 echo "${HZN}" > "${RESPONSE_FILE}"
 

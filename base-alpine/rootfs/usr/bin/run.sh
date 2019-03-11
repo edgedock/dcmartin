@@ -43,4 +43,4 @@ else
 fi
 
 # start listening
-nice -n -10 socat TCP4-LISTEN:${LOCALHOST_PORT},fork EXEC:service.sh
+socat TCP4-LISTEN:${LOCALHOST_PORT},fork EXEC:service.sh

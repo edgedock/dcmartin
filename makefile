@@ -22,10 +22,11 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 
 BASES = base-alpine base-ubuntu 
 SERVICES = cpu hal wan yolo herald mqtt yolo4motion hzncli
+JETSONS = jetson-jetpack jetson-cuda jetson-opencv jetson-yolo # jetson-caffe # jetson-digits
 PATTERNS = yolo2msghub motion2mqtt
 SETUP = setup
 
-ALL = $(BASES) $(SERVICES) $(PATTERNS)
+ALL = $(BASES) $(SERVICES) $(PATTERNS) # ${JETSONS}
 
 ##
 ## targets
@@ -59,7 +60,7 @@ pattern-validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
-.PHONY: ${BASES} $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
+.PHONY: ${ALL} default all build run check stop push publish verify clean start test sync
 
 sync: ../ibm/open-horizon .gitignore CLOC.md 
 	@echo ">>> MAKE -- synching ${ALL}"

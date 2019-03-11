@@ -13,6 +13,7 @@ ENV \
 
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
   ca-certificates \
+  imagemagick \
   build-essential \
   git
 
@@ -83,9 +84,9 @@ LABEL \
     org.label-schema.schema-version="1.0" \
     org.label-schema.build-date="${BUILD_DATE}" \
     org.label-schema.build-arch="${BUILD_ARCH}" \
-    org.label-schema.name="darknet" \
+    org.label-schema.name="jetson-yolo" \
     org.label-schema.description="yolo/darknet as a service" \
-    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/yolo/" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/jetson-yolo/" \
     org.label-schema.vcs-ref="${BUILD_REF}" \
     org.label-schema.version="${BUILD_VERSION}" \
     org.label-schema.vendor="David C Martin <github@dcmartin.com>"
