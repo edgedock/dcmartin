@@ -20,8 +20,8 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ## things NOT TO change
 ##
 
-BASES = base-alpine base-ubuntu hzncli
-SERVICES =  cpu hal wan yolo  herald mqtt yolo4motion
+BASES = base-alpine base-ubuntu 
+SERVICES = cpu hal wan yolo herald mqtt yolo4motion hzncli
 PATTERNS = yolo2msghub motion2mqtt
 SETUP = setup
 
@@ -59,7 +59,7 @@ pattern-validate:
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) -C $$dir $@; \
 	done
 
-.PHONY: $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
+.PHONY: ${BASES} $(SERVICES) $(PATTERNS) default all build run check stop push publish verify clean start test sync
 
 sync: ../ibm/open-horizon .gitignore CLOC.md 
 	@echo ">>> MAKE -- synching ${ALL}"

@@ -27,4 +27,12 @@ before_script:
 script:
   - make build
 after_success:
-  - make push 
+  # - make run
+  # - make check
+  - make push
+  # - make service-start
+  # - make service-test
+  # - make service-push
+  # - make nodes
+  # - make test-nodes until all good
+  # - make service-publish

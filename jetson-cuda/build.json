@@ -1,0 +1,7 @@
+{
+  "squash": false,
+  "build_from": {
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack:0.0.1"
+  },
+  "args": {}
+}

@@ -1,3 +1,6 @@
+*.md
+*.json
+*.out
 darknet/
 kafkacat.sh.*
 test-config-*
@@ -12,7 +15,7 @@ DOCKER_HUB_ID
 HZN_*
 CPU_*
 HAL_*
-dcmartin@us.ibm.com-*
+IBM-*
 MOTION_*
 PRIVATE_KEY_FILE
 PUBLIC_KEY_FILE
