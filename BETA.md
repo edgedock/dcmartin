@@ -290,3 +290,51 @@
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
+
+## `jetson-jetpack-beta`
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-jetpack-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+
+## `jetson-cuda-beta`
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-cuda-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+
+## `jetson-opencv-beta`
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-opencv-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+
+## `jetson-yolo-beta`
+
+![Supports aarch64 Architecture][arm64-shield]
+[![](https://images.microbadger.com/badges/image/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta.svg)](https://microbadger.com/images/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta "Get your own version badge on microbadger.com")
+[![Docker Pulls][pulls-arm64]][docker-arm64]
+
+[docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta
+[pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.jetson-yolo-beta.svg
+
+[arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
