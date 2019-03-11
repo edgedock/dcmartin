@@ -31,10 +31,12 @@ If the device is to be used for development and testing then create the appropri
 
 ```
 sudo -s
-USERID=<your-user-id>
-adduser ${USERID} sudo
-adduser ${USERID} docker
+USERID=<youruserid>
+adduser ${USERID} 
+addgroup ${USERID} sudo
+addgroup ${USERID} docker
 echo "${USERID} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID}-nopasswd
+chmod 400  /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
 The device will still need to be registered for a specific pattern.  Refer to [`PATTERN.md`][pattern-md].
