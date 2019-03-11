@@ -22,10 +22,24 @@ Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. u
 
 ### Process
 For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][horizon-setup] is used to install the Horizon software under LINUX; the short-cut URL is `ibm.biz/horizon-setup`:
+
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
-When this installation finishes the device will still need to be registered for a specific pattern.  Refer to the _Horizon Addons_ section below for information on using Home Assistant addons to initiate device patterns and listen for sensor output.
+
+If the device is to be used for development and testing then create the appropriate account, add to necessary groups, and change `sudo` policy for that user to not require a password:
+
+```
+sudo -s
+USERID=<your-user-id>
+adduser ${USERID} sudo
+adduser ${USERID} docker
+echo "${USERID} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID}-nopasswd
+```
+
+The device will still need to be registered for a specific pattern.  Refer to [`PATTERN.md`][pattern-md].
+
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
 
 ## Network installation
 
