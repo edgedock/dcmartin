@@ -49,8 +49,6 @@ if [ -z "${REPLY}" ]; then echo "false"; exit 1; fi
 
 # process input
 OUT="${REPLY}"
-SERVICE_LABEL=$(echo "${OUT}" | jq -r '.service')
-if [ "${SERVICE_LABEL}" == 'null' ]; then echo "service: null"; fi
 ENTRIES=$(echo "${OUT}" | jq -r '.|to_entries[].key')
 if [ "${ENTRIES}" == 'null' ]; then echo "entries: null"; break; fi
 OUTPUT='{'
