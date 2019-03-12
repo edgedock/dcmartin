@@ -3,11 +3,11 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-JSON='[{"name": "yolo", "url": "http://yolo" },{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
+SERVICES_JSON='[{"name": "yolo", "url": "http://yolo" },{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
 
-# OPTIONS
-OPTIONS='{"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${JSON}',"period":'${YOLO2MSGHUB_PERIOD}'}'
-echo "${OPTIONS}" > ${TMPDIR}/${SERVICE_LABEL}.json
+# CONFIG
+CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${SERVICES_JSON}',"period":'${YOLO2MSGHUB_PERIOD}'}'
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 # make topic
 TOPIC=$(curl -sSL -H 'Content-Type: application/json' -H "X-Auth-Token: ${YOLO2MSGHUB_APIKEY}" "${YOLO2MSGHUB_ADMIN_URL}/admin/topics" -d '{"name":"'${SERVICE_LABEL}'"}')
@@ -16,14 +16,14 @@ if [ "$(echo "${TOPIC}" | jq '.errorCode!=null')" == 'true' ]; then
 fi
 
 # do all SERVICES forever
-SERVICES=$(echo "${JSON}" | jq -r '.[]|.name')
+SERVICES=$(echo "${SERVICES_JSON}" | jq -r '.[]|.name')
 while true; do
   DATE=$(date +%s)
   OUTPUT=$(mktemp)
-  echo ${OPTIONS} | jq '.date='$(date +%s) > ${OUTPUT}
+  echo ${CONFIG} | jq '.date='$(date +%s) > ${OUTPUT}
   # process all services
   for S in $SERVICES; do
-    URL=$(echo "${JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
+    URL=$(echo "${SERVICES_JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
     if [ ! -z "${URL}" ]; then
       TEMP_FILE=$(mktemp)
       curl -sSL "${URL}" | jq -c '.'"${S}" > ${TEMP_FILE} 2> /dev/null
@@ -34,11 +34,12 @@ while true; do
       else
         echo 'null' >> ${TEMP_OUTPUT}
       fi
+      rm -f ${TEMP_FILE}
       echo '}' >> ${TEMP_OUTPUT}
       # add to output
       jq -s add ${TEMP_OUTPUT} ${OUTPUT} > ${OUTPUT}.$$ && mv -f ${OUTPUT}.$$ ${OUTPUT}
       # cleanup
-      rm -f ${TEMP_FILE} ${TEMP_OUTPUT}
+      rm -f ${TEMP_OUTPUT}
     fi
   done
 

@@ -1,13 +1,29 @@
 #!/bin/bash
 
+DEBUG=true
+
+node_alive()
+{
+  machine=${1}
+  if [ ! -z "${machine}" ]; then
+    $(ping -W 1 -c 1 ${machine} &> /dev/null)
+    RESULT=$?
+  fi
+  echo ${RESULT:-1} 
+}
+
 node_status()
 {
   machine=${1}
-  hzn=$(ssh ${machine} 'command -v hzn')
-  if [ ! -z "${hzn}" ]; then
-    state=$(ssh ${machine} 'hzn node list 2> /dev/null')
+  if [ $(node_alive ${machine}) == 0 ]; then
+    hzn=$(ssh ${machine} 'command -v hzn')
+    if [ ! -z "${hzn}" ]; then
+      state=$(ssh ${machine} 'hzn node list 2> /dev/null')
+    fi
+    if [ -z "${state:-}" ]; then state='null'; fi
+  else
+    state='offline'
   fi
-  if [ -z "${state:-}" ]; then state='null'; fi
   echo ${state}
 }
 
@@ -79,7 +95,7 @@ node_update()
       fi
       ;;
     *)
-      echo "+++ WARN -- $0 $$ -- ${state} ${machine} with ${SERVICE_NAME}" &> /dev/stderr
+      echo "+++ WARN -- $0 $$ --  ${machine} state: ${state}" &> /dev/stderr
       ;;
   esac
   state=$(node_state ${machine})
@@ -106,8 +122,9 @@ fi
 
 machine=${1}
 if [ -z "${machine}" ]; then echo "*** ERROR -- $0 $$ -- no machine specified; exiting" &> /dev/stderr; exit 1; fi
+if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- machine: ${machine}" &> /dev/stderr; fi
 
-OUT=$(ping -c 1 ${machine})
+OUT=$(ping -W 1 -c 1 ${machine})
 if [ $? != 0 ]; then echo "+++ WARN -- $0 $$ -- machine not found on network; exiting" &> /dev/stderr; exit 1; fi
 
 IPADDR=$(echo "${OUT}" | head -1 | sed 's|.*(\([^)]*\)).*|\1|')

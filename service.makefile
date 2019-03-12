@@ -93,7 +93,7 @@ depend: $(APIKEY) ${DIR}
 ##
 
 build: Dockerfile build.json service.json rootfs Makefile
-	@echo ">>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}" &> /dev/stderr
+	@echo ">>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; architecture: ${BUILD_ARCH}; tag: ${DOCKER_TAG}" &> /dev/stderr
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
 logs:
@@ -208,11 +208,13 @@ $(TEST_NODE_NAMES):
 list-nodes:
 	@echo ">>> MAKE --" $$(date +%T) "-- listing nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
-	  echo ">>> MAKE --" $$(date +%T) "-- listing $${machine}" $$(date); \
-	  ssh $${machine} 'hzn node list'; \
-	  ssh $${machine} 'hzn agreement list'; \
-	  ssh $${machine} 'hzn service list'; \
-	  ssh $${machine} 'docker ps'; \
+	  echo ">>> MAKE --" $$(date +%T) "-- listing $${machine}" &> /dev/stderr; \
+          ping -W 1 -c 1 $${machine} &> /dev/null \
+	    && echo "NODE: " && ssh $${machine} 'hzn node list' | jq -c '.' \
+	    && echo "AGREEMENT: " && ssh $${machine} 'hzn agreement list' | jq -c '.' \
+	    && echo "SERVICE: " && ssh $${machine} 'hzn service list' | jq -c '.' \
+	    && echo "DOCKER: " && ssh $${machine} 'docker ps --format "{{.Names}},{{.Image}}"' | awk -F, '{ printf("{\"name\":\"%s\",\"image\":\"%s\"}\n", $$1, $$2) }' | jq -c \
+	    || echo ">>> MAKE --" $$(date +%T) "-- not found ${machine} &> /dev/stderr"; \
 	done
 
 CONFIG := ../setup/horizon.json
@@ -231,7 +233,16 @@ undo-nodes:
 	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
+	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null &'; \
+	done
+
+redo-nodes:
+	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
+	@for machine in $(TEST_NODE_NAMES); do \
+	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
 	  ssh $${machine} 'hzn unregister -fr'; \
+	  ssh $${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli'; \
+	  ssh $${machine} 'sudo apt-get purge -y bluehorizon horizon horizon-cli'; \
 	done
 
 ##
