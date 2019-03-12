@@ -210,6 +210,8 @@ list-nodes:
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- listing $${machine}" $$(date); \
 	  ssh $${machine} 'hzn node list'; \
+	  ssh $${machine} 'hzn agreement list'; \
+	  ssh $${machine} 'hzn service list'; \
 	  ssh $${machine} 'docker ps'; \
 	done
 

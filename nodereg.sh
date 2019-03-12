@@ -49,7 +49,7 @@ node_register()
   machine=${1}
   echo "--- INFO -- $0 $$ -- registering ${machine} with pattern: ${SERVICE_NAME}; input: ${INPUT}" &> /dev/stderr
   scp ${INPUT} ${machine}:/tmp/input.json &> /dev/null
-  ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" &> /dev/null
+  ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" # &> /dev/null
 }
 
 node_update()

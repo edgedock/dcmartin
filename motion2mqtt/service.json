@@ -23,7 +23,7 @@
     { "name": "MOTION_MQTT_PASSWORD", "label": "password", "type": "string", "defaultValue": "" },
     { "name": "MOTION_POST_PICTURES", "label": "post pictures; on, off, first, last, center, best", "type": "string", "defaultValue": "best" },
     { "name": "MOTION_LOCATE_MODE", "label": "location motion mode; off,box,cross,redbox,redcross", "type": "string", "defaultValue": "off" },
-    { "name": "MOTION_EVENT_GAP", "label": "seconds of no motion indicating end of event", "type": "int", "defaultValue": "60" },
+    { "name": "MOTION_EVENT_GAP", "label": "seconds of no motion indicating end of event", "type": "int", "defaultValue": "30" },
     { "name": "MOTION_FRAMERATE", "label": "frames per second", "type": "int", "defaultValue": "2" },
     { "name": "MOTION_THRESHOLD", "label": "changed pixel count indicating motion; range (1,maxInt]", "type": "int", "defaultValue": "5000" },
     { "name": "MOTION_THRESHOLD_TUNE", "label": "attempt to tune threshold", "type": "boolean", "defaultValue": "false" },
@@ -41,7 +41,7 @@
     "services": {
       "motion2mqtt": {
         "environment": [
-          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.4"
+          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.6"
         ],
         "binds": null,
         "specific_ports": [

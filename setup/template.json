@@ -128,7 +128,7 @@
     { "id": "ubuntu-18.10", "client": { "hostname": "[^ ]*", "sudo": "password", "username": "root", "password": "toor" } },
     { "id": "ubuntu-16.04", "client": { "hostname": "[^ ]*", "sudo": "password", "username": "root", "password": "toor" } },
     { "id": "tx2-18.04", "client": { "hostname": "jetson-[^ ]*", "sudo": "password", "username": "nvidia", "password": "nvidia" } },
-    { "id": "raspbian-stretch-lite", "client": { "hostname": "raspberrypi", "sudo": "silent", "username": "pi", "password": "raspberry" } }
+    { "id": "raspbian-stretch-lite", "client": { "hostname": "raspberrypi", "sudo": "silent", "username": "pi", "password": "raspberry" },"url":"http://director.downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip" }
   ],
   "exchanges": [
     { "id": "none" },

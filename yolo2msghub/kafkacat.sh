@@ -48,8 +48,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
       continue
     fi
     if [ "${VALID}" != 'true' ]; then
-      echo "+++ WARN $0 $$ -- invalid payload" &> /dev/stderr
-      continue
+      echo "+++ WARN $0 $$ -- invalid payload: ${VALID}" $(jq -c '.' ${PAYLOAD%.*}.out) &> /dev/stderr
     fi
     ID=$(jq -r '.hzn.device_id' ${PAYLOAD})
     DATE=$(jq -r '.yolo2msghub.yolo.date' ${PAYLOAD})
@@ -75,7 +74,7 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
             jq -r '.yolo2msghub.yolo.image' ${PAYLOAD} | base64 --decode > ${0##*/}.$$.${ID}.jpeg
-            if [ ! -z $(command -v open) ]; then open ${0##*/}.$$.${ID}.jpeg; fi
+            # if [ ! -z $(command -v open) ]; then open ${0##*/}.$$.${ID}.jpeg; fi
           else
             echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person" &> /dev/stderr
           fi

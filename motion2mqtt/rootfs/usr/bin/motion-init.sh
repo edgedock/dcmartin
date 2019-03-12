@@ -5,8 +5,6 @@
 ### 
 
 MOTION_CONF_FILE="/etc/motion/motion.conf"
-MOTION_PID_FILE="/var/run/motion/motion.pid" 
-MOTION_CMD=$(command -v motion)
 
 motion_init()
 {
@@ -39,34 +37,4 @@ motion_init()
         ;;
     esac
   fi
-}
-
-motion_pid()
-{
-  PID=
-  if [ -s "${MOTION_PID_FILE}" ]; then
-    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- MOTION_PID_FILE: ${MOTION_PID_FILE}" &> /dev/stderr; fi
-    PID=$(cat ${MOTION_PID_FILE})
-  fi
-  echo "${PID}"
-}
-
-motion_start()
-{
-  if [ -z "$(motion_pid)" ]; then
-    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- starting ${MOTION_CMD} with ${MOTION_PID_FILE}" &> /dev/stderr; fi
-    ${MOTION_CMD} -b -d ${MOTION_LOG_LEVEL:-6} -k ${MOTION_LOG_TYPE:-9} -c "${MOTION_CONF_FILE}" -p "${MOTION_PID_FILE}" -l ${TMPDIR}/motion.log
-    while [ -z "$(motion_pid)" ]; do
-      if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on motion" &> /dev/stderr; fi
-      sleep 1
-    done
-  fi
-  echo $(motion_pid)
-}
-
-motion_restart()
-{
-  PID=$(motion_pid)
-  if [ -z "${PID:-}" ]; then PID=$(motion_start); fi
-  echo "${PID}"
 }

@@ -39,7 +39,8 @@ fi
 ### MOTION
 ### 
 
-source /usr/bin/motion-tools.sh
+source /usr/bin/motion-init.sh
+source /usr/bin/motion-start.sh
 
 ###
 ### FUNCTIONS
@@ -77,7 +78,7 @@ update_output() {
   OUTPUT_FILE="${1}"
   service_update ${OUTPUT_FILE}
   TEMPFILE=$(mktemp)
-  jq '.pid='$(motion_restart)'|.date='$(date +%s) "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
+  jq '.pid='$(motion_pid)'|.date='$(date +%s) "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
   cp -f "${OUTPUT_FILE}" "${TMPDIR}/${SERVICE_LABEL}.json"
 }
 
@@ -89,7 +90,7 @@ update_output() {
 motion_init
 
 ## start motion
-motion_restart
+PID=$(motion_start)
 
 ## initialize
 OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.$$.json"

@@ -1,0 +1,8 @@
+{
+  "label": "jetson-yolo",
+  "description": "yolo and friends as a pattern",
+  "public": true,
+  "services": [
+    { "serviceUrl": "com.github.dcmartin.open-horizon.jetson-yolo", "serviceOrgid": "dcmartin@us.ibm.com", "serviceArch": "arm64", "serviceVersions": [ { "version": "0.0.1" } ] }
+  ]
+}
