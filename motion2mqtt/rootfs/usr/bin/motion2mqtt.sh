@@ -17,14 +17,9 @@ if [ -z "${MOTION_DEVICE_NAME:-}" ] || [ "${MOTION_DEVICE_NAME}" == 'default' ];
   fi
 fi
 
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":'${MOTION_MQTT_PORT}',"username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES}'","locate_mode":"'${MOTION_LOCATE_MODE}'","event_gap":'${MOTION_EVENT_GAP}',"framerate":'${MOTION_FRAMERATE}',"threshold":'${MOTION_THRESHOLD}',"threshold_tune":'${MOTION_THRESHOLD_TUNE}',"noise_level":'${MOTION_NOISE_LEVEL}',"noise_tune":'${MOTION_NOISE_TUNE}',"log_level":'${MOTION_LOG_LEVEL}',"log_type":"'${MOTION_LOG_TYPE}'"}}'
+CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${SERVICES_JSON},"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":'${MOTION_MQTT_PORT}',"username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES}'","locate_mode":"'${MOTION_LOCATE_MODE}'","event_gap":'${MOTION_EVENT_GAP}',"framerate":'${MOTION_FRAMERATE}',"threshold":'${MOTION_THRESHOLD}',"threshold_tune":'${MOTION_THRESHOLD_TUNE}',"noise_level":'${MOTION_NOISE_LEVEL}',"noise_tune":'${MOTION_NOISE_TUNE}',"log_level":'${MOTION_LOG_LEVEL}',"log_type":"'${MOTION_LOG_TYPE}'"}}'
 
 if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- config: ${CONFIG}" &> /dev/stderr; fi
-
-## services consumed
-SERVICES=$(echo "${SERVICES_JSON}" | jq -r '.[]|.name')
-CONFIG=$(echo "${CONFIG}" | jq '.services=['$(echo "${SERVICES}" | fmt | sed 's| |","|g' | sed 's|\(.*\)|"\1"|')']')
-if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- SERVICES: ${SERVICES}" &> /dev/stderr; fi
 
 ## timezone
 ZONEINFO="/usr/share/zoneinfo/${MOTION_TIMEZONE}"
@@ -51,23 +46,24 @@ service_update() {
   OUTPUT_FILE=${1}
   OUTPUT=$(mktemp)
   echo '{}' > "${OUTPUT}"
+  SERVICES=$(echo "${SERVICES_JSON}" | jq -r '.[]|.name')
   for S in ${SERVICES}; do
     URL=$(echo "${SERVICES_JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
-    TEMPFILE=$(mktemp)
+    TEMP_FILE=$(mktemp)
     if [ ! -z "${URL}" ]; then
-      curl -fsSL "${URL}" -o ${TEMPFILE} 2> /dev/null 
+      curl -sSL "${URL}" jq -c '.'"${S}" > ${TEMP_FILE} 2> /dev/null 
     fi
-    TEMPOUT=$(mktemp)
-    echo '{"'${S}'":' > ${TEMPOUT}
-    if [ ! -s "${TEMPFILE:-}" ]; then
-      echo -n 'null' >> ${TEMPOUT}
+    TEMP_OUTPUT=$(mktemp)
+    echo '{"'${S}'":' > ${TEMP_OUTPUT}
+    if [ -s "${TEMP_FILE:-}" ]; then
+      cat ${TEMP_FILE} >> ${TEMP_OUTPUT}
     else
-      jq -c '.'"${S}" ${TEMPFILE} >> ${TEMPOUT}
+      echo 'null' >> ${TEMP_OUTPUT}
     fi
-    rm -f ${TEMPFILE}
-    echo '}' >> ${TEMPOUT}
-    jq -s add "${TEMPOUT}" "${OUTPUT}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT}"
-    rm -f ${TEMPOUT}
+    rm -f ${TEMP_FILE}
+    echo '}' >> ${TEMP_OUTPUT}
+    jq -s add "${TEMP_OUTPUT}" "${OUTPUT}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT}"
+    rm -f ${TEMP_OUTPUT}
   done
   jq -s add "${OUTPUT}" "${OUTPUT_FILE}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT_FILE}"
   rm -f "${OUTPUT}"
@@ -77,8 +73,8 @@ service_update() {
 update_output() {
   OUTPUT_FILE="${1}"
   service_update ${OUTPUT_FILE}
-  TEMPFILE=$(mktemp)
-  jq '.pid='$(motion_pid)'|.date='$(date +%s) "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
+  TEMP_FILE=$(mktemp)
+  jq '.pid='$(motion_pid)'|.date='$(date +%s) "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
   cp -f "${OUTPUT_FILE}" "${TMPDIR}/${SERVICE_LABEL}.json"
 }
 
@@ -96,7 +92,7 @@ PID=$(motion_start)
 OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.$$.json"
 
 ## initialize service output
-echo "${CONFIG}" > "${OUTPUT_FILE}"
+echo ${CONFIG} | jq -c '.date='$(date +%s) > ${OUTPUT_FILE}
 
 ## forever
 while true; do 
@@ -114,8 +110,8 @@ while true; do
 	    if [ -z "${OUT}" ]; then OUT='null'; fi
 	    # don't update always
 	    if [ "${MOTION_POST_PICTURES}" == 'all' ]; then
-	      TEMPFILE=$(mktemp)
-	      jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
+	      TEMP_FILE=$(mktemp)
+	      jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
 	      IMAGE_PATH="${FULLPATH%.*}.jpg"
 	      if [ -s "${IMAGE_PATH}" ]; then
 		IMG_B64_FILE="${TMPDIR}/${IMAGE_PATH##*/}"; IMG_B64_FILE="${IMG_B64_FILE%.*}.b64"
@@ -148,8 +144,8 @@ while true; do
 	  else
 	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: EVENT end" &> /dev/stderr; fi
 	    # update event
-	    TEMPFILE=$(mktemp)
-	    jq '.motion.event='"${OUT}" "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
+	    TEMP_FILE=$(mktemp)
+	    jq '.motion.event='"${OUT}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
 	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: updated ${OUTPUT_FILE} with event JSON:" $(echo "${OUT}" | jq -c) &> /dev/stderr; fi
 	    # check for GIF
 	    IMAGE_PATH="${FULLPATH%.*}.gif"
@@ -172,8 +168,8 @@ while true; do
 	      fi
 	      rm -f "${IMAGE_PATH}"
 	      # update output to posted image
-	      TEMPFILE=$(mktemp)
-	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${TEMPFILE}" && mv -f "${TEMPFILE}" "${OUTPUT_FILE}"
+	      TEMP_FILE=$(mktemp)
+	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
 	    fi
 	    # cleanup
 	    find "${FULLPATH%/*}" -name "${FULLPATH%.*}*" -print | xargs rm -f
@@ -190,16 +186,16 @@ while true; do
     # merge image base64 iff exists
     if [ ! -z "${IMG_B64_FILE:-}" ] && [ -s "${IMG_B64_FILE}" ]; then
       if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${IMG_B64_FILE}" &> /dev/stderr; fi
-      TEMPFILE=$(mktemp)
-      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${IMG_B64_FILE}" > "${TEMPFILE}" && mv "${TEMPFILE}" "${OUTPUT_FILE}"
+      TEMP_FILE=$(mktemp)
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${IMG_B64_FILE}" > "${TEMP_FILE}" && mv "${TEMP_FILE}" "${OUTPUT_FILE}"
       rm -f "${IMG_B64_FILE}"
       IMG_B64_FILE=
     fi
     # merge GIF base64 iff exists
     if [ ! -z "${GIF_B64_FILE:-}" ] && [ -s "${GIF_B64_FILE}" ]; then
     if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${GIF_B64_FILE}" &> /dev/stderr; fi
-      TEMPFILE=$(mktemp)
-      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${GIF_B64_FILE}" > "${TEMPFILE}" && mv "${TEMPFILE}" "${OUTPUT_FILE}"
+      TEMP_FILE=$(mktemp)
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${GIF_B64_FILE}" > "${TEMP_FILE}" && mv "${TEMP_FILE}" "${OUTPUT_FILE}"
       rm -f "${GIF_B64_FILE}"
       GIF_B64_FILE=
     fi
