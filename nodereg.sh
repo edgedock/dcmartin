@@ -122,14 +122,12 @@ fi
 
 machine=${1}
 if [ -z "${machine}" ]; then echo "*** ERROR -- $0 $$ -- no machine specified; exiting" &> /dev/stderr; exit 1; fi
-if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- machine: ${machine}" &> /dev/stderr; fi
 
 OUT=$(ping -W 1 -c 1 ${machine})
-if [ $? != 0 ]; then echo "+++ WARN -- $0 $$ -- machine not found on network; exiting" &> /dev/stderr; exit 1; fi
-
+if [ $? != 0 ]; then echo "+++ WARN -- $0 $$ -- machine ${machine} not found on network; exiting" &> /dev/stderr; exit 1; fi
 IPADDR=$(echo "${OUT}" | head -1 | sed 's|.*(\([^)]*\)).*|\1|')
-
 echo "--- INFO -- $0 $$ -- ${machine} at IP: ${IPADDR:-}" &> /dev/stderr
+
 state=$(node_update ${machine}) 
 while [ "${state}" != 'configured' ]; do
   echo "--- INFO -- $0 $$ -- machine: ${machine}; state: ${state}" &> /dev/stderr

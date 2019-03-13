@@ -41,7 +41,7 @@
     "services": {
       "motion2mqtt": {
         "environment": [
-          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.6"
+          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.11"
         ],
         "binds": null,
         "specific_ports": [

@@ -17,7 +17,7 @@ if [ -z "${MOTION_DEVICE_NAME:-}" ] || [ "${MOTION_DEVICE_NAME}" == 'default' ];
   fi
 fi
 
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${SERVICES_JSON},"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":'${MOTION_MQTT_PORT}',"username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES}'","locate_mode":"'${MOTION_LOCATE_MODE}'","event_gap":'${MOTION_EVENT_GAP}',"framerate":'${MOTION_FRAMERATE}',"threshold":'${MOTION_THRESHOLD}',"threshold_tune":'${MOTION_THRESHOLD_TUNE}',"noise_level":'${MOTION_NOISE_LEVEL}',"noise_tune":'${MOTION_NOISE_TUNE}',"log_level":'${MOTION_LOG_LEVEL}',"log_type":"'${MOTION_LOG_TYPE}'"}}'
+CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${SERVICES_JSON}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":'${MOTION_MQTT_PORT}',"username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES}'","locate_mode":"'${MOTION_LOCATE_MODE}'","event_gap":'${MOTION_EVENT_GAP}',"framerate":'${MOTION_FRAMERATE}',"threshold":'${MOTION_THRESHOLD}',"threshold_tune":'${MOTION_THRESHOLD_TUNE}',"noise_level":'${MOTION_NOISE_LEVEL}',"noise_tune":'${MOTION_NOISE_TUNE}',"log_level":'${MOTION_LOG_LEVEL}',"log_type":"'${MOTION_LOG_TYPE}'"}}'
 
 if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- config: ${CONFIG}" &> /dev/stderr; fi
 
@@ -42,9 +42,8 @@ source /usr/bin/motion-start.sh
 ###
 
 ## update services functions
-service_update() {
-  OUTPUT_FILE=${1}
-  OUTPUT=$(mktemp)
+requiredServices_update() {
+  OUTPUT=${1}
   echo '{}' > "${OUTPUT}"
   SERVICES=$(echo "${SERVICES_JSON}" | jq -r '.[]|.name')
   for S in ${SERVICES}; do
@@ -65,17 +64,29 @@ service_update() {
     jq -s add "${TEMP_OUTPUT}" "${OUTPUT}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT}"
     rm -f ${TEMP_OUTPUT}
   done
-  jq -s add "${OUTPUT}" "${OUTPUT_FILE}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT_FILE}"
-  rm -f "${OUTPUT}"
+  echo $?
 }
 
 ## update service output
 update_output() {
   OUTPUT_FILE="${1}"
-  service_update ${OUTPUT_FILE}
   TEMP_FILE=$(mktemp)
-  jq '.pid='$(motion_pid)'|.date='$(date +%s) "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
-  cp -f "${OUTPUT_FILE}" "${TMPDIR}/${SERVICE_LABEL}.json"
+  REQSVCS_OUTPUT_FILE=$(mktemp)
+  if [ $(requiredServices_update ${REQSVCS_OUTPUT_FILE}) != 0 ]; then
+    if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- requiredServices_update failed" &> /dev/stderr; fi
+    jq '.' "${OUTPUT_FILE}" > "${TEMP_FILE}"
+  else
+    jq -s add "${REQSVCS_OUTPUT_FILE}" "${OUTPUT_FILE}" > "${TEMP_FILE}"
+  fi
+  rm -f "${REQSVCS_OUTPUT_FILE}"
+  if [ -s "${TEMP_FILE}" ]; then
+    jq '.pid='$(motion_pid)'|.date='$(date +%s) "${TEMP_FILE}" > "${TEMP_FILE}.$$" && mv -f "${TEMP_FILE}.$$" "${TEMP_FILE}"
+  else
+    if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- update_output: update failed" &> /dev/stderr; fi
+    echo '{"pid":'$(motion_pid)',"date":'$(date +%s)'}' > "${TEMP_FILE}"
+  fi
+  SERVICE_OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
+  mv -f "${TEMP_FILE}" "${SERVICE_OUTPUT_FILE}"
 }
 
 ###

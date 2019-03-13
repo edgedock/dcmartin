@@ -1,5 +1,5 @@
 # service versions agreement pattern
-.test.name=.motion2mqtt.name,.test.pid=.motion2mqtt.pid,.test.hzn=.hzn,.test.period=.motion2mqtt.period,.test.date=.date,.test.cpu=.motion2mqtt.cpu?!=null,.test.cpu=.motion2mqtt.cpu.percent,.test.event=.motion2mqtt.motion.event.base64?!=null,.test.image=.motion2mqtt.motion.image.base64?!=null
+.test.version=.hzn.version,.test.name=.motion2mqtt.name,.test.pid=.motion2mqtt.pid,.test.hzn=.hzn,.test.period=.motion2mqtt.period,.test.date=.date,.test.cpu=.motion2mqtt.cpu?!=null,.test.cpu=.motion2mqtt.cpu.percent,.test.event=.motion2mqtt.motion.event.base64?!=null,.test.image=.motion2mqtt.motion.image.base64?!=null
 # service versions
 .test.period=.motion2mqtt.period,.test.date=.date,.test.pattern.label=.pattern.value.label,.test.pattern.services=.pattern.value.services[].serviceVersions[].version,.test.pattern.updated=.pattern.value.lastUpdated,.test.horizon=.hzn,.test.cpu=.motion2mqtt.cpu?!=null,.test.cpu=.motion2mqtt.cpu.percent,.test.event=.motion2mqtt.motion.event.base64?!=null,.test.image=.motion2mqtt.motion.image.base64?!=null
 # working

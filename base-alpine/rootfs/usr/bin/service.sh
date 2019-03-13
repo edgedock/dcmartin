@@ -21,14 +21,16 @@ RESPONSE_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.json"
 echo "${HZN}" > "${RESPONSE_FILE}"
 
 SERVICE_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
-if [ -s "${SERVICE_FILE}" ]; then 
-  TSF="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$"
-  echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
+TSF="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$"
+echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
+if [ -s "${SERVICE_FILE}" ]; then
   cat "${SERVICE_FILE}" >> "${TSF}"
-  echo '}' >> "${TSF}"
-  jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMPDIR}/$$.$$" && mv -f "${TMPDIR}/$$.$$" "${RESPONSE_FILE}"
-  rm -f "${TSF}"
+else
+  echo 'null' >> "${TSF}"
 fi
+echo '}' >> "${TSF}"
+jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMPDIR}/$$.$$" && mv -f "${TMPDIR}/$$.$$" "${RESPONSE_FILE}"
+rm -f "${TSF}"
 
 SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
 

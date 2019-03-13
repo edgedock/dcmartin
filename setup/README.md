@@ -4,54 +4,91 @@ This repository contains sample scripts to automatically setup nodes for [Open H
 
 You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials available in the Slack [channel][edge-slack].
 
-# Installation
-
 ## Supported devices
 A target device or virtual environment is required; either of the following are sufficient.
 
-## Manual installation
-
-### LINUX (Ubuntu) Virtual Machine
+### VM - LINUX (Ubuntu) Virtual Machine
 Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
 
-### RaspberryPi3+ with Raspbian Stretch
+### Rpi3B+ - RaspberryPi3+ with Raspbian Stretch
 1. Download Raspbian [image][raspbian-image] for the RaspberryPi3 and flash a 32 Gbyte+ micro-SD card.  On macOS use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
 1. Create the file `ssh` in the root directory of the mounted SD-card; on macOS use `touch /Volumes/boot/ssh`.  This step will enable remote access using the `ssh` command with the default login `pi` and password `raspberry`.
 1. Eject the SD-card (e.g. on macOS use `diskutil eject /Volume/boot`).
 1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
 
-### Process
-For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the command below to install Horizon.  This installation script [`hzn-setup.sh`][horizon-setup] is used to install the Horizon software under LINUX; the short-cut URL is `ibm.biz/horizon-setup`:
+# A. Manual Installation
+## Process
+### Step 1 - Install Open Horizon
+For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the commands below:
 
 ```
-wget -qO - ibm.biz/horizon-setup | sudo bash
+wget -qO - get.docker.com | sudo bash
 ```
-
-If the device is to be used for development and testing then create the appropriate account, add to necessary groups, and change `sudo` policy for that user to not require a password:
 
 ```
 sudo -s
-USERID=<youruserid>
-adduser ${USERID} 
-addgroup ${USERID} sudo
-addgroup ${USERID} docker
+APT_REPO=updates \
+  && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list \
+  && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key \
+  && wget -qO - "${PUBLICKEY_URL}" | apt-key add - \
+  && echo "deb [arch=armhf,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" > "${APT_LIST}" \
+  && apt-get update -y && apt-get install -y bluehorizon horizon horizon-cli
+exit
+```
+
+It is recommended, but not required, to change the default `pi` password,  as well as identify the device with a unique name for use in testing (e.g. `test-rpi3-1`):
+
+```
+passwd pi
+export DEVICE_NAME=test-rpi3-1
+sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hosts
+sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hostname
+sudo hostname ${DEVICE_NAME}
+```
+The device will need to be rebooted for the name change to take effect.
+
+### Step 2 - Configure for development / testing
+
+If the device is to be used for development and testing it will need to be configured with the appropriate account, privileges, and change `sudo` policy for that user to not require a password:
+
+```
+export USERID=<your-userid>
+sudo adduser ${USERID} 
+```
+
+```
+sudo addgroup ${USERID} sudo
+sudo addgroup ${USERID} docker
+```
+
+```
+sudo -s
 echo "${USERID} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID}-nopasswd
 chmod 400  /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
-The device will still need to be registered for a specific pattern.  Refer to [`PATTERN.md`][pattern-md].
+The **development host** (e.g. Apple iMac or MacBook) will also need to be configured with SSH credentials (n.b. `~/.ssh/`) which are then copied to the device from the host; run the following command as `<your-userid>` on the development host:
 
+```
+ssh-copy-id <device-name>.local # and enter password chosed previously
+```
+
+After credentials are established, the device may be used to test [services][service-md] and [patterns][pattern-md].  Refer to [`BUILD.md`][build-md].
+
+[make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
+[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
 
-## Network installation
+# B. Network installation
 
 Installations can be performed over the network when devices are discovered.  This technique is suitable for local-area network (LAN) deployments. Please refer to [these][network] instructions.
 
-## System installation
+# C. System installation
 
 System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][system] instructions.
 
-# Horizon Addons
+# D. Horizon Addons
 
 Add the repository [`https://github.com/dcmartin/hassio-addons`][dcm-addons] to the Add-on Store.  Install and start the following addons (n.b. both require `MSGHUB_API_KEY` to `listen` for Kafka messages):
 

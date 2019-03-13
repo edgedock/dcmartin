@@ -21,7 +21,7 @@ motion_start()
 {
   if [ -z "$(motion_pid)" ]; then
     if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- starting ${MOTION_CMD} with ${MOTION_PID_FILE}" &> /dev/stderr; fi
-    ${MOTION_CMD} -b -d ${MOTION_LOG_LEVEL:-6} -k ${MOTION_LOG_TYPE:-9} -c "${MOTION_CONF_FILE}" -p "${MOTION_PID_FILE}" -l ${TMPDIR}/motion.log
+    ${MOTION_CMD} -c "${MOTION_CONF_FILE}"
     while [ -z "$(motion_pid)" ]; do
       if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on motion" &> /dev/stderr; fi
       sleep 1

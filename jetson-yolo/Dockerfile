@@ -69,6 +69,10 @@ FROM darknet
 # Copy compiled darknet
 COPY --from=darknet /darknet /darknet
 
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get -y autoremove && apt-get -y autoclean
+RUN rm -rf /var/cache/apt
+
 # Copy usr
 COPY rootfs/usr /usr
 
