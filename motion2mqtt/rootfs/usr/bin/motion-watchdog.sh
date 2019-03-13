@@ -12,6 +12,7 @@ if [ -z "${CMD}" ]; then echo "*** ERROR -- $0 $$ -- no motion command path spec
 while true; do
   pid=$(ps | awk '{ print $1,$4 }' | egrep "${CMD}" | awk '{ print $1 }')
   if [ -z "${pid}" ] || [ "${PID}" != "${pid}" ]; then
+    rm -f ${MOTION_PID_FILE}
     if [ ! -z "${PID}" ]; then kill -9 ${PID}; fi
     PID=$(motion_start)
   fi
