@@ -60,7 +60,8 @@ Other services include:
 + [`hzncli`][hzncli] - service container with `hzn` command-line-interface installed
 + [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
 + [`mqtt2kafka`][mqtt2kafka-service] - relay specified MQTT traffic to Kafka
-+ [`jetson-caffe`][jetson-caffe-service] - BLVC Caffe with CUDA and OpenCV for nVidia Jetson TX
++ [`jetson-caffe`][jetson-caffe-service] - BVLC Caffe with CUDA and OpenCV for nVidia Jetson TX
++ [`jetson-yolo`][jetson-yolo-service] - Darknet YOLO with CUDA and OpenCV for nVidia Jetson TX
 
 There are also two _base_ containers that are used by the other services:
 
@@ -83,6 +84,7 @@ There are also two _base_ containers that are used by the other services:
 [motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
 [mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
 [jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
+[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
 
 # 3. Build, Test & Deploy
 
