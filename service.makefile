@@ -29,8 +29,8 @@ SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json)
 SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[].key' build.json)
 
 ## KEYS
-PRIVATE_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}-*.key),$(wildcard ../${HZN_ORG_ID}-*.key),PRIVATE_KEY_FILE)
-PUBLIC_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}-*.pem),$(wildcard ../${HZN_ORG_ID}-*.pem),PUBLIC_KEY_FILE)
+PRIVATE_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}*.key),$(wildcard ../${HZN_ORG_ID}*.key),PRIVATE_KEY_FILE)
+PUBLIC_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}*.pem),$(wildcard ../${HZN_ORG_ID}*.pem),PUBLIC_KEY_FILE)
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
