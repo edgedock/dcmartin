@@ -198,14 +198,14 @@ pattern-validate: pattern.json
 ## TESTING
 ##
 
-test-nodes: $(TEST_NODE_NAMES)
+nodes-test: $(TEST_NODE_NAMES)
 	@echo ">>> MAKE --" $$(date +%T) "-- tested: $(SERVICE_NAME); nodes: ${TEST_NODE_NAMES}; date: $$(date)" &> /dev/stderr
 
 $(TEST_NODE_NAMES):
 	@echo ">>> MAKE --" $$(date +%T) "-- testing: ${SERVICE_NAME}; node: ${@}; port: $(SERVICE_PORT); date: $$(date)" &> /dev/stderr
 	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl -m 30 --connect-timeout $(TEST_NODE_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
 
-list-nodes:
+nodes-list:
 	@echo ">>> MAKE --" $$(date +%T) "-- listing nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- listing $${machine}" &> /dev/stderr; \
@@ -214,7 +214,7 @@ list-nodes:
 	    && echo "AGREEMENT: " && ssh $${machine} 'hzn agreement list' | jq -c '.' \
 	    && echo "SERVICE: " && ssh $${machine} 'hzn service list' | jq -c '.' \
 	    && echo "DOCKER: " && ssh $${machine} 'docker ps --format "{{.Names}},{{.Image}}"' | awk -F, '{ printf("{\"name\":\"%s\",\"image\":\"%s\"}\n", $$1, $$2) }' | jq -c \
-	    || echo ">>> MAKE --" $$(date +%T) "-- not found ${machine} &> /dev/stderr"; \
+	    || echo ">>> MAKE **" $$(date +%T) "** not found $${machine}" &> /dev/stderr; \
 	done
 
 CONFIG := ../setup/horizon.json
@@ -229,20 +229,25 @@ nodes: ${DIR}/userinput.json
 	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) && ./nodereg.sh $${machine} ${SERVICE_NAME} ${DIR}/userinput.json; \
 	done
 
-undo-nodes:
+nodes-undo:
 	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
-	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null &'; \
+	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null &' \
+	    || echo ">>> MAKE **" $$(date +%T) "** not found $${machine}" &> /dev/stderr; \
 	done
 
-redo-nodes:
-	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
+nodes-purge:
+	@echo ">>> MAKE --" $$(date +%T) "-- purging nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
-	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
-	  ssh $${machine} 'hzn unregister -fr'; \
-	  ssh $${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli'; \
-	  ssh $${machine} 'sudo apt-get purge -y bluehorizon horizon horizon-cli'; \
+	  if [ $$(ping -W 1 -c 1 $${machine} && true || false) ]; then \
+	    echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date) \
+	    ssh $${machine} 'hzn unregister -fr'; \
+	    ssh $${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli'; \
+	    ssh $${machine} 'sudo apt-get purge -y bluehorizon horizon horizon-cli'; \
+	  else \
+	    echo ">>> MAKE **" $$(date +%T) "** not found $${machine}" &> /dev/stderr; \
+	  fi; \
 	done
 
 ##
