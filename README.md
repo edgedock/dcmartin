@@ -90,34 +90,18 @@ There are also two _base_ containers that are used by the other services:
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-## 3.1 Build 
-
-The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
+## 3.1 Build (see [**video**][build-push-video]) 
 
 [build-push-video]: https://www.youtube.com/watch?v=NHLen-lY7pw
 
+The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
+
 + Clone this [repository][repository]
-+ Initiate build with `make` command (see [**video**][build-push-video]) 
++ Initiate build with `make` command 
 
-### 3.1.0 Quick-start
-
-To `make` all container images for all architectures for each and every service use the `service-push` target; see [**video**][build-push-all-video].
+## 3.2 Push service containers (see [**video**][build-push-all-video])
 
 [build-push-all-video]: https://youtu.be/d5JiB_aDxRY
-
-```
-make service-push
-```
-
-To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry; see [**video**][publish-cpu-service-video].
-
-[publish-cpu-service-video]: https://youtu.be/C47L1PWVp3E
-
-```
-make service-publish
-```
-
-### 3.1.1 Pre-requisites to push containers 
 
 1. Set `HZN_ORG_ID` to the exchange organization identifier
 1. Set `DOCKER_HUB_ID` to the [Docker registry][docker-hub] login identifier
@@ -139,6 +123,31 @@ docker login
 docker login
 ```
 
+To `make` all container images for all architectures for each and every service use the `service-push` target:
+
+```
+make service-push
+```
+
+## 3.3 Publish services (see [**video**][publish-cpu-service-video])
+
+[publish-cpu-service-video]: https://youtu.be/C47L1PWVp3E
+
+
+1. Generate and download IBM Cloud API Key as `apiKey.json` ([cloud.ibm.com/iam][ibm-iam])
+1. Install `hzn` command-line tool and create code signing keys (public and private)
+
+```
+hzn key create ${HZN_ORG_ID} you@yourdomain.tld
+```
+[ibm-iam]: http://cloud.ibm.com/iam
+
+To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry:
+
+```
+make service-publish
+```
+
 The following commands automatically replace the defaults in all configuration and build templates.
 
 ```
@@ -150,17 +159,7 @@ for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; don
 ```
 
 
-### 3.1.2 Pre-requisites to publish services 
-
-1. Generate and download IBM Cloud API Key as `apiKey.json` ([cloud.ibm.com/iam][ibm-iam])
-1. Install `hzn` command-line tool and create code signing keys (public and private)
-
-```
-hzn key create ${HZN_ORG_ID} you@yourdomain.tld
-```
-[ibm-iam]: http://cloud.ibm.com/iam
-
-## 3.2 Test
+# 4. Test
 
 Each service may be tested individually using the following `make` targets:
 
@@ -168,7 +167,7 @@ Each service may be tested individually using the following `make` targets:
 + `test` - test the service individually; tests status response JSON for conformance
 + `service-test` - test the service and all required services; tests status response JSON for conformance
 
-## 3.3 Deploy (see [video][horizon-video-setup])
+# 5. Deploy (see [video][horizon-video-setup])
 
 Pattern tests using deployed nodes may be utilized with appropriate client device node configuration.  Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-md].
 
@@ -190,7 +189,7 @@ For more information see [`PATTERN.md`][pattern-md].
 [travis-ci]: https://travis-ci.org/
 [build-pattern-video]: https://youtu.be/cv_rOdxXidA
 
-# 4. Open Horizon
+# 6. Open Horizon
 
 Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].  
 
@@ -202,15 +201,15 @@ wget -qO - ibm.biz/horizon-setup | sudo bash
 
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 
-## 4.1 Credentials
+## 6.1 Credentials
 
 Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing your [IBMid][ibm-registration] email and IBM Cloud account GUID.
 
-## 4.2 Further Information 
+## 6.2 Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
-## Changelog & Releases
+# Changelog & Releases
 
 Releases are based on Semantic Versioning, and use the format
 of ``MAJOR.MINOR.PATCH``. In a nutshell, the version will be incremented
