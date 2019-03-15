@@ -9,8 +9,8 @@ if [ -z "${YOLO_CONFIG}" ]; then YOLO_CONFIG="tiny"; fi
 if [ -z "${DARKNET}" ]; then echo "*** ERROR -- $0 $$ -- DARKNET unspecified; set environment variable for testing"; fi
 
 # temporary image and output
-JPEG="${TMP}/${0##*/}.$$.jpeg"
-OUT="${TMP}/${0##*/}.$$.out"
+JPEG="${TMPDIR}/${0##*/}.$$.jpeg"
+OUT="${TMPDIR}/${0##*/}.$$.out"
 
 # same for all configurations
 YOLO_NAMES="${DARKNET}/data/coco.names"
@@ -105,7 +105,7 @@ yolo_process()
 
   ## do YOLO
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- DARKNET: ./darknet detector test ${YOLO_DATA} ${YOLO_CFG_FILE} ${YOLO_WEIGHTS} ${JPEG} -thresh ${YOLO_THRESHOLD}" &> /dev/stderr; fi
-  ./darknet detector test "${YOLO_DATA}" "${YOLO_CFG_FILE}" "${YOLO_WEIGHTS}" "${JPEG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMP}/darknet.$$.out"
+  ./darknet detector test "${YOLO_DATA}" "${YOLO_CFG_FILE}" "${YOLO_WEIGHTS}" "${JPEG}" -thresh "${YOLO_THRESHOLD}" > "${OUT}" 2> "${TMPDIR}/darknet.$$.out"
   # extract processing time in seconds
   TIME=$(cat "${OUT}" | egrep "Predicted" | sed 's/.*Predicted in \([^ ]*\).*/\1/')
   if [ -z "${TIME}" ]; then TIME=0; fi
@@ -148,19 +148,19 @@ yolo_process()
     OUTPUT=$(echo "${OUTPUT}" | jq '.count='${TOTAL}'|.detected='"${DETECTED}"'|.time='${TIME})
   else
     echo "+++ WARN $0 $$ -- no output:" $(cat ${OUT}) &> /dev/stderr
-    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- darknet failed:" $(cat "${TMP}/darknet.$$.out") &> /dev/stderr; fi
+    if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- darknet failed:" $(cat "${TMPDIR}/darknet.$$.out") &> /dev/stderr; fi
     OUTPUT=$(echo "${OUTPUT}" | jq '.count=0|.detected=null|.time=0')
   fi
 
   # capture annotated image as BASE64 encoded string
-  IMAGE="${TMP}/predictions.$$.json"
+  IMAGE="${TMPDIR}/predictions.$$.json"
   echo -n '{"image":"' > "${IMAGE}"
   if [ -s "predictions.jpg" ]; then
     base64 -w 0 -i predictions.jpg >> "${IMAGE}"
   fi
   echo '"}' >> "${IMAGE}"
 
-  TEMP="${TMP}/${0##*/}.$$.json"
+  TEMP="${TMPDIR}/${0##*/}.$$.json"
   echo "${OUTPUT}" > "${TEMP}"
   jq -s add "${TEMP}" "${IMAGE}" > "${TEMP}.$$" && mv -f "${TEMP}.$$" "${IMAGE}"
   rm -f "${TEMP}"

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 if [ -z "${CPU_INTERVAL}" ]; then CPU_INTERVAL=1; fi
 if [ -z "${CPU_PERIOD}" ]; then CPU_PERIOD=60; fi
 
 CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 while true; do
   DATE=$(date +%s)
@@ -27,8 +27,8 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq '.percent='${PERCENT})
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/$$"
+  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
   # wait for ..
   SECONDS=$((CPU_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

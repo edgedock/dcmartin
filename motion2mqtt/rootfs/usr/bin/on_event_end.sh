@@ -1,12 +1,12 @@
 #!/bin/tcsh
 
 if ( -d "/tmpfs" ) then 
-  set TMP = "/tmpfs"
+  set TMPDIR = "/tmpfs"
 else
-  set TMP = "/tmp"
+  set TMPDIR = "/tmp"
 endif 
 
-set tmpdir = "${TMP}/$0:t/$$."`date +%s`
+set tmpdir = "${TMPDIR}/$0:t/$$."`date +%s`
 mkdir -p "${tmpdir}"
 
 unsetenv DEBUG
