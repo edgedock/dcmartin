@@ -5,6 +5,7 @@ test.json
 *.out
 *.zip
 .DS_Store
+MQTT_*
 DEBUG*
 APIKEY*
 TEST_TMP_*
