@@ -78,10 +78,12 @@ update_output() {
     if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- requiredServices_update failed" &> /dev/stderr; fi
     jq '.' "${OUTPUT_FILE}" > "${TEMP_FILE}"
   else
-    jq -s add "${REQSVCS_OUTPUT_FILE}" "${OUTPUT_FILE}" > "${TEMP_FILE}"
+    jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${REQSVCS_OUTPUT_FILE}" > "${TEMP_FILE}"
+    # jq -s add "${OUTPUT_FILE}" "${REQSVCS_OUTPUT_FILE}" > "${TEMP_FILE}"
   fi
   rm -f "${REQSVCS_OUTPUT_FILE}"
   if [ -s "${TEMP_FILE}" ]; then
+    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- added required services" &> /dev/stderr; fi
     jq '.pid='$(motion_pid)'|.date='$(date +%s) "${TEMP_FILE}" > "${TEMP_FILE}.$$" && mv -f "${TEMP_FILE}.$$" "${TEMP_FILE}"
   else
     if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- update_output: update failed" &> /dev/stderr; fi

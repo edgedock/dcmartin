@@ -1,7 +1,5 @@
 #!/bin/bash
 
-DEBUG=true
-
 node_alive()
 {
   machine=${1}
@@ -48,9 +46,9 @@ node_install()
 {
   machine=${1}
   echo "--- INFO -- $0 $$ -- installing ${machine}" &> /dev/stderr
-  ssh ${machine} 'sudo apt-get update' &> /dev/null
-  ssh ${machine} 'sudo apt-get upgrade -y' &> /dev/null
-  ssh ${machine} 'sudo apt-get install -y bluehorizon' &> /dev/null
+  ssh ${machine} 'sudo apt-get update' # &> /dev/null
+  ssh ${machine} 'sudo apt-get upgrade -y' # &> /dev/null
+  ssh ${machine} 'sudo apt-get install -y bluehorizon' # &> /dev/null
 }
 
 node_unregister()
@@ -79,7 +77,14 @@ node_update()
     unconfigured)
       node_register ${machine}
       ;;
-    configuring|unconfiguring)
+    configuring)
+      pattern=$(node_status ${machine} | jq -r '.pattern')
+      echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
+      node_purge ${machine}
+      ;;
+    unconfiguring)
+      pattern=$(node_status ${machine} | jq -r '.pattern')
+      echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
       node_purge ${machine}
       ;;
     configured)

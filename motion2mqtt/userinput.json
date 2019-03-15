@@ -6,14 +6,16 @@
       "url": "com.github.dcmartin.open-horizon.motion2mqtt",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
-        "MOTION_MQTT_HOST": "mqtt",
-        "MOTION_DEVICE_DB": "motion",
-        "MOTION_DEVICE_NAME": "",
         "MOTION_TIMEZONE": "America/Los_Angeles",
+        "MOTION_GROUP": "newman",
+        "MOTION_DEVICE": "",
         "MOTION_POST_PICTURES": "center",
-        "MOTION_LOG_LEVEL": 2,
+        "MOTION_LOG_LEVEL": 6,
         "MOTION_LOG_TYPE": "all",
-        "DEBUG": false
+        "MQTT_HOST": "horizon.dcmartin.com",
+        "MQTT_USERNAME": "",
+        "MQTT_PASSWORD": "",
+        "DEBUG": true
       }
     },
     {
@@ -21,12 +23,14 @@
       "url": "com.github.dcmartin.open-horizon.yolo4motion",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
-        "YOLO4MOTION_MQTT_HOST": "mqtt",
-        "YOLO4MOTION_GROUP": "motion",
+        "MQTT_HOST": "horizon.dcmartin.com",
+        "MQTT_USERNAME": "username",
+        "MQTT_PASSWORD": "password",
+        "MOTION_GROUP": "newman",
 	"YOLO_CONFIG": "tiny",
 	"YOLO_ENTITY": "all",
 	"YOLO_SCALE": "none",
-        "DEBUG": false
+        "DEBUG": true
       }
     }
   ]

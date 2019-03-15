@@ -47,7 +47,7 @@ echo "--- INFO -- $0 $$ -- Testing ${SERVICE_LABEL} in container tagged: ${DOCKE
 I=0
 
 while true; do
-  OUT=$(docker exec "${CID}" curl -m ${TIMEOUT} -sSL "${HOST}")
+  OUT=$(docker exec "${CID}" curl --connect-timeout ${TIMEOUT} -sSL "${HOST}")
   if [ $? != 0 ]; then
     echo "*** ERROR -- $0 $$ -- curl failed to ${HOST}" &> /dev/stderr
     echo 'null'

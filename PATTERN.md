@@ -68,9 +68,10 @@ test-cpu-6.local
 ## 3.1 `make` targets
 
 + `nodes`
-+ `list-nodes`
-+ `test-nodes`
-+ `undo-nodes`
++ `nodes-list`
++ `nodes-test`
++ `nodes-undo`
++ `nodes-purge`
 
 ### 3.1.1 `make nodes`
 
@@ -122,7 +123,7 @@ Created horizon metadata files in /Volumes/dcmartin/GIT/beta/open-horizon/motion
 --- INFO -- ./nodereg.sh 80931 -- test-cpu-2.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
 ```
 
-### 3.1.2 `make list-nodes`
+### 3.1.2 `make nodes-list`
 
 After registration and initiation of Docker containers for services:
 
@@ -286,7 +287,7 @@ CONTAINER ID        IMAGE                                                       
 
 ```
 
-### `make test-nodes`
+### `make nodes-test`
 
 Nodes configured with the pattern will respond to inquiries on their status port, e.g. the `motion2mqtt` service exposes port `8082` for its status.  Executing this target in the `motion2mqtt` directory will interrogate that port, for example:
 
@@ -364,7 +365,7 @@ ELAPSED: 1
 --- MAKE -- finish testing motion2mqtt-beta on test-sdr-1.local test-sdr-4.local test-cpu-2.local test-cpu-3.local test-cpu-6.local at Mon Feb 25 17:34:12 PST 2019
 ```
 
-### 3.1.3 `make undo-nodes`
+### 3.1.3 `make nodes-undo`
 
 ```
 >>> MAKE -- 11:12:35 -- unregistering nodes: test-sdr-1.local test-sdr-4.local test-cpu-3.local test-cpu-6.local test-cpu-2.local

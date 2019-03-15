@@ -7,12 +7,12 @@ else
 endif
 
 unsetenv DEBUG
-unsetenv USE_MQTT
+unsetenv DEBUG_MQTT
 
 if ($?DEBUG) then
   set message = ( "START" `date` )
   echo "$0:t $$ -- $message" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
 
 ## REQUIRES date utilities
@@ -26,7 +26,7 @@ else
   if ($?DEBUG) then
     set message = "no dateutils(1) found; exiting"
     echo "$0:t $$ -- $message" >& /dev/stderr
-    if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+    if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
   endif
   # quit
   goto done
@@ -66,21 +66,21 @@ set EJ = "${dir}/${TS}-${EN}.json"
 if ($?DEBUG) then
   set message = '{"dir":"'${dir}'","camera":"'$CN'","event":"'$EN'","start":'$NOW',"timestamp":"'"$TS"'","json":"'"$EJ"'"}'
   echo "$0:t $$ -- $message" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
 
 ## create event JSON
-echo '{"device":"'${MOTION_DEVICE_NAME}'","camera":"'${CN}'","event":"'${EN}'","start":'${NOW}'}' >! "${EJ}"
+echo '{"device":"'${MOTION_DEVICE}'","camera":"'${CN}'","event":"'${EN}'","start":'${NOW}'}' >! "${EJ}"
 
 ## PUBLISH
-set MQTT_TOPIC = "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/${CN}/event/start"
-mosquitto_pub -q 2 -r -i "${MOTION_DEVICE_NAME}" -h "${MOTION_MQTT_HOST}" -p "${MOTION_MQTT_PORT}" -t "${MQTT_TOPIC}" -f "$EJ"
+set MQTT_TOPIC = "${MOTION_GROUP}/${MOTION_DEVICE}/${CN}/event/start"
+motion2mqtt_pub.sh -q 2 -r -t "${MQTT_TOPIC}" -f "$EJ"
 
 # debug
 if ($?DEBUG) then
-  set message = "sent file ${EJ} to topic ${MQTT_TOPIC} at ${MOTION_MQTT_HOST}"
+  set message = "sent file ${EJ} to topic ${MQTT_TOPIC} at ${MQTT_HOST}"
   echo "$0:t $$ -- $message" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
 
 done:
@@ -88,5 +88,5 @@ done:
 if ($?DEBUG) then
   set message = ( "FINISH" `date` )
   echo "$0:t $$ -- $message" >& /dev/stderr
-  if ($?USE_MQTT) mosquitto_pub -h "${MOTION_MQTT_HOST}" -t "${MOTION_DEVICE_DB}/${MOTION_DEVICE_NAME}/debug" -m '{"'${MOTION_DEVICE_NAME}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
+  if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif

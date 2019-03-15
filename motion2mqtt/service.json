@@ -15,12 +15,8 @@
   ],
   "userInput": [
     { "name": "MOTION_TIMEZONE", "label": "database and group name for devices", "type": "string", "defaultValue": "GMT" },
-    { "name": "MOTION_DEVICE_DB", "label": "database and group name for devices", "type": "string", "defaultValue": "motion" },
-    { "name": "MOTION_DEVICE_NAME", "label": "name of device", "type": "string", "defaultValue": "" },
-    { "name": "MOTION_MQTT_HOST", "label": "IP or FQDN for mqtt host", "type": "string", "defaultValue": "mqtt" },
-    { "name": "MOTION_MQTT_PORT", "label": "port number", "type": "int", "defaultValue": "1883" },
-    { "name": "MOTION_MQTT_USERNAME", "label": "username", "type": "string", "defaultValue": "" },
-    { "name": "MOTION_MQTT_PASSWORD", "label": "password", "type": "string", "defaultValue": "" },
+    { "name": "MOTION_GROUP", "label": "database and group name for devices", "type": "string", "defaultValue": "motion" },
+    { "name": "MOTION_DEVICE", "label": "name of device", "type": "string", "defaultValue": "" },
     { "name": "MOTION_POST_PICTURES", "label": "post pictures; on, off, first, last, center, best", "type": "string", "defaultValue": "best" },
     { "name": "MOTION_LOCATE_MODE", "label": "location motion mode; off,box,cross,redbox,redcross", "type": "string", "defaultValue": "off" },
     { "name": "MOTION_EVENT_GAP", "label": "seconds of no motion indicating end of event", "type": "int", "defaultValue": "30" },
@@ -32,6 +28,10 @@
     { "name": "MOTION_LOG_LEVEL", "label": "specify motion logging level", "type": "int", "defaultValue": "2" },
     { "name": "MOTION_LOG_TYPE", "label": "specify motion logging type", "type": "string", "defaultValue": "all" },
     { "name": "MOTION_PERIOD", "label": "specify motion watchdog in seconds", "type": "int", "defaultValue": "30" },
+    { "name": "MQTT_HOST", "label": "IP or FQDN for mqtt host", "type": "string", "defaultValue": "mqtt" },
+    { "name": "MQTT_PORT", "label": "port number", "type": "int", "defaultValue": "1883" },
+    { "name": "MQTT_USERNAME", "label": "username", "type": "string", "defaultValue": "" },
+    { "name": "MQTT_PASSWORD", "label": "password", "type": "string", "defaultValue": "" },
     { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8082" },
     { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
     { "name": "DEBUG", "label": "debug; true or false", "type": "boolean", "defaultValue": "false" },
@@ -41,7 +41,7 @@
     "services": {
       "motion2mqtt": {
         "environment": [
-          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.11"
+          "SERVICE_LABEL=motion2mqtt","SERVICE_VERSION=0.0.12.15"
         ],
         "binds": null,
         "specific_ports": [
