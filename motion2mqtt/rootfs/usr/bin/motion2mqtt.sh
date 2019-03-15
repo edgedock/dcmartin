@@ -6,18 +6,19 @@ if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 ## initialize service output ASAP
 touch "${TMPDIR}/${SERVICE_LABEL}.json"
 
-SERVICES_JSON='[{"name":"cpu","url":"http://cpu"}]'
+#SERVICES_JSON='[ {"name":"cpu","url":"http://cpu"}, {"name":"mqtt","url":"http://mqtt"}, {"name":"yolo4motion","url":"http://yolo4motion"} ]'
+SERVICES_JSON='[ {"name":"cpu","url":"http://cpu"}, {"name":"mqtt","url":"http://mqtt"} ]'
 
-if [ -z "${MOTION_DEVICE_NAME:-}" ] || [ "${MOTION_DEVICE_NAME}" == 'default' ]; then
+if [ -z "${MOTION_DEVICE:-}" ] || [ "${MOTION_DEVICE}" == 'default' ]; then
   if [ -z "${HZN_DEVICE_ID}" ]; then
     IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
-    MOTION_DEVICE_NAME="$(hostname)-${IPADDR}"
+    export MOTION_DEVICE="$(hostname)-${IPADDR}"
   else
-    MOTION_DEVICE_NAME="${HZN_DEVICE_ID}"
+    export MOTION_DEVICE="${HZN_DEVICE_ID}"
   fi
 fi
 
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${SERVICES_JSON}',"db":"'${MOTION_DEVICE_DB}'","name":"'${MOTION_DEVICE_NAME}'","timezone":"'$MOTION_TIMEZONE'","mqtt":{"host":"'${MOTION_MQTT_HOST}'","port":'${MOTION_MQTT_PORT}',"username":"'${MOTION_MQTT_USERNAME}'","password":"'${MOTION_MQTT_PASSWORD}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES}'","locate_mode":"'${MOTION_LOCATE_MODE}'","event_gap":'${MOTION_EVENT_GAP}',"framerate":'${MOTION_FRAMERATE}',"threshold":'${MOTION_THRESHOLD}',"threshold_tune":'${MOTION_THRESHOLD_TUNE}',"noise_level":'${MOTION_NOISE_LEVEL}',"noise_tune":'${MOTION_NOISE_TUNE}',"log_level":'${MOTION_LOG_LEVEL}',"log_type":"'${MOTION_LOG_TYPE}'"}}'
+CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"services":'${SERVICES_JSON:-null}',"group":"'${MOTION_GROUP:-}'","name":"'${MOTION_DEVICE:-}'","timezone":"'$MOTION_TIMEZONE'","period":'${MOTION_PERIOD:-}',"mqtt":{"host":"'${MQTT_HOST:-}'","port":'${MQTT_PORT:-1883}',"username":"'${MQTT_USERNAME:-}'","password":"'${MQTT_PASSWORD:-}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES:-best}'","locate_mode":"'${MOTION_LOCATE_MODE:-off}'","event_gap":'${MOTION_EVENT_GAP:-60}',"framerate":'${MOTION_FRAMERATE:-5}',"threshold":'${MOTION_THRESHOLD:-5000}',"threshold_tune":'${MOTION_THRESHOLD_TUNE:-false}',"noise_level":'${MOTION_NOISE_LEVEL:-0}',"noise_tune":'${MOTION_NOISE_TUNE:-false}',"log_level":'${MOTION_LOG_LEVEL:-9}',"log_type":"'${MOTION_LOG_TYPE:-all}'"}}'
 
 if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- config: ${CONFIG}" &> /dev/stderr; fi
 
@@ -50,7 +51,7 @@ requiredServices_update() {
     URL=$(echo "${SERVICES_JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
     TEMP_FILE=$(mktemp)
     if [ ! -z "${URL}" ]; then
-      curl -sSL "${URL}" jq -c '.'"${S}" > ${TEMP_FILE} 2> /dev/null 
+      curl -sSL "${URL}" | jq -c '.'"${S}" > ${TEMP_FILE} 2> /dev/null 
     fi
     TEMP_OUTPUT=$(mktemp)
     echo '{"'${S}'":' > ${TEMP_OUTPUT}
@@ -70,6 +71,7 @@ requiredServices_update() {
 ## update service output
 update_output() {
   OUTPUT_FILE="${1}"
+  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- update_output; OUTPUT_FILE: ${OUTPUT_FILE}" &> /dev/stderr; fi
   TEMP_FILE=$(mktemp)
   REQSVCS_OUTPUT_FILE=$(mktemp)
   if [ $(requiredServices_update ${REQSVCS_OUTPUT_FILE}) != 0 ]; then
@@ -97,21 +99,24 @@ update_output() {
 motion_init
 
 ## start motion
-PID=$(motion_start)
+motion_start
+if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- motion started; PID:" $(motion_pid) &> /dev/stderr; fi
 
 ## initialize
 OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.$$.json"
 
 ## initialize service output
-echo ${CONFIG} | jq -c '.date='$(date +%s) > ${OUTPUT_FILE}
+echo "${CONFIG}" | jq -c '.date='$(date +%s) > ${OUTPUT_FILE}
+if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- initializing output:" $(jq -c '.' ${OUTPUT_FILE}) &> /dev/stderr; fi
 
 ## forever
 while true; do 
   # update output
   update_output ${OUTPUT_FILE}
-
+  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on directory: ${DIR}" &> /dev/stderr; fi
   # wait (forever) on changes in ${DIR}
   inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH; do
+    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- inotifywait ${FULLPATH}" &> /dev/stderr; fi
     if [ ! -z "${FULLPATH}" ]; then 
       # process updates
       case "${FULLPATH##*/}" in
