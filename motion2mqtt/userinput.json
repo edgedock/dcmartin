@@ -24,8 +24,8 @@
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
         "MQTT_HOST": "horizon.dcmartin.com",
-        "MQTT_USERNAME": "username",
-        "MQTT_PASSWORD": "password",
+        "MQTT_USERNAME": "",
+        "MQTT_PASSWORD": "",
         "MOTION_GROUP": "newman",
 	"YOLO_CONFIG": "tiny",
 	"YOLO_ENTITY": "all",
