@@ -90,22 +90,28 @@ There are also two _base_ containers that are used by the other services:
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-## 3.1 Build
+## 3.1 Build 
 
-The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
+The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
+
+[build-push-video]: https://www.youtube.com/watch?v=NHLen-lY7pw
 
 + Clone this [repository][repository]
-+ Initiate build with `make` command (see [`MAKE.md`][make-md] )
++ Initiate build with `make` command (see [**video**][build-push-video]) 
 
 ### 3.1.0 Quick-start
 
-To `make` all container images for all architectures for each and every service use the `service-push` target:
+To `make` all container images for all architectures for each and every service use the `service-push` target; see [**video**][build-push-all-video].
+
+[build-push-all-video]: https://youtu.be/NUHkhuhhd8I
 
 ```
 make service-push
 ```
 
-To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry.
+To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry; see [**video**][publish-cpu-service-video].
+
+[publish-cpu-service-video]: https://youtu.be/Kjge4nyC1yY
 
 ```
 make service-publish
@@ -122,7 +128,6 @@ make service-publish
 
 ```
 # set environment variables
-export HZN_ORG_ID="you@yourdomain.tld"
 export DOCKER_HUB_ID="yourdockerhubid"
 # login to Docker registry (e.g. hub.docker.com)
 docker login
@@ -137,12 +142,15 @@ docker login
 The following commands automatically replace the defaults in all configuration and build templates.
 
 ```
+export HZN_ORG_ID="you@yourdomain.tld"
 # change all configuration templates
 for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" ${json}; done
 # change all build specifications
 for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
 ```
-### 3.1.2 Pre-requisites to publish services
+
+
+### 3.1.2 Pre-requisites to publish services 
 
 1. Generate and download IBM Cloud API Key as `apiKey.json` ([cloud.ibm.com/iam][ibm-iam])
 1. Install `hzn` command-line tool and create code signing keys (public and private)
