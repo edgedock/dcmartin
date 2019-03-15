@@ -86,26 +86,40 @@ There are also two _base_ containers that are used by the other services:
 [jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
 [jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
 
-# 3. Build, Test & Deploy
+# 3. Build, Push & Publish
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-## 3.1 Build (see [**video**][build-push-video]) 
+## 3.1 Clone, build and push (see [**video**][build-push-video]) 
 
 [build-push-video]: https://www.youtube.com/watch?v=NHLen-lY7pw
 
 The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
 
-+ Clone this [repository][repository]
-+ Initiate build with `make` command 
+1. Clone this [repository][repository]
+2. Set `DOCKER_HUB_ID` to the [Docker registry][docker-hub] login identifier
+2. Login to Docker registry
+4. Initiate build with `make` command
 
-## 3.2 Push service containers (see [**video**][build-push-all-video])
+### 3.1.1 Video Script
+
+```
+mkdir ~/gitdir
+cd ~/gitdir
+git clone http://github.com/dcmartin/open-horizon
+cd open-horizon/cpu
+export DOCKER_HUB_ID=dcmsjc
+make build
+docker login
+make push
+make service-push
+```
+
+## 3.2 Build and push all containers (see [**video**][build-push-all-video])
 
 [build-push-all-video]: https://youtu.be/d5JiB_aDxRY
 
 1. Set `HZN_ORG_ID` to the exchange organization identifier
-1. Set `DOCKER_HUB_ID` to the [Docker registry][docker-hub] login identifier
-2. Login to Docker registry
 1. Change `service`, `pattern`, and `build` configuration template files (as necessary)
 
 [docker-hub]: http://hub.docker.com/
@@ -125,9 +139,15 @@ docker login
 
 To `make` all container images for all architectures for each and every service use the `service-push` target:
 
+### 3.2.1 Video Script
+
 ```
+cd ~/gitdir/open-horizon
+export DOCKER_HUB_ID=dcmsjc
+docker login
 make service-push
 ```
+
 
 ## 3.3 Publish services (see [**video**][publish-cpu-service-video])
 
@@ -156,6 +176,20 @@ export HZN_ORG_ID="you@yourdomain.tld"
 for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" ${json}; done
 # change all build specifications
 for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
+```
+
+### 3.3.1 Video Script
+
+```
+cd ~/gitdir/open-horizon
+ls -al apiKey.json 
+export DOCKER_HUB_ID=dcmsjc
+docker login
+export HZN_ORG_ID=dcmartin@us.ibm.com
+hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
+mv -f *.key ${HZN_ORG_ID}.key
+mv -f *.pem ${HZN_ORG_ID}.pem
+make service-publish
 ```
 
 
