@@ -103,7 +103,7 @@ The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requir
 
 To `make` all container images for all architectures for each and every service use the `service-push` target; see [**video**][build-push-all-video].
 
-[build-push-all-video]: https://youtu.be/NUHkhuhhd8I
+[build-push-all-video]: https://youtu.be/d5JiB_aDxRY
 
 ```
 make service-push
@@ -111,7 +111,7 @@ make service-push
 
 To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry; see [**video**][publish-cpu-service-video].
 
-[publish-cpu-service-video]: https://youtu.be/Kjge4nyC1yY
+[publish-cpu-service-video]: https://youtu.be/C47L1PWVp3E
 
 ```
 make service-publish
