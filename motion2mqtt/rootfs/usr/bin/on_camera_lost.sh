@@ -1,9 +1,9 @@
 #!/bin/tcsh
 
 if ( -d "/tmpfs" ) then 
-  set TMP = "/tmpfs"
+  set TMPDIR = "/tmpfs"
 else
-  set TMP = "/tmp"
+  set TMPDIR = "/tmp"
 endif
 
 unsetenv DEBUG

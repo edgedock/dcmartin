@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 if [ -z "${MQTT_PERIOD}" ]; then MQTT_PERIOD=60; fi
 
@@ -14,14 +14,14 @@ mosquitto -d -c /etc/mosquitto.conf
 PID=$(ps | grep "mosquitto" | grep -v grep | awk '{ print $1 }' | head -1)
 if [ -z "${PID}" ]; then PID=0; fi
 CONFIG=$(echo "${CONFIG}" | jq '.pid='"${PID}")
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 VERSION=$(mosquitto_sub -C 1 -h horizon.dcmartin.com -t '$SYS/broker/version')
 if [ -z "${VERSION:-}" ]; then VERSION="unknown"; fi
 CONFIG=$(echo "${CONFIG}" | jq '.version="'"${VERSION}"'"')
 
 # intialize service output
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 ###
 ### MAIN
@@ -48,8 +48,8 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq '.broker.publish.messages.dropped='$(mosquitto_sub -C 1 -h "${MQTT_HOST}" -t '$SYS/broker/publish/messages/dropped'))
   OUTPUT=$(echo "${OUTPUT}" | jq '.broker.subscriptions.count='$(mosquitto_sub -C 1 -h "${MQTT_HOST}" -t '$SYS/broker/subscriptions/count'))
   # update output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/${0##*/}.$$"
-  mv -f "${TMP}/${0##*/}.$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/${0##*/}.$$"
+  mv -f "${TMPDIR}/${0##*/}.$$" "${TMPDIR}/${SERVICE_LABEL}.json"
   # wait for ..
   SECONDS=$((MQTT_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

@@ -90,9 +90,9 @@ There are also two _base_ containers that are used by the other services:
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-## 3.1 Clone, build and push (see [**video**][build-push-video]) 
+## 3.1 Clone, build, push, and publish (see [**video**][clone-to-publish-video]) 
 
-[build-push-video]: https://www.youtube.com/watch?v=NHLen-lY7pw
+[clone-to-publish-video]: https://youtu.be/vLicHLN90JQ
 
 The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
 
@@ -101,23 +101,13 @@ The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requir
 2. Login to Docker registry
 4. Initiate build with `make` command
 
-### 3.1.1 Video Script
+**Video Script:** on [GitHub][clone-to-publish-script]
 
-```
-mkdir ~/gitdir
-cd ~/gitdir
-git clone http://github.com/dcmartin/open-horizon
-cd open-horizon/cpu
-export DOCKER_HUB_ID=dcmsjc
-make build
-docker login
-make push
-make service-push
-```
+[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-build-push-publish-cpu.txt
 
-## 3.2 Build and push all containers (see [**video**][build-push-all-video])
+## 3.2 Build and push all containers (see [**video**][service-push-video])
 
-[build-push-all-video]: https://youtu.be/d5JiB_aDxRY
+[service-push-video]: https://youtu.be/d5JiB_aDxRY
 
 1. Set `HZN_ORG_ID` to the exchange organization identifier
 1. Change `service`, `pattern`, and `build` configuration template files (as necessary)
@@ -139,15 +129,9 @@ docker login
 
 To `make` all container images for all architectures for each and every service use the `service-push` target:
 
-### 3.2.1 Video Script
+**Video Script:** on [GitHub][clone-to-publish-script]
 
-```
-cd ~/gitdir/open-horizon
-export DOCKER_HUB_ID=dcmsjc
-docker login
-make service-push
-```
-
+[service-push-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/service-push.txt
 
 ## 3.3 Publish services (see [**video**][publish-cpu-service-video])
 
@@ -178,20 +162,9 @@ for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HO
 for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
 ```
 
-### 3.3.1 Video Script
+**Video Script:** on [GitHub][service-publish-script]
 
-```
-cd ~/gitdir/open-horizon
-ls -al apiKey.json 
-export DOCKER_HUB_ID=dcmsjc
-docker login
-export HZN_ORG_ID=dcmartin@us.ibm.com
-hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
-mv -f *.key ${HZN_ORG_ID}.key
-mv -f *.pem ${HZN_ORG_ID}.pem
-make service-publish
-```
-
+[service-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/service-publish.txt
 
 # 4. Test
 

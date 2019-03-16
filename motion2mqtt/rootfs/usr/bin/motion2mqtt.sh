@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TMP
+# TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 ## initialize service output ASAP

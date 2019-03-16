@@ -60,14 +60,14 @@ The `cpu.sh` script example demonstrates this pattern with a never-ending `while
 ```
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 if [ -z "${CPU_INTERVAL}" ]; then CPU_INTERVAL=1; fi
 if [ -z "${CPU_PERIOD}" ]; then CPU_PERIOD=60; fi
 
 CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 while true; do
   DATE=$(date +%s)
@@ -87,8 +87,8 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq '.percent='${PERCENT})
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/$$"
+  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
   # wait for ..
   SLEEP=$((CPU_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SLEEP} > 0 ]; then
@@ -104,14 +104,14 @@ A slightly more complicated script that combines multiple `requiredServices`, no
 ```
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 JSON='[{"name": "yolo", "url": "http://yolo" },{"name": "hal", "url": "http://hal" },{"name":"cpu","url":"http://cpu"},{"name":"wan","url":"http://wan"}]'
 
 # OPTIONS
 OPTIONS='{"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"services":'${JSON}',"period":'${YOLO2MSGHUB_PERIOD}'}'
-echo "${OPTIONS}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${OPTIONS}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 # make topic
 TOPIC=$(curl -sSL -H 'Content-Type: application/json' -H "X-Auth-Token: ${YOLO2MSGHUB_APIKEY}" "${YOLO2MSGHUB_ADMIN_URL}/admin/topics" -d '{"name":"'${SERVICE_LABEL}'"}')
@@ -143,8 +143,8 @@ while true; do
   done
   OUTPUT=$(echo "${OUTPUT}" | jq '.date='$(date +%s))
 
-  echo "${OUTPUT}" > "${TMP}/$$"
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" > "${TMPDIR}/$$"
+  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
 
   if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- output: ${OUTPUT}" &> /dev/stderr; fi
 

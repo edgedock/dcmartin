@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 if [ -z "${WAN_PERIOD}" ]; then WAN_PERIOD=1800; fi
 CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${WAN_PERIOD}'}' 
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 while true; do
   DATE=$(date +%s)
@@ -15,8 +15,8 @@ while true; do
 
   OUTPUT=$(echo "${OUTPUT}" | jq '.date='$(date +%s))
 
-  echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMP}/$$"
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMPDIR}/$$"
+  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
   # wait for ..
   SECONDS=$((WAN_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

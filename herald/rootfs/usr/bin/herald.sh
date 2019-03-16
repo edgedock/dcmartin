@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# TMP
-if [ -d '/tmpfs' ]; then TMP='/tmpfs'; else TMP='/tmp'; fi
+# TMPDIR
+if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
 if [ -z "${HERALD_PERIOD}" ]; then HERALD_PERIOD=60; fi
 
 CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${HERALD_PERIOD}'}'
-echo "${CONFIG}" > ${TMP}/${SERVICE_LABEL}.json
+echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
 
 python /usr/bin/discovery.py &
 
@@ -26,8 +26,8 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq -c '.found='"${DISCOVERED}")
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMP}/$$"
-  mv -f "${TMP}/$$" "${TMP}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/$$"
+  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
   # wait for ..
   SECONDS=$((HERALD_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

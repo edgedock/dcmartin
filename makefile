@@ -66,7 +66,7 @@ sync: ../ibm/open-horizon .gitignore CLOC.md
 	@echo ">>> MAKE -- synching ${ALL}"
 	@rsync -av makefile service.makefile *.md *.sh .gitignore .travis.yml ../ibm/open-horizon
 	@for dir in $(ALL) ${SETUP}; do \
-	  rsync -a --info=name --exclude='service.json' --exclude='userinput.json' --exclude='pattern.json' --exclude-from=./.gitignore $${dir} ../ibm/open-horizon/ ; \
+	  rsync -a --info=name --exclude='service.json' --exclude='userinput.json' --exclude='pattern.json' --exclude-from=./.gitignore $${dir}/ ../ibm/open-horizon/$${dir}/ ; \
 	done
 	
 CLOC.md: .gitignore .
