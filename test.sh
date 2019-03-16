@@ -54,7 +54,8 @@ while true; do
     exit 1
   fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
-    echo "${OUT}" > "test.json"
+    TEST_OUT="test.${DOCKER_TAG##*/}.json"
+    echo "${OUT}" > "${TEST_OUT}"
     if [ ! -z "$(command -v ${CMD})" ]; then
       TEST=$(echo "${OUT}" | ${CMD})
       if [ "${TEST:-}" == 'true' ]; then

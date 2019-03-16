@@ -203,7 +203,7 @@ nodes-test: $(TEST_NODE_NAMES)
 
 $(TEST_NODE_NAMES):
 	@echo ">>> MAKE --" $$(date +%T) "-- testing: ${SERVICE_NAME}; node: ${@}; port: $(SERVICE_PORT); date: $$(date)" &> /dev/stderr
-	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl -m 30 --connect-timeout $(TEST_NODE_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o check.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" check.json | jq -c '.test'
+	-@export JQ_FILTER="$(TEST_NODE_FILTER)" && START=$$(date +%s) && curl --connect-timeout $(TEST_NODE_TIMEOUT) -fsSL "http://${@}:${DOCKER_PORT}" -o test.${@}.json && FINISH=$$(date +%s) && echo "ELAPSED:" $$((FINISH-START)) && jq -c "$${JQ_FILTER}" test.${@}.json | jq -c '.test'
 
 nodes-list:
 	@echo ">>> MAKE --" $$(date +%T) "-- listing nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
@@ -233,7 +233,7 @@ nodes-undo:
 	@echo ">>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo ">>> MAKE --" $$(date +%T) "-- unregistering $${machine}" $$(date); \
-	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null &' \
+	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null || docker system prune -fa &> /dev/null &' \
 	    || echo ">>> MAKE **" $$(date +%T) "** not found $${machine}" &> /dev/stderr; \
 	done
 

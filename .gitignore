@@ -30,3 +30,4 @@ horizon.json
 horizon/
 sdrconf*
 MQTT2KAFKA_*
+test.*.json
