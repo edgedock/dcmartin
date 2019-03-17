@@ -1,14 +1,16 @@
-rm -fr ~/gitdir
-mkdir ~/gitdir
-cd ~/gitdir
+GD=~/gitdir
+rm -fr $GD
+mkdir -p $GD
+cd $GD
 git clone http://github.com/dcmartin/open-horizon
-cd ~/gitdir/open-horizon
+cd $GD/open-horizon
 cp -f ~/apiKey.json ./apiKey.json 
 export DOCKER_HUB_ID=dcmsjc
 docker login
 export HZN_ORG_ID=dcmartin@us.ibm.com
-for json in */service.json */pattern.json; do sed -i -e "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" "${json}"; done
-for json in */build.json; do sed -i -e "s/dcmartin\//${DOCKER_HUB_ID}\//g" ${json}; done
+for j in */service.json; do jq '.org="'${HORIZON_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */pattern.json; do jq '.services[].serviceOrgid="'${HORIZON_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */build.json; do sed -i -e 's|dcmartin/|'"${DOCKER_HUB_ID}"'/|g' "${j}"; done
 rm -f *.key *.pem
 hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
 mv -f *.key ${HZN_ORG_ID}.key

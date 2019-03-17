@@ -1,6 +1,6 @@
+rm -fr ~/gitdir
 mkdir ~/gitdir
 cd ~/gitdir
 git clone http://github.com/dcmartin/open-horizon
 cd open-horizon/
-export DOCKER_HUB_ID=dcmsjc
-make build
+make

@@ -1,0 +1,14 @@
+export DOCKER_HUB_ID=dcmsjc
+docker login
+export HZN_ORG_ID=dcmartin@us.ibm.com
+for service in base-alpine cpu hal wan base-ubuntu yolo yolo2msghub; do cd ~/gitdir/open-horizon/${service} && make service-build && make service-push && make service-publish; done
+cd ~/gitdir/open-horizon/yolo2msghub
+make pattern-publish
+echo 'test-sdr-4.local' > TEST_TMP_MACHINES
+ssh-copy-id test-sdr-4.local
+make nodes-list
+make nodes-undo
+make nodes
+make nodes
+make nodes-list
+make nodes-test
