@@ -157,7 +157,7 @@ The following commands automatically replace the defaults in all configuration a
 ```
 export HZN_ORG_ID="you@yourdomain.tld"
 # change all configuration templates
-for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HORIZON_ORG_ID}/g" ${json}; done
+for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HZN_ORG_ID}/g" ${json}; done
 # change all build specifications
 for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
 ```
