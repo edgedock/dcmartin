@@ -28,8 +28,8 @@ LIGHT_PURPLE='\033[1;35m'
 LIGHT_CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
-PROMPT="${LIGHT_CYAN}"
-COMMAND="${LIGHT_BLUE}"
+PROMPT="${LIGHT_RED}"
+COMMAND="${LIGHT_PURPLE}"
 
 cat "${SCRIPT}" | while read -r; do 
   echo -e -n "${PROMPT}$(hostname) $(date +%T)"' $ '"${COMMAND}"

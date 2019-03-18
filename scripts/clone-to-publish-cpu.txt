@@ -1,5 +1,5 @@
 GD=~/gitdir
-rm -fr $GD
+rm -fr $GD/open-horizon
 mkdir -p $GD
 cd $GD
 git clone http://github.com/dcmartin/open-horizon
@@ -15,8 +15,8 @@ rm -f *.key *.pem
 hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
 mv -f *.key ${HZN_ORG_ID}.key
 mv -f *.pem ${HZN_ORG_ID}.pem
-cd ~/gitdir/open-horizon/base-alpine
+cd $GD/open-horizon/base-alpine
 make service-push
-cd ~/gitdir/open-horizon/cpu
+cd $GD/open-horizon/cpu
 make service-push
 make service-publish
