@@ -8,19 +8,17 @@ if [ ! -d "${DIR}" ]; then
 fi
 
 # what
-SERVICE="service.json"
-SERVICE_VERSION=$(jq -r '.version' "${SERVICE}")
-
 PATTERN="pattern.json"
-PATTERN_LABEL=$(jq -r '.label' "${PATTERN}")
 if [ -s "${PATTERN}" ]; then
-  jq -c '.services=[.services[]|.serviceVersions[].version="'${SERVICE_VERSION}'"]' "${PATTERN}" > "${PATTERN}.$$"
+  # use pattern label as service identifier
+  PATTERN_LABEL=$(jq -r '.label' "${PATTERN}")
   # tagging
   if [ ! -z "${TAG:-}" ]; then
-    jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}.$$" > "${PATTERN}.$$.$$"
-    mv -f "${PATTERN}.$$.$$" "${PATTERN}.$$"
+    jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${PATTERN}.$$"
+    mv -f "${PATTERN}.$$" "${DIR}/${PATTERN}"
+  else
+    cp -f "${PATTERN}" "${DIR}/${PATTERN}"
   fi
-  mv -f "${PATTERN}.$$" "${DIR}/${PATTERN}"
 else
   echo "*** ERROR -- $0 $$ -- cannot find pattern JSON template: ${PATTERN}" &> /dev/stderr
   exit 1
