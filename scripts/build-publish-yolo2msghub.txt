@@ -9,6 +9,5 @@ ssh-copy-id test-sdr-4.local
 make nodes-list
 make nodes-undo
 make nodes
-make nodes
 make nodes-list
 make nodes-test
