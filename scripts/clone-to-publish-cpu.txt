@@ -8,8 +8,8 @@ cp -f ~/apiKey.json ./apiKey.json
 export DOCKER_HUB_ID=dcmsjc
 docker login
 export HZN_ORG_ID=dcmartin@us.ibm.com
-for j in */service.json; do jq '.org="'${HORIZON_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
-for j in */pattern.json; do jq '.services[].serviceOrgid="'${HORIZON_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */service.json; do jq '.org="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */pattern.json; do jq '.services[].serviceOrgid="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
 for j in */build.json; do sed -i -e 's|dcmartin/|'"${DOCKER_HUB_ID}"'/|g' "${j}"; done
 rm -f *.key *.pem
 hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
