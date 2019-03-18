@@ -85,6 +85,9 @@ ${DIR}: service.json userinput.json $(APIKEY)
 ${DIR}/userinput.json: userinput.json ${DIR}
 	@./checkvars.sh ${DIR}
 
+${DIR}/pattern.json: pattern.json ${DIR}
+	@./fixpattern.sh ${DIR}
+
 depend: $(APIKEY) ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./mkdepend.sh ${DIR}
 
@@ -93,7 +96,7 @@ depend: $(APIKEY) ${DIR}
 ##
 
 build: Dockerfile build.json service.json rootfs Makefile
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; architecture: ${BUILD_ARCH}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
 
 logs:
@@ -103,24 +106,24 @@ stop:
 	@docker stop "${DOCKER_NAME}"
 
 run: remove service-stop
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 
 remove:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	-@docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking: ${SERVICE_NAME}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking container: ${SERVICE_NAME}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
 	@rm -f check.json
 	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
 push: build $(DOCKER_LOGIN)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	@docker push ${DOCKER_TAG}
 
 test:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	./test.sh "${DOCKER_TAG}"
 
 ##
@@ -128,25 +131,25 @@ test:
 ##
 
 ${SERVICE_ARCH_SUPPORT}:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making: ${SERVICE_NAME}; architecture: $@""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making service: ${SERVICE_NAME}; architecture: $@""${NC}" &> /dev/stderr
 	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$@" build
 
 service-build: ${SERVICE_ARCH_SUPPORT}
 
 service-push: 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
 	done
 
 service-start: remove service-stop depend # $(SERVICE_REQVARS) 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
 
 service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) "${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) "${NC}" &> /dev/stderr
 	-@${MAKE} service-stop
 	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
 
@@ -159,22 +162,22 @@ service-stop:
 	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
 publish-service: ${DIR} $(APIKEY) $(KEYS)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing service: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY))
 
 service-publish: 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-publish: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" publish-service; \
 	done
 
 service-verify: $(APIKEY) $(KEYS)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- verifying: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-verify: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) "${SERVICE_TAG}"
 
 service-clean: ${DIR}
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-clean: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
 	@./service-clean.sh
 
 ##
@@ -233,21 +236,27 @@ nodes-undo:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- unregistering nodes: ${TEST_NODE_NAMES}""${NC}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo "${MC}>>> MAKE --" $$(date +%T) "-- unregistering $${machine}" "${NC}"; \
-	  ping -W 1 -c 1 $${machine} &> /dev/null && ssh $${machine} 'hzn unregister -fr &> /dev/null || docker system prune -fa &> /dev/null &' \
-	    || echo "${RED}>>>${NC} MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
+	  ping -W 1 -c 1 $${machine} &> /dev/null \
+	    && ssh $${machine} 'hzn unregister -fr &> ~/undo.log &' \
+	    || echo "${RED}>>> MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
 	done
 
-nodes-purge:
+nodes-clean: nodes-undo
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning nodes: ${TEST_NODE_NAMES}""${NC}" &> /dev/stderr
+	@for machine in $(TEST_NODE_NAMES); do \
+	  echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning $${machine}" "${NC}"; \
+	  ping -W 1 -c 1 $${machine} &> /dev/null \
+	    && ssh $${machine} 'IDS=$$(docker ps --format "{{.ID}}") && if [ ! -z "${IDS}" ]; then docker rm -f ${IDS}; fi || docker system prune -fa &> ~/prune.log &' \
+	    || echo "${RED}>>> MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
+	done
+
+nodes-purge: nodes-undo nodes-clean
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- purging nodes: ${TEST_NODE_NAMES}""${NC}" &> /dev/stderr
 	@for machine in $(TEST_NODE_NAMES); do \
-	  if [ $$(ping -W 1 -c 1 $${machine} && true || false) ]; then \
-	    echo "${MC}>>> MAKE --" $$(date +%T) "-- unregistering $${machine}" "${NC}" \
-	    ssh $${machine} 'hzn unregister -fr'; \
-	    ssh $${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli'; \
-	    ssh $${machine} 'sudo apt-get purge -y bluehorizon horizon horizon-cli'; \
-	  else \
-	    echo "${RED}>>>${NC} MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
-	  fi; \
+	  echo "${MC}>>> MAKE --" $$(date +%T) "-- purging $${machine}" "${NC}" &> /dev/stderr; \
+	  ping -W 1 -c 1 $${machine} &> /dev/null \
+	    && ssh $${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli &> ~/remove.log || sudo apt-get purge -y bluehorizon horizon horizon-cli &> ~/purge.log &' \
+	    || echo "${RED}"">>> MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
 	done
 
 ##
@@ -272,7 +281,7 @@ distclean: clean
 ##
 ## COLORS
 ##
-MC=${LIGHT_BLUE}
+MC=${LIGHT_CYAN}
 NC=${NO_COLOR}
 
 NO_COLOR=\033[0m
