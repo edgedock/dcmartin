@@ -1,4 +1,4 @@
-export DEV=192.168.1.47 NAME=test-sdr-4 USERID=dcmartin
+export DEV=192.168.1.47
 ssh-copy-id ${DEV} -l pi
 ssh ${DEV} -l pi
 sudo -s
@@ -14,6 +14,7 @@ echo "deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main" > "$
 apt-get update -qq
 apt-get install -qq -y bluehorizon horizon horizon-cli
 passwd pi
+export NAME=test-sdr-4 USERID=dcmartin
 sed -i "s|raspberrypi|${NAME}|" /etc/hosts
 sed -i "s|raspberrypi|${NAME}|" /etc/hostname
 hostname ${NAME}
