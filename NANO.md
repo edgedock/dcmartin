@@ -28,16 +28,17 @@ Access [Jetson Nano Start][nano-start], download the Jetson Nano Developer Kit (
 [etcher-io]: http://etcher.io/
 
 ## Step 2
-Insert SD card into Nano, connect monitor, keyboard, mouse and optional external SSD storage device.  Connect micro-USB cable connected to power-supply.  Nano will boot and present GUI to setup.
+Insert SD card into Nano, connect monitor, keyboard, mouse and optional external SSD storage device.  Connect micro-USB cable connected to power-supply.  Nano will boot and present GUI to complete setup, including creation of _account_ which will be referenced in subsequent steps.
+
 ## Step 3
-Configure account for access to Docker commands; logout and login to take effect.
+Open `terminal` program on Nano (n.b. right-click on _desktop_) and configure _account_ for access to Docker commands; logout and login to take effect.
 
 ```
 sudo addgroup ${SUDO_USER} docker
 ```
 
 ## Step 4
-Enable account for automated `sudo` (i.e. no password required); prompts for password:
+Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
 
 ```
 sudo -s
