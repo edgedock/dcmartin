@@ -176,7 +176,7 @@ The following commands presume `sda` as the device for the external drive
 ```
 sudo -s
 mkdir /sda
-echo '/dev/sda /sda /ext4' >> /etc/fstab
+echo '/dev/sda /sda ext4' >> /etc/fstab
 mount -a
 ```
 
