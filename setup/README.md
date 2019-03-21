@@ -7,14 +7,24 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 ## Supported devices
 A target device or virtual environment is required; either of the following are sufficient.
 
-### VM - LINUX (Ubuntu) Virtual Machine
-Download an Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
+### 1. Generic `amd64`
+Download a Debian/Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
 
-### Rpi3B+ - RaspberryPi3+ with Raspbian Stretch
-1. Download Raspbian [image][raspbian-image] for the RaspberryPi3 and flash a 32 Gbyte+ micro-SD card.  On macOS use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
-1. Create the file `ssh` in the root directory of the mounted SD-card; on macOS use `touch /Volumes/boot/ssh`.  This step will enable remote access using the `ssh` command with the default login `pi` and password `raspberry`.
+### 2. Raspberry Pi `arm`
+1. Download [Raspbian][raspbian-image]; flash a 32 Gbyte+ microSD card; use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
+1. Create the file `ssh` in the root directory of the mounted SD-card; use `touch /Volumes/boot/ssh`.  This step will enable remote access using the `ssh` command with the default login `pi` and password `raspberry`.
 1. Eject the SD-card (e.g. on macOS use `diskutil eject /Volume/boot`).
-1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `wpa_supplicant.conf` file in the root directory).
+1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `/wpa_supplicant.conf`)
+
+### 3. nVidia Jetson `arm64`
+
++ [TX2][jetsontx2-md] - with Ubuntu 18.04 and JetPack 2.3.3/4.1.1
++ [Nano][nano-md] - with Ubuntu 18.04 and JetPack 4.2
++ [Xavier][xavier-md] - with Ubuntu 18.04 and JetPack 4.2
+
+[jetsontx2-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/JETSONTX2.md
+[nano-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/NANO.md
+[xavier-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/XAVIER.md
 
 # A. Manual Installation
 ## Process
