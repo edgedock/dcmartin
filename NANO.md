@@ -1,6 +1,6 @@
 # `NANO.md` - Setup and Install for Open Horizon
 
-Setup information for the Nano is at: [JetsonNano-Start][nano-start]
+Setup information for the Nano is at: [JetsonNano-Start][nano-start].
 
 [nano-start]: http://nvidia.com/jetsonnano-start
 
@@ -23,8 +23,9 @@ Setup information for the Nano is at: [JetsonNano-Start][nano-start]
 Perform the following in the order listed to setup the Jetson Nano with appropriate hardware and software to run Open Horizon patterns and services.
 
 ## Step 1
-Access [Jetson Nano Start][nano-start], download the Jetson Nano Developer Kit (5.3 Gbyte), and copy the the uncompressed image (12.1 Gbyte) to the SD card using [Etcher][etcher-io]
+Download the [Jetson Nano Developer Kit][nano-sdcard] (5.3 Gbyte), and copy the the uncompressed image (12.1 Gbyte) to the SD card using [Etcher][etcher-io]
 
+[nano-sdcard]: https://developer.nvidia.com/embedded/dlc/jetson-nano-dev-kit-sd-card-image
 [etcher-io]: http://etcher.io/
 
 ## Step 2
