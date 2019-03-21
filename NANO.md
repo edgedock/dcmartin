@@ -12,7 +12,7 @@ Setup information for the Nano is at: [JetsonNano-Start][nano-start]
 1. HDMI or DisplayPort cable and monitor
 1. USB keyboard and mouse
 1. Wired (RJ45) Ethernet cable and network
-1. 32 Gbyte (64 Gbyte recommended)
+1. 32 Gbyte microSD card (64 Gbyte recommended)
 1. Micro-USB 5V 2.4A power-supply and cable
 
 # Software Required
