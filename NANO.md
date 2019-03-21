@@ -31,13 +31,6 @@ Access [Jetson Nano Start][nano-start], download the Jetson Nano Developer Kit (
 Insert SD card into Nano, connect monitor, keyboard, mouse and optional external SSD storage device.  Connect micro-USB cable connected to power-supply.  Nano will boot and present GUI to complete setup, including creation of _account_ which will be referenced in subsequent steps.
 
 ## Step 3
-Open `terminal` program on Nano (n.b. right-click on _desktop_) and configure _account_ for access to Docker commands; logout and login to take effect.
-
-```
-sudo addgroup ${SUDO_USER} docker
-```
-
-## Step 4
 Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
 
 ```
@@ -46,7 +39,7 @@ echo "${SUDO_USER} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${SUDO_USER}-n
 chmod 400  /etc/sudoers.d/010_${SUDO_USER}-nopasswd
 ```
 
-## Step 5
+## Step 4
 Remove existing Docker (installed as `docker.io` package), update, and upgrade:
 
 [docker-com]: http://www.docker.com/
@@ -63,6 +56,13 @@ Install latest release directly from [Docker][docker-com]:
 
 ```
 wget -qO - get.docker.com | sudo bash
+```
+
+## Step 5
+Open `terminal` program on Nano (n.b. right-click on _desktop_) and configure _account_ for access to Docker commands; logout and login to take effect.
+
+```
+sudo addgroup ${SUDO_USER} docker
 ```
 
 ## Step 6
