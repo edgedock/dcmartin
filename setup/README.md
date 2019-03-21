@@ -73,7 +73,7 @@ sudo addgroup ${USERID} docker
 
 ```
 sudo -s
-echo "${USERID} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID}-nopasswd
+echo "${USERID:-toor} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID:-toor}-nopasswd
 chmod 400  /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
