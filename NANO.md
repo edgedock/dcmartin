@@ -47,14 +47,16 @@ chmod 400  /etc/sudoers.d/010_${SUDO_USER}-nopasswd
 ```
 
 ## Step 5
-Remove existing Docker (installed as `docker.io` package):
+Remove existing Docker (installed as `docker.io` package), update, and upgrade:
 
 [docker-com]: http://www.docker.com/
 
 ```
-apt remove -y docker.io
-apt autoremove -y
-apt purge -y
+sudo apt remove -y docker.io
+sudo apt autoremove -y
+sudo apt purge -y
+sudo apt update
+sudo apt upgrade -y
 ```
 
 Install latest release directly from [Docker][docker-com]:
@@ -62,6 +64,7 @@ Install latest release directly from [Docker][docker-com]:
 ```
 wget -qO - get.docker.com | sudo bash
 ```
+
 ## Step 6
 Install Open Horizon packages
 
