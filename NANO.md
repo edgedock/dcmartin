@@ -191,9 +191,9 @@ Relocate `/var/lib/docker` to SSD:
 ```
 sudo -s
 systemctl stop docker
-rsync -a /var/lib/docker /sda/docker
+rsync -a /var/lib/docker /sda
 rm -fr /var/lib/docker
-ln -s /sda/docker /var/lib/docker
+ln -s /sda/docker /var/lib
 systemctl start docker
 ```
 
@@ -201,9 +201,9 @@ Relocate `/home` to SSD:
 
 ```
 sudo -s
-rsync -a /home /sda/home
+rsync -a /home /sda
 rm -fr /home
-ln -s /sda/home /home
+ln -s /sda/home /
 ```
 
 Logout and login to complete relocation to new home directory.
