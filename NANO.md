@@ -1,6 +1,9 @@
 # `NANO.md` - Setup and Install for Open Horizon
 
-Setup information for the Nano is at: [JetsonNano-Start][nano-start].
+[Downloads][nvidia-downloads] for nVidia embedded computing devices.
+Setup information for the Nano is at: [JetsonNano-Start][nano-start].  
+
+[nvidia-downloads]: https://www.developer.nvidia.com/embedded/downloads
 
 [nano-start]: http://nvidia.com/jetsonnano-start
 
@@ -8,12 +11,15 @@ Setup information for the Nano is at: [JetsonNano-Start][nano-start].
 
 # Hardware Required
 
-1. Jetson Nano
+1. [Jetson Nano][jetson-nano]
 1. HDMI or DisplayPort cable and monitor
 1. USB keyboard and mouse
 1. Wired (RJ45) Ethernet cable and network
 1. 32 Gbyte microSD card (64 Gbyte recommended)
-1. Micro-USB 5V 2.4A power-supply and cable
+1. Micro-USB 5V 3A [power-supply][power-supply] and cable
+
+[jetson-nano]: https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-nano/
+[power-supply]: https://www.amazon.com/gp/product/B072FTJH73/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1
 
 # Software Required
 
