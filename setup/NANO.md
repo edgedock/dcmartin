@@ -17,6 +17,8 @@ Setup information for the Nano is at: [JetsonNano-Start][nano-start].
 1. Wired (RJ45) Ethernet cable and network
 1. 32 Gbyte microSD card (64 Gbyte recommended)
 1. Micro-USB 5V 3A [power-supply][power-supply] and cable
+1. USB SSD drive (_optional_)
+1. USB WiFi adapter (_optional_)
 
 [jetson-nano]: https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-nano/
 [power-supply]: https://www.amazon.com/gp/product/B072FTJH73/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1
