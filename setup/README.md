@@ -72,9 +72,10 @@ sudo addgroup ${USERID} docker
 ```
 
 ```
-sudo -s
-echo "${USERID:-toor} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${USERID:-toor}-nopasswd
-chmod 400  /etc/sudoers.d/010_${USERID}-nopasswd
+echo "${USERID} ALL=(ALL) NOPASSWD: ALL" > /tmp/nopasswd \
+  && sudo chown root /tmp/nopasswd \
+  && sudo chmod 400 /tmp/nopasswd
+  && sudo mv /tmp/nopasswd /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
 The **development host** (e.g. Apple iMac or MacBook) will also need to be configured with SSH credentials (n.b. `~/.ssh/`) which are then copied to the device from the host; run the following command as `<your-userid>` on the development host:
