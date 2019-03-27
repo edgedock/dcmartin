@@ -3,7 +3,15 @@
   "build_from": {
     "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.yolo:0.0.8",
     "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.yolo:0.0.8",
-    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.yolo:0.0.8"
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.yolo:0.0.8",
+    "386": null,
+    "ppc64": null,
+    "ppc64le": null,
+    "mips64": null,
+    "mips64le": null,
+    "s390x": null,
+    "mips": null,
+    "mipsle": null
   },
   "args": {}
 }
