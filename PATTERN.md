@@ -2,46 +2,53 @@
 
 # 1. Build
 
-Patterns are composed of services and have no build process.  However, all services specified in the `pattern.json` configuration file must be available in the exchange for all architectures specified in the configuration.  The configuration file:
+Patterns are composed of services and have no build process.  However, all services specified in the `pattern.json` configuration file must be available in the exchange for all architectures specified in the configuration.  The configuration file for `motion2mqtt` pattern is listed below.
 
 ```
 {
-  "label": "yolo2msghub",
-  "description": "yolo and friends as a pattern",
+  "label": "motion2mqtt",
+  "description": "motion2mqtt as a pattern",
   "public": true,
   "services": [
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "amd64",
-      "serviceVersions": [
-        {
-          "version": "0.0.1"
-        }
-      ]
+      "serviceVersions": [ { "version": "0.0.13" } ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm",
-      "serviceVersions": [
-        {
-          "version": "0.0.1"
-        }
-      ]
+      "serviceVersions": [ { "version": "0.0.13" } ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
+      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm64",
-      "serviceVersions": [
-        {
-          "version": "0.0.1"
-        }
-      ]
+      "serviceVersions": [ { "version": "0.0.13" } ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "amd64",
+      "serviceVersions": [ { "version": "0.0.1" } ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm",
+      "serviceVersions": [ { "version": "0.0.1" } ]
+    },
+    {
+      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
+      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceArch": "arm64",
+      "serviceVersions": [ { "version": "0.0.1" } ]
     }
   ]
 }
+
 ```
 
 # 2. Publish
@@ -49,20 +56,19 @@ Patterns are composed of services and have no build process.  However, all servi
 ## `make` targets
 
 ### `pattern-publish`
+Publishes the `horizon/pattern.json` configuration file using the `SERVICE_NAME` of the inherent service.
 
 ### `pattern-validate`
+Validates the pattern registration in the exchange using the `hzn` command-line-interface tool.
 
-# 3. Deploy
+# 3. Deployment Testing
 
-
-These targets act on clients specified by the `TEST_NODES_NAME` variable; its value may be specified in file `TEST_TMP_MACHINES`:
+Client devices and virtual machines may be targeted for use as development nodes; refer to `setup/README.md` for additional information.  Once devices have been configured for use a development nodes a listing of node names should be created in the file `TEST_TMP_MACHINES`; this file is _ignored_ by Git; for example:
 
 ```
-test-sdr-1.local
-test-sdr-4.local
-test-cpu-2.local
-test-cpu-3.local
-test-cpu-6.local
+test-amd64-1.local
+test-arm-1.local
+test-arm64-1.local
 ```
 
 ## 3.1 `make` targets
@@ -71,301 +77,119 @@ test-cpu-6.local
 + `nodes-list`
 + `nodes-test`
 + `nodes-undo`
++ `nodes-clean`
 + `nodes-purge`
 
 ### 3.1.1 `make nodes`
-
-Before registration:
+This target registers the development nodes listed in the `TEST_TMP_MACHINES` file with the current working directory pattern (e.g. `motion2mqtt/` directory with `pattern.json` file).  This target can be run repeatedly to assess registration status.  For example, in the following output only `test-cpu-6` was registered with the pattern; all other nodes were already registered.
 
 ```
+make nodes
 Created horizon metadata files in /Volumes/dcmartin/GIT/beta/open-horizon/motion2mqtt/horizon. Edit these files to define and configure your new service.
->>> MAKE -- 11:16:28 -- registering nodes: test-sdr-1.local test-sdr-4.local test-cpu-3.local test-cpu-6.local test-cpu-2.local
->>> MAKE -- 11:16:28 -- registering test-sdr-1.local Sun Mar 10 11:16:28 PDT 2019
---- INFO -- ./nodereg.sh 80400 -- test-sdr-1.local
---- INFO -- ./nodereg.sh 80400 -- registering test-sdr-1.local with pattern motion2mqtt-beta
->>> MAKE -- 11:16:49 -- registering test-sdr-4.local Sun Mar 10 11:16:49 PDT 2019
---- INFO -- ./nodereg.sh 80435 -- test-sdr-4.local
---- INFO -- ./nodereg.sh 80435 -- registering test-sdr-4.local with pattern motion2mqtt-beta
->>> MAKE -- 11:17:07 -- registering test-cpu-3.local Sun Mar 10 11:17:07 PDT 2019
---- INFO -- ./nodereg.sh 80468 -- test-cpu-3.local
---- INFO -- ./nodereg.sh 80468 -- registering test-cpu-3.local with pattern motion2mqtt-beta
->>> MAKE -- 11:17:26 -- registering test-cpu-6.local Sun Mar 10 11:17:26 PDT 2019
---- INFO -- ./nodereg.sh 80501 -- test-cpu-6.local
---- INFO -- ./nodereg.sh 80501 -- registering test-cpu-6.local with pattern motion2mqtt-beta
->>> MAKE -- 11:17:46 -- registering test-cpu-2.local Sun Mar 10 11:17:46 PDT 2019
---- INFO -- ./nodereg.sh 80535 -- test-cpu-2.local
---- INFO -- ./nodereg.sh 80535 -- registering test-cpu-2.local with pattern motion2mqtt-beta
-```
-After registration:
-
-```
-Created horizon metadata files in /Volumes/dcmartin/GIT/beta/open-horizon/motion2mqtt/horizon. Edit these files to define and configure your new service.
->>> MAKE -- 11:19:42 -- registering nodes: test-sdr-1.local test-sdr-4.local test-cpu-3.local test-cpu-6.local test-cpu-2.local
->>> MAKE -- 11:19:43 -- registering test-sdr-1.local Sun Mar 10 11:19:43 PDT 2019
---- INFO -- ./nodereg.sh 80769 -- test-sdr-1.local
---- INFO -- ./nodereg.sh 80769 -- test-sdr-1.local -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
---- INFO -- ./nodereg.sh 80769 -- test-sdr-1.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
->>> MAKE -- 11:19:50 -- registering test-sdr-4.local Sun Mar 10 11:19:50 PDT 2019
---- INFO -- ./nodereg.sh 80810 -- test-sdr-4.local
---- INFO -- ./nodereg.sh 80810 -- test-sdr-4.local -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
---- INFO -- ./nodereg.sh 80810 -- test-sdr-4.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
->>> MAKE -- 11:19:55 -- registering test-cpu-3.local Sun Mar 10 11:19:55 PDT 2019
---- INFO -- ./nodereg.sh 80850 -- test-cpu-3.local
---- INFO -- ./nodereg.sh 80850 -- test-cpu-3.local -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
---- INFO -- ./nodereg.sh 80850 -- test-cpu-3.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
->>> MAKE -- 11:20:00 -- registering test-cpu-6.local Sun Mar 10 11:20:00 PDT 2019
---- INFO -- ./nodereg.sh 80891 -- test-cpu-6.local
---- INFO -- ./nodereg.sh 80891 -- test-cpu-6.local -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
---- INFO -- ./nodereg.sh 80891 -- test-cpu-6.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
->>> MAKE -- 11:20:05 -- registering test-cpu-2.local Sun Mar 10 11:20:05 PDT 2019
---- INFO -- ./nodereg.sh 80931 -- test-cpu-2.local
---- INFO -- ./nodereg.sh 80931 -- test-cpu-2.local -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
---- INFO -- ./nodereg.sh 80931 -- test-cpu-2.local -- version: 0.0.12; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:12:51 -- registering nodes: test-amd64-1 nano-1 test-cpu-2 test-cpu-3 test-cpu-6 test-sdr-1 test-sdr-4 tx2
+>>> MAKE -- 16:12:52 -- registering test-amd64-1 
++++ WARN -- ./nodereg.sh 30580 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30580 -- test-amd64-1 at IP: 192.168.1.187
+--- INFO -- ./nodereg.sh 30580 -- test-amd64-1 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30580 -- test-amd64-1 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:13:01 -- registering nano-1 
++++ WARN -- ./nodereg.sh 30631 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30631 -- nano-1 at IP: 192.168.1.206
+--- INFO -- ./nodereg.sh 30631 -- nano-1 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30631 -- nano-1 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:13:08 -- registering test-cpu-2 
++++ WARN -- ./nodereg.sh 30682 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30682 -- test-cpu-2 at IP: 192.168.1.180
+--- INFO -- ./nodereg.sh 30682 -- test-cpu-2 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30682 -- test-cpu-2 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:13:17 -- registering test-cpu-3 
++++ WARN -- ./nodereg.sh 30733 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30733 -- test-cpu-3 at IP: 192.168.1.167
+--- INFO -- ./nodereg.sh 30733 -- test-cpu-3 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30733 -- test-cpu-3 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:13:24 -- registering test-cpu-6 
++++ WARN -- ./nodereg.sh 30786 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30786 -- test-cpu-6 at IP: 192.168.1.220
+--- INFO -- ./nodereg.sh 30786 -- registering test-cpu-6 with pattern: dcmartin@us.ibm.com/motion2mqtt-beta; input: horizon/userinput.json
+--- INFO -- ./nodereg.sh 30786 -- machine: test-cpu-6; state: Reading input file /tmp/input.json...
+Horizon Exchange base URL: https://alpha.edge-fabric.com/v1
+Node dcmartin@us.ibm.com/test-cpu-6 exists in the exchange
+Initializing the Horizon node...
+Setting service variables...
+Changing Horizon state to configured to register this node with Horizon...
+Horizon node is registered. Workload agreement negotiation should begin shortly. Run 'hzn agreement list' to view.
+configured
+--- INFO -- ./nodereg.sh 30786 -- test-cpu-6 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30786 -- test-cpu-6 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:13:52 -- registering test-sdr-1 
++++ WARN -- ./nodereg.sh 30870 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30870 -- test-sdr-1 at IP: 192.168.1.219
+--- INFO -- ./nodereg.sh 30870 -- test-sdr-1 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30870 -- test-sdr-1 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:14:01 -- registering test-sdr-4 
++++ WARN -- ./nodereg.sh 30921 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30921 -- test-sdr-4 at IP: 192.168.1.47
+--- INFO -- ./nodereg.sh 30921 -- test-sdr-4 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30921 -- test-sdr-4 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
+>>> MAKE -- 16:14:11 -- registering tx2 
++++ WARN -- ./nodereg.sh 30974 -- missing service organization; using dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30974 -- tx2 at IP: 192.168.1.31
+--- INFO -- ./nodereg.sh 30974 -- tx2 -- configured with dcmartin@us.ibm.com/motion2mqtt-beta
+--- INFO -- ./nodereg.sh 30974 -- tx2 -- version: 0.0.13; url: com.github.dcmartin.open-horizon.motion2mqtt-beta
 ```
 
 ### 3.1.2 `make nodes-list`
 
-After registration and initiation of Docker containers for services:
+After registration and initiation of Docker containers for services; for example node `tx2`:
 
 ```
->>> MAKE -- 11:04:43 -- listing nodes: test-sdr-1.local test-sdr-4.local test-cpu-3.local test-cpu-6.local test-cpu-2.local
->>> MAKE -- 11:04:43 -- listing test-sdr-1.local Sun Mar 10 11:04:43 PDT 2019
-{
-  "id": "test-sdr-1",
-  "organization": "dcmartin@us.ibm.com",
-  "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
-  "name": "test-sdr-1",
-  "token_last_valid_time": "2019-03-10 15:52:07 +0000 GMT",
-  "token_valid": true,
-  "ha": false,
-  "configstate": {
-    "state": "configured",
-    "last_update_time": "2019-03-10 15:52:16 +0000 GMT"
-  },
-  "configuration": {
-    "exchange_api": "https://alpha.edge-fabric.com/v1/",
-    "exchange_version": "1.75.0",
-    "required_minimum_exchange_version": "1.73.0",
-    "preferred_exchange_version": "1.75.0",
-    "architecture": "arm",
-    "horizon_version": "2.22.3"
-  },
-  "connectivity": {
-    "firmware.bluehorizon.network": true,
-    "images.bluehorizon.network": true
-  }
-}
-CONTAINER ID        IMAGE                                                            COMMAND             CREATED             STATUS              PORTS                              NAMES
-b84ef6fe64dc        dcmartin/arm_com.github.dcmartin.open-horizon.motion2mqtt-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours          0.0.0.0:8080-8082->8080-8082/tcp   4e4e38404d7e0c781c30a344965aba87b0174ced17e2fc86cdb3b31d9240ffd2-motion2mqtt
-f7a443ad19db        dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_31924caa-5fdb-41d7-bb1c-9f2bd270a623-yolo4motion
-707f1617bf23        dcmartin/arm_com.github.dcmartin.open-horizon.mqtt-beta          "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_faaa9933-a445-486e-a746-3b0b5c835ec2-mqtt
-0ecaaa367c13        dcmartin/arm_com.github.dcmartin.open-horizon.cpu-beta           "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_fe59c186-e074-4df5-a10b-2ef411974a3a-cpu
->>> MAKE -- 11:04:45 -- listing test-sdr-4.local Sun Mar 10 11:04:45 PDT 2019
-{
-  "id": "test-sdr-4",
-  "organization": "dcmartin@us.ibm.com",
-  "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
-  "name": "test-sdr-4",
-  "token_last_valid_time": "2019-03-10 15:52:22 +0000 GMT",
-  "token_valid": true,
-  "ha": false,
-  "configstate": {
-    "state": "configured",
-    "last_update_time": "2019-03-10 15:52:31 +0000 GMT"
-  },
-  "configuration": {
-    "exchange_api": "https://alpha.edge-fabric.com/v1/",
-    "exchange_version": "1.75.0",
-    "required_minimum_exchange_version": "1.73.0",
-    "preferred_exchange_version": "1.75.0",
-    "architecture": "arm",
-    "horizon_version": "2.22.3"
-  },
-  "connectivity": {
-    "firmware.bluehorizon.network": true,
-    "images.bluehorizon.network": true
-  }
-}
-CONTAINER ID        IMAGE                                                            COMMAND             CREATED             STATUS              PORTS                              NAMES
-d31e4b8f5d9b        dcmartin/arm_com.github.dcmartin.open-horizon.motion2mqtt-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours          0.0.0.0:8080-8082->8080-8082/tcp   2bbfb8b6def64c0a6e9e74cb9888eea900bf9622854ded04e2ff50f49498eb0c-motion2mqtt
-95e3748eec1d        dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_06fa9b0c-9cd3-4daf-b95c-1a7cdade792d-yolo4motion
-45155b57b2b7        dcmartin/arm_com.github.dcmartin.open-horizon.mqtt-beta          "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_03a046e6-8f32-4537-828b-04fc806184ef-mqtt
-6e7f50c1dedb        dcmartin/arm_com.github.dcmartin.open-horizon.cpu-beta           "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_be7eb6d2-6eee-4aca-9e46-a3c1e0b0a7aa-cpu
->>> MAKE -- 11:04:46 -- listing test-cpu-3.local Sun Mar 10 11:04:46 PDT 2019
-{
-  "id": "test-cpu-3",
-  "organization": "dcmartin@us.ibm.com",
-  "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
-  "name": "test-cpu-3",
-  "token_last_valid_time": "2019-03-10 15:52:43 +0000 GMT",
-  "token_valid": true,
-  "ha": false,
-  "configstate": {
-    "state": "configured",
-    "last_update_time": "2019-03-10 15:52:54 +0000 GMT"
-  },
-  "configuration": {
-    "exchange_api": "https://alpha.edge-fabric.com/v1/",
-    "exchange_version": "1.75.0",
-    "required_minimum_exchange_version": "1.73.0",
-    "preferred_exchange_version": "1.75.0",
-    "architecture": "arm",
-    "horizon_version": "2.22.3"
-  },
-  "connectivity": {
-    "firmware.bluehorizon.network": true,
-    "images.bluehorizon.network": true
-  }
-}
-CONTAINER ID        IMAGE                                                            COMMAND             CREATED             STATUS              PORTS                              NAMES
-c2faff20f9ea        dcmartin/arm_com.github.dcmartin.open-horizon.motion2mqtt-beta   "/usr/bin/run.sh"   11 minutes ago      Up 11 minutes       0.0.0.0:8080-8082->8080-8082/tcp   4e45971d40d83bd994b0e4badf400249ab506670cc9daed8e023cfa58af1e064-motion2mqtt
-d62418d1dff8        dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion-beta   "/usr/bin/run.sh"   12 minutes ago      Up 11 minutes                                          dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_e65c0d1b-cbc6-4786-a94f-c642030f7b1b-yolo4motion
-901be4bdc5ee        dcmartin/arm_com.github.dcmartin.open-horizon.mqtt-beta          "/usr/bin/run.sh"   12 minutes ago      Up 12 minutes                                          dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_48db8127-32f6-4cc9-aec9-7a202c4af253-mqtt
-175888fb695a        dcmartin/arm_com.github.dcmartin.open-horizon.cpu-beta           "/usr/bin/run.sh"   12 minutes ago      Up 12 minutes                                          dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_f157f46e-804a-4718-98c6-be559c616040-cpu
->>> MAKE -- 11:04:48 -- listing test-cpu-6.local Sun Mar 10 11:04:48 PDT 2019
-{
-  "id": "test-cpu-6",
-  "organization": "dcmartin@us.ibm.com",
-  "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
-  "name": "test-cpu-6",
-  "token_last_valid_time": "2019-03-10 15:53:00 +0000 GMT",
-  "token_valid": true,
-  "ha": false,
-  "configstate": {
-    "state": "configured",
-    "last_update_time": "2019-03-10 15:53:12 +0000 GMT"
-  },
-  "configuration": {
-    "exchange_api": "https://alpha.edge-fabric.com/v1/",
-    "exchange_version": "1.75.0",
-    "required_minimum_exchange_version": "1.73.0",
-    "preferred_exchange_version": "1.75.0",
-    "architecture": "arm",
-    "horizon_version": "2.22.3"
-  },
-  "connectivity": {
-    "firmware.bluehorizon.network": true,
-    "images.bluehorizon.network": true
-  }
-}
-CONTAINER ID        IMAGE                                                            COMMAND             CREATED             STATUS              PORTS                              NAMES
-4570d43b32c0        dcmartin/arm_com.github.dcmartin.open-horizon.motion2mqtt-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours          0.0.0.0:8080-8082->8080-8082/tcp   e398dc1e502dbfa7ba2ca13b39aaffb7f3497e0e8aaac19cfa00dd6812f585bf-motion2mqtt
-c1516b128757        dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_62c80f17-138a-49b6-a574-817cd576f7fb-yolo4motion
-41cb6bd7caa1        dcmartin/arm_com.github.dcmartin.open-horizon.mqtt-beta          "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_2cd75bc7-df20-4438-8e7c-983d9231f35f-mqtt
-8778e3ef5682        dcmartin/arm_com.github.dcmartin.open-horizon.cpu-beta           "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_378b0f55-3907-42f3-aeda-fecf0cc29a86-cpu
->>> MAKE -- 11:04:50 -- listing test-cpu-2.local Sun Mar 10 11:04:50 PDT 2019
-{
-  "id": "test-cpu-2",
-  "organization": "dcmartin@us.ibm.com",
-  "pattern": "dcmartin@us.ibm.com/motion2mqtt-beta",
-  "name": "test-cpu-2",
-  "token_last_valid_time": "2019-03-10 15:53:19 +0000 GMT",
-  "token_valid": true,
-  "ha": false,
-  "configstate": {
-    "state": "configured",
-    "last_update_time": "2019-03-10 15:53:28 +0000 GMT"
-  },
-  "configuration": {
-    "exchange_api": "https://alpha.edge-fabric.com/v1/",
-    "exchange_version": "1.75.0",
-    "required_minimum_exchange_version": "1.73.0",
-    "preferred_exchange_version": "1.75.0",
-    "architecture": "arm",
-    "horizon_version": "2.22.3"
-  },
-  "connectivity": {
-    "firmware.bluehorizon.network": true,
-    "images.bluehorizon.network": true
-  }
-}
-CONTAINER ID        IMAGE                                                            COMMAND             CREATED             STATUS              PORTS                              NAMES
-44c27bff8b87        dcmartin/arm_com.github.dcmartin.open-horizon.motion2mqtt-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours          0.0.0.0:8080-8082->8080-8082/tcp   a3c4ac393498b4fefcc213a1d2e5237c09557a24438d543e70a07fe6dfcacefe-motion2mqtt
-3b4be796e88b        dcmartin/arm_com.github.dcmartin.open-horizon.yolo4motion-beta   "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_9161d21c-8418-472d-8c16-19b12e598643-yolo4motion
-838e17a284d5        dcmartin/arm_com.github.dcmartin.open-horizon.mqtt-beta          "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_f122312e-b094-4c7f-95c3-7ea569d827b7-mqtt
-7e7e59bbda4d        dcmartin/arm_com.github.dcmartin.open-horizon.cpu-beta           "/usr/bin/run.sh"   2 hours ago         Up 2 hours                                             dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_2f5293d1-6085-4ab2-8fd1-2f1b282e4fdb-cpu
-
+>>> MAKE -- 16:15:24 -- listing tx2
+{"node":"tx2"}
+{"agreements":[{"url":"com.github.dcmartin.open-horizon.mqtt2kafka-beta","org":"dcmartin@us.ibm.com","version":"0.0.1","arch":"arm64"},{"url":"com.github.dcmartin.open-horizon.motion2mqtt-beta","org":"dcmartin@us.ibm.com","version":"0.0.13","arch":"arm64"}]}
+{"services":["com.github.dcmartin.open-horizon.wan-beta","com.github.dcmartin.open-horizon.yolo4motion-beta","com.github.dcmartin.open-horizon.cpu-beta","com.github.dcmartin.open-horizon.hal-beta","com.github.dcmartin.open-horizon.motion2mqtt-beta","com.github.dcmartin.open-horizon.mqtt-beta","com.github.dcmartin.open-horizon.mqtt2kafka-beta"]}
+{"container":"3e64661fb5a83040932d7dfa3c549d83d6e38c839e6b7cb2c1b16516da052742-motion2mqtt"}
+{"container":"dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.yolo4motion-beta_0.0.4_c5ae5ff6-1f5f-4651-976b-3c099a2c19b7-yolo4motion"}
+{"container":"dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.hal-beta_0.0.3_c6ee8878-face-4100-8386-d047bd710787-hal"}
+{"container":"dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.cpu-beta_0.0.3_fb8eb358-ee21-443d-8257-3a07f3b448e6-cpu"}
+{"container":"31840f4d6b962138a127ea7f1992c75072356697b71bbbd8f33f3933da02d479-mqtt2kafka"}
+{"container":"dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.wan-beta_0.0.3_f6bdb821-6dfe-43ed-a067-cb0b17720468-wan"}
+{"container":"dcmartin-us.ibm.com_com.github.dcmartin.open-horizon.mqtt-beta_0.0.3_1fc832a7-e78a-4670-957f-9354da01b75c-mqtt"}
 ```
 
-### `make nodes-test`
+### 3.1.3 `make nodes-test`
 
 Nodes configured with the pattern will respond to inquiries on their status port, e.g. the `motion2mqtt` service exposes port `8082` for its status.  Executing this target in the `motion2mqtt` directory will interrogate that port, for example:
 
 ```
---- MAKE -- start testing motion2mqtt-beta on test-sdr-1.local port 8082 at Mon Feb 25 17:33:55 PST 2019
-ELAPSED: 2
-{"period":300}
-{"date":1551140470}
-{"pattern":{"label":"motion2mqtt-beta"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"updated":"2019-02-26T00:00:35.550Z[UTC]"}}
-{"horizon":{"pattern":"dcmartin@us.ibm.com/motion2mqtt-beta"}}
+>>> MAKE -- 16:17:50 -- testing: motion2mqtt-beta; node: tx2; port: 8082:8082; date: Wed Mar 27 16:17:50 PDT 2019
+ELAPSED: 4
+{"date":1553728375}
+{"config":{"log_level":"info","debug":true,"group":"newman","device":"tx2","timezone":"/usr/share/zoneinfo/America/Los_Angeles","services":[{"name":"yolo4motion","url":"http://yolo4motion"},{"name":"cpu","url":"http://cpu"},{"name":"mqtt","url":"http://mqtt"},{"name":"hal","url":"http://hal"}],"mqtt":{"host":"mqtt","port":1883,"username":"","password":""},"motion":{"post_pictures":"center","locate_mode":"off","event_gap":30,"framerate":2,"threshold":5000,"threshold_tune":false,"noise_level":32,"noise_tune":true,"log_level":6,"log_type":"all"}}}
+{"hzn":"dcmartin@us.ibm.com/motion2mqtt-beta"}
+{"label":"motion2mqtt"}
+{"version":"0.0.13.13"}
+{"service":true}
+{"mqtt":true}
+{"hal":true}
+{"hal":{"lsdf":[{"mount":"/dev/root","spacetotal":"28G","spaceavail":"20G"},{"mount":"/dev/sda","spacetotal":"110G","spaceavail":"86G"}]}}
+{"hal":{"lshw":{"product":"quill"}}}
+{"yolo4motion":false}
 {"cpu":true}
-{"cpu":100}
-{"event":true}
-{"image":true}
---- MAKE -- start testing motion2mqtt-beta on test-sdr-4.local port 8082 at Mon Feb 25 17:33:58 PST 2019
-ELAPSED: 2
-{"period":300}
-{"date":1551139975}
-{"pattern":{"label":"motion2mqtt-beta"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"updated":"2019-02-26T00:00:35.550Z[UTC]"}}
-{"horizon":{"pattern":"dcmartin@us.ibm.com/motion2mqtt-beta"}}
-{"cpu":true}
-{"cpu":31.29}
-{"event":true}
-{"image":true}
---- MAKE -- start testing motion2mqtt-beta on test-cpu-2.local port 8082 at Mon Feb 25 17:34:03 PST 2019
-ELAPSED: 2
-{"period":300}
-{"date":1551140497}
-{"pattern":{"label":"motion2mqtt-beta"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"updated":"2019-02-26T00:00:35.550Z[UTC]"}}
-{"horizon":{"pattern":"dcmartin@us.ibm.com/motion2mqtt-beta"}}
-{"cpu":true}
-{"cpu":8.37}
-{"event":true}
-{"image":true}
---- MAKE -- start testing motion2mqtt-beta on test-cpu-3.local port 8082 at Mon Feb 25 17:34:08 PST 2019
-ELAPSED: 1
-{"period":300}
-{"date":1551140000}
-{"pattern":{"label":"motion2mqtt-beta"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"updated":"2019-02-26T00:00:35.550Z[UTC]"}}
-{"horizon":{"pattern":"dcmartin@us.ibm.com/motion2mqtt-beta"}}
-{"cpu":true}
-{"cpu":100}
-{"event":true}
-{"image":true}
---- MAKE -- start testing motion2mqtt-beta on test-cpu-6.local port 8082 at Mon Feb 25 17:34:10 PST 2019
-ELAPSED: 1
-{"period":300}
-{"date":1551140082}
-{"pattern":{"label":"motion2mqtt-beta"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"services":"0.0.6"}}
-{"pattern":{"updated":"2019-02-26T00:00:35.550Z[UTC]"}}
-{"horizon":{"pattern":"dcmartin@us.ibm.com/motion2mqtt-beta"}}
-{"cpu":true}
-{"cpu":72.9}
-{"event":true}
-{"image":true}
---- MAKE -- finish testing motion2mqtt-beta on test-sdr-1.local test-sdr-4.local test-cpu-2.local test-cpu-3.local test-cpu-6.local at Mon Feb 25 17:34:12 PST 2019
+{"cpu":39.66}
+{"motion":{"event":false}}
+{"motion":{"image":false}}
+{"yolo":{"image":false}}
+{"yolo":{"mock":null}}
+{"yolo":{"detected":null}}
 ```
 
-### 3.1.3 `make nodes-undo`
+This output is created using the following filter for the `jq` command (see `TEST_NODE_FILTER` file); this file may contain multiple lines with comments denoted by a `#` as the first character.  Only the first non-commented line is utilized; others may be alternatives.
+
+```
+.test.date=.date, .test.config=.config, .test.hzn=.hzn.pattern.key, .test.label=.service.label, .test.version=.service.version,.test.service=.motion2mqtt?!=null, .test.mqtt=.mqtt?!=null, .test.hal=.hal?!=null, .test.hal.lsdf=.hal.lsdf, .test.hal.lshw.product=.hal.lshw.product, .test.yolo4motion=.yolo4motion?!=null, .test.cpu=.cpu?!=null, .test.cpu=.cpu.percent, .test.motion.event=.motion2mqtt.motion.event.base64?!=null, .test.motion.image=.motion2mqtt.motion.image.base64?!=null, .test.yolo.image=(.yolo4motion.image?!=null), .test.yolo.mock=(.yolo4motion.mock), .test.yolo.detected=(.yolo4motion.detected)
+```
+
+### 3.1.4 `make nodes-undo`
 
 ```
 >>> MAKE -- 11:12:35 -- unregistering nodes: test-sdr-1.local test-sdr-4.local test-cpu-3.local test-cpu-6.local test-cpu-2.local
@@ -385,3 +209,11 @@ Horizon node unregistered. You may now run 'hzn register ...' again, if desired.
 Unregistering this node, cancelling all agreements, stopping all workloads, and restarting Horizon...
 Horizon node unregistered. You may now run 'hzn register ...' again, if desired.
 ```
+
+### 3.1.5 `make nodes-clean`
+
+Performs both a `nodes-undo` as well as removes all running docker images and prunes all containers from the nodes.
+
+### 3.1.6 `make nodes-purge`
+
+Performs `nodes-clean` and then purges `bluehorizon`, `horizon`, and `horizon-cli` packages from node.
