@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEBUG=true
+
 node_alive()
 {
   machine=${1}
@@ -28,8 +30,8 @@ node_status()
 node_state()
 {
   machine=${1}
-  state=$(node_status ${machine} | jq -r '.configstate.state')
-  if [ -z "${state:-}" ]; then state='null'; fi
+  state=$(node_status ${machine})
+  if [ -z "${state:-}" ] || [ "${state}" == 'null' ]; then state='null'; else state=$(echo "${state}" | jq -r '.configstate.state'); fi
   echo ${state}
 }
 
@@ -46,6 +48,13 @@ node_install()
 {
   machine=${1}
   echo "--- INFO -- $0 $$ -- installing ${machine}" &> /dev/stderr
+  ssh ${machine} 'APT_REPO=updates \
+  && APT=/etc/apt/sources.list.d/bluehorizon.list \
+  && URL=http://pkg.bluehorizon.network \
+  && KEY=${URL}/bluehorizon.network-public.key \
+  && wget -qO - "${KEY}" | sudo apt-key add - \
+  && echo "deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${APT_REPO} main" > /tmp/$$ \
+  && sudo mv /tmp/$$ "${APT}"'
   ssh ${machine} 'sudo apt-get update' # &> /dev/null
   ssh ${machine} 'sudo apt-get upgrade -y' # &> /dev/null
   ssh ${machine} 'sudo apt-get install -y bluehorizon' # &> /dev/null

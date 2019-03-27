@@ -1,4 +1,4 @@
-# `NANO.md` - Setup and Install for Open Horizon
+# `NANO.md` - Install on Jetson Nano
 
 [Downloads][nvidia-downloads] for nVidia embedded computing devices.
 Setup information for the Nano is at: [JetsonNano-Start][nano-start].  
@@ -42,7 +42,7 @@ Insert SD card into Nano, connect monitor, keyboard, mouse and optional external
 ## Step 3
 Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
 
-```
+```shell
 sudo -s
 echo "${SUDO_USER} ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers.d/010_${SUDO_USER}-nopasswd
 chmod 400  /etc/sudoers.d/010_${SUDO_USER}-nopasswd
@@ -53,7 +53,7 @@ Remove existing Docker (installed as `docker.io` package), update, and upgrade:
 
 [docker-com]: http://www.docker.com/
 
-```
+```shell
 sudo apt remove -y docker.io
 sudo apt autoremove -y
 sudo apt purge -y
@@ -63,7 +63,7 @@ sudo apt upgrade -y
 
 Install latest release directly from [Docker][docker-com]:
 
-```
+```shell
 wget -qO - get.docker.com | sudo bash
 ```
 

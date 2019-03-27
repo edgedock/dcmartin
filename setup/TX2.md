@@ -1,4 +1,4 @@
-# `JETSONTX2.md` - Install on nVidia TX2
+# `TX2.md` - Install on nVidia TX2
 
 **WARNING**: _work in progress_
 

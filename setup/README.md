@@ -7,69 +7,72 @@ You will need an [IBM Cloud][ibm-cloud] account and IBM MessageHub credentials a
 ## Supported devices
 A target device or virtual environment is required; either of the following are sufficient.
 
-### 1. Generic `amd64`
+### 1. Raspberry Pi 32-bit `arm`
++ [`Raspberry Pi Model 3B+`][raspberrypi-md]
+
+[raspberrypi-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/RPI.md
+
+### 2. Intel/AMD 64-bit `amd64`
 Download a Debian/Ubuntu [image][ubuntu-image] and start a new virtual machine, e.g. using [VirtualBox][virtualbox], with the CD/DVD image as the boot device; change networking from `NAT` to `Bridged`.  **Note**: Install the VirtualBox Extensions Pack.  Connect to VM using `ssh` or use the GUI to start a Terminal session.
 
-### 2. Raspberry Pi `arm`
-1. Download [Raspbian][raspbian-image]; flash a 32 Gbyte+ microSD card; use [Etcher][etcher-io], **but** <ins>unset the option</ins> to `Auto un-mount on success`.
-1. Create the file `ssh` in the root directory of the mounted SD-card; use `touch /Volumes/boot/ssh`.  This step will enable remote access using the `ssh` command with the default login `pi` and password `raspberry`.
-1. Eject the SD-card (e.g. on macOS use `diskutil eject /Volume/boot`).
-1. Insert uSD-card into a RPi3 and connect to _wired_ ethernet (or create appropriate `/wpa_supplicant.conf`)
-
-### 3. nVidia Jetson `arm64`
+### 3. nVidia Jetson 64-bit `arm64`
 
 + [TX2][jetsontx2-md] - with Ubuntu 18.04 and JetPack 2.3.3/4.1.1
 + [Nano][nano-md] - with Ubuntu 18.04 and JetPack 4.2
 + [Xavier][xavier-md] - with Ubuntu 18.04 and JetPack 4.2
 
-[jetsontx2-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/JETSONTX2.md
+[jetsontx2-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/TX2.md
 [nano-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/NANO.md
 [xavier-md]: https://github.com/dcmartin/open-horizon/tree/master/setup/XAVIER.md
 
 # A. Manual Installation
 ## Process
+### Step 0 - Set password and change host name
+It is recommended, but not required, to change the default `pi` password,  as well as identify the device with a unique name for use in testing (e.g. `test-arm-1`); run the following commands on the target device:
+
+```
+sudo passwd pi
+export DEVICE_NAME=test-arm-1
+sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hosts
+sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hostname
+sudo hostname ${DEVICE_NAME}
+```
+The device will need to be rebooted for the name change to take effect on the LAN; then the device can be referenced by the name, e.g. `test-arm-1.local`.
 ### Step 1 - Install Open Horizon
-For either Ubuntu VM or Raspbian Raspberry Pi3 the software can be installed manually.  Log into the VM or RPi3 and run the commands below:
+For any Debian-based LINUX environment, e.g. Ubuntu Bionic or Raspbian Stretch, Docker needs to be installed.
+Log into the VM or RPi3 and run the commands below to install Docker:
 
 ```
 wget -qO - get.docker.com | sudo bash
 ```
 
-```
-sudo -s
-APT_REPO=updates \
-  && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list \
-  && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key \
-  && wget -qO - "${PUBLICKEY_URL}" | apt-key add - \
-  && echo "deb [arch=armhf,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" > "${APT_LIST}" \
-  && apt-get update -y && apt-get install -y bluehorizon horizon horizon-cli
-exit
-```
-
-It is recommended, but not required, to change the default `pi` password,  as well as identify the device with a unique name for use in testing (e.g. `test-rpi3-1`):
+Then, as _root_ (n.b. `sudo -s` first), run the following commands to install Open Horizon:
 
 ```
-passwd pi
-export DEVICE_NAME=test-rpi3-1
-sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hosts
-sudo sed -i "s|raspberrypi|${DEVICE_NAME}|" /etc/hostname
-sudo hostname ${DEVICE_NAME}
+REPO=updates \
+  && LIST=/etc/apt/sources.list.d/bluehorizon.list \
+  && URL=http://pkg.bluehorizon.network \
+  && KEY=${URL}/bluehorizon.network-public.key \
+  && wget -qO - "${KEY}" | apt-key add - \
+  && echo "deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main" > "${LIST}" \
+  && apt-get update -y && apt-get install -y bluehorizon
 ```
-The device will need to be rebooted for the name change to take effect.
 
 ### Step 2 - Configure for development / testing
 
-If the device is to be used for development and testing it will need to be configured with the appropriate account, privileges, and change `sudo` policy for that user to not require a password:
+If the device is to be used for development and testing it will need to be configured with the appropriate account, privileges, and change `sudo` policy for that user to not require a password.  Run the following commands to create a new user:
 
 ```
 export USERID=<your-userid>
 sudo adduser ${USERID} 
 ```
+Then add the user to both the `sudo` and `docker` groups:
 
 ```
 sudo addgroup ${USERID} sudo
 sudo addgroup ${USERID} docker
 ```
+Finally, change the permissions for the user to enable password-less `sudo` with the following commands:
 
 ```
 echo "${USERID} ALL=(ALL) NOPASSWD: ALL" > /tmp/nopasswd \
@@ -78,10 +81,10 @@ echo "${USERID} ALL=(ALL) NOPASSWD: ALL" > /tmp/nopasswd \
   && sudo mv /tmp/nopasswd /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
-The **development host** (e.g. Apple iMac or MacBook) will also need to be configured with SSH credentials (n.b. `~/.ssh/`) which are then copied to the device from the host; run the following command as `<your-userid>` on the development host:
+The **development host** (e.g. Apple iMac or MacBook) will also need to be configured with SSH credentials (n.b. `~/.ssh/`) which are then copied to the device from the host; run the following command **on the development host** as `<your-userid>`:
 
 ```
-ssh-copy-id <device-name>.local # and enter password chosed previously
+ssh-copy-id <device-name>.local
 ```
 
 After credentials are established, the device may be used to test [services][service-md] and [patterns][pattern-md].  Refer to [`BUILD.md`][build-md].
@@ -93,11 +96,11 @@ After credentials are established, the device may be used to test [services][ser
 
 # B. Network installation
 
-Installations can be performed over the network when devices are discovered.  This technique is suitable for local-area network (LAN) deployments. Please refer to [these][network] instructions.
+Installations can be automated over the network as new devices are discovered.  This technique is suitable for local-area network (LAN) deployments. Please refer to [these][network] instructions.
 
 # C. System installation
 
-System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication.  Please refer to [these][system] instructions.
+System level installation modifies the operating system image boot sequence to install the Open Horizon software.  This technique is suitable for replication in mass quantities.  Please refer to [these][system] instructions.
 
 # D. Horizon Addons
 

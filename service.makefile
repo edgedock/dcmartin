@@ -3,7 +3,7 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),$(shell uname 
 
 ## IDENTIFICATION
 HZN_ORG_ID ?= $(if $(wildcard ../HZN_ORG_ID),$(shell cat ../HZN_ORG_ID),HZN_ORG_ID_UNSPECIFIED)
-DOCKER_HUB_ID ?= $(if $(wildcard ../DOCKER_HUB_ID),$(shell cat ../DOCKER_HUB_ID),$(shell whoami))
+DOCKER_HUB_ID ?= $(if $(wildcard ../DOCKER_HUB_ID),$(shell cat ../DOCKER_HUB_ID),)
 
 ## GIT
 GIT_REMOTE_URL=$(shell git remote get-url origin)
@@ -97,7 +97,7 @@ depend: $(APIKEY) ${DIR}
 
 build: Dockerfile build.json service.json rootfs Makefile
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > build.out
+	@export DOCKER_TAG="${DOCKER_TAG}" && docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > "build.$${DOCKER_TAG##*/}.out"
 
 logs:
 	@docker logs -f "${DOCKER_NAME}"
@@ -146,7 +146,7 @@ service-start: remove service-stop depend # $(SERVICE_REQVARS)
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
 	@./checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -d ${DIR}
+	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
 
 service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) "${NC}" &> /dev/stderr
@@ -265,7 +265,7 @@ nodes-purge: nodes-undo nodes-clean
 
 clean: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@rm -fr ${DIR} check.json build.out test.*.out
+	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: clean
