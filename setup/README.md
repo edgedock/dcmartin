@@ -72,7 +72,7 @@ Finally, change the permissions for the user to enable password-less `sudo` with
 ```
 echo "${USERID} ALL=(ALL) NOPASSWD: ALL" > /tmp/nopasswd \
   && sudo chown root /tmp/nopasswd \
-  && sudo chmod 400 /tmp/nopasswd
+  && sudo chmod 400 /tmp/nopasswd \
   && sudo mv /tmp/nopasswd /etc/sudoers.d/010_${USERID}-nopasswd
 ```
 
