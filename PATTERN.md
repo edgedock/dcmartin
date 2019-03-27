@@ -63,7 +63,18 @@ Validates the pattern registration in the exchange using the `hzn` command-line-
 
 # 3. Deployment Testing
 
-Client devices and virtual machines may be targeted for use as development nodes; refer to `setup/README.md` for additional information.  Once devices have been configured for use a development nodes a listing of node names should be created in the file `TEST_TMP_MACHINES`; this file is _ignored_ by Git; for example:
+Client devices and virtual machines may be targeted for use as development nodes; refer to `setup/README.md` for additional information.  Devices are controlled using the `ssh` command via both the `Makefile` as well as through the `nodereg.sh` script; this script processes devices through stages until registered:
+
++ `null` - installs Open Horizon on the device
++ `unconfigured` - registers the node for the current pattern
++ `configuring` - purges the device of Open Horizon
++ `configured` - unregisters node iff pattern `url` does not match current
+
+See `make nodes` below for additional information.
+
+## A. Identify development nodes
+
+Once devices have been configured for use a development nodes a listing of node names should be created in the file `TEST_TMP_MACHINES`; this file is _ignored_ by Git; for example:
 
 ```
 test-amd64-1.local
