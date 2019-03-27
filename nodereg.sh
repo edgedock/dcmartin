@@ -40,8 +40,7 @@ node_purge()
   machine=${1}
   node_unregister ${machine}
   echo "--- INFO -- $0 $$ -- purging ${machine}" &> /dev/stderr
-  ssh ${machine} 'sudo apt-get remove -y bluehorizon horizon horizon-cli' &> /dev/null
-  ssh ${machine} 'sudo apt-get purge -y bluehorizon horizon horizon-cli' &> /dev/null
+  ssh ${machine} 'sudo apt purge -y bluehorizon horizon horizon-cli' &> /dev/null
 }
 
 node_install()
