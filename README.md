@@ -43,30 +43,35 @@ These services and patterns are built and pushed to public [repositories][docker
 
 Services are defined within a directory hierarchy of this [repository][repository]. Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.
 
+Patterns include:
 
-There are two services which are **available as a _pattern_** and may be registered for a node:
++ `yolo2msghub` - Pattern of `yolo2msghub` service with `yolo`,`hal`,`wan`, and `cpu`
++ `motion2mqtt` - Pattern of `motion2mqtt`,`yolo4motion` and `mqtt2kafka` services with ``mqtt`,`hal`,`wan`, and `cpu`
 
-+ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
-+ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
-
-Other services include:
+Services include:
 
 + [`cpu`][cpu-service] - provide CPU usage as percentage (0-100)
 + [`wan`][wan-service] - provide Wide-Area-Network information
 + [`hal`][hal-service] - provide Hardware-Abstraction-Layer information
 + [`yolo`][yolo-service] - recognize entities from USB camera
 + [`mqtt`][mqtt-service] - MQTT message broker service
-+ [`herald`][herald-service] - multi-cast data received from other heralds on local-area-network
 + [`hzncli`][hzncli] - service container with `hzn` command-line-interface installed
++ [`herald`][herald-service] - multi-cast data received from other heralds on local-area-network
++ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
++ [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
 + [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
 + [`mqtt2kafka`][mqtt2kafka-service] - relay specified MQTT traffic to Kafka
 + [`jetson-caffe`][jetson-caffe-service] - BVLC Caffe with CUDA and OpenCV for nVidia Jetson TX
 + [`jetson-yolo`][jetson-yolo-service] - Darknet YOLO with CUDA and OpenCV for nVidia Jetson TX
++ [`jetson-digits`][jetson-digits] - nVidia DIGITS with CUDA
 
-There are also two _base_ containers that are used by the other services:
+There are also _base_ containers that are used by the other services:
 
-+ [`base-alpine`][base-alpine] - base service container for Alpine LINUX
-+ [`base-ubuntu`][base-ubuntu] - base service container for Ubuntu LINUX
++ [`base-alpine`][base-alpine] - base container for Alpine LINUX
++ [`base-ubuntu`][base-ubuntu] - base container for Ubuntu LINUX
++ [`jetson-jetpack`][jetson-jetpack] - base container for Jetson devices
++ [`jetson-cuda`][jetson-cuda] - base container for Jetson devices with CUDA
++ [`jetson-opencv`][jetson-opencv] - base container for Jetson devices with CUDA & OpenCV
 
 [yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
 [hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
@@ -85,6 +90,11 @@ There are also two _base_ containers that are used by the other services:
 [mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
 [jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
 [jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
+
+[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
+[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
+[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
+[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
 # 3. Build, Push & Publish
 
