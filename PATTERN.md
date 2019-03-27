@@ -63,7 +63,9 @@ Validates the pattern registration in the exchange using the `hzn` command-line-
 
 # 3. Deployment Testing
 
-Client devices and virtual machines may be targeted for use as development nodes; refer to `setup/README.md` for additional information.  Devices are controlled using the `ssh` command via both the `Makefile` as well as through the `nodereg.sh` script; this script processes devices through stages until registered:
+Client devices and virtual machines may be targeted for use as development nodes; refer to [`setup/README.md`][setup-readme-md] for additional information.  Devices are controlled using the `ssh` command via both the `Makefile` as well as through the `nodereg.sh` script; this script processes devices through stages until registered:
+
+[setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 
 + `null` - installs Open Horizon on the device
 + `unconfigured` - registers the node for the current pattern
