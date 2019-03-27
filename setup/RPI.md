@@ -68,24 +68,30 @@ Host is up (0.21s latency).
 MAC Address: B8:27:EB:ED:F0:55 (Raspberry Pi Foundation)
 ```
 
+Record the IP address of the target device; it will be referenced in later commands:
+
+```
+export DEVIP=192.168.1.220
+```
+
 ## Step 3
 Copy SSH keys from the host to the default `pi` account; if SSH keys do not exist, use the `ssh-keygen` command to create.
 
 ```
-ssh-copy-id pi@192.168.1.220
+ssh-copy-id pi@${DEVIP}
 ```
 
 And change the default password for the `pi` account:
 
 ```
-ssh pi@192.168.1.220 'sudo passwd pi'
+ssh pi@${DEVIP} 'sudo passwd pi'
 ```
 
 ## Step 4
 Install Docker latest release directly from [Docker][docker-com]:
 
 ```shell
-ssh pi@192.168.1.220 'wget -qO - get.docker.com | sudo bash'
+ssh pi@${DEVIP} 'wget -qO - get.docker.com | sudo bash'
 ```
 
 ## Step 5
@@ -96,39 +102,39 @@ REPO=updates
 LIST=/etc/apt/sources.list.d/bluehorizon.list
 URL=http://pkg.bluehorizon.network
 KEY=${URL}/bluehorizon.network-public.key
-ssh pi@192.168.1.220 "wget -qO - ${KEY} | sudo apt-key add -"
-ssh pi@192.168.1.220 "echo deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main > /tmp/$$ && sudo mv /tmp/$$ ${LIST}"
-ssh pi@192.168.1.220 'sudo apt-get update -y && sudo apt-get install -y bluehorizon horizon horizon-cli'
+ssh pi@${DEVIP} "wget -qO - ${KEY} | sudo apt-key add -"
+ssh pi@${DEVIP} "echo deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main > /tmp/$$ && sudo mv /tmp/$$ ${LIST}"
+ssh pi@${DEVIP} 'sudo apt-get update -y && sudo apt-get install -y bluehorizon horizon horizon-cli'
 ```
 
 ## Step 6
 Create development account for current user:
 
 ```
-ssh pi@192.168.1.220 sudo adduser ${USER}
+ssh pi@${DEVIP} sudo adduser ${USER}
 ```
 
 Enter account specifics, including new password, and then copy host SSH credentials to account:
 
 ```
-ssh-copy-id ${USER}@192.168.1.220 
+ssh-copy-id ${USER}@${DEVIP} 
 ```
 
 Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
 
 ```shell
-ssh pi@192.168.1.220 "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
-ssh pi@192.168.1.220 "chmod 400 /tmp/010_${USER}-nopasswd"
-ssh pi@192.168.1.220 "sudo chown root /tmp/010_${USER}-nopasswd"
-ssh pi@192.168.1.220 "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
+ssh pi@${DEVIP} "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
+ssh pi@${DEVIP} "chmod 400 /tmp/010_${USER}-nopasswd"
+ssh pi@${DEVIP} "sudo chown root /tmp/010_${USER}-nopasswd"
+ssh pi@${DEVIP} "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
 ```
 
 ## Step 7
 Configure _account_ for access to Docker commands; logout and login to take effect.
 
 ```
-ssh pi@192.168.1.220 "sudo addgroup ${USER} docker"
-ssh pi@192.168.1.220 "sudo addgroup ${USER} sudo"
+ssh pi@${DEVIP} "sudo addgroup ${USER} docker"
+ssh pi@${DEVIP} "sudo addgroup ${USER} sudo"
 ```
 
 ## Step 8
