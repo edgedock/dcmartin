@@ -39,23 +39,18 @@ sudo hostname ${DEVICE_NAME}
 ```
 The device will need to be rebooted for the name change to take effect on the LAN; then the device can be referenced by the name, e.g. `test-arm-1.local`.
 ### Step 1 - Install Open Horizon
-For any Debian-based LINUX environment, e.g. Ubuntu Bionic or Raspbian Stretch, Docker needs to be installed.
-Log into the VM or RPi3 and run the commands below to install Docker:
+For any Debian-based LINUX environment, e.g. Ubuntu or Raspbian.
+
+If `docker` command is not installed, log into the device and run the commands below to install Docker:
 
 ```
 wget -qO - get.docker.com | sudo bash
 ```
 
-Then, as _root_ (n.b. `sudo -s` first), run the following commands to install Open Horizon:
+Then run the following commands to install Open Horizon:
 
 ```
-REPO=updates \
-  && LIST=/etc/apt/sources.list.d/bluehorizon.list \
-  && URL=http://pkg.bluehorizon.network \
-  && KEY=${URL}/bluehorizon.network-public.key \
-  && wget -qO - "${KEY}" | apt-key add - \
-  && echo "deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main" > "${LIST}" \
-  && apt-get update -y && apt-get install -y bluehorizon
+wget -qO - ibm.biz/get-horizon | sudo bash
 ```
 
 ### Step 2 - Configure for development / testing
