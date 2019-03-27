@@ -113,7 +113,7 @@ The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requir
 
 **Video Script:** on [GitHub][clone-to-publish-script]
 
-[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-build-push-publish-cpu.txt
+[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-to-publish-cpu.txt
 
 ## 3.2 Build and push all containers (see [**video**][service-push-video])
 
@@ -215,8 +215,6 @@ A _quick-start_ for Ubuntu/Debian/Raspbian LINUX below.
 ```
 wget -qO - ibm.biz/horizon-setup | sudo bash
 ```
-
-[setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 
 ## 6.1 Credentials
 
