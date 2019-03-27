@@ -103,7 +103,7 @@
         { "key": "MOTION_MQTT_PASSWORD", "value": "" },
         { "key": "HZN_EXCHANGE_APIKEY", "value": null }
       ],
-      "public_key": null
+      "public_key": null,
       "private_key": null,
       "nodes": [
         { "id": "rpi-2", "machine": "rpi3", "device": "test-sdr-1", "token": null },
