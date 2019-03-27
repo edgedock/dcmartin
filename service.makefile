@@ -26,7 +26,7 @@ SERVICE_URI := $(shell jq -r '.url' service.json)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
 SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
 SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json)
-SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[].key' build.json)
+SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[]|select(.value!=null).key' build.json)
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}*.key),$(wildcard ../${HZN_ORG_ID}*.key),HZN_ORG_ID_PRIVATE_KEY_FILE)
