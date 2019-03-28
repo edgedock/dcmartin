@@ -98,13 +98,7 @@ ssh pi@${DEVIP} 'wget -qO - get.docker.com | sudo bash'
 Install Open Horizon packages
 
 ```
-REPO=updates
-LIST=/etc/apt/sources.list.d/bluehorizon.list
-URL=http://pkg.bluehorizon.network
-KEY=${URL}/bluehorizon.network-public.key
-ssh pi@${DEVIP} "wget -qO - ${KEY} | sudo apt-key add -"
-ssh pi@${DEVIP} "echo deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${REPO} main > /tmp/$$ && sudo mv /tmp/$$ ${LIST}"
-ssh pi@${DEVIP} 'sudo apt-get update -y && sudo apt-get install -y bluehorizon horizon horizon-cli'
+ssh pi@${DEVIP} 'wget -qO - ibm.biz/get-horizon | sudo bash'
 ```
 
 ## Step 6

@@ -197,7 +197,7 @@ wget -qO - get.docker.com | sudo bash
 Install Open Horizon
 
 ```
-wget -qO - ibm.biz/horizon-setup | sudo bash
+wget -qO - ibm.biz/get-horizon | sudo bash
 ```
 
 ## Step Y

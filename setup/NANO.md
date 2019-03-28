@@ -78,13 +78,7 @@ sudo addgroup ${SUDO_USER} docker
 Install Open Horizon packages
 
 ```
-sudo -s
-APT_REPO=updates \
-  && APT_LIST=/etc/apt/sources.list.d/bluehorizon.list \
-  && PUBLICKEY_URL=http://pkg.bluehorizon.network/bluehorizon.network-public.key \
-  && wget -qO - "${PUBLICKEY_URL}" | apt-key add - \
-  && echo "deb [arch=armhf,arm64,amd64] http://pkg.bluehorizon.network/linux/ubuntu xenial-${APT_REPO} main" > "${APT_LIST}" \
-  && apt-get update -y && apt-get install -y bluehorizon horizon horizon-cli
+wget -qO - ibm.biz/get-horizon | sudo bash
 ```
 
 ## Step 7
