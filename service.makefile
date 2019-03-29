@@ -180,8 +180,14 @@ service-verify: $(APIKEY) $(KEYS)
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) "${SERVICE_TAG}"
 
-service-clean: ${DIR}
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-clean: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
+service-clean:
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-clean: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" clean; \
+	done
+
+exchange-clean: ${DIR}
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- exchange-clean: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
 	@./service-clean.sh
 
 ##
@@ -272,7 +278,7 @@ clean: remove service-stop
 	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
-distclean: clean
+distclean: service-clean
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: distribution""${NC}" &> /dev/stderr
 	@rm -fr $(KEYS) $(APIKEY) $(SERVICE_REQVARS) ${SERVICE_VARIABLES} TEST_TMP_*
 
