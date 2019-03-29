@@ -3,7 +3,6 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),$(shell uname 
 
 ## IDENTIFICATION
 HZN_ORG_ID ?= $(if $(wildcard ../HZN_ORG_ID),$(shell cat ../HZN_ORG_ID),HZN_ORG_ID_UNSPECIFIED)
-DOCKER_HUB_ID ?= $(if $(wildcard ../DOCKER_HUB_ID),$(shell cat ../DOCKER_HUB_ID),)
 
 ## GIT
 GIT_REMOTE_URL=$(shell git remote get-url origin)
@@ -37,16 +36,21 @@ KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY && echo APIKEY),APIKEY)
 
 ## docker
-DOCKER_HUB_ID := $(if $(DOCKER_HUB_ID),$(DOCKER_HUB_ID),$(shell whoami))
-DOCKER_LOGIN := $(if $(wildcard ~/.docker/config.json),,Please_login_to_docker_hub)
+DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),)
+DOCKER_NAMESPACE := $(if $(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"PLEASE_SET_DOCKER_NAMESPACE"))
+DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),)
+DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),"docker.io"))
+DOCKER_USERAUTH := $(if $(wildcard ~/.docker/config.json),$(shell jq -r '.auths|to_entries[]|select(.key|test("'$(DOCKER_REGISTRY)'")).value.auth' ~/.docker/config.json | base64 --decode),)
+DOCKER_LOGIN ?= $(if $(DOCKER_USERAUTH),$(shell echo "$(DOCKER_USERAUTH)" | sed 's/\(.*\):.*/\1/'),)
+DOCKER_PASSWORD ?= $(if $(DOCKER_USERAUTH),$(shell echo "$(DOCKER_USERAUTH)" | sed 's/.*:\(.*\)/\1/'),)
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
-DOCKER_TAG = $(DOCKER_HUB_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
+DOCKER_TAG = $(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
 BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\([^/]*\)/.*|\1|")
-SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_HUB_ID) ]; then echo ${DOCKER_HUB_ID}; else echo ""; fi)
+SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_NAMESPACE) ]; then echo ${DOCKER_NAMESPACE}; else echo ""; fi)
 BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/\([^:]*\):.*|\1|")
 BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
@@ -118,9 +122,9 @@ check:
 	@rm -f check.json
 	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
-push: build $(DOCKER_LOGIN)
+push: build
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@docker push ${DOCKER_TAG}
+	@docker push ${DOCKER_REGISTRY}/${DOCKER_TAG}
 
 test:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
@@ -132,14 +136,14 @@ test:
 
 ${SERVICE_ARCH_SUPPORT}:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making service: ${SERVICE_NAME}; architecture: $@""${NC}" &> /dev/stderr
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$@" build
+	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$@" build
 
 service-build: ${SERVICE_ARCH_SUPPORT}
 
 service-push: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" push; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" push; \
 	done
 
 service-start: remove service-stop depend # $(SERVICE_REQVARS) 
@@ -168,7 +172,7 @@ publish-service: ${DIR} $(APIKEY) $(KEYS)
 service-publish: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-publish: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_HUB_ID=$(DOCKER_HUB_ID) BUILD_ARCH="$${arch}" publish-service; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" publish-service; \
 	done
 
 service-verify: $(APIKEY) $(KEYS)
