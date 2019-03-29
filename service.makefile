@@ -37,14 +37,11 @@ APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json
 
 ## docker
 DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),)
-DOCKER_NAMESPACE := $(if $(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"PLEASE_SET_DOCKER_NAMESPACE"))
+DOCKER_NAMESPACE := $(if $(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"required: DOCKER_NAMESPACE"))
 DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),)
-DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),"docker.io"))
-DOCKER_USERAUTH := $(if $(wildcard ~/.docker/config.json),$(shell jq -r '.auths|to_entries[]|select(.key|test("'$(DOCKER_REGISTRY)'")).value.auth' ~/.docker/config.json | base64 --decode),)
-DOCKER_LOGIN ?= $(if $(DOCKER_USERAUTH),$(shell echo "$(DOCKER_USERAUTH)" | sed 's/\(.*\):.*/\1/'),)
-DOCKER_PASSWORD ?= $(if $(DOCKER_USERAUTH),$(shell echo "$(DOCKER_USERAUTH)" | sed 's/.*:\(.*\)/\1/'),)
+DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),))
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
-DOCKER_TAG = $(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION)
+DOCKER_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION),$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION))
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
