@@ -1,4 +1,4 @@
 cd ~/gitdir/open-horizon
-export DOCKER_HUB_ID=dcmsjc
+export DOCKER_NAMESPACE=dcmsjc
 docker login
 make service-push

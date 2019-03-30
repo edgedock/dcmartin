@@ -18,7 +18,7 @@ YOLO_NAMES="${DARKNET}/data/coco.names"
 yolo_init() 
 {
   # build configuation
-  CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","threshold":'${YOLO_THRESHOLD}'}'
+  CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-}',"date":'$(date +%s)',"period":'${YOLO_PERIOD}',"entity":"'${YOLO_ENTITY}'","scale":"'${YOLO_SCALE}'","config":"'${YOLO_CONFIG}'","device":"'${YOLO_DEVICE}'","threshold":'${YOLO_THRESHOLD}',"services":'"${SERVICES:-null}"'}}'
   # get names of entities that can be detected
   if [ -s "${YOLO_NAMES}" ]; then
     if [ "${DEBUG:-}" == 'true' ]; then echo "??? DEBUG $0 $$ -- processing ${YOLO_NAMES}" &> /dev/stderr; fi
@@ -58,8 +58,7 @@ yolo_config()
       YOLO_DATA="${DARKNET_V3_DATA}"
     ;;
     *)
-      if [ "${DEBUG:-}" == 'true' ]; then echo "*** ERROR -- $0 $$ -- invalid YOLO_CONFIG: ${1}; exiting" &> /dev/stderr; fi
-      exit 1
+      if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- invalid YOLO_CONFIG: ${1}" &> /dev/stderr; fi
     ;;
   esac
   if [ ! -s "${YOLO_WEIGHTS}" ]; then

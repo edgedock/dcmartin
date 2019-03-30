@@ -3,15 +3,39 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-if [ -z "${CPU_INTERVAL}" ]; then CPU_INTERVAL=1; fi
-if [ -z "${CPU_PERIOD}" ]; then CPU_PERIOD=60; fi
+###
+### FUNCTIONS
+###
 
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${CPU_PERIOD}',"interval":'${CPU_INTERVAL}'}'
-echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
+source /usr/bin/service-tools.sh
 
+###
+### initialize
+###
+
+## initialize horizon
+hzn_init
+
+## configure service
+
+CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"period":"'${CPU_PERIOD}'","interval":"'${CPU_INTERVAL}'","services":'"${SERVICES:-null}"'}'
+
+## initialize servive
+service_init ${CONFIG}
+
+###
+### MAIN
+###
+
+## create initial output
+OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
+echo '{"date":'$(date +%s)'}' > "${OUTPUT_FILE}"
+service_update "${OUTPUT_FILE}"
+
+# iterate forever
 while true; do
   DATE=$(date +%s)
-  OUTPUT="${CONFIG}"
+  OUTPUT=$(jq -c '.' "${OUTPUT_FILE}")
 
   # https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
   RAW=$(grep -iE '^cpu ' /proc/stat)
@@ -27,8 +51,9 @@ while true; do
   OUTPUT=$(echo "${OUTPUT}" | jq '.percent='${PERCENT})
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/$$"
-  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${OUTPUT_FILE}"
+  # update service
+  service_update "${OUTPUT_FILE}"
   # wait for ..
   SECONDS=$((CPU_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

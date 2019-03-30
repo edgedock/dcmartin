@@ -2,7 +2,7 @@
 
 # 1. Manual variables
 
-## `DOCKER_HUB_ID`
+## `DOCKER_NAMESPACE`
 
 Please specify the appropriate identifier for your container registry; defaults to `whoami`.  This variable should be changed prior to attempting to `push` a Docker image.
 
@@ -59,7 +59,7 @@ This variable provides the IBM Cloud API key; it is the contents of the `APIKEY`
 
 ## Docker
 
-+ `DOCKER_HUB_ID` - identifier for login to container registry; defaults to output of `whoami`
++ `DOCKER_NAMESPACE` - identifier for login to container registry; defaults to output of `whoami`
 + `DOCKER_NAME` - identifier for container; defaults to `${BUILD_ARCH}/${SERVICE_NAME}`
 + `DOCKER_TAG` - tag for container; defaults to `$(DOCKER_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)` 
 + `DOCKER_PORT` - port mapping for local container; from default is first from `ports` in `service.json`

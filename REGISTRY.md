@@ -160,7 +160,7 @@ cp ~/registry.json .
 export DOCKER_LOGIN=token
 export DOCKER_PASSWORD=$(jq -r '.private' registry.json)
 export DOCKER_REGISTRY=$(jq -r '.registry' registry.json)
-export DOCKER_HUB_ID=$(jq -r '.namespace' registry.json)
+export DOCKER_NAMESPACE=$(jq -r '.namespace' registry.json)
 export DOCKER_TOKEN=(jq -r '.public' registry.json)
 ```
 

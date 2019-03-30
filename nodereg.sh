@@ -52,26 +52,26 @@ node_install()
   && URL=http://pkg.bluehorizon.network \
   && KEY=${URL}/bluehorizon.network-public.key \
   && wget -qO - "${KEY}" | sudo apt-key add - \
-  && echo "deb [arch=armhf,arm64,amd64] ${URL}/linux/ubuntu xenial-${APT_REPO} main" > /tmp/$$ \
+  && echo "deb [arch=armhf,arm64,amd64,ppc64le] ${URL}/linux/ubuntu xenial-${APT_REPO} main" > /tmp/$$ \
   && sudo mv /tmp/$$ "${APT}"'
-  ssh ${machine} 'sudo apt-get update' # &> /dev/null
-  ssh ${machine} 'sudo apt-get upgrade -y' # &> /dev/null
-  ssh ${machine} 'sudo apt-get install -y bluehorizon' # &> /dev/null
+  ssh ${machine} 'sudo apt-get update &> update.log'
+  ssh ${machine} 'sudo apt-get upgrade -y &> upgrade.log'
+  ssh ${machine} 'sudo apt-get install -y bluehorizon &> install.log'
 }
 
 node_unregister()
 {
   machine=${1}
   echo "--- INFO -- $0 $$ -- unregistering ${machine}" &> /dev/stderr
-  ssh ${machine} 'hzn unregister -f -r' &> /dev/null
+  ssh ${machine} 'hzn unregister -f -r &> unregister.log &'
 }
 
 node_register()
 {
   machine=${1}
   echo "--- INFO -- $0 $$ -- registering ${machine} with pattern: ${SERVICE_NAME}; input: ${INPUT}" &> /dev/stderr
-  scp ${INPUT} ${machine}:/tmp/input.json &> /dev/null
-  ssh ${machine} hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${SERVICE_NAME} -f /tmp/input.json -n "${machine%.*}:null" # &> /dev/null
+  scp ${INPUT} ${machine}:input.json &> /dev/null
+  ssh ${machine} "hzn register ${HZN_ORG_ID} -u iamapikey:${HZN_EXCHANGE_APIKEY} ${SERVICE_NAME} -f input.json -n ${machine%.*}:null &> register.log"
 }
 
 node_update()
@@ -88,7 +88,6 @@ node_update()
     configuring)
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
-      node_purge ${machine}
       ;;
     unconfiguring)
       pattern=$(node_status ${machine} | jq -r '.pattern')

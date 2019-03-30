@@ -1,4 +1,4 @@
-export DOCKER_HUB_ID=dcmsjc
+export DOCKER_NAMESPACE=dcmsjc
 docker login
 export HZN_ORG_ID=dcmartin@us.ibm.com
 for service in base-alpine cpu hal wan base-ubuntu yolo yolo2msghub; do cd ~/gitdir/open-horizon/${service} && make service-build && make service-push && make service-publish; done

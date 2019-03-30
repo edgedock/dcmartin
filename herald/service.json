@@ -18,7 +18,7 @@
     "services": {
       "herald": {
         "environment": [
-          "SERVICE_LABEL=herald","SERVICE_VERSION=0.0.3"
+          "SERVICE_LABEL=herald","SERVICE_VERSION=0.0.3","SERVICE_PORT=5960"
         ],
         "specific_ports": [
           { "HostPort": "5959/udp", "HostIP": "0.0.0.0" },

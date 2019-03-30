@@ -71,68 +71,76 @@ MAC Address: B8:27:EB:ED:F0:55 (Raspberry Pi Foundation)
 Record the IP address of the target device; it will be referenced in later commands:
 
 ```
-export DEVIP=192.168.1.220
+export IP=192.168.1.220
 ```
 
 ## Step 3
 Copy SSH keys from the host to the default `pi` account; if SSH keys do not exist, use the `ssh-keygen` command to create.
 
 ```
-ssh-copy-id pi@${DEVIP}
+ssh-copy-id pi@${IP}
 ```
 
 And change the default password for the `pi` account:
 
 ```
-ssh pi@${DEVIP} 'sudo passwd pi'
+ssh pi@${IP} 'sudo passwd pi'
 ```
 
 ## Step 4
 Install Docker latest release directly from [Docker][docker-com]:
 
 ```shell
-ssh pi@${DEVIP} 'wget -qO - get.docker.com | sudo bash'
+ssh pi@${IP} 'wget -qO - get.docker.com | sudo bash'
 ```
 
 ## Step 5
 Install Open Horizon packages
 
 ```
-ssh pi@${DEVIP} 'wget -qO - ibm.biz/get-horizon | sudo bash'
+ssh pi@${IP} 'wget -qO - ibm.biz/get-horizon | sudo bash'
 ```
 
 ## Step 6
 Create development account for current user:
 
 ```
-ssh pi@${DEVIP} sudo adduser ${USER}
+ssh pi@${IP} sudo adduser ${USER}
 ```
 
 Enter account specifics, including new password, and then copy host SSH credentials to account:
 
 ```
-ssh-copy-id ${USER}@${DEVIP} 
+ssh-copy-id ${USER}@${IP} 
 ```
 
 Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
 
 ```shell
-ssh pi@${DEVIP} "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
-ssh pi@${DEVIP} "chmod 400 /tmp/010_${USER}-nopasswd"
-ssh pi@${DEVIP} "sudo chown root /tmp/010_${USER}-nopasswd"
-ssh pi@${DEVIP} "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
+ssh pi@${IP} "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
+ssh pi@${IP} "chmod 400 /tmp/010_${USER}-nopasswd"
+ssh pi@${IP} "sudo chown root /tmp/010_${USER}-nopasswd"
+ssh pi@${IP} "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
 ```
 
 ## Step 7
 Configure _account_ for access to Docker commands; logout and login to take effect.
 
 ```
-ssh pi@${DEVIP} "sudo addgroup ${USER} docker"
-ssh pi@${DEVIP} "sudo addgroup ${USER} sudo"
+ssh pi@${IP} "sudo addgroup ${USER} docker"
+ssh pi@${IP} "sudo addgroup ${USER} sudo"
 ```
 
 ## Step 8
-Once SSH access has been enabled properly, restrictions on access should then be applied; execute the following commands to disable password-based login (as root, use `sudo -s`):
+Once SSH access has been enabled properly, restrictions on access should then be applied.  If SSH has been configured properly, no input or password should be required; check `~/.ssh/known_hosts` for name conflicts).  Login to the device as root:
+
+
+```
+ssh pi@${IP} sudo -s
+```
+
+and execute the following commands to disable password-based login:
+
 
 ```
 cat > /etc/ssh/ssh_config << EOF

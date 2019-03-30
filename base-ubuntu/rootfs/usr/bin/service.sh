@@ -3,36 +3,16 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-# hzn config
-if [ -z "${HZN}" ]; then
-  if [ ! -s "/tmp/config.json" ]; then
-    echo "*** ERROR $0 $$ -- environment HZN unset; empty /tmp/config.json; exiting" 2> /dev/stderr
-    exit 1
-  fi
-  echo "+++ WARN $0 $$ -- environment HZN unset; using /tmp/config.json; continuing" 2> /dev/stderr
-  export HZN=$(jq '.' "/tmp/config.json")
-  if [ -z "${HZN}" ]; then
-    echo "*** ERROR $0 $$ -- environment HZN unset; invalid /tmp/config.json; exiting" $(cat /tmp/config.json) 2> /dev/stderr
-    exit 1
-  fi
-fi
+source /usr/bin/service-tools.sh
 
-RESPONSE_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.json"
-echo "${HZN}" > "${RESPONSE_FILE}"
+###
+### MAIN
+###
 
-SERVICE_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
-TSF="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$"
-echo '{"'${SERVICE_LABEL}'":' > "${TSF}"
-if [ -s "${SERVICE_FILE}" ]; then
-  cat "${SERVICE_FILE}" >> "${TSF}"
-else
-  echo 'null' >> "${TSF}"
-fi
-echo '}' >> "${TSF}"
-jq -s add "${TSF}" "${RESPONSE_FILE}" > "${TMPDIR}/$$.$$" && mv -f "${TMPDIR}/$$.$$" "${RESPONSE_FILE}"
-rm -f "${TSF}"
-
+RESPONSE_FILE=$(mktemp)
+service_output ${RESPONSE_FILE}
 SIZ=$(wc -c "${RESPONSE_FILE}" | awk '{ print $1 }')
+if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- output: ${RESPONSE_FILE}; size: ${SIZ}" &> /dev/stderr; fi
 
 echo "HTTP/1.1 200 OK"
 echo "Content-Type: application/json; charset=ISO-8859-1"

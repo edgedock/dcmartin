@@ -20,9 +20,9 @@
   ],
   "deployment": {
     "services": {
-      "jetson-yolo": {
+      "yolo": {
         "environment": [
-          "SERVICE_LABEL=jetson-yolo",
+          "SERVICE_LABEL=yolo",
           "SERVICE_VERSION=0.0.1",
           "LD_LIBRARY_PATH=:/usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/tegra:/usr/local/cuda/lib64:/usr/local/cuda/lib64:/root/opencv-3.4.1/build/lib"
         ],
