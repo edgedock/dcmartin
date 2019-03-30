@@ -41,7 +41,8 @@ DOCKER_NAMESPACE := $(if $(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE),$(if $(wildcard
 DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),)
 DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),))
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
-DOCKER_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION),$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION))
+DOCKER_NAMESPACE := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE))
+DOCKER_TAG = $(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
@@ -121,7 +122,7 @@ check:
 
 push: build
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@docker push ${DOCKER_REGISTRY}/${DOCKER_TAG}
+	@docker push ${DOCKER_TAG}
 
 test:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
