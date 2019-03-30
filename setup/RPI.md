@@ -88,9 +88,11 @@ ssh pi@${IP} 'sudo passwd pi'
 ```
 
 ## Step 4
-Install Docker latest release directly from [Docker][docker-com]:
+Update and upgrade, then install Docker latest release directly from [Docker][docker-com]:
 
 ```shell
+ssh pi@${IP} 'sudo apt update'
+ssh pi@${IP} 'sudo apt upgrade -qq -y'
 ssh pi@${IP} 'wget -qO - get.docker.com | sudo bash'
 ```
 
