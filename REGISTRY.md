@@ -121,6 +121,12 @@ Confirm creation of namespace; run the following command to list all:
 ibmcloud cr namespace-list
 ```
 
+Upgrade the container registry to _standard_ plan:
+
+```
+ibmcloud cr plan-upgrade
+```
+
 ### Step 5
 Create an API key with read/write access to the registry; create file and set environment variable:
 
