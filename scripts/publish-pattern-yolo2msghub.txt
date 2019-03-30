@@ -1,4 +1,4 @@
-export DOCKER_HUB_ID=dcmsjc
+export DOCKER_NAMESPACE=dcmsjc
 export HZN_ORG_ID=dcmartin@us.ibm.com
 cd ~/gitdir/open-horizon/yolo2msghub
 make service-publish

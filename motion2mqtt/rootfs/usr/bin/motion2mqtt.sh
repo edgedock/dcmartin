@@ -3,122 +3,73 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-## initialize service output ASAP
-touch "${TMPDIR}/${SERVICE_LABEL}.json"
-
-#SERVICES_JSON='[ {"name":"cpu","url":"http://cpu"}, {"name":"mqtt","url":"http://mqtt"}, {"name":"yolo4motion","url":"http://yolo4motion"} ]'
-SERVICES_JSON='[ {"name":"cpu","url":"http://cpu"}, {"name":"mqtt","url":"http://mqtt"} ]'
-
-if [ -z "${MOTION_DEVICE:-}" ] || [ "${MOTION_DEVICE}" == 'default' ]; then
-  if [ -z "${HZN_DEVICE_ID}" ]; then
-    IPADDR=$(hostname -i | awk '{ print $1 }' | awk -F\. '{ printf("%03d%03d%03d%03d\n", $1, $2, $3, $4) }')
-    export MOTION_DEVICE="$(hostname)-${IPADDR}"
-  else
-    export MOTION_DEVICE="${HZN_DEVICE_ID}"
-  fi
-fi
-
-CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"services":'${SERVICES_JSON:-null}',"group":"'${MOTION_GROUP:-}'","name":"'${MOTION_DEVICE:-}'","timezone":"'$MOTION_TIMEZONE'","period":'${MOTION_PERIOD:-}',"mqtt":{"host":"'${MQTT_HOST:-}'","port":'${MQTT_PORT:-1883}',"username":"'${MQTT_USERNAME:-}'","password":"'${MQTT_PASSWORD:-}'"},"motion":{"post_pictures":"'${MOTION_POST_PICTURES:-best}'","locate_mode":"'${MOTION_LOCATE_MODE:-off}'","event_gap":'${MOTION_EVENT_GAP:-60}',"framerate":'${MOTION_FRAMERATE:-5}',"threshold":'${MOTION_THRESHOLD:-5000}',"threshold_tune":'${MOTION_THRESHOLD_TUNE:-false}',"noise_level":'${MOTION_NOISE_LEVEL:-0}',"noise_tune":'${MOTION_NOISE_TUNE:-false}',"log_level":'${MOTION_LOG_LEVEL:-9}',"log_type":"'${MOTION_LOG_TYPE:-all}'"}}'
-
-if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- config: ${CONFIG}" &> /dev/stderr; fi
+if [ -z "${LOGTO:-}" ]; then LOGTO="${TMPDIR}/${0##*/}.log"; fi
 
 ## timezone
-ZONEINFO="/usr/share/zoneinfo/${MOTION_TIMEZONE}"
-if [ -e "${ZONEINFO}" ]; then
-  cp "${ZONEINFO}" /etc/localtime
-  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- zoneinfo: ${ZONEINFO}" &> /dev/stderr; fi
-else
-  echo "+++ WARN $0 $$ -- cannot locate time zone information: ${ZONEINFO}" &> /dev/stderr
-fi
+set_timezone()
+{
+  TZ=${1}
+  ZONEINFO="/usr/share/zoneinfo/${TZ}"
+  if [ -e "${ZONEINFO}" ]; then
+    cp "${ZONEINFO}" /etc/localtime
+    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- zoneinfo: ${ZONEINFO}" >> ${LOGTO} 2>&1; fi
+  else
+    echo "+++ WARN $0 $$ -- cannot locate time zone: ${TZ}" >> ${LOGTO} 2>&1
+    ZONEINFO=
+  fi
+  echo "${ZONEINFO}"
+}
 
-###
-### MOTION
-### 
-
-source /usr/bin/motion-init.sh
-source /usr/bin/motion-start.sh
+## Bus 001 Device 004: ID 046d:0821 Logitech, Inc. HD Webcam C910
+## Bus 001 Device 004: ID 1415:2000 Nam Tai E&E Products Ltd. or OmniVision Technologies, Inc. Sony Playstation Eye
 
 ###
 ### FUNCTIONS
 ###
 
-## update services functions
-requiredServices_update() {
-  OUTPUT=${1}
-  echo '{}' > "${OUTPUT}"
-  SERVICES=$(echo "${SERVICES_JSON}" | jq -r '.[]|.name')
-  for S in ${SERVICES}; do
-    URL=$(echo "${SERVICES_JSON}" | jq -r '.[]|select(.name=="'${S}'").url')
-    TEMP_FILE=$(mktemp)
-    if [ ! -z "${URL}" ]; then
-      curl -sSL "${URL}" | jq -c '.'"${S}" > ${TEMP_FILE} 2> /dev/null 
-    fi
-    TEMP_OUTPUT=$(mktemp)
-    echo '{"'${S}'":' > ${TEMP_OUTPUT}
-    if [ -s "${TEMP_FILE:-}" ]; then
-      cat ${TEMP_FILE} >> ${TEMP_OUTPUT}
-    else
-      echo 'null' >> ${TEMP_OUTPUT}
-    fi
-    rm -f ${TEMP_FILE}
-    echo '}' >> ${TEMP_OUTPUT}
-    jq -s add "${TEMP_OUTPUT}" "${OUTPUT}" > "${OUTPUT}.$$" && mv -f "${OUTPUT}.$$" "${OUTPUT}"
-    rm -f ${TEMP_OUTPUT}
-  done
-  echo $?
-}
-
-## update service output
-update_output() {
-  OUTPUT_FILE="${1}"
-  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- update_output; OUTPUT_FILE: ${OUTPUT_FILE}" &> /dev/stderr; fi
-  TEMP_FILE=$(mktemp)
-  REQSVCS_OUTPUT_FILE=$(mktemp)
-  if [ $(requiredServices_update ${REQSVCS_OUTPUT_FILE}) != 0 ]; then
-    if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- requiredServices_update failed" &> /dev/stderr; fi
-    jq '.' "${OUTPUT_FILE}" > "${TEMP_FILE}"
-  else
-    jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${REQSVCS_OUTPUT_FILE}" > "${TEMP_FILE}"
-    # jq -s add "${OUTPUT_FILE}" "${REQSVCS_OUTPUT_FILE}" > "${TEMP_FILE}"
-  fi
-  rm -f "${REQSVCS_OUTPUT_FILE}"
-  if [ -s "${TEMP_FILE}" ]; then
-    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- added required services" &> /dev/stderr; fi
-    jq '.pid='$(motion_pid)'|.date='$(date +%s) "${TEMP_FILE}" > "${TEMP_FILE}.$$" && mv -f "${TEMP_FILE}.$$" "${TEMP_FILE}"
-  else
-    if [ "${DEBUG}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- update_output: update failed" &> /dev/stderr; fi
-    echo '{"pid":'$(motion_pid)',"date":'$(date +%s)'}' > "${TEMP_FILE}"
-  fi
-  SERVICE_OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.json"
-  mv -f "${TEMP_FILE}" "${SERVICE_OUTPUT_FILE}"
-}
+source /usr/bin/motion-tools.sh
+source /usr/bin/service-tools.sh
 
 ###
 ### MAIN
 ###
 
+## initialize horizon
+hzn_init
+
+## configure service
+
+CONFIG_SERVICES='[{"name":"cpu","url":"http://cpu"},{"name":"mqtt","url":"http://mqtt"},{"name":"hal","url":"http://hal"}]'
+CONFIG_MQTT='{"host":"'${MQTT_HOST:-}'","port":'${MQTT_PORT:-1883}',"username":"'${MQTT_USERNAME:-}'","password":"'${MQTT_PASSWORD:-}'"}'
+CONFIG_MOTION='{"post_pictures":"'${MOTION_POST_PICTURES:-best}'","locate_mode":"'${MOTION_LOCATE_MODE:-off}'","event_gap":'${MOTION_EVENT_GAP:-60}',"framerate":'${MOTION_FRAMERATE:-5}',"threshold":'${MOTION_THRESHOLD:-5000}',"threshold_tune":'${MOTION_THRESHOLD_TUNE:-false}',"noise_level":'${MOTION_NOISE_LEVEL:-0}',"noise_tune":'${MOTION_NOISE_TUNE:-false}',"log_level":'${MOTION_LOG_LEVEL:-9}',"log_type":"'${MOTION_LOG_TYPE:-all}'"}'
+CONFIG_SERVICE='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"group":"'${MOTION_GROUP:-}'","device":"'$(motion_device)'","timezone":"'$(set_timezone ${MOTION_TIMEZONE:-})'","services":'"${CONFIG_SERVICES}"',"mqtt":'"${CONFIG_MQTT}"',"motion":'"${CONFIG_MOTION}"'}'
+
+## initialize servive
+service_init ${CONFIG_SERVICE}
+
 ## initialize motion
-motion_init
+motion_init ${CONFIG_MOTION}
 
 ## start motion
 motion_start
-if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- motion started; PID:" $(motion_pid) &> /dev/stderr; fi
+if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- motion started; PID:" $(motion_pid) >> ${LOGTO} 2>&1; fi
+
+## start motion watchdog
+motion_watchdog
+if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- motion watchdog started" >> ${LOGTO} 2>&1; fi
 
 ## initialize
-OUTPUT_FILE="${TMPDIR}/${SERVICE_LABEL}.$$.json"
-
-## initialize service output
-echo "${CONFIG}" | jq -c '.date='$(date +%s) > ${OUTPUT_FILE}
-if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- initializing output:" $(jq -c '.' ${OUTPUT_FILE}) &> /dev/stderr; fi
+OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
+echo '{"date":"'$(date +%s)'"}' > "${OUTPUT_FILE}"
 
 ## forever
 while true; do 
-  # update output
-  update_output ${OUTPUT_FILE}
-  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on directory: ${DIR}" &> /dev/stderr; fi
+  # update service
+  service_update ${OUTPUT_FILE}
+  if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- waiting on directory: ${DIR}" >> ${LOGTO} 2>&1; fi
   # wait (forever) on changes in ${DIR}
   inotifywait -m -r -e close_write --format '%w%f' "${DIR}" | while read FULLPATH; do
-    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- inotifywait ${FULLPATH}" &> /dev/stderr; fi
+    if [ "${DEBUG}" == 'true' ]; then echo "--- INFO -- $0 $$ -- inotifywait ${FULLPATH}" >> ${LOGTO} 2>&1; fi
     if [ ! -z "${FULLPATH}" ]; then 
       # process updates
       case "${FULLPATH##*/}" in
@@ -128,8 +79,7 @@ while true; do
 	    if [ -z "${OUT}" ]; then OUT='null'; fi
 	    # don't update always
 	    if [ "${MOTION_POST_PICTURES}" == 'all' ]; then
-	      TEMP_FILE=$(mktemp)
-	      jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
+	      jq '.motion.image='"${OUT}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
 	      IMAGE_PATH="${FULLPATH%.*}.jpg"
 	      if [ -s "${IMAGE_PATH}" ]; then
 		IMG_B64_FILE="${TMPDIR}/${IMAGE_PATH##*/}"; IMG_B64_FILE="${IMG_B64_FILE%.*}.b64"
@@ -137,11 +87,11 @@ while true; do
 	      fi
 	    fi
 	  else
-	    echo "+++ WARN $0 $$ -- no content in ${FULLPATH}; continuing..." &> /dev/stderr
+	    echo "+++ WARN $0 $$ -- no content in ${FULLPATH}; continuing..." >> ${LOGTO} 2>&1
 	    continue
 	  fi
 	  if [ "${MOTION_POST_PICTURES}" != 'all' ]; then 
-	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: posting ONLY ${MOTION_POST_PICTURES} picture; continuing..." &> /dev/stderr; fi
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: posting ONLY ${MOTION_POST_PICTURES} picture; continuing..." >> ${LOGTO} 2>&1; fi
 	    continue
 	  fi
 	  ;;
@@ -149,27 +99,26 @@ while true; do
 	  if [ -s "${FULLPATH}" ]; then
 	    OUT=$(jq '.' "${FULLPATH}")
 	    if [ -z "${OUT}" ]; then OUT='null'; fi
-	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) &> /dev/stderr; fi
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT:" $(echo "${OUT}" | jq -c .) >> ${LOGTO} 2>&1; fi
 	  else
-	    echo "+++ WARN $0 $$ -- EVENT: no content in ${FULLPATH}" &> /dev/stderr
+	    echo "+++ WARN $0 $$ -- EVENT: no content in ${FULLPATH}" >> ${LOGTO} 2>&1
 	    continue
 	  fi
 	  # test for end
 	  IMAGES=$(jq -r '.images[]?' "${FULLPATH}")
 	  if [ -z "${IMAGES}" ] || [ "${IMAGES}" == 'null' ]; then 
-	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: EVENT start; continuing..." &> /dev/stderr; fi
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: EVENT start; continuing..." >> ${LOGTO} 2>&1; fi
 	    continue
 	  else
-	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: EVENT end" &> /dev/stderr; fi
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}: EVENT end" >> ${LOGTO} 2>&1; fi
 	    # update event
-	    TEMP_FILE=$(mktemp)
-	    jq '.motion.event='"${OUT}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
-	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: updated ${OUTPUT_FILE} with event JSON:" $(echo "${OUT}" | jq -c) &> /dev/stderr; fi
+	    jq '.motion.event='"${OUT}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
+	    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: updated ${OUTPUT_FILE} with event JSON:" $(echo "${OUT}" | jq -c) >> ${LOGTO} 2>&1; fi
 	    # check for GIF
 	    IMAGE_PATH="${FULLPATH%.*}.gif"
 	    if [ -s "${IMAGE_PATH}" ]; then
 	      GIF_B64_FILE="${TMPDIR}/${IMAGE_PATH##*/}"; GIF_B64_FILE="${GIF_B64_FILE%.*}.b64"
-	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: found GIF: ${IMAGE_PATH}; creating ${GIF_B64_FILE}" &> /dev/stderr; fi
+	      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- EVENT: found GIF: ${IMAGE_PATH}; creating ${GIF_B64_FILE}" >> ${LOGTO} 2>&1; fi
 	      base64 -w 0 "${IMAGE_PATH}" | sed -e 's|\(.*\)|{"motion":{"event":{"base64":"\1"}}}|' > "${GIF_B64_FILE}"
 	    fi
 	    rm -f "${IMAGE_PATH}"
@@ -186,39 +135,36 @@ while true; do
 	      fi
 	      rm -f "${IMAGE_PATH}"
 	      # update output to posted image
-	      TEMP_FILE=$(mktemp)
-	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${TEMP_FILE}" && mv -f "${TEMP_FILE}" "${OUTPUT_FILE}"
+	      jq '.motion.image='"${POSTED_IMAGE_JSON}" "${OUTPUT_FILE}" > "${OUTPUT_FILE}.$$" && mv -f "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
 	    fi
 	    # cleanup
 	    find "${FULLPATH%/*}" -name "${FULLPATH%.*}*" -print | xargs rm -f
 	  fi
 	  ;;
 	*)
-	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}; continuing..." &> /dev/stderr; fi
+	  if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- ${FULLPATH}; continuing..." >> ${LOGTO} 2>&1; fi
 	  continue
 	  ;;
       esac
     else
-      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- timeout" &> /dev/stderr; fi
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- timeout" >> ${LOGTO} 2>&1; fi
     fi
     # merge image base64 iff exists
     if [ ! -z "${IMG_B64_FILE:-}" ] && [ -s "${IMG_B64_FILE}" ]; then
-      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${IMG_B64_FILE}" &> /dev/stderr; fi
-      TEMP_FILE=$(mktemp)
-      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${IMG_B64_FILE}" > "${TEMP_FILE}" && mv "${TEMP_FILE}" "${OUTPUT_FILE}"
+      if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${IMG_B64_FILE}" >> ${LOGTO} 2>&1; fi
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${IMG_B64_FILE}" > "${OUTPUT_FILE}.$$" && mv "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
       rm -f "${IMG_B64_FILE}"
       IMG_B64_FILE=
     fi
     # merge GIF base64 iff exists
     if [ ! -z "${GIF_B64_FILE:-}" ] && [ -s "${GIF_B64_FILE}" ]; then
-    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${GIF_B64_FILE}" &> /dev/stderr; fi
-      TEMP_FILE=$(mktemp)
-      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${GIF_B64_FILE}" > "${TEMP_FILE}" && mv "${TEMP_FILE}" "${OUTPUT_FILE}"
+    if [ "${DEBUG}" == 'true' ]; then echo "??? DEBUG -- $0 $$ -- found ${GIF_B64_FILE}" >> ${LOGTO} 2>&1; fi
+      jq -s 'reduce .[] as $item ({}; . * $item)' "${OUTPUT_FILE}" "${GIF_B64_FILE}" > "${OUTPUT_FILE}.$$" && mv "${OUTPUT_FILE}.$$" "${OUTPUT_FILE}"
       rm -f "${GIF_B64_FILE}"
       GIF_B64_FILE=
     fi
     # update output
-    update_output ${OUTPUT_FILE}
+    service_update ${OUTPUT_FILE}
   done 
 done
 

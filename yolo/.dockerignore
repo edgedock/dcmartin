@@ -11,7 +11,7 @@ test.json
 DEBUG*
 APIKEY*
 TEST_TMP_*
-DOCKER_HUB_ID
+DOCKER_*
 HZN_*
 CPU_*
 HAL_*

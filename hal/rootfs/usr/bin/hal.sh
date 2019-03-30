@@ -3,13 +3,33 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-if [ -z "${HAL_PERIOD:-}" ]; then HAL_PERIOD=300; fi
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${HAL_PERIOD}'}'
-echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
+###
+### FUNCTIONS
+###
+
+source /usr/bin/service-tools.sh
+
+###
+### MAIN
+###
+
+## initialize horizon
+hzn_init
+
+## configure service
+
+CONFIG='{"log_level":"'${LOG_LEVEL:-info}'","debug":'${DEBUG:-false}',"period":"'${HAL_PERIOD:-1800}'","services":'"${SERVICES:-null}"'}'
+
+## initialize servive
+service_init ${CONFIG}
+
+## initialize
+OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
+echo '{"date":'$(date +%s)'}' > "${OUTPUT_FILE}"
 
 while true; do
   DATE=$(date +%s)
-  OUTPUT="${CONFIG}"
+  OUTPUT=$(jq -c '.' "${OUTPUT_FILE}")
 
   for ls in lshw lsusb lscpu lspci lsblk lsdf; do
     OUT="$(${ls}.sh | jq '.'${ls}'?')"
@@ -19,8 +39,8 @@ while true; do
     if [ ${DEBUG:-} == 'true' ]; then echo "OUTPUT == ${OUTPUT}" &> /dev/stderr; fi
   done
 
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${TMPDIR}/$$"
-  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
+  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${OUTPUT_FILE}"
+  service_update "${OUTPUT_FILE}"
   # wait for ..
   SECONDS=$((HAL_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then

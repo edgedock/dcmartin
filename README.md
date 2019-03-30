@@ -32,7 +32,7 @@ These services and patterns are built and pushed to public [repositories][docker
 
 + `HZN_EXCHANGE_URL` is `https://alpha.edge-fabric.com/v1`
 + `HZN_ORG_ID` is `dcmartin@us.ibm.com`.
-+ `DOCKER_HUB_ID` is [`dcmartin`][docker-dcmartin]
++ `DOCKER_NAMESPACE` is [`dcmartin`][docker-dcmartin]
 + `URL` is [`com.github.dcmartin.open-horizon`][repository]
 
 [docker-dcmartin]: https://hub.docker.com/?namespace=dcmartin
@@ -107,7 +107,7 @@ The services and patterns in this [repository][repository] may be built and test
 The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
 
 1. Clone this [repository][repository]
-2. Set `DOCKER_HUB_ID` to the [Docker registry][docker-hub] login identifier
+2. Set `DOCKER_NAMESPACE` to the [Docker registry][docker-hub] login identifier
 2. Login to Docker registry
 4. Initiate build with `make` command
 
@@ -126,7 +126,7 @@ The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requir
 
 ```
 # set environment variables
-export DOCKER_HUB_ID="yourdockerhubid"
+export DOCKER_NAMESPACE="yourdockerhubid"
 # login to Docker registry (e.g. hub.docker.com)
 docker login
 ```
@@ -169,7 +169,7 @@ export HZN_ORG_ID="you@yourdomain.tld"
 # change all configuration templates
 for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HZN_ORG_ID}/g" ${json}; done
 # change all build specifications
-for json in */build.json; do sed -i "s/dcmartin/${DOCKER_HUB_ID}/g" ${json}; done
+for json in */build.json; do sed -i "s/dcmartin/${DOCKER_NAMESPACE}/g" ${json}; done
 ```
 
 **Video Script:** on [GitHub][service-publish-script]

@@ -37,27 +37,32 @@ while true; do
   DATE=$(date +%s)
 
   # path to image payload
-  JPEG_FILE=$(mktemp)
+  JPEG_FILE="${TMPDIR}/${0##*/}.$$.jpg"
   # capture image payload from /dev/video0
-  fswebcam --device "${YOLO_DEVICE}" --no-banner "${JPEG_FILE}" &> /dev/null
+  fswebcam --no-banner "${JPEG_FILE}" &> /dev/null
 
   # process image payload into JSON
   if [ -z "${ITERATION:-}" ]; then ITERATION=0; else ITERATION=$((ITERATION+1)); fi
-  YOLO_OUTPUT_FILE=$(yolo_process "${JPEG_FILE}" "${ITERATION}")
+  YOLO_JSON_FILE=$(yolo_process "${JPEG_FILE}" "${ITERATION}")
 
-  # remove
-  rm -f ${JPEG_FILE}
+  if [ -s "${YOLO_JSON_FILE}" ]; then
+    # initialize output with configuration
+    JSON_FILE="${TMPDIR}/${0##*/}.$$.json"
+    echo "${CONFIG}" | jq '.date='$(date +%s)'|.entity="'${YOLO_ENTITY}'"' > "${JSON_FILE}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- JSON_FILE: ${JSON_FILE}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${JSON_FILE}") &> /dev/stderr; fi
 
-  if [ -s "${YOLO_OUTPUT_FILE}" ]; then
     # add two files
-    jq '.date='$(date +%s) "${YOLO_OUTPUT_FILE}" > "${OUTPUT_FILE}"
-    # update
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- YOLO_JSON_FILE: ${YOLO_JSON_FILE}" $(jq -c '.image=(.image!=null)' ${YOLO_JSON_FILE}) &> /dev/stderr; fi
+    jq -s add "${JSON_FILE}" "${YOLO_JSON_FILE}" > "${JSON_FILE}.$$" && mv -f "${JSON_FILE}.$$" "${JSON_FILE}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- JSON_FILE: ${JSON_FILE}:" $(jq -c '.image=(.image!=null)|.names=(.names!=null)' "${JSON_FILE}") &> /dev/stderr; fi
+
+    # make it atomic
+    if [ -s "${JSON_FILE}" ]; then
+      service_update "${JSON_FILE}"
+    fi
   else
-    echo '{"date":'$(date +%s)'}' > "${OUTPUT_FILE}"
     if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- nothing seen" &> /dev/stderr; fi
   fi
-  # update
-  service_update "${OUTPUT_FILE}"
 
   # wait for ..
   SECONDS=$((YOLO_PERIOD - $(($(date +%s) - DATE))))
@@ -65,4 +70,5 @@ while true; do
     if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- sleep ${SECONDS}" &> /dev/stderr; fi
     sleep ${SECONDS}
   fi
+
 done

@@ -36,18 +36,17 @@ KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY && echo APIKEY),APIKEY)
 
 ## docker
-DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),)
-DOCKER_NAMESPACE := $(if $(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"required: DOCKER_NAMESPACE"))
-DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),)
-DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),))
+DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"required: DOCKER_NAMESPACE"))
+DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),))
+DOCKER_REPOSITORY ?= $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE))
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
-DOCKER_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION),$(DOCKER_NAMESPACE)/$(DOCKER_NAME):$(SERVICE_VERSION))
+DOCKER_TAG = $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
 BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
 BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\([^/]*\)/.*|\1|")
-SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_NAMESPACE) ]; then echo ${DOCKER_NAMESPACE}; else echo ""; fi)
+SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_REPOSITORY) ]; then echo ${DOCKER_REPOSITORY}; else echo ""; fi)
 BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/\([^:]*\):.*|\1|")
 BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|[^/]*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
@@ -121,7 +120,7 @@ check:
 
 push: build
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@docker push ${DOCKER_REGISTRY}/${DOCKER_TAG}
+	@docker push ${DOCKER_TAG}
 
 test:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
@@ -133,14 +132,14 @@ test:
 
 ${SERVICE_ARCH_SUPPORT}:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making service: ${SERVICE_NAME}; architecture: $@""${NC}" &> /dev/stderr
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$@" build
+	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$@" build
 
 service-build: ${SERVICE_ARCH_SUPPORT}
 
 service-push: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" push; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" push; \
 	done
 
 service-start: remove service-stop depend # $(SERVICE_REQVARS) 
@@ -169,7 +168,7 @@ publish-service: ${DIR} $(APIKEY) $(KEYS)
 service-publish: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-publish: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" publish-service; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" publish-service; \
 	done
 
 service-verify: $(APIKEY) $(KEYS)
@@ -180,7 +179,7 @@ service-verify: $(APIKEY) $(KEYS)
 service-clean:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-clean: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) BUILD_ARCH="$${arch}" clean; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" clean; \
 	done
 
 exchange-clean: ${DIR}

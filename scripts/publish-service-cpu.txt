@@ -1,5 +1,5 @@
 cd ~/gitdir/open-horizon/cpu
-export DOCKER_HUB_ID=dcmsjc
+export DOCKER_NAMESPACE=dcmsjc
 make build
 docker login
 make push

@@ -3,23 +3,44 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-if [ -z "${WAN_PERIOD}" ]; then WAN_PERIOD=1800; fi
-CONFIG='{"date":'$(date +%s)',"log_level":"'${LOG_LEVEL}'","debug":'${DEBUG}',"period":'${WAN_PERIOD}'}' 
-echo "${CONFIG}" > ${TMPDIR}/${SERVICE_LABEL}.json
+###
+### FUNCTIONS
+###
 
+source /usr/bin/service-tools.sh
+
+## initialize horizon
+hzn_init
+
+## configure service
+
+CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"period":"'${WAN_PERIOD:-1800}'","services":'"${SERVICES:-null}"'}'
+
+## initialize servive
+service_init ${CONFIG}
+
+###
+### MAIN
+###
+
+## initialize
+OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
+echo '{"date":'$(date +%s)'}' > "${OUTPUT_FILE}"
+
+## update service
+service_update "${OUTPUT_FILE}"
+
+## iterate forever
 while true; do
   DATE=$(date +%s)
-  OUTPUT="${CONFIG}"
   SPEEDTEST=$(speedtest --json)
-  if [ -z "${SPEEDTEST}" ]; then SPEEDTEST=null; fi
-
-  OUTPUT=$(echo "${OUTPUT}" | jq '.date='$(date +%s))
-
-  echo "${OUTPUT}" | jq '.speedtest='"${SPEEDTEST}" > "${TMPDIR}/$$"
-  mv -f "${TMPDIR}/$$" "${TMPDIR}/${SERVICE_LABEL}.json"
+  # update output
+  echo '{"date":'$(date +%s)',"speedtest":'${SPEEDTEST:-null}'}' > "${OUTPUT_FILE}"
+  service_update ${OUTPUT_FILE}
   # wait for ..
   SECONDS=$((WAN_PERIOD - $(($(date +%s) - DATE))))
   if [ ${SECONDS} -gt 0 ]; then
     sleep ${SECONDS}
   fi
 done
+

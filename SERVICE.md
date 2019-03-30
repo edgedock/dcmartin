@@ -8,7 +8,7 @@ The `make` targets for services **require** a Docker hub account, credentials fo
 sudo addgroup yourlogin docker
 docker login
 jq -r '.apiKey' apiKey.json > APIKEY
-export DOCKER_HUB_ID=dcmartin
+export DOCKER_NAMESPACE=dcmartin
 export HZN_ORG_ID=dcmartin@us.ibm.com
 ```
 
@@ -218,7 +218,7 @@ The template for registration configuration includes specification of environmen
 The build process for each service is identical.  The _default_ `make` target `build`, `run`,`check` for the  Docker container image using the native architecture (e.g. `amd64`).  The execution environment does _not_ include the required services (see `service-start`).  More information on `make` and the build process is available in [`BUILD.md`][build-md] and [`MAKE.md`][make-md].
 
 + `service-build` - build Docker container images for all supported architectures
-+ `service-push` - push the Docker container images to registry (n.b. `DOCKER_HUB_ID`; see [`MAKEVARS.md`][makevars-md])
++ `service-push` - push the Docker container images to registry (n.b. `DOCKER_NAMESPACE`; see [`MAKEVARS.md`][makevars-md])
 + `service-start` - starts the services and required services 
 + `service-test` - tests the _started_ service using `test-{service}.sh` for conformant status payload
 + `service-stop` - stops the services and required services
