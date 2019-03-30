@@ -8,7 +8,6 @@
 
 HZN_ORG_ID ?= $(if $(wildcard HZN_ORG_ID),$(shell cat HZN_ORG_ID),dcmartin@us.ibm.com)
 URL ?= $(if $(wildcard URL),$(shell cat URL),com.github.dcmartin.open-horizon)
-DOCKER_NAMESPACE ?= $(if $(wildcard DOCKER_NAMESPACE),$(shell cat DOCKER_NAMESPACE),$(shell whoami))
 
 # tag this build environment
 TAG ?= $(if $(wildcard TAG),$(shell cat TAG),)
@@ -40,24 +39,24 @@ default: $(ALL)
 
 $(ALL):
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making $@""${NC}" &> /dev/stderr
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) -C $@
+	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $@
 
 $(TARGETS):
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making $@ in ${ALL}""${NC}" &> /dev/stderr
 	@for dir in $(ALL); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 pattern-publish:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing $(PATTERNS)""${NC}" &> /dev/stderr
 	@for dir in $(PATTERNS); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 pattern-validate: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- validating $(PATTERNS)""${NC}" &> /dev/stderr
 	@for dir in $(PATTERNS); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_NAMESPACE=$(DOCKER_NAMESPACE) -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 .PHONY: ${ALL} default all build run check stop push publish verify clean start test sync
