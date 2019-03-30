@@ -38,7 +38,14 @@ APIKEY := $(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json
 ## docker
 DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),"required: DOCKER_NAMESPACE"))
 DOCKER_REGISTRY ?= $(if $(wildcard ../DOCKER_REGISTRY),$(shell cat ../DOCKER_REGISTRY),$(if $(wildcard ../registry.json),$(shell jq -r '.registry' ../registry.json),))
+DOCKER_LOGIN ?= $(if $(wildcard ../DOCKER_LOGIN),$(shell cat ../DOCKER_LOGIN),$(if $(wildcard ../registry.json),token,))
+DOCKER_PASSWORD ?= $(if $(wildcard ../DOCKER_PASSWORD),$(shell cat ../DOCKER_PASSWORD),$(if $(wildcard ../registry.json),$(shell jq -r '.private' ../registry.json),))
+DOCKER_PUBLICKEY ?= $(if $(wildcard ../DOCKER_PUBLICKEY),$(shell cat ../DOCKER_PUBLICKEY),$(if $(wildcard ../registry.json),$(shell jq -r '.public' ../registry.json),))
 DOCKER_REPOSITORY ?= $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE))
+DOCKER_SERVER ?= $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),"docker.io")
+DOCKER_CONFIG := $(if $(wildcard ~/.docker/config.json),$(shell jq -r '.auths|to_entries[]|select(.key|test("'$(DOCKER_SERVER)'"))' ~/.docker/config.json),)
+DOCKER_LOGIN ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.value.auth' | base64 --decode | awk -F: '${ print $1 }'),)
+DOCKER_PASSWORD ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.value.auth' | base64 --decode | awk -F: '${ print $2 }'),)
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
 DOCKER_TAG = $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
@@ -118,7 +125,11 @@ check:
 	@rm -f check.json
 	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
-push: build
+login: ~/.docker/config.json
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- login to $(DOCKER_SERVER) for ${DOCKER_REGISTRY} using ${DOCKER_LOGIN}""${NC}" &> /dev/stderr
+	@echo $(DOCKER_PASSWORD) | docker login -u ${DOCKER_LOGIN} --password-stdin  ${DOCKER_REGISTRY}
+
+push: build login
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	@docker push ${DOCKER_TAG}
 
