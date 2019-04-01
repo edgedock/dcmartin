@@ -8,15 +8,14 @@ if [ -z "${HZN_CONFIG_FILE}" ]; then export HZN_CONFIG_FILE="${TMPDIR}/horizon.j
 
 # hzn_pattern() - find the pattern with the given name; searches HZN_ORGANIZATION only
 hzn_pattern() {
-  PATTERN="${1}"
+  PATTERN=
   if [ ! -z "${1}" ] && [ ! -z "${HZN_ORGANIZATION:-}" ] && [ ! -z "${HZN_EXCHANGE_APIKEY:-}" ] && [ ! -z "${HZN_EXCHANGE_URL:-}" ]; then
     ALL=$(curl -sL -u "${HZN_ORGANIZATION}/iamapikey:${HZN_EXCHANGE_APIKEY}" "${HZN_EXCHANGE_URL}orgs/${HZN_ORGANIZATION}/patterns")
     if [ ! -z "${ALL}" ]; then
       PATTERN=$(echo "${ALL}" | jq '.patterns|to_entries[]|select(.key=="'${1}'")')
-      if [ -z "${PATTERN}" ] || [ "${PATTERN}" == 'null' ]; then PATTERN='"'${1}'"'; fi
     fi
   fi
-  if [ -z "${PATTERN}" ]; then PATTERN='null'; fi
+  if [ -z "${PATTERN}" ]; then if [ ! -z "${1}" ]; then PATTERN='"'${1}'"'; else PATTERN='null'; fi; fi
   if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn_pattern: ${PATTERN}" &> /dev/stderr; fi
   echo ${PATTERN}
 }

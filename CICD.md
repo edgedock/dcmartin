@@ -62,7 +62,7 @@ A combination of tools enables automation for almost every component in the CI/C
 
 This [repository][repository] is built as an example implementation of this CI/CD process.  Each of the services is built using a similar [design][design-md] that utilizes a common set of `make` files and support scripts.
 
-The CI/CD process is centered around these primary tools accessed through the command-line:
+The CI/CD process is centered around these primary tools accessed **through the command-line**:
 
 + `make` - control, build, test automation
 + `git` - software version and branch management
@@ -71,9 +71,15 @@ The CI/CD process is centered around these primary tools accessed through the co
 + `hzn` - Open Horizon command-line-interface
 + `ssh` - Secure Shell 
 
-The process is designed to account for multiple branches, registries, and exchanges being utilized as part of the build, test, and release management process; no release management process is proscribed.
+The process is designed to account for multiple branches, registries, and exchanges being utilized as part of the build, test, and release management process; no release management process is proscribed nor provided.
 
-The CI/CD process requires configuration to operate properly; the control attributes are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
+The CI/CD process requires configuration to operate properly; **relevant JSON configuration files**:
+
+1. `~/.docker/config.json` - Docker configuration, including registries and authentication
+2. `registry.json` - IBM Cloud Container Registry configuration (see [`REGISTRY.md`][registry-md])
+3. `apiKey.json` - IBM Cloud platform API key
+
+These files are utilized for the control attributes; they may also be specified as environment variables or files in the `open-horizon/` directory; **the control attributes are**: 
 
 + `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
 + `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
@@ -89,7 +95,7 @@ For more information refer to [`MAKEVARS.md`][makevars-md]
 
 ## Step 1 - Clone and configure
 
-Clone this [repository][repository] into a new directory (n.b. the repository may also be [forked][forking-repository]):
+Clone this [repository][repository] into a new directory (n.b. it may also be [forked][forking-repository]):
 
 [forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
 
@@ -100,7 +106,7 @@ This repository is configured with the following default `make` variables which 
 
 [docker-hub]: http://hub.docker.com
 
-Set those environment variables (and `GIT` directory) appropriately:
+Set those environment variables (and `GD` _Git_ working directory) appropriately:
 
 ```
 export GD=
@@ -108,7 +114,7 @@ export DOCKER_NAMESPACE=
 export HZN_ORG_ID=
 ```
 
-Use the following instructions (n.b. [complete script][clone-config-script]) to clone and configure this repository:
+Use the following instructions (n.b. [automation script][clone-config-script]) to clone and configure this repository:
 
 ```
 mkdir -p $GD
@@ -164,7 +170,7 @@ mv -f *.pem ${HZN_ORG_ID}.pem
 
 The resulting `open-horizon/` directory contains all the necessary components to build a set of service, a deployable pattern, and a set of nodes for testing.
 
-## Optional - IBM Container Registry
+## Step 5 - _Optional_ - IBM Container Registry
 Refer to the [`REGISTRY.md`][registry-md] instructions for additional information on utilizing the IBM Cloud Container Registry.
 
 [registry-md]: https://github.com/dcmartin/open-horizon/blob/master/REGISTRY.md
@@ -183,20 +189,14 @@ The containers built and pushed for these two services are utilized to build the
 2. `hal` - a hardware-abstraction-layer inventory
 3. `wan` - a wide-area-network monitor
 4. `yolo` - the `you-only-look-once` image entity detection and classification tool
-5. `yolo2msghub` - uses 1-4 to send entity detection information to Kafka
+5. `yolo2msghub` - uses 1-4 to send local state and entity detection information via Kafka
 
 Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`BUILD.md`][build-md] and [`MAKE.md`][make-md] for additional information.
 
-
-
-
 # 3.3 Test Patterns
-
-Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
+The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed to test devices.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
 
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
-
-
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
 [build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md

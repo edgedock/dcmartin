@@ -8,6 +8,28 @@ export MOTION_CONF_FILE="/etc/motion/motion.conf"
 export MOTION_PID_FILE="/var/run/motion/motion.pid" 
 export MOTION_CMD=$(command -v motion)
 
+
+KNOWN_CAMERAS='[{"name":"ps3eye","usb":"1415:2000","width":640,"height":480,"fov":65},{"name":"c910","usb":"046d:0821","width":1920,"height":1080,"fov":83,"focal":{"value":43,"unit":"mm"},"fps":"30@640x480","bits":8,"vidpid":"VID_046D&PID_0821","capture":[{"aspect":"4:3","video":["320x240","640x480","1600x1200"],"image":["640x480","1280x960","2560x1920","3840x2880"]},{"aspect":"16:9","video":["480x360","858x480","1280x720","1920x1080"],"image":["480x360","858x480","1280x720","1920x1080"]}]}]'
+
+hal_lsusb()
+{
+  lsusb=$(curl -fsSL "http://hal" 2> /dev/null | jq '.lsusb?')
+  if [ -z "${lsusb:-}" ] || [ "${lsusb}" == 'null' ]; then lsusb='null'; fi
+  echo "${lsusb}"
+}
+
+motion_usb_camera()
+{
+  lsusb=$(hal_lsusb)
+  for id in $(echo "${lsusb}" | jq -r '.[].id'); do
+    usb=$(echo "${lsusb}" | jq '.[]|select(.id=="'${id}'")')
+    if [ ! -z "${usb} ] && [ "${usb}" != 'null' ]; then
+      CAM=${USB}
+    fi
+  done
+  echo "${CAM:-}"
+}
+
 motion_device()
 {
   if [ -z "${MOTION_DEVICE:-}" ] || [ "${MOTION_DEVICE}" == 'default' ]; then
