@@ -108,7 +108,7 @@ export DOCKER_NAMESPACE=
 export HZN_ORG_ID=
 ```
 
-Use the following instructions (n.b. [source][clone-config-script]) to clone and configure this repository; **password for Docker may be requested**)
+Use the following instructions (n.b. [complete script][clone-config-script]) to clone and configure this repository:
 
 ```
 mkdir -p $GD
@@ -164,83 +164,41 @@ mv -f *.pem ${HZN_ORG_ID}.pem
 
 The resulting `open-horizon/` directory contains all the necessary components to build a set of service, a deployable pattern, and a set of nodes for testing.
 
-# 3.2 Building sample services
+## Optional - IBM Container Registry
+Refer to the [`REGISTRY.md`][registry-md] instructions for additional information on utilizing the IBM Cloud Container Registry.
 
-## Step 1 - 
-## Step 5
+[registry-md]: https://github.com/dcmartin/open-horizon/blob/master/REGISTRY.md
+
+# 3.2 Sample Services
+Services are organized into subdirectories of `open-horizon/` directory and all share a common design (n.b. see [`DESIGN.md`][design-md]).  For more information on _services_, see [`SERVICE.md`][service-md].
+
+Some services are built as _base_ containers that are used as the Docker build `FROM` target.  The base containers include:
+
+1. `base-alpine` - a base service container for Alpine LINUX
+2. `base-ubuntu` - a base service container for Ubuntu LINUX
+
+The containers built and pushed for these two services are utilized to build the remaining samples:
+
+1. `cpu` - a cpu percentage monitor
+2. `hal` - a hardware-abstraction-layer inventory
+3. `wan` - a wide-area-network monitor
+4. `yolo` - the `you-only-look-once` image entity detection and classification tool
+5. `yolo2msghub` - uses 1-4 to send entity detection information to Kafka
+
+Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`BUILD.md`][build-md] and [`MAKE.md`][make-md] for additional information.
+
+
+
+
+# 3.3 Test Patterns
+
+Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
 
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
 
 
-1. Create _configuration_ JSON: `service.json` and `pattern.json` 
-1. Create `service.makefile` - build, etc.. service using configuration JSON
-1. Single `Dockerfile` - simplify build process
-1. Create _build_ JSON: `build.json` - standardize architecture naming and Docker `FROM`
-1. Create script `docker-run.sh` - standardize local execution (variables, environment, priviledged, ports)
-1. Automate creation of `dev` environment (and elimination of `horizon/` artifact) 
-1. Create script `mkdepend.sh`- automate post-processing of `dev` environment
-1. Create template `userinput.json` - automate `dev` environment
-1. Create script `checkvars.sh` - automate service variable processing
-1. Create script `test.sh`- automatic, generic, test harness for any service
-1. Create script `test-service.sh` - automatic, generic, test script for any service
-1. `TAG` builds - optional environment variable or`TAG` file to distinguish build artifacts
-1. Create script `fixpattern.sh` - automate pattern naming for publishing
-
-### 1. Configuration JSON
-
-The specification of version numbers and other dependencies for the build process were centralized into two JSON configuration files: `service.json` and `pattern.json`.  These files existed in the original, but were elevated to build artifacts and were templatized to handle issues of architecture and required services identification, notably the _tagging_ of the `url` and the `requiredServices[].url` in the `service.json` and `services[].servicesUrl` in the `pattern.json` (n.b. see _`mkdepend.sh`_).
-
-### 2. `service.makefile`
-
-A generic `Makefile` (n.b. shared via symbolic link) for any service using the CI/CD process; the build process provided is described in more detail in [`MAKE.md`][make-md].
-
-### 3. & 4. Single Dockerfile _and_ `build.json`
-
-Simplify development process through single Dockerfile using the JSON configuration in `build.json` to derive the `FROM` specification.  The `build.json` contains an array of **supported** architectures and the corresponding container **tag**, for example:
-
-```
-    "build_from": {
-        "arm64": "arm64v8/alpine:3.8",
-        "amd64": "alpine:3.8",
-        "arm": "arm32v6/alpine:3.8"
-    }
-```
-
-The standard `make` file utilizes this information to provide the `FROM` information required in the `Dockerfile`, specifying `--build-arg BUILD_FROM=<from>` command-line option to the `docker` command according to the `build.json`; a default value is best-practice, for example:
-
-```
-ARG BUILD_FROM=alpine:3.8
-  
-FROM $BUILD_FROM
-```
-
-### 5. `docker-run.sh`
-
-A dynamic mechanism is required to automatically process the configuration JSON `service.json` to identify the environment variables expected and required.  In addition, dynamic mapping of ports from the container to the local host eliminated port conflicts; a benefit of extending the configuration to include a `ports` mapping section was standardization for all services on utilization of port `80` as the default.  This eliminated the need for a well-known port for each service as implemented originally.
-
-### 6. Automate `horizon/` directory
-
-The static artifact of the `horizon/` directory was specific to the cpu2msghub service, including files with embedded environment variables which required evaluation to create necessary components in the build.  Nothing in the `horizon/` directory could not be generated using the `hzn dev service new` command.
-
-### 7. and 8. and 9. `mkdepend.sh`, `userinput.json`,`checkvars.sh`
-
-The template artifacts of `service.json` and `userinput.json` are processed to provide proper architectures and variables for use with `hzn dev service start` command, including checking variables against transient files with matching names, e.g. `MSGHUB_APIKEY`.  This file-name mechanism enables automation of the build process as avoids disclosure of _secrets_ using TravisCI.
-
-### 10. and 11. `test.sh` and `test-service.sh`
-
-Automated test harness (`test.sh`) and automated, default, service test script (`test-service.sh`) for any service using this CI/CD process.  The default script is utilized to process the output of the service and provide a structural breakdown suitable for comparison with a known-good sample.
-
-### 12. and 13. `TAG` and `fixpattern.sh`
-
-To avoid utilization of the same pattern _name_ when building the software on varying branches in the repository, an additional `TAG` is introduced to append to all artifacts built in the repository.  The `fixpattern.sh` script appends the value, if and only if defined, to the pattern _name_ for both the `hzn exchange pattern publish` command and derived, transient, `horizon/pattern.json` file.
-
-# MORE INFORMATION
-
-Please refer to [`SERVICE.md`][service-md] for more information on building services.
-Please refer to [`PATTERN.md`][pattern-md] for more information on building patterns.
-
-
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
+[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
 [open-horizon-github]: http://github.com/open-horizon

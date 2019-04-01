@@ -1,6 +1,6 @@
 # `RPI.md` - Install on Raspberry Pi Model 3B+
 
-# Hardware Required
+# A. Hardware Required
 
 1. [RaspberryPi Model 3B+][device]
 1. 16 Gbyte microSD card (32 Gbyte recommended)
@@ -10,13 +10,13 @@
 [device]: https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus
 [power-supply]: https://www.amazon.com/gp/product/B072FTJH73/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1
 
-# Software Required
+# B. Software Required
 
 + Balena [Etcher][etcher-io] GUI application for Windows, macOS, LINUX 
 
 [etcher-io]: http://etcher.io/
 
-# Instructions
+# C. Setup
 Perform the following in the order listed to setup the RPi3B+ with appropriate hardware and software to run Open Horizon patterns and services.
 
 ## Step 1
@@ -87,14 +87,35 @@ And change the default password for the `pi` account:
 ssh pi@${IP} 'sudo passwd pi'
 ```
 
+And set the hostname:
+
+```
+export DEVICE=test-sdr-4
+ssh pi@${IP} "sudo sed -i /etc/hostname s/raspberrypi/${DEVICE}/"
+ssh pi@${IP} "sudo sed -i /etc/hosts -e s/raspberrypi/${DEVICE}/"
+ssh pi@${IP} "sudo hostname ${DEVICE}"
+```
+
+And reboot:
+
+```
+ssh pi@${IP} "sudo reboot"
+```
+
 ## Step 4
-Update and upgrade, then install Docker latest release directly from [Docker][docker-com]:
+Update and upgrade:
 
 ```shell
-ssh pi@${IP} 'sudo apt update'
-ssh pi@${IP} 'sudo apt upgrade -qq -y'
+ssh pi@${IP} 'sudo apt update && sudo apt upgrade -qq -y'
+```
+
+then install Docker latest release directly from [Docker][docker-com]:
+
+```
 ssh pi@${IP} 'wget -qO - get.docker.com | sudo bash'
 ```
+[docker-com]: https://www.docker.com/get-started
+
 
 ## Step 5
 Install Open Horizon packages
@@ -102,38 +123,7 @@ Install Open Horizon packages
 ```
 ssh pi@${IP} 'wget -qO - ibm.biz/get-horizon | sudo bash'
 ```
-
 ## Step 6
-Create development account for current user:
-
-```
-ssh pi@${IP} sudo adduser ${USER}
-```
-
-Enter account specifics, including new password, and then copy host SSH credentials to account:
-
-```
-ssh-copy-id ${USER}@${IP} 
-```
-
-Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
-
-```shell
-ssh pi@${IP} "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
-ssh pi@${IP} "chmod 400 /tmp/010_${USER}-nopasswd"
-ssh pi@${IP} "sudo chown root /tmp/010_${USER}-nopasswd"
-ssh pi@${IP} "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
-```
-
-## Step 7
-Configure _account_ for access to Docker commands; logout and login to take effect.
-
-```
-ssh pi@${IP} "sudo addgroup ${USER} docker"
-ssh pi@${IP} "sudo addgroup ${USER} sudo"
-```
-
-## Step 8
 Once SSH access has been enabled properly, restrictions on access should then be applied.  If SSH has been configured properly, no input or password should be required; check `~/.ssh/known_hosts` for name conflicts).  Login to the device as root:
 
 
@@ -162,9 +152,42 @@ UsePAM no
 EOF
 ```
 
-# Optional
+## Installation complete
+At this point the device is configured with Docker and Open Horizon and can be registered for a pattern.
 
-## A. Add External SSD
+# D. Development device setup (optional)
+
+## Step 7
+Create development account for current user:
+
+```
+ssh pi@${IP} sudo adduser ${USER}
+```
+
+Enter account specifics, including new password, and then copy host SSH credentials to account:
+
+```
+ssh-copy-id ${USER}@${IP} 
+```
+
+Enable _account_ for automated `sudo` (i.e. no password required); sequence prompts for password:
+
+```shell
+ssh pi@${IP} "echo ${USER} 'ALL=(ALL) NOPASSWD: ALL' > /tmp/010_${USER}-nopasswd"
+ssh pi@${IP} "sudo mv /tmp/010_${USER}-nopasswd /etc/sudoers.d/"
+ssh pi@${IP} "sudo chmod 400 /etc/sudoers.d/010_${USER}-nopasswd"
+ssh pi@${IP} "sudo chown root /etc/sudoers.d/010_${USER}-nopasswd"
+```
+
+## Step 8
+Configure _account_ for access to Docker commands; logout and login to take effect.
+
+```
+ssh pi@${IP} "sudo addgroup ${USER} docker"
+ssh pi@${IP} "sudo addgroup ${USER} sudo"
+```
+
+# E. Add External SSD (optional)
 Add external SSD storage device and copy Docker and user home directories from SD card to external SSD.  ; use the `lsblk` command to identify the actual identifier.
 
 ```
