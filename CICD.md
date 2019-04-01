@@ -133,7 +133,7 @@ With the assumption that `docker` has already been installed; if not refer to th
 
 + **macOS**
 
- ```
+```
 cd $GD/open-horizon
 sudo bash ./update-hzncli-macos.sh
 ```
@@ -141,7 +141,7 @@ sudo bash ./update-hzncli-macos.sh
 
 + **LINUX**
 
- ```
+```
 cd $GD/open-horizon
 sudo bash ./setup/aptget-horizon.sh
 ```
@@ -175,8 +175,8 @@ Refer to the [`REGISTRY.md`][registry-md] instructions for additional informatio
 
 [registry-md]: https://github.com/dcmartin/open-horizon/blob/master/REGISTRY.md
 
-# 3.2 Sample Services
-Services are organized into subdirectories of `open-horizon/` directory and all share a common design (n.b. see [`DESIGN.md`][design-md]).  For more information on _services_, see [`SERVICE.md`][service-md].
+# 4. Build
+Services are organized into subdirectories of `open-horizon/` directory and all share a common [design][design-md]. Please refer to [`BUILD.md`][build-md] for details on the build process. 
 
 Some services are built as _base_ containers that are used as the Docker build `FROM` target.  The base containers include:
 
@@ -191,9 +191,11 @@ The containers built and pushed for these two services are utilized to build the
 4. `yolo` - the `you-only-look-once` image entity detection and classification tool
 5. `yolo2msghub` - uses 1-4 to send local state and entity detection information via Kafka
 
-Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`BUILD.md`][build-md] and [`MAKE.md`][make-md] for additional information.
+Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`MAKE.md`][make-md] for additional information.
 
-# 3.3 Test Patterns
+For more information on building services, see [`SERVICE.md`][service-md].
+
+# 5. Test
 The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed to test devices.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
 
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
