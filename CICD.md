@@ -1,49 +1,158 @@
-# CI/CD for Open Horizon
+# `CICD.md` - CI/CD for Open Horizon
+This document provides an introduction to the process and tooling utilized in this [repository][repository] to achieve continuous integration and delivery of [Open Horizon][open-horizon] services and patterns to the edge.
 
-## Background
+[repository]:  https://github.com/dcmartin/open-horizon
 
-The need for development and deployment of services to the edge requires capabiltiies for **continuous integration** (CI) and **continuous delivery** (CD) of the software components.  In the case of Open Horizon, the packages delivered are one or more _containers_ which encapsulate a Docker run-time environment and provision a _service_.
+[open-horizon]: http://github.com/open-horizon
 
-### Patterns
-A _pattern_ is a packaging of one or more _services_ into a named entity identified by the organization which published that pattern into the _exchange_ **and** a pattern _name_ unique to that organization.  For example, the pattern named `cpu2msghub`is in the `IBM` organization and hence its **unique** identfiier is `IBM/cpu2msghub`.   Patterns refer to services based on a organization (`ord`) and `url` -- as well as architecture (`arch`) and version (`version`).  For example:
+Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and definitions.
 
-```
-{ "url": "com.github.open-horizon.examples.cpu", "org": "IBM", "version": "1.2.2", "arch": "amd64" }
-```
-Patterns are published to the exchange through the `hzn` command-line-interface (CLI) and may be either `public` to the exchange or `private` to the organization.
+[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/TERMINOLOGY.md
 
-### Services
-A _service_ is a packaging of one or more _container_ images with zero or more required services, including peer services and required services; composition of services via _virtual private network_ (VPN).  Each service is identified through `deployment.services` from `service.json`.  In the following -- extracted from `cpu2msghub/service.json`--  the _service_ is deployed with the identifier `cpu2msghub`. 
+# 0. Background
+It is presumed that the reader is a software engineer with familiarity with the following:
 
-```
++ `LINUX` - The free, open-source, UNIX-like, operating system, e.g. [Ubuntu][get-ubuntu] or [Raspbian][get-raspbian]
++ `HTTP` - The HyperText Transfer Protocol and tooling; see [here][curl-intro] and [here][socat-intro]
++ `GIT` - Software management -AAS; see [here][git-basics]
++ `JSON` - JavaScript Object Notation and tooling; see [here][json-intro-jq]
++ `make` - and other standard LINUX build tools; see [here][gnu-make]
+
+[get-ubuntu]: https://www.ubuntu.com/download
+[get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
+[gnu-make]: https://www.gnu.org/software/make/
+[socat-intro]: https://medium.com/@copyconstruct/socat-29453e9fc8a6
+[git-basics]: https://gist.github.com/blackfalcon/8428401
+[json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
+[curl-intro]: https://www.maketecheasier.com/introduction-curl/
+
+# 1. Introduction
+Open Horizon edge fabric provides method and apparatus to run multiple Docker containers on edge nodes.  These nodes are LINUX devices running the Docker virtualization engine, the Open Horizon edge fabric client, and registered with an Open Horizon exchange.
+
+The edge fabric stitches together multiple containers, networks, and physical sensors into a pattern designed to solve a problem.  The only limitation of the fabric are the devices' capabilities; for example one device may have a camera attached and another may not.
+
+The CI/CD process is centered around five (5) primary tools:
+
++ `make` - control, build, test automation
++ `git` - software version and branch management
++ `docker` - Docker repositories and images
++ `travis` - release change management
++ `hzn` - Open Horizon command-line-interface
+
+## 1.1 Automation controls
+The CI/CD automated process is designed to account for multiple branches, registries, and exchanges being utilized as part of the build, test, and release management process.  The attributes that specify these components are listed below and detailed in [`MAKEVARS.md`][makevars-md].
+
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+
++ `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
++ `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
++ `DOCKER_LOGIN` - account identifier for access to registry
++ `DOCKER_PASSWORD` - password to verify account in registry
++ `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
++ `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
++ `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
+
+# 2. Services
+Open Horizon edge fabric services compose one or more Docker containers along with other required services connected with point-to-point virtual-private-networks (VPN). 
+
+### Service identification
+Services are identified with the following mandatory attributes:
+
++ `org` - the organization in the _exchange_
++ `url` - a unique name for the service within the organization
++ `version` - the [_semantic version_][whatis-semantic-version] of the service
++ `arch` - the architecture of the service (see [architecture list][arch-list])
+
+### Service description
+Additional descriptive attributes are also available:
+
++ `label` - an plain-text  string to name the service; **used for defaults in build process**
++ `description` - a plain-text description of the service; maximum 1024 characters
++ `documentation` - link (URL) to documentation, e.g. `README.md` file
+
+### Service composition
+The composition attributes include:
+
++ `shareable` - may be either `singleton` or `multiple` to control instantiation
++ `requiredServices` - an array of services to instantiate and connect  via [VPN][whatis-vpn]
++ `userInput` - an array of dictionary entries for variables passed as environment variables to the container(s)
++ `deployment` - a dictionary of `services` defined by hostname, including Docker image & environment
+
+[whatis-vpn]: https://en.wikipedia.org/wiki/Virtual_private_network
+
+### Example service
+
+The [`cpu/service.json`][cpu-service]  template -- when completed -- is listed below.  The **cpu** service is a `singleton` with no `requiredServices`, four (4) variables in `userInput`, and one `deployment.services` named `cpu` with additional environment variables `SERVICE_LABEL` and `SERVICE_VERSION`.
+
+[cpu-service]: https://github.com/dcmartin/open-horizon/blob/master/cpu/service.json
+
+```JSON
+{
+  "label": "cpu",
+  "description": "Provides hardware abstraction layer as service",
+  "documentation": "https://github.com/dcmartin/open-horizon/cpu/README.md",
+  "org": "dcmartin@us.ibm.com",
+  "url": "com.github.dcmartin.open-horizon.cpu-beta",
+  "version": "0.0.3",
+  "arch": "arm64",
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [],
+  "userInput": [
+    {
+      "name": "CPU_PERIOD",
+      "label": "seconds between update",
+      "type": "int",
+      "defaultValue": "60"
+    },
+    {
+      "name": "CPU_INTERVAL",
+      "label": "seconds between cpu testing",
+      "type": "int",
+      "defaultValue": "1"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "label": "specify logging level",
+      "type": "string",
+      "defaultValue": "info"
+    },
+    {
+      "name": "DEBUG",
+      "label": "debug on/off",
+      "type": "boolean",
+      "defaultValue": "false"
+    }
+  ],
   "deployment": {
     "services": {
-      "cpu2msghub": {
-...
+      "cpu": {
+        "environment": [
+          "SERVICE_LABEL=cpu",
+          "SERVICE_VERSION=0.0.3"
+        ],
+        "image": "dcmartin/arm64_com.github.dcmartin.open-horizon.cpu-beta:0.0.3",
+        "privileged": true,
+        "specific_ports": []
       }
     }
+  },
+  "tmpfs": {
+    "size": 2048000
+  },
+  "ports": {
+    "80/tcp": 8581
   }
-```
-Access to the service coud be performed using `curl`, e.g.
-
-```
-% curl -sSL http://yolo2msghub/
+}
 ```
 
-#### Required services
+## Containers
 
-Required services are identified by `url` as well as its architecture and version; for example from the same `cpu2msghub/services.json`
+## Patterns
 
-```
- "requiredServices": [
-        { "url": "com.github.open-horizon.examples.cpu", "org": "IBM", "version": "1.2.2", "arch": "amd64" },
-        { "url": "github.com.open-horizon.examples.gps", "org": "IBM", "version": "2.0.5", "arch": "amd64" }
-]
-```
+## Nodes
 
-Services are published to the exchange through an intermediary container registry service, e.g. Docker Hub.  The container image in the registry is referenced by exchange when the service is published.
-
-## Success criteria
+# Design criteria
 
 The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The key success criteria are:
 
@@ -51,25 +160,6 @@ The expectations of this process is to automate the development, testing, and de
 2. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
 3. __enforce testing__ - all components should provide interfaces and cases for testing
 4. __automate everything__ - to the greatest degree possible, automate the process
-
-## Existing examples
-
-The Open Horizon [page on github.com][open-horizon-github] provides open-source code for components and examples.  There are two examples currently available for use during the alpha phase. These examples include:
-
-+ Patterns
-  + cpu2msghub - capture CPU and GPS data and to send Kafka 
-  + sdr2msghub - capture audio from FM radio broadcasts and send to Kafka
-+ Services
-  + cpu - return CPU usage percentage (0.0-100.0]
-  + gps - return GPS coordinates - statically defined, captured from device, or Internet IP derived
-  + sdr - capture FM radio broadcasts
-  + _network_ - **out-of-scope**
-  + _pi3-streamer_ - **out-of-scope**
-  + _weatherstation_ - **out-of-scope**
-
-[edge-fabric-staging-docs]: https://github.ibm.com/Edge-Fabric/staging-docs
-
-This CI/CD process was developed based on the existing example patterns and services; only functional patterns and services available in the `IBM` organization were utilized; other examples were not utilized.  The [documentation][edge-fabric-staging-docs] for these examples provided guidance and insight on the requirements for the build process; no documentation was available for any existing release process or build automation.
 
 ### Stage everything
 The change control system for this repository is Git which provides mechanisms to stage changes between various versions of a repository.  These versions are distinguished within a repository via branching from a parent (e.g. the trunk or _main_ branch) and then incorporating any changes through a _commit_ back to the parent.  The _push_ of the change back to the repository may be used to evaluate the state and determine if a _stage_ is ready for a build to be initiated.  The relevant content to define a _stage_ should be an artifact in the build process from which state information may be extracted; storing relevant information in the `Makefile` defeats that objective.
@@ -82,42 +172,9 @@ Staged changes require testing processes to automate the build process.  Each se
 ### Automate everything
 Determination of build state in the TravisCI process requires utilization of platform controlled environment variables, typically reserved for _secrets_, or can leverage repository sources, e.g. JSON configurations.  While specification of environment variables through the build automation process would be possible, both the quantity and the variability in naming present challenges to automation and repeatability.
 
-## `examples` Repository
 
-The [`examples`][open-horizon-examples-github] repository provides a breakdown into three subdirectories:
-  
-  + `edge/` - source code for Edge services
-  + `tools/` - Alpine LINUX package for `kafkacat`
-  + `cloud/` - source code for Cloud services
 
-The `tools/` and `cloud/` components are out-of-scope.  The `edge/` subdirectory contains subdirectories for documentation (`doc/`), as well as for the following:
-  
-  + `msghub` - source code for services utilizing Kafka; in subdirectories: `cpu2msghub/` and `sdr2msghub/`
-  + `services` - source code for other services
-  + `wiotp` - Watson IoT Platform (**out-of-scope**)
-
-Of the two Kafka-based services, the `cpu2msghub` service is simpler and was selected as the prototype for subsequent build process and release management automation for continuous integration and continuous delivery.
-
-## `edge/msghub/cpu2msghub`
- 
- This subdirectory contains the source code and build files for the `cpu2msghub` _service_.   The `cpu2msghub` _service_ requires two additional services form the `IBM` organization, nominally _cpu_ and _gps_,  identified by their sets of  `org`,`url`,`arch`, and `version`.
- 
- The build process includes one `Makefile` with targets for:
- 
- + `build` - builds the container including copy of Kafka APK
- + `run` - runs the container (locally) using a static set of `docker run` options
- + `check` - checks the output of the locally run container
- + `stop` - stops the locally run container
- + `hznbuild` - fetches dependencies for _cpu_ and _gps_ from within repository to `dev` environment
- + `hznstart`- starts the service (and required services) in `dev` environment
- + `hznstop` - stops the service (and required services) in `dev` environment
- + `publish-service` - publishes the service into the exchange
- + `publish-pattern` - publishes the pattern into the exchange
- + `clean` - removes build artifacts
- 
-There is no TravisCI build automation.  Review of the build process identified several challenges to automation.  The targets depend on extensive use of environment variables. These variables are statically defined in the `Makefile`, including the pattern _name_ (i.e. `cpu2msghub`), its version (`CPU2MSGHUB_VERSION`), as well as the versions of its required services (`CPU_VERSION` and `GPS_VERSION`).
-
-# Changes from Examples
+# Using the CI/CD process and tooling
 
 1. Create _configuration_ JSON: `service.json` and `pattern.json` 
 1. Create `service.makefile` - build, etc.. service using configuration JSON
