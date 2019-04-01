@@ -1,5 +1,110 @@
 # `SERVICE.md` - _Service_ build process automation
 
+## CI/CD
+
+The control attributes for the CI/CD process are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
+
++ `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
++ `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
++ `DOCKER_LOGIN` - account identifier for access to registry
++ `DOCKER_PASSWORD` - password to verify account in registry
++ `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
++ `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
++ `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
+
+More information is available  in [`CICD.md`][cicd-md].
+
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/CICD.md
+
+# Services
+Open Horizon edge fabric services compose one or more Docker containers along with other required services connected with point-to-point virtual-private-networks (VPN). 
+
+### Service identification
+Services are identified with the following mandatory attributes:
+
++ `org` - the organization in the _exchange_
++ `url` - a unique name for the service within the organization
++ `version` - the [_semantic version_][whatis-semantic-version] of the service
++ `arch` - the architecture of the service (see [architecture list][arch-list])
+
+### Service description
+Additional descriptive attributes are also available:
+
++ `label` - an plain-text  string to name the service; **used for defaults in build process**
++ `description` - a plain-text description of the service; maximum 1024 characters
++ `documentation` - link (URL) to documentation, e.g. `README.md` file
+
+### Service composition
+The composition attributes include:
+
++ `shareable` - may be either `singleton` or `multiple` to control instantiation
++ `requiredServices` - an array of services to instantiate and connect  via [VPN][whatis-vpn]
++ `userInput` - an array of dictionary entries for variables passed as environment variables to the container(s)
++ `deployment` - a dictionary of `services` defined by hostname, including Docker image & environment
+
+[whatis-vpn]: https://en.wikipedia.org/wiki/Virtual_private_network
+
+### Service execution
+The service execution controls include (see Docker [`run`][docker-run-mode] options):
+
++ `privileged` - equivalent to Docker `privileged` mode
++ `bind` - maps host file-system directories to container volumes
++ `specificPorts` - maps host IP ports to container ports (TCP and/or UDP)
++ `devices` - maps host devices to container (e.g. `/dev/video0`)
+
+### Example service
+
+The [`cpu/service.json`][cpu-service]  template -- when completed -- is listed below.
+
+1. The service is identified by the combination: `org``/``url``_``version``_``arch`.
+
+2. The service is described by its human-readable `label`, `description`, and `documentation` URL.
+
+3. The service composition indicates `singleton` with no `requiredServices`.
+
+4. The service execution indicates one `deployment.services` entry for `cpu` with `image` identifying the Docker container to be retrieved from the registry (n.b. the  default Docker registry is `docker.io` and is _not_ included in the path).  The container is to be run in Docker `privileged` mode, with two `environment` variables; four (4) `userInput` variables, and no `devices`, `binds`, or `specificPorts` mapped.
+
+[docker-run-mode]: https://docs.docker.com/engine/reference/run/
+
+[cpu-service]: https://github.com/dcmartin/open-horizon/blob/master/cpu/service.json
+
+```JSON
+{
+  "label": "cpu",
+  "description": "Provides hardware abstraction layer as service",
+  "documentation": "https://github.com/dcmartin/open-horizon/cpu/README.md",
+  "org": "dcmartin@us.ibm.com",
+  "url": "com.github.dcmartin.open-horizon.cpu-beta",
+  "version": "0.0.3",
+  "arch": "arm64",
+  "sharable": "singleton",
+  "requiredServices": [],
+  "deployment": {
+    "services": {
+      "cpu": {
+        "environment": ["SERVICE_LABEL=cpu", "SERVICE_VERSION=0.0.3" ],
+        "image": "dcmartin/arm64_com.github.dcmartin.open-horizon.cpu-beta:0.0.3",
+        "privileged": true,
+        "binds": null,
+        "devices":null,
+        "specific_ports": null
+      }
+    }
+  },
+  "userInput": [
+    { "name": "CPU_PERIOD","label": "seconds between update","type": "int","defaultValue": "60"},
+    { "name": "CPU_INTERVAL", "label": "seconds between cpu testing", "type": "int", "defaultValue": "1"},
+    { "name": "LOG_LEVEL","label": "specify logging level", "type": "string","defaultValue": "info"},
+    { "name": "DEBUG","label": "debug on/off","type": "boolean","defaultValue": "false"}
+  ],
+  "public": true
+}
+```
+
+The optional `public` attribute indicates the service is available -- **after publishing** -- to any organization using the exchange; note that authenticaton and authorization may also be requied for the Docker registry.
+
+
+
 # 0. Requirements
 
 The `make` targets for services **require** a Docker hub account, credentials for the exchange, and installation of the Open Horizon command-line-interface (CLI) application: `hzn`; it is also recommended that the account be a member of the `docker` group.  For quick reference, refer to examples below.  **On _macOS_ do not store Docker hub credentials securely on the OSX keychain**; check Docker preferences.

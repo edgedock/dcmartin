@@ -5,18 +5,16 @@ This document provides an introduction to the process and tooling utilized in th
 
 [open-horizon]: http://github.com/open-horizon
 
-Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and definitions.
 
-[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/TERMINOLOGY.md
 
 # 0. Background
 It is presumed that the reader is a software engineer with familiarity with the following:
 
-+ `LINUX` - The free, open-source, UNIX-like, operating system, e.g. [Ubuntu][get-ubuntu] or [Raspbian][get-raspbian]
-+ `HTTP` - The HyperText Transfer Protocol and tooling; see [here][curl-intro] and [here][socat-intro]
-+ `GIT` - Software management -AAS; see [here][git-basics]
-+ `JSON` - JavaScript Object Notation and tooling; see [here][json-intro-jq]
-+ `make` - and other standard LINUX build tools; see [here][gnu-make]
++ **LINUX** - The free, open-source, UNIX-like, operating system, e.g. [Ubuntu][get-ubuntu] or [Raspbian][get-raspbian]
++ **HTTP** - The HyperText Transfer Protocol and tooling; see [here][curl-intro] and [here][socat-intro]
++ **Git** - Software management -AAS; see [here][git-basics]
++ **JSON** - JavaScript Object Notation and tooling; see [here][json-intro-jq]
++ **Make** - and other standard LINUX build tools; see [here][gnu-make]
 
 [get-ubuntu]: https://www.ubuntu.com/download
 [get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
@@ -26,23 +24,56 @@ It is presumed that the reader is a software engineer with familiarity with the 
 [json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
 [curl-intro]: https://www.maketecheasier.com/introduction-curl/
 
+Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and definitions.
+
+[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/TERMINOLOGY.md
+
 # 1. Introduction
 Open Horizon edge fabric provides method and apparatus to run multiple Docker containers on edge nodes.  These nodes are LINUX devices running the Docker virtualization engine, the Open Horizon edge fabric client, and registered with an Open Horizon exchange.
 
-The edge fabric stitches together multiple containers, networks, and physical sensors into a pattern designed to solve a problem.  The only limitation of the fabric are the devices' capabilities; for example one device may have a camera attached and another may not.
+The edge fabric enables multiple containers, networks, and physical sensors to stitched into a pattern designed to meet a need.  The only limitation of the fabric are the devices' capabilities; for example one device may have a camera attached and another may have a GPU.
 
-The CI/CD process is centered around five (5) primary tools:
+The CI/CD process demonstrated in this repository enables the automated building, testing, pushing, publishing, and deploying edge fabric services to devices for the purposes of development and testing.  Release management and production deployment are out-of-scope.
+
+# 2. Design
+
+The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The primary objective is to:
+
++ __eliminate failure in the field__
+
+A node that is currently operational should not fail due to an automated CI/CD process result.
+
+The key success criteria are:
+ 
+2. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
+3. __enforce testing__ - all components should provide interfaces and cases for testing
+4. __automate anything__ - to the greatest degree possible, automate the process
+
+### Stage everything
+The change control system for this repository is Git which provides mechanisms to stage changes between various versions of a repository.  These versions are distinguished within a repository via branching from a parent (e.g. the trunk or _master_ branch) and then incorporating any changes through a _commit_ back to the parent.  The _push_ of the change back to the repository may be used to evaluate the state and determine if a _stage_ is ready for a build to be initiated.  
+
+### Enforce testing
+Staged changes require testing processes to automate the build process.  Each service should conform to a standard test harness with either a default or custom test script.  Standardization of the testing process enables replication and re-use of tests for the service and its required services, simplifying testing.  Additional standardization in testing should be extended to API coverage through utilization of Swagger (n.b. IBM API Connect).
+
+### Automate anything
+A combination of tools enables automation for almost every component in the CI/CD process.  However, certain activities remain the provenance of human review and oversite, including _pull requests_ and _release management_.  In addition, modification of a service _version_ is _not_ dependent on either the Git or Docker repository version information.
+
+# 3.Use
+
+This [repository][repository] is built as an example implementation of this CI/CD process.  Each of the services is built using a similar [design][design-md] that utilizes a common set of `make` files and support scripts.
+
+The CI/CD process is centered around these primary tools accessed through the command-line:
 
 + `make` - control, build, test automation
 + `git` - software version and branch management
-+ `docker` - Docker repositories and images
++ `docker` - Docker registries, repositories, and images
 + `travis` - release change management
 + `hzn` - Open Horizon command-line-interface
++ `ssh` - Secure Shell 
 
-## 1.1 Automation controls
-The CI/CD automated process is designed to account for multiple branches, registries, and exchanges being utilized as part of the build, test, and release management process.  The attributes that specify these components are listed below and detailed in [`MAKEVARS.md`][makevars-md].
+The process is designed to account for multiple branches, registries, and exchanges being utilized as part of the build, test, and release management process; no release management process is proscribed.
 
-[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
+The CI/CD process requires configuration to operate properly; the control attributes are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
 
 + `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
 + `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
@@ -52,129 +83,94 @@ The CI/CD automated process is designed to account for multiple branches, regist
 + `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
 + `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
 
-# 2. Services
-Open Horizon edge fabric services compose one or more Docker containers along with other required services connected with point-to-point virtual-private-networks (VPN). 
+For more information refer to [`MAKEVARS.md`][makevars-md]
 
-### Service identification
-Services are identified with the following mandatory attributes:
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
 
-+ `org` - the organization in the _exchange_
-+ `url` - a unique name for the service within the organization
-+ `version` - the [_semantic version_][whatis-semantic-version] of the service
-+ `arch` - the architecture of the service (see [architecture list][arch-list])
+## Step 1 - Clone and configure
 
-### Service description
-Additional descriptive attributes are also available:
+Clone this [repository][repository] into a new directory (n.b. the repository may also be [forked][forking-repository]):
 
-+ `label` - an plain-text  string to name the service; **used for defaults in build process**
-+ `description` - a plain-text description of the service; maximum 1024 characters
-+ `documentation` - link (URL) to documentation, e.g. `README.md` file
+[forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
 
-### Service composition
-The composition attributes include:
+This repository is configured with the following default `make` variables which should be changed:
 
-+ `shareable` - may be either `singleton` or `multiple` to control instantiation
-+ `requiredServices` - an array of services to instantiate and connect  via [VPN][whatis-vpn]
-+ `userInput` - an array of dictionary entries for variables passed as environment variables to the container(s)
-+ `deployment` - a dictionary of `services` defined by hostname, including Docker image & environment
++ `DOCKER_NAMESPACE` - the identifier for the registry; for example, the _userid_ on [docker.io][docker-hub]
++ `HZN_ORG_ID` - organizational identifier in the Open Horizon exchange; for example: <userid>@cloud.ibm.com
 
-[whatis-vpn]: https://en.wikipedia.org/wiki/Virtual_private_network
+[docker-hub]: http://hub.docker.com
 
-### Example service
+Set those environment variables (and `GIT` directory) appropriately:
 
-The [`cpu/service.json`][cpu-service]  template -- when completed -- is listed below.  The **cpu** service is a `singleton` with no `requiredServices`, four (4) variables in `userInput`, and one `deployment.services` named `cpu` with additional environment variables `SERVICE_LABEL` and `SERVICE_VERSION`.
-
-[cpu-service]: https://github.com/dcmartin/open-horizon/blob/master/cpu/service.json
-
-```JSON
-{
-  "label": "cpu",
-  "description": "Provides hardware abstraction layer as service",
-  "documentation": "https://github.com/dcmartin/open-horizon/cpu/README.md",
-  "org": "dcmartin@us.ibm.com",
-  "url": "com.github.dcmartin.open-horizon.cpu-beta",
-  "version": "0.0.3",
-  "arch": "arm64",
-  "public": true,
-  "sharable": "singleton",
-  "requiredServices": [],
-  "userInput": [
-    {
-      "name": "CPU_PERIOD",
-      "label": "seconds between update",
-      "type": "int",
-      "defaultValue": "60"
-    },
-    {
-      "name": "CPU_INTERVAL",
-      "label": "seconds between cpu testing",
-      "type": "int",
-      "defaultValue": "1"
-    },
-    {
-      "name": "LOG_LEVEL",
-      "label": "specify logging level",
-      "type": "string",
-      "defaultValue": "info"
-    },
-    {
-      "name": "DEBUG",
-      "label": "debug on/off",
-      "type": "boolean",
-      "defaultValue": "false"
-    }
-  ],
-  "deployment": {
-    "services": {
-      "cpu": {
-        "environment": [
-          "SERVICE_LABEL=cpu",
-          "SERVICE_VERSION=0.0.3"
-        ],
-        "image": "dcmartin/arm64_com.github.dcmartin.open-horizon.cpu-beta:0.0.3",
-        "privileged": true,
-        "specific_ports": []
-      }
-    }
-  },
-  "tmpfs": {
-    "size": 2048000
-  },
-  "ports": {
-    "80/tcp": 8581
-  }
-}
+```
+export GD=
+export DOCKER_NAMESPACE=
+export HZN_ORG_ID=
 ```
 
-## Containers
+Use the following instructions (n.b. [source][clone-config-script]) to clone and configure this repository; **password for Docker may be requested**)
 
-## Patterns
+```
+mkdir -p $GD
+cd $GD
+git clone http://github.com/dcmartin/open-horizon
+cd $GD/open-horizon
+for j in */service.json; do jq '.org="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */pattern.json; do jq '.services[].serviceOrgid="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
+for j in */build.json; do sed -i -e 's|dcmartin/|'"${DOCKER_NAMESPACE}"'/|g' "${j}"; done
+```
 
-## Nodes
+## Step 2 - Install Open Horizon
+With the assumption that `docker` has already been installed; if not refer to these [instructions][get-docker].
 
-# Design criteria
+[get-docker]: https://docs.docker.com/install/
 
-The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The key success criteria are:
++ **macOS**
 
-1. __avoid failure in the field__ - a node that is currently operational should not fail due to an automated CI/CD process
-2. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
-3. __enforce testing__ - all components should provide interfaces and cases for testing
-4. __automate everything__ - to the greatest degree possible, automate the process
+ ```
+cd $GD/open-horizon
+sudo bash ./update-hzncli-macos.sh
+```
+**Note**: only the `hzn` command-line-interface tool is installed for macOS
 
-### Stage everything
-The change control system for this repository is Git which provides mechanisms to stage changes between various versions of a repository.  These versions are distinguished within a repository via branching from a parent (e.g. the trunk or _main_ branch) and then incorporating any changes through a _commit_ back to the parent.  The _push_ of the change back to the repository may be used to evaluate the state and determine if a _stage_ is ready for a build to be initiated.  The relevant content to define a _stage_ should be an artifact in the build process from which state information may be extracted; storing relevant information in the `Makefile` defeats that objective.
++ **LINUX**
 
-Explicit changes to a version artifact with appropriate build automation is still TBD.  The service version is specified in the`service.json` configuration template.  That version is used to determine the Docker _tag_ as well as the Open Horizon _service_ tag.
+ ```
+cd $GD/open-horizon
+sudo bash ./setup/aptget-horizon.sh
+```
 
-### Enforce testing
-Staged changes require testing processes to automate the build process.  Each service should conform to a standard test harness with either a default or custom test script.  Standardization of the testing process enables replication and re-use of tests for the service and its required services, simplifying testing.  Additional standardization in testing should be extended to API coverage through utilization of Swagger (n.b. IBM API Connect).
+## Step 3 - Create IBM Cloud API key file
+Visit the IBM Cloud [IAM][iam-service] service to create and download a platform API key; copy that `apiKey.json` file into the `open-horizon/` directory:
 
-### Automate everything
-Determination of build state in the TravisCI process requires utilization of platform controlled environment variables, typically reserved for _secrets_, or can leverage repository sources, e.g. JSON configurations.  While specification of environment variables through the build automation process would be possible, both the quantity and the variability in naming present challenges to automation and repeatability.
+[iam-service]: https://cloud.ibm.com/iam
 
+```
+cp -f ~/apiKey.json $GD/open-horizon/apiKey.json 
+```
 
+## Step 4 - Create code-signing key files
+Create a private-public key pair for encryption and digital signature:
 
-# Using the CI/CD process and tooling
+```
+cd $GD/open-horizon/
+rm -f *.key *.pem
+hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
+mv -f *.key ${HZN_ORG_ID}.key
+mv -f *.pem ${HZN_ORG_ID}.pem
+```
+
+[clone-config-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-config.txt
+
+The resulting `open-horizon/` directory contains all the necessary components to build a set of service, a deployable pattern, and a set of nodes for testing.
+
+# 3.2 Building sample services
+
+## Step 1 - 
+## Step 5
+
+[design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
+
 
 1. Create _configuration_ JSON: `service.json` and `pattern.json` 
 1. Create `service.makefile` - build, etc.. service using configuration JSON

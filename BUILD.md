@@ -1,5 +1,21 @@
 # `BUILD.md` - build process automation
 
+## CI/CD
+
+The control attributes for the CI/CD process are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
+
++ `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
++ `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
++ `DOCKER_LOGIN` - account identifier for access to registry
++ `DOCKER_PASSWORD` - password to verify account in registry
++ `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
++ `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
++ `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
+
+More information is available  in [`CICD.md`][cicd-md].
+
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/CICD.md
+
 ## Introduction
 
 This [repository][repository] is built using the `make` software; please refer to [`MAKE.md`][make-md] for more information.  The top-level [`makefile`][makefile] (n.b. lower-case) controls build across all services; please refer to [`SERVICE.md`][service-md] for additional details.
