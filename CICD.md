@@ -191,11 +191,130 @@ The containers built and pushed for these two services are utilized to build the
 4. `yolo` - the `you-only-look-once` image entity detection and classification tool
 5. `yolo2msghub` - uses 1-4 to send local state and entity detection information via Kafka
 
+
 Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`MAKE.md`][make-md] for additional information.
+
+### Step 1
+To `build` and `check` the services, run the following commands:
+
+```
+cd $GD/open-horizon
+make
+```
+### Step 2
+To `start` and `test` the `yolo2msghub` service, run the following commands:
+
+```
+cd $CG/open-horizon/yolo2msghub
+make service-start
+make service-test
+```
+### Step 3
+To `build` & `push`and then publish services in the exchange, run the following commands:
+
+```
+cd $GD/open-horizon
+make service-push
+make service-publish
+```
+### Step 4
+To publish the `yolo2msghub` pattern, run the following commands:
+
+```
+cd $GD/open-horizon/yolo2msghub
+make pattern-publish
+make pattern-validate
+```
 
 For more information on building services, see [`SERVICE.md`][service-md].
 
-# 5. Test
+# 5. Change
+The build process is designed to process changes to the software and take actions, e.g. rebuilding a service container.  To manage change control this process utilizes the `git` command in conjunction with a SaaS (e.g. `github.com`).  The namespace and version identifiers for Git do not represent the namespaces, identifiers, or versions used by either Docker or Open Horizon.
+
+To avoid conflicts in identification of containers, services, and patterns multiple Docker registries and Open Horizon Exchanges should be utilized.  However, when using a single Docker registry and/or Open Horizon exchange, a special `TAG` file may be created in the `open-horizon/` directory create distinct names.
+
+The `TAG` may be used to indicate a branch or stage;  for example from experimental (`exp`), to testing (`beta`), and finally to staging (`master`) prior to release management and production.
+
+A Git branch can be identified using the `git branch` command; an asterisk (`*`) indicates the current branch; for example:
+
+```
+% git branch
+* beta
+  master
+```
+
+And branches may be changed using `git checkout` command:
+
+```
+% git checkout master
+
+Switched to branch 'master'
+Your branch is up to date with 'origin/master'.
+% git branch
+  beta
+* master
+```
+
+An`open-horizon/TAG` file associated with the `beta` branch can be created with the following command (n.b. `$GD` refers to the Git directory):
+
+```
+echo 'beta' > $GD/open-horizon/TAG
+```
+
+The `TAG` value is then used to modify the container, service, and pattern identifiers in the configuration templates and build files.  For example the completed `yolo2msghub/horizon/service.definition.json` configuration has the `url` values changed for the service itself as well as its required services.  In addition, the Docker container identifier `image` has also been annotated with the `TAG` value of `beta`.  These modifications are only made to identifiers associated with the Docker registry/namespace and Open Horizon exchange; extrinsic identifiers are left unchanged.
+
+```
+{
+  "org": "dcmartin@us.ibm.com",
+  "label": "yolo2msghub",
+  "description": "Sends JSON payloads from yolo service to Kafka",
+  "documentation": "https://github.com/dcmartin/open-horizon/yolo2msghub/README.md",
+  "url": "com.github.dcmartin.open-horizon.yolo2msghub-beta",
+  "version": "0.0.11",
+  "arch": "amd64",
+  "public": true,
+  "sharable": "singleton",
+  "requiredServices": [
+    { "url": "com.github.dcmartin.open-horizon.yolo-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.8", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.wan-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.hal-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.cpu-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" }
+  ],
+  "userInput": [
+    { "name": "YOLO2MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },
+    { "name": "YOLO2MSGHUB_ADMIN_URL", "label": "administrative URL", "type": "string", "defaultValue": "https://kafka-admin-prod02.messagehub.services.us-south.bluemix.net:443" },
+    { "name": "YOLO2MSGHUB_BROKER", "label": "message hub broker list", "type": "string", "defaultValue": "kafka05-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093" },
+    { "name": "YOLO2MSGHUB_PERIOD", "label": "update interval", "type": "int", "defaultValue": "30" },
+    { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8587" },
+    { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
+    { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
+  ],
+  "deployment": {
+    "services": {
+      "yolo2msghub": {
+        "environment": [ "SERVICE_LABEL=yolo2msghub", "SERVICE_VERSION=0.0.11" ],
+        "devices": null,
+        "binds": null,
+        "specific_ports": [ { "HostPort": "8587:8587/tcp", "HostIP": "0.0.0.0" } ],
+        "image": "dcmartin/amd64_com.github.dcmartin.open-horizon.yolo2msghub-beta:0.0.11",
+        "privileged": false
+      }
+    }
+  },
+  "tmpfs": {
+    "size": 8192000
+  },
+  "ports": {
+    "8587/tcp": 8587
+  }
+}
+```
+
+In addition, the `build.json` file values are also decorated with the `TAG` value when from the same Docker registry and namespace.
+
+
+
+# 6. Test
 The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed to test devices.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
 
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/DESIGN.md
