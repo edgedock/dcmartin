@@ -1,65 +1,102 @@
 # `PATTERN.md` - publishing patterns
 
-# 1. Build
+# 1. Introduction
 
-Patterns are composed of services and have no build process.  However, all services specified in the `pattern.json` configuration file must be available in the exchange for all architectures specified in the configuration.  The configuration file for `motion2mqtt` pattern is listed below.
+Patterns are composed of services and depend on a successful service build.  All services for all architectures specified in the _pattern_ configuration file must be available in the designated exchange.
+
+## Example single-service `pattern.json` template
+
+The `pattern.json` template file for `yolo2msghub` (see below) contains human-readable attributes and a listing of services that are included.  In this example, there are three `services` in the array; one for each supported architecture.  Each service is identified by a the URL, organization, architecture, and acceptable versions.
 
 ```
 {
-  "label": "motion2mqtt",
-  "description": "motion2mqtt as a pattern",
+  "label": "yolo2msghub",
+  "description": "yolo and friends as a pattern",
   "public": true,
   "services": [
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "amd64",
-      "serviceVersions": [ { "version": "0.0.13" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.11"
+        }
+      ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm",
-      "serviceVersions": [ { "version": "0.0.13" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.11"
+        }
+      ]
     },
     {
-      "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
+      "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
       "serviceOrgid": "dcmartin@us.ibm.com",
       "serviceArch": "arm64",
-      "serviceVersions": [ { "version": "0.0.13" } ]
-    },
-    {
-      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
-      "serviceArch": "amd64",
-      "serviceVersions": [ { "version": "0.0.1" } ]
-    },
-    {
-      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
-      "serviceArch": "arm",
-      "serviceVersions": [ { "version": "0.0.1" } ]
-    },
-    {
-      "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
-      "serviceArch": "arm64",
-      "serviceVersions": [ { "version": "0.0.1" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.11"
+        }
+      ]
     }
   ]
 }
-
 ```
 
-# 2. Publish
+# 2. Configuration
 
-## `make` targets
+When using a single `DOCKER_NAMESPACE` and/or a single `HZN_EXCHANGE_URL` for multiple build stages, a special `TAG` file is recommended to maintain naming separation for containers, services, and patterns.
+
+The `TAG` file may be used to indicate a branch, or stage, in the process;  for example from experimental (`exp`), to testing (`beta`), and finally to staging (`master`) prior to release management and production.
+
+A Git branch can be identified using the `git branch` command; an asterisk (`*`) indicates the current branch; for example:
+
+```
+% git branch
+* beta
+  master
+```
+
+A `./open-horizon/TAG` file associated with the `beta` branch is created with the following command:
+
+```
+echo 'beta' > $GD/open-horizon/TAG
+```
+
+
+
+
+separation of Docker container images and Open Horizon exchange services and patterns when using a single `DOCKER_NAMESPACE` and 
+
+
+# 3. Publish and validate
+Patterns are published to an exchange using a completed configuration template.  When all services in a pattern have been published to the exchange, the pattern itself can be published.
 
 ### `pattern-publish`
-Publishes the `horizon/pattern.json` configuration file using the `SERVICE_NAME` of the inherent service.
+
+Patterns are published using the `make` command in the corresponding subdirectory of the repository; for example:
+
+```
+cd ./open-horizon/yolo2msghub
+make pattern-publish
+```
+
+Example output:
+
+```
+>>> MAKE -- 19:19:58 -- publishing: yolo2msghub; organization: dcmartin@us.ibm.com; exchange: https://alpha.edge-fabric.com/v1
+Updating yolo2msghub in the exchange...
+Storing dcmartin@us.ibm.com.pem with the pattern in the exchange...
+```
 
 ### `pattern-validate`
 Validates the pattern registration in the exchange using the `hzn` command-line-interface tool.
+
 
 # 3. Deployment Testing
 

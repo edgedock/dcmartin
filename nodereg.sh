@@ -88,6 +88,9 @@ node_update()
     configuring)
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
+      ssh ${machine} 'hzn eventlog list 2> /dev/stderr' | jq -c '.[]'
+      node_unregister ${machine}
+      sleep 10
       ;;
     unconfiguring)
       pattern=$(node_status ${machine} | jq -r '.pattern')
@@ -140,7 +143,7 @@ if [ $? != 0 ]; then echo "+++ WARN -- $0 $$ -- machine ${machine} not found on 
 IPADDR=$(echo "${OUT}" | head -1 | sed 's|.*(\([^)]*\)).*|\1|')
 echo "--- INFO -- $0 $$ -- ${machine} at IP: ${IPADDR:-}" &> /dev/stderr
 
-state=$(node_update ${machine}) 
+state=$(node_update ${machine})
 while [ "${state}" != 'configured' ]; do
   echo "--- INFO -- $0 $$ -- machine: ${machine}; state: ${state}" &> /dev/stderr
   state=$(node_update "${machine}") 

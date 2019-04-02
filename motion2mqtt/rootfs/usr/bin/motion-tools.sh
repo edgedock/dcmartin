@@ -9,25 +9,60 @@ export MOTION_PID_FILE="/var/run/motion/motion.pid"
 export MOTION_CMD=$(command -v motion)
 
 
-KNOWN_CAMERAS='[{"name":"ps3eye","usb":"1415:2000","width":640,"height":480,"fov":65},{"name":"c910","usb":"046d:0821","width":1920,"height":1080,"fov":83,"focal":{"value":43,"unit":"mm"},"fps":"30@640x480","bits":8,"vidpid":"VID_046D&PID_0821","capture":[{"aspect":"4:3","video":["320x240","640x480","1600x1200"],"image":["640x480","1280x960","2560x1920","3840x2880"]},{"aspect":"16:9","video":["480x360","858x480","1280x720","1920x1080"],"image":["480x360","858x480","1280x720","1920x1080"]}]}]'
+KNOWN_CAMERAS='[{"name":"ps3eye","usb":"1415:2000","width":640,"height":480,"bits":8,"fov":65,"palette":8},{"name":"kinect","usb":"045e:02ae","width":640,"height":480,"bits":8,"fps":30,"fov":57,"palette":14},{"name":"c910","usb":"046d:0821","width":1280,"height":720,"bits":8,"fov":83,"fps":"30","palette":8,"aspect":"16:9","focal":{"value":43,"unit":"mm"},"vidpid":"VID_046D&PID_0821","capture":[{"aspect":"4:3","video":["320x240","640x480","1600x1200"],"image":["640x480","1280x960","2560x1920","3840x2880"]},{"aspect":"16:9","video":["480x360","858x480","1280x720","1920x1080"],"image":["480x360","858x480","1280x720","1920x1080"]}]}]'
+
+#    "lsusb": [
+#      {
+#        "bus_number": "001",
+#        "device_id": "001",
+#        "device_bus_number": "1d6b",
+#        "manufacture_id": "Bus 001 Device 001: ID 1d6b:0002",
+#        "manufacture_device_name": "Bus 001 Device 001: ID 1d6b:0002"
+#      },
+#      {
+#        "bus_number": "001",
+#        "device_id": "002",
+#        "device_bus_number": "80ee",
+#        "manufacture_id": "Bus 001 Device 002: ID 80ee:0021",
+#        "manufacture_device_name": "Bus 001 Device 002: ID 80ee:0021"
+#      },
+#      {
+#        "bus_number": "002",
+#        "device_id": "001",
+#        "device_bus_number": "1d6b",
+#        "manufacture_id": "Bus 002 Device 001: ID 1d6b:0003",
+#        "manufacture_device_name": "Bus 002 Device 001: ID 1d6b:0003"
+#      },
+#      {
+#        "bus_number": "001",
+#        "device_id": "003",
+#        "device_bus_number": "1415",
+#        "manufacture_id": "Bus 001 Device 003: ID 1415:2000",
+#        "manufacture_device_name": "Bus 001 Device 003: ID 1415:2000"
+#      }
+#    ]
 
 hal_lsusb()
 {
   lsusb=$(curl -fsSL "http://hal" 2> /dev/null | jq '.lsusb?')
-  if [ -z "${lsusb:-}" ] || [ "${lsusb}" == 'null' ]; then lsusb='null'; fi
+  if [ -z "${lsusb:-}" ]; then lsusb='null'; fi
   echo "${lsusb}"
 }
 
 motion_usb_camera()
 {
-  lsusb=$(hal_lsusb)
-  for id in $(echo "${lsusb}" | jq -r '.[].id'); do
-    usb=$(echo "${lsusb}" | jq '.[]|select(.id=="'${id}'")')
-    if [ ! -z "${usb} ] && [ "${usb}" != 'null' ]; then
-      CAM=${USB}
-    fi
-  done
-  echo "${CAM:-}"
+  # get all usb device
+  if [[ lsusb=$(hal_lsusb) != 'null' ]]; then
+    # search by manufacture identifier
+    for mid in $(echo "${lsusb}" | jq -r '.[].manufacture_id'); do
+      for id in $(echo "${KNOWN_CAMERAS}" | jq -r '.[].usb'); do
+	usb=$(echo "${lsusb}" | jq '.[]|select(.manufacture_id|test("'${id}'")')
+	if [ -z "${usb} ] || [ "${usb}" == 'null' ]; then continue; fi
+	device=$(echo "${usb}" | jq -r '.manufacture_id' | sed 's/.*Device \([0-9]*\).*/\1/')
+      done
+    done
+  fi
+  echo "${device:-}"
 }
 
 motion_device()

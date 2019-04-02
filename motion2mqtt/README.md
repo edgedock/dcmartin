@@ -30,6 +30,7 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 
 [docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.motion2mqtt
 [pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.motion2mqtt.svg
+"q
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
@@ -221,6 +222,33 @@ When deployed as a pattern, additional information is provided (n.b. `base64` en
   }
 }
 ```
+
+## Video for LINUX
+
+V4l2 Option|	FOURCC|	v4l2_palette option
+:-------|-------:|-------:|-------:
+`V4L2_PIX_FMT_SN9C10X`|`S910`|`0`
+`V4L2_PIX_FMT_SBGGR16`|`BYR2`|`1`
+`V4L2_PIX_FMT_SBGGR8`|`BA81`|`2`
+`V4L2_PIX_FMT_SPCA561`|`S561`|`3`
+`V4L2_PIX_FMT_SGBRG8`|`GBRG`|`4`
+`V4L2_PIX_FMT_SGRBG8`|`GRBG`|`5`
+`V4L2_PIX_FMT_PAC207`|`P207`|`6`
+`V4L2_PIX_FMT_PJPG`|`PJPG`|`7`
+`V4L2_PIX_FMT_MJPEG`|`MJPG`|`8`
+`V4L2_PIX_FMT_JPEG`|`JPEG`|`9`
+`V4L2_PIX_FMT_RGB24`|`RGB3`|`10`
+`V4L2_PIX_FMT_SPCA501`|`S501`|`11`
+`V4L2_PIX_FMT_SPCA505`|`S505`|`12`
+`V4L2_PIX_FMT_SPCA508`|`S508`|`13`
+`V4L2_PIX_FMT_UYVY`|`UYVY`|`14`
+`V4L2_PIX_FMT_YUYV`|`YUYV`|`15`
+`V4L2_PIX_FMT_YUV422P`|`422P`|`16`
+`V4L2_PIX_FMT_YUV420`|`YU12`|`17`
+`V4L2_PIX_FMT_Y10`|`Y10`|`18`
+`V4L2_PIX_FMT_Y12`|`Y12`|`19`
+`V4L2_PIX_FMT_GREY`|`GREY`|`20`
+`V4L2_PIX_FMT_H264`|`H264`|`21`
 
 ## Changelog & Releases
 

@@ -31,3 +31,4 @@ horizon/
 sdrconf*
 MQTT2KAFKA_*
 test.*.json
+test.*.jpeg

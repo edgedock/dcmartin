@@ -28,7 +28,8 @@
         "MQTT_PASSWORD": "",
         "MQTT2KAFKA_APIKEY": "",
         "MQTT2KAFKA_PAYLOAD": "image",
-        "MQTT2KAFKA_TOPIC": "+/+/+/event/end",
+        "MQTT2KAFKA_SUBSCRIBE": "+/+/+/event/end",
+        "MQTT2KAFKA_PUBLISH": "",
         "MQTT2KAFKA_TOO_OLD": 300,
         "DEBUG": true
       }

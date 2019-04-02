@@ -40,7 +40,7 @@ if [ -z $(command -v "${CMD}") ]; then
   exit 0
 fi
 
-if [ -z ${TIMEOUT:-} ]; then TIMEOUT=5; fi
+if [ -z ${TIMEOUT:-} ]; then TIMEOUT=2; fi
 
 echo "--- INFO -- $0 $$ -- Testing ${SERVICE_LABEL} in container tagged: ${DOCKER_TAG} at" $(date) &> /dev/stderr
 
