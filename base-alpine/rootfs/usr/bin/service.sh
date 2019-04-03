@@ -20,3 +20,4 @@ echo "Content-length: ${SIZ}"
 echo "Access-Control-Allow-Origin: *"
 echo ""
 cat "${RESPONSE_FILE}"
+rm -f ${RESPONSE_FILE}

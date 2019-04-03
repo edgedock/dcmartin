@@ -41,7 +41,7 @@ These services and patterns are built and pushed to public [repositories][docker
 
 # 2. Services & Patterns
 
-Services are defined within a directory hierarchy of this [repository][repository]. Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.
+Services are defined within a directory hierarchy of this [repository][repository]. Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.  All services in this repository share a common [design][design-md].
 
 Patterns include:
 
@@ -96,131 +96,13 @@ There are also _base_ containers that are used by the other services:
 [jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
 [jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
-# 3. Build, Push & Publish
+# 3. Copy and Use
 
-The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  While all services in this repository share a common design (see [`DESIGN.md`][design-md]), that design is independent of the build automation process.   See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
+The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.
 
-## 3.1 Clone, build, push, and publish (see [**video**][clone-to-publish-video]) 
+See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-[clone-to-publish-video]: https://youtu.be/vLicHLN90JQ
-
-The `make` program (see [`MAKE.md`][make-md] ) is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].  The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_.   More information is available at  [`BUILD.md`][build-md].
-
-1. Clone this [repository][repository]
-2. Set `DOCKER_NAMESPACE` to the [Docker registry][docker-hub] login identifier
-2. Login to Docker registry
-4. Initiate build with `make` command
-
-**Video Script:** on [GitHub][clone-to-publish-script]
-
-[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-to-publish-cpu.txt
-
-## 3.2 Build and push all containers (see [**video**][service-push-video])
-
-[service-push-video]: https://youtu.be/d5JiB_aDxRY
-
-1. Set `HZN_ORG_ID` to the exchange organization identifier
-1. Change `service`, `pattern`, and `build` configuration template files (as necessary)
-
-[docker-hub]: http://hub.docker.com/
-
-```
-# set environment variables
-export DOCKER_NAMESPACE="yourdockerhubid"
-# login to Docker registry (e.g. hub.docker.com)
-docker login
-```
-**NOTE**: on **macOS** the Docker application preferences should _not_ use the secure OSX keychain.
-
-```
-# login to Docker registry (e.g. hub.docker.com)
-docker login
-```
-
-To `make` all container images for all architectures for each and every service use the `service-push` target:
-
-**Video Script:** on [GitHub][clone-to-publish-script]
-
-[service-push-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/service-push.txt
-
-## 3.3 Publish services (see [**video**][publish-cpu-service-video])
-
-[publish-cpu-service-video]: https://youtu.be/C47L1PWVp3E
-
-
-1. Generate and download IBM Cloud API Key as `apiKey.json` ([cloud.ibm.com/iam][ibm-iam])
-1. Install `hzn` command-line tool and create code signing keys (public and private)
-
-```
-hzn key create ${HZN_ORG_ID} you@yourdomain.tld
-```
-[ibm-iam]: http://cloud.ibm.com/iam
-
-To publish a service to the exchange use the `service-publish` target; this target will fail if the service containers have not been successfully pushed to the Docker registry:
-
-```
-make service-publish
-```
-
-The following commands automatically replace the defaults in all configuration and build templates.
-
-```
-export HZN_ORG_ID="you@yourdomain.tld"
-# change all configuration templates
-for json in */service.json */pattern.json; do sed -i "s/dcmartin@us.ibm.com/${HZN_ORG_ID}/g" ${json}; done
-# change all build specifications
-for json in */build.json; do sed -i "s/dcmartin/${DOCKER_NAMESPACE}/g" ${json}; done
-```
-
-**Video Script:** on [GitHub][service-publish-script]
-
-[service-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/service-publish.txt
-
-# 4. Test
-
-Each service may be tested individually using the following `make` targets:
-
-+ `check` - check the service individually using `TEST_JQ_FILTER` for `jq` command; returns response JSON
-+ `test` - test the service individually; tests status response JSON for conformance
-+ `service-test` - test the service and all required services; tests status response JSON for conformance
-
-# 5. Deploy (see [video][horizon-video-setup])
-
-Pattern tests using deployed nodes may be utilized with appropriate client device node configuration.  Edge nodes for testing may be created using instructions in [`SETUP.md`][setup-md].
-
-+ `nodes` - configure clients with _pattern_; devices IP/FQDN specified in `TEST_TMP_MACHINES` file
-+ `list-nodes` - execute `hzn node list` and `docker ps` on client devices
-+ `test-nodes` - process status API from client using `jq` command and `TEST_NODE_FILTER`expression
-+ `undo-nodes` - unregister client devices as nodes
-
-For more information see [`PATTERN.md`][pattern-md].
-
-[horizon-video-setup]: https://youtu.be/IfR-XY603JY
-[docker-start]: https://www.docker.com/get-started
-[make-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKE.md
-[setup-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
-[network-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/NETWORK.md
-[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
-[build-md]: https://github.com/dcmartin/open-horizon/blob/master/BUILD.md
-[travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
-[travis-ci]: https://travis-ci.org/
-[build-pattern-video]: https://youtu.be/cv_rOdxXidA
-
-# 6. Open Horizon
-
-Open Horizon is available for a variety of architectures and platforms.  For more information please refer to the [`setup/README.md`][setup-readme-md].  
-
-A _quick-start_ for Ubuntu/Debian/Raspbian LINUX below.
-
-```
-wget -qO - ibm.biz/horizon-setup | sudo bash
-```
-
-## 6.1 Credentials
-
-Credentials are required to participate; request access on the IBM Applied Sciences [Slack][edge-slack] by providing your [IBMid][ibm-registration] email and IBM Cloud account GUID.
-
-## 6.2 Further Information 
+#  	&#127919;  Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
@@ -252,6 +134,7 @@ David C Martin (github@dcmartin.com)
 [repository]: https://github.com/dcmartin/open-horizon
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/CICD.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
 [status-md]: https://github.com/dcmartin/open-horizon/blob/master/STATUS.md
 [beta-md]: https://github.com/dcmartin/open-horizon/blob/master/BETA.md
