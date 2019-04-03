@@ -1,4 +1,4 @@
-# `motion2mqtt` - detect motion and send to MQTT
+# &#128249; `motion2mqtt` - detect motion and send to MQTT
 
 Monitors attached camera and provides [motion-project.github.io][motion-project-io] as micro-service, transmitting _events_ and _images_ to a designated [MQTT][mqtt-org] host.  This container may be run locally using Docker, pushed to a Docker registry, and published to any [_Open Horizon_][open-horizon] exchange.
 
@@ -30,7 +30,6 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 
 [docker-arm64]: https://hub.docker.com/r/dcmartin/arm64_com.github.dcmartin.open-horizon.motion2mqtt
 [pulls-arm64]: https://img.shields.io/docker/pulls/dcmartin/arm64_com.github.dcmartin.open-horizon.motion2mqtt.svg
-"q
 
 [arm64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg

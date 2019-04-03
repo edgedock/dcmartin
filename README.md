@@ -1,4 +1,4 @@
-# Open Horizon example _services_ and _patterns_
+#  	&#127749; Open Horizon example _services_ and _patterns_
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud. 
 
@@ -45,8 +45,8 @@ Services are defined within a directory hierarchy of this [repository][repositor
 
 Patterns include:
 
-+ `yolo2msghub` - Pattern of `yolo2msghub` service with `yolo`,`hal`,`wan`, and `cpu`
-+ `motion2mqtt` - Pattern of `motion2mqtt`,`yolo4motion` and `mqtt2kafka` services with ``mqtt`,`hal`,`wan`, and `cpu`
++ `yolo2msghub` - Pattern of `yolo2msghub` with `yolo`,`hal`,`wan`, and `cpu`
++ `motion2mqtt` - Pattern of `motion2mqtt`,`yolo4motion` and `mqtt2kafka` with `mqtt`,`hal`,`wan`, and `cpu`
 
 Services include:
 
