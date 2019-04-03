@@ -115,6 +115,7 @@ stop:
 run: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	@sleep 2
 
 remove:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
