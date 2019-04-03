@@ -60,7 +60,7 @@ Services include:
 + [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
 + [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
 + [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
-+ [`mqtt2kafka`][mqtt2kafka-service] - relay specified MQTT traffic to Kafka
++ [`mqtt2kafka`][mqtt2kafka-service] - relay MQTT traffic to Kafka
 + [`jetson-caffe`][jetson-caffe-service] - BVLC Caffe with CUDA and OpenCV for nVidia Jetson TX
 + [`jetson-yolo`][jetson-yolo-service] - Darknet YOLO with CUDA and OpenCV for nVidia Jetson TX
 + [`jetson-digits`][jetson-digits] - nVidia DIGITS with CUDA
