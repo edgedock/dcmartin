@@ -3,32 +3,24 @@
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-###
-### FUNCTIONS
-###
-
+## source tools
 source /usr/bin/kafka-tools.sh
 source /usr/bin/service-tools.sh
 
 ###
-### initialization
+### MAIN
 ###
 
 ## initialize horizon
 hzn_init
 
 ## configure service
-
 SERVICES='[{"name":"wan","url":"http://wan"},{"name":"mqtt","url":"http://mqtt"}]'
 MQTT='{"host":"'${MQTT_HOST:-}'","port":'${MQTT_PORT:-1883}',"username":"'${MQTT_USERNAME:-}'","password":"'${MQTT_PASSWORD:-}'"}'
 CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"subscribe":"'${MQTT2KAFKA_SUBSCRIBE}'","payload":"'${MQTT2KAFKA_PAYLOAD}'","publish":"'${MQTT2KAFKA_PUBLISH}'","services":'"${SERVICES}"',"mqtt":'"${MQTT:-null}"',"wan":'"${WAN:-null}"'}'
 
 ## initialize servive
 service_init ${CONFIG}
-
-###
-### MAIN
-###
 
 ## MQTT arguments
 MOSQUITTO_ARGS="-h ${MQTT_HOST} -p ${MQTT_PORT}"
