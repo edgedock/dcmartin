@@ -4,6 +4,99 @@
 # Introduction
 These services are all designed on a common pattern to provide a low-latency response to status requests with providing asynchronous updates.  The principle components are `run.sh` and `service.sh`.   There is one implementation of each script with a copy in every _base_ service (e.g. `base-ubuntu`).
 
+When a service container is instantiated on a node it is provided with a set of environment variables by the Open Horizon edge fabric. 
+
+**NOTE:** The environment variables defined by the Open Horizon pattern are _not_ defined when testing a container stand-alone.  
+
+1. `HZN_ORGANIZATION` - the organization for the service (e.g. `dcmartin@us.ibm.com`)
+2. `HZN_EXCHANGE_URL` - the exchange host URL
+3. `HZN_AGREEMENTID` - the agreement identifier
+4. `HZN_ARCH`- system architecture (e.g. `arm`, `arm64`, `amd64`, `ppc64le`)
+5. `HZN_CPUS` - CPU cores requested
+6. `HZN_PATTERN` - the name of the pattern (e.g. `dcmartin@us.ibm.com/yolo2-msghub`)
+7. `HZN_HOST_IPS` - the TCP/IP addresses of the host
+8. `HZN_RAM` - RAM kilobytes requested
+
+#  &#9995; `Dockerfile`
+All Docker containers are built using a file that contains instructions; that file is `Dockerfile` by default.  The build process currently only supports building single Docker container image and uses a single `Dockerfile` for all architectures.
+
+The Docker file includes a directive to build the container from another, previously built, container; for example in the `open-horizon/base-ubuntu/Dockerfile`:
+
+```
+ARG BUILD_FROM=ubuntu:bionic
+FROM $BUILD_FROM
+ARG BUILD_ARCH=amd64
+```
+
+These three lines define two arguments (`ARG`) to the Docker build instructions and one directive (`FROM` ) indicating the container identifier from which this container should be built.
+
+Both the `BUILD_FROM` and `BUILD_ARCH` values are defaults; values will be provided during build automation.
+
+#  &#9995; `build.json`
+Multiple architectures are supported through the `build.json` configuration file; for example the `base-ubuntu/build.json` indicate the architecture (e.g. `amd64`) and `FROM` image.  For more information on the Docker `FROM` directive, please refer to [Docker build documentation][docker-build-doc]
+
+[docker-build-doc]: https://docs.docker.com/engine/reference/builder/
+
+The base service container for Ubuntu specifies a dictionary of `build_from` architectures and Docker registry image identifiers.  A complete Docker identifier is composed of three components:
+
++ `DOCKER_REGISTRY` - the registry which will provide repositories for container images
++ `DOCKER_NAMESPACE` - the user, group, or other identifier for the space within the registry
++ `DOCKER_NAME` - the identifier of the Docker container repository
++ `DOCKER_TAG` - the identifier of the Docker image version
+
+A complete Docker container image identifier is:
+
+&#9971; `DOCKER_REGISTRY`/`DOCKER_NAMESPACE`/`DOCKER_NAME`:`DOCKER_TAG`
+
+The `docker` command does _not_ have a means to change the default registry and unless specified will utilize the default `docker.io`.  The [Docker Hub][docker-hub] login username is the default namespace.
+
+[docker-hub]: http://hub.docker.com/
+
+## Example 1: `base-ubuntu`
+The base container for Ubuntu-based services utilizes existing container images as `build_from` identifiers.  Since the registry is unspecified, the default `docker.io` will be utilized.
+
+```
+{
+    "squash": false,
+    "build_from": {
+        "amd64": "ubuntu:bionic",
+        "arm": "arm32v7/ubuntu:bionic",
+        "arm64": "arm64v8/ubuntu:bionic",
+        "386": null,
+        "ppc64": null,
+        "ppc64le": null,
+        "mips64": null,
+        "mips64le": null,
+        "s390x": null,
+        "mips": null,
+        "mipsle": null
+    },
+    "args": {}
+}
+```
+## Example 2: `yolo`
+The service container for the `yolo` service is built from the `base-ubuntu` container.
+
+```
+{
+  "squash": false,
+  "build_from": {
+    "amd64": "dcmartin/amd64_com.github.dcmartin.open-horizon.base-alpine:0.0.4",
+    "arm": "dcmartin/arm_com.github.dcmartin.open-horizon.base-alpine:0.0.4",
+    "arm64": "dcmartin/arm64_com.github.dcmartin.open-horizon.base-alpine:0.0.4",
+    "386": null,
+    "ppc64": null,
+    "ppc64le": null,
+    "mips64": null,
+    "mips64le": null,
+    "s390x": null,
+    "mips": null,
+    "mipsle": null
+  },
+  "args": {}
+}
+```
+
 # A. `run.sh`
 The elemental component of all services in this repository is the `run.sh` script; for example:
 
@@ -19,24 +112,33 @@ There are library functions provided in the `hzn-tools.sh` script; they include:
 
 ### &#128073; `hzn_init()`
 
-Initializes a data structure to record the `HZN`  values (see below). If the environment variable `HZN_EXCHANGE_APIKEY` is defined and the pattern is found in the exchange, the  details for the pattern will be downloaded and added to the status.
+Takes no arguments and initializes a data structure to record the `HZN`  values (see above). If the environment variable `HZN_EXCHANGE_APIKEY` is defined and the pattern is found in the exchange, the  details for the pattern will be downloaded and added to the status.
 
 ### &#128073; `hzn_config()`
-Once the service has been initialized the `hzn_config()` function returns the JSON configuration
+Once Open Horizon has been initialized, the `hzn_config()` function returns the JSON configuration.
+
+Example JSON configuration returned by `hzn_config()`:
+
+```
+  "hzn": {
+    "agreementid": "2abd5656decd7b7343586ee6be739fbb49c8ff2ab3107be9962738d94b40986e",
+    "arch": "arm",
+    "cpus": 1,
+    "device_id": "test-arm-1",
+    "exchange_url": "https://alpha.edge-fabric.com/v1/",
+    "host_ips": [
+      "127.0.0.1",
+      "192.168.1.220",
+      "172.17.0.1"
+    ],
+    "organization": "dcmartin@us.ibm.com",
+    "ram": 0,
+    "pattern": "dcmartin@us.ibm.com/yolo2msghub-beta"
+  }
+```
 
 ## Step 1 - Initialize status
-When a service container is instantiated on a node it is provided with a set of environment variables by the Open Horizon edge fabric. 
-
-**NOTE:** The environment variables defined by the Open Horizon pattern are _not_ defined when testing a container stand-alone.  
-
-1. `HZN_ORGANIZATION` - the organization for the service (e.g. `dcmartin@us.ibm.com`)
-2. `HZN_EXCHANGE_URL` - the exchange host URL
-3. `HZN_AGREEMENTID` - the agreement identifier
-4. `HZN_ARCH`- system architecture (e.g. `arm`, `arm64`, `amd64`, `ppc64le`)
-5. `HZN_CPUS` - CPU cores requested
-6. `HZN_PATTERN` - the name of the pattern (e.g. `dcmartin@us.ibm.com/yolo2-msghub`)
-7. `HZN_HOST_IPS` - the TCP/IP addresses of the host
-8. `HZN_RAM` - RAM kilobytes requested
+Call the `hzn_init()` function with no arguments and expect a non-zero length string as result; then capture the configuration into a well known environment variable, i.e. `HZN`, for later reference.
 
 ```
 # initialize horizon
@@ -49,7 +151,9 @@ fi
 ```
 
 ## Step 2 - Invoke the _service_ script
-The script detects if an executable program exists with the name of the service; if it does exist, the executable is invoked as a background process.  The `SERVICE_LABEL` is defined as an environment variable in the `service.json` configuration template.
+
+### &#9994; `SERVICE_LABEL`
+This environment variable is defined in the `service.json` configuration template.  The script detects if an executable program exists with the name of the service and `.sh` appended; if it does exist, the executable is invoked as a background process. 
 
 ```
 # label
@@ -63,25 +167,8 @@ else
 fi
 ```
 
-For example, in the `deployment` section of the the `cpu/service.json`configuration template the `SERVICE_LABEL` is set to `cpu`:
-
-```
-  "deployment": {
-    "services": {
-      "cpu": {
-        "environment": [ "SERVICE_LABEL=cpu", "SERVICE_VERSION=0.0.3" ],
-        "image": null,
-        "privileged": true,
-        "binds": null,
-        "devices": null,
-        "specific_ports": null
-      }
-    }
-  }
-```
-
 ## Step 3 - Respond to HTTP
-The last section of the `run.sh` script utilizes the `socat` utility to listen on a designated port and respond by invoking the `service.sh` script.  The `LOCALHOST_PORT` environment variable may be specified to over-ride the default port `80`.
+The last section of the `run.sh` script utilizes the `socat` utility to listen on a designated port and respond by invoking the `service.sh` script.  The `LOCALHOST_PORT` environment variable may be specified; if is it undefined or zero-length, the default port `80` is used.
 
 ```
 # port
@@ -102,60 +189,90 @@ This script processes the output from the `SERVICE_LABEL` script invoked as a ba
 There are a set of support functions to control the `service.sh` script output:
 
 ### &#128073; `service_init()`
-Initializes the service.
+Initializes the service according to the supplied JSON argument
 
 ### &#128073; `service_config()`
-Configures the service according to the supplied JSON argument
+Returns the service configuration as JSON string.
 
 ### &#128073; `service_update()`
-Updates the service status; this function is called by the specific `SERVICE_LABEL` script.
+Provides a file as an update to the service status; this function is called by `SERVICE_LABEL` script.
 
 ### &#128073; `service_output()`
-Provides the service status in the provided file.
+Provides the service status in conjunction with the status of Open Horizon (`hzn`) and any required services; for example, the `yolo2msghub` service status output includes the following top-level entities:
+
++ `hzn` - the Open Horizon service information per the `service_init` function
++ `config` - the configuration of the service per the `service_config`function
++ `service` - the service metadata (i.e. `environment` variables from `service.json`)
+
+In addition, each service may generate its own _actual_ payload as well as the status _actuals_ for any services specified in the `service_init` configuration.  For example the `yolo2msghub` service status includes the following additional top-level entities:
+
++ `yolo2msghub` - the _actual_ status of the service, incorporating `yolo` status  _actual_
++ `hal` - the `hal` service status _actual_
++ `cpu` - the `cpu` service status _actual_
++ `wan` - the `wan` service status _actual_
+
+ See **Example `yolo2msghub` Status** below for complete listing.
 
 # C. _service_`.sh`
+The executable service script identified by the `SERVICE_LABEL` (e.g. `cpu` and `open-horizon/cpu/rootfs/usr/bin/cpu.sh`), runs continuously after invocation by the `run.sh` script.
 
-## Example: `cpu.sh`
+## Example 1: `cpu`
+This service continuously updates the CPU percentage utilization with a value between 0.0 and 100.0.  Periodic polling of the system processor information provides the underlying data; most example services have an update period specifiable in seconds.
+
+In the `deployment` section of the the `cpu/service.json`template the `SERVICE_LABEL` is set to `cpu`:
+
+```
+  "deployment": {
+    "services": {
+      "cpu": {
+        "environment": [ "SERVICE_LABEL=cpu", "SERVICE_VERSION=0.0.3" ],
+        "image": null,
+        "privileged": true,
+        "binds": null,
+        "devices": null,
+        "specific_ports": null
+      }
+    }
+  }
+```
+
+### Example 1: `cpu` script
+The script to produce a CPU percentage utilization is based on this [wiki][cpu-wiki]; the logic samples the CPU utilization twice over `CPU_INTERVAL`seconds and calculates an average; it repeats this process every `CPU_PERIOD` seconds; forever.
+
+[cpu-wiki]: https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
+
 
 ```
 #!/bin/bash
-  
+
 # TMPDIR
 if [ -d '/tmpfs' ]; then TMPDIR='/tmpfs'; else TMPDIR='/tmp'; fi
 
-###
-### FUNCTIONS
-###
-
+## source service tools
 source /usr/bin/service-tools.sh
-
-###
-### initialize
-###
-
-## initialize horizon
-hzn_init
-
-## configure service
-
-CONFIG='{"log_level":"'${LOG_LEVEL:-}'","debug":'${DEBUG:-false}',"period":"'${CPU_PERIOD}'","interval":"'${CPU_INTERVAL}'","services":'"${SERVICES:-null}"'}'
-
-## initialize servive
-service_init ${CONFIG}
 
 ###
 ### MAIN
 ###
 
+## initialize horizon
+hzn_init
+
+## configure service w/ defaults
+CONFIG='{"log_level":"'${LOG_LEVEL:-info}'","debug":'${DEBUG:-false}',"period":"'${CPU_PERIOD:-30}'","interval":"'${CPU_INTERVAL:-1}'","services":'"${SERVICES:-null}"'}'
+
+## initialize servive
+service_init ${CONFIG}
+
 ## create initial output
-OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
+OUTPUT_FILE=$(mktemp)
 echo '{"date":'$(date +%s)'}' > "${OUTPUT_FILE}"
 service_update "${OUTPUT_FILE}"
 
 # iterate forever
 while true; do
   DATE=$(date +%s)
-  OUTPUT=$(jq -c '.' "${OUTPUT_FILE}")
+  OUTPUT='{}'
 
   # https://github.com/Leo-G/DevopsWiki/wiki/How-Linux-CPU-Usage-Time-and-Percentage-is-calculated
   RAW=$(grep -iE '^cpu ' /proc/stat)
@@ -168,10 +285,9 @@ while true; do
 
   PERCENT=$(echo "scale=2; 100 * (($CT2 - $CT1) - ($CI2 - $CI1)) / ($CT2 - $CT1)" | bc -l)
   if [ -z "${PERCENT}" ]; then PERCENT=null; fi
-  OUTPUT=$(echo "${OUTPUT}" | jq '.percent='${PERCENT})
 
   # output
-  echo "${OUTPUT}" | jq '.date='$(date +%s) > "${OUTPUT_FILE}"
+  echo '{"date":'$(date +%s)',"percent":'${PERCENT:-null}'}' > "${OUTPUT_FILE}"
   # update service
   service_update "${OUTPUT_FILE}"
   # wait for ..
@@ -182,7 +298,8 @@ while true; do
 done
 ``` 
 
-For example, the `cpu` service returns the following when executed locally:
+### Example 1: `cpu` status
+When built and run locally, for example using the `make build check` command, the `cpu` status returns:
 
 ```
 {
@@ -219,9 +336,9 @@ For example, the `cpu` service returns the following when executed locally:
 ```
 
 
-## Example: `yolo2msghub.sh`
+## Example 2: `yolo2msghub`
 
-A slightly more complicated script that combines multiple `requiredServices`, notably `hal`, `cpu`,  `wan`, and `yolo`, to provide a composite service includes all the status outputs.  In this example, each of the sub-services is processed to only include the payload service content, 
+A slightly more complicated script that combines multiple `requiredServices`, notably `hal`, `cpu`,  `wan`, and `yolo`, to provide a composite service includes all the status outputs.  In this example, each of the sub-services is processed to only include the payload service content, with the exception of the `yolo` service which is inherent to the `yolo2msghub` JSON status payload.
 
 ```
 #!/bin/bash
@@ -319,7 +436,8 @@ while true; do
 done
 ```
 
-##### Example payload
+#### Example `yolo2msghub` status
+When deployed to an Open Horizon node with its required services and devices, the status returns:
 
 ```
 {

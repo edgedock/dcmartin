@@ -35,7 +35,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.base-alpine`
-+ `version` - `0.0.2`
++ `version` - `0.0.4`
 
 #### Optional variables
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
@@ -57,6 +57,8 @@ Copy this [repository][repository], change to the `base` directory, then use the
 % make
 ...
 {
+  "base-alpine": null,
+  "date": 1554314524,
   "hzn": {
     "agreementid": "",
     "arch": "",
@@ -67,14 +69,14 @@ Copy this [repository][repository], change to the `base` directory, then use the
       ""
     ],
     "organization": "",
-    "pattern": "",
-    "ram": 0
+    "ram": 0,
+    "pattern": null
   },
-  "date": 1549909627,
-  "service": "base",
-  "hostname": "fe855a6844c0-172017000003",
-  "pid": 0,
-  "base": null
+  "config": null,
+  "service": {
+    "label": "base-alpine",
+    "version": "0.0.4"
+  }
 }
 ```
 

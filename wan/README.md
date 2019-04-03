@@ -52,67 +52,100 @@ Copy this [repository][repository], change to the `wan` directory, then use the 
 % make
 ...
 {
-  "hostname": "8a1dc0372e86-172017000005",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "wan",
-  "device": "test-cpu-2-arm_com.github.dcmartin.open-horizon.wan",
-  "pid": 9,
   "wan": {
+    "date": 1554316055
+  },
+  "date": 1554316055,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": {
     "log_level": "info",
-    "debug": "false",
-    "date": 1548701992,
-    "period": 1800
+    "debug": false,
+    "period": "1800",
+    "services": null
+  },
+  "service": {
+    "label": "wan",
+    "version": "0.0.3"
   }
 }
 ```
+
 The `wan` payload will be incomplete until the service initiates; subsequent `make check` will return complete; see below:
+
 ```
 {
-  "hostname": "8a1dc0372e86-172017000005",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "wan",
-  "device": "test-cpu-2",
-  "pid": 9,
   "wan": {
-    "log_level": "info",
-    "debug": "false",
-    "date": 1548702028,
-    "period": 1800,
+    "date": 1554316080,
     "speedtest": {
-      "download": 4890441.312717636,
-      "upload": 7495721.486184587,
-      "ping": 19.113,
-      "server": {
-        "url": "http://sjc.speedtest.net/speedtest/upload.php",
-        "lat": "37.3041",
-        "lon": "-121.8727",
-        "name": "San Jose, CA",
-        "country": "United States",
-        "cc": "US",
-        "sponsor": "Speedtest.net",
-        "id": "10384",
-        "url2": "http://sjc2.speedtest.net/speedtest/upload.php",
-        "host": "sjc.host.speedtest.net:8080",
-        "d": 7.476714842887551,
-        "latency": 19.113
-      },
-      "timestamp": "2019-01-28T18:59:59.103913Z",
-      "bytes_sent": 9617408,
-      "bytes_received": 9593604,
-      "share": null,
       "client": {
-        "ip": "67.164.104.198",
-        "lat": "37.2458",
-        "lon": "-121.8306",
-        "isp": "Comcast Cable",
-        "isprating": "3.7",
         "rating": "0",
-        "ispdlavg": "0",
-        "ispulavg": "0",
         "loggedin": "0",
-        "country": "US"
+        "isprating": "3.7",
+        "ispdlavg": "0",
+        "ip": "67.169.35.196",
+        "isp": "Comcast Cable",
+        "lon": "-121.7875",
+        "ispulavg": "0",
+        "country": "US",
+        "lat": "37.2329"
+      },
+      "bytes_sent": 17776640,
+      "download": 293909407.83393836,
+      "timestamp": "2019-04-03T18:27:35.965955Z",
+      "share": null,
+      "bytes_received": 368444545,
+      "ping": 11.965,
+      "upload": 11112862.225383956,
+      "server": {
+        "latency": 11.965,
+        "name": "San Jose, CA",
+        "url": "http://speedtest.sjc.sonic.net/speedtest/upload.php",
+        "country": "United States",
+        "lon": "-121.8727",
+        "cc": "US",
+        "host": "speedtest.sjc.sonic.net:8080",
+        "sponsor": "Sonic.net, Inc.",
+        "lat": "37.3041",
+        "id": "17846",
+        "d": 10.9325856080155
       }
     }
+  },
+  "date": 1554316055,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": {
+    "log_level": "info",
+    "debug": false,
+    "period": "1800",
+    "services": null
+  },
+  "service": {
+    "label": "wan",
+    "version": "0.0.3"
   }
 }
 ```

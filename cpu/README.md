@@ -35,7 +35,7 @@ Provides CPU usage information as micro-service; updates periodically (default `
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.cpu`
-+ `version` - `0.0.2`
++ `version` - `0.0.3`
 
 #### Optional variables
 + `CPU_PERIOD` - seconds between updates; defaults to `60`
@@ -53,6 +53,10 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
 % make
 ...
 {
+  "cpu": {
+    "date": 1554314683
+  },
+  "date": 1554314683,
   "hzn": {
     "agreementid": "",
     "arch": "",
@@ -63,25 +67,30 @@ Copy this [repository][repository], change to the `cpu` directory, then use the 
       ""
     ],
     "organization": "",
-    "pattern": "",
-    "ram": 0
+    "ram": 0,
+    "pattern": null
   },
-  "date": 1549907345,
-  "service": "cpu",
-  "hostname": "7a635ad1f814-172017000002",
-  "pid": 21,
-  "cpu": {
-    "date": 1549907345,
+  "config": {
     "log_level": "info",
     "debug": false,
-    "period": 60,
-    "interval": 1
+    "period": "60",
+    "interval": "1",
+    "services": null
+  },
+  "service": {
+    "label": "cpu",
+    "version": "0.0.3"
   }
 }
 ```
 The `cpu` payload will be incomplete until the service initiates; subsequent `make check` will return complete; see below:
 ```
 {
+  "cpu": {
+    "date": 1554314684,
+    "percent": 5.27
+  },
+  "date": 1554314683,
   "hzn": {
     "agreementid": "",
     "arch": "",
@@ -92,20 +101,19 @@ The `cpu` payload will be incomplete until the service initiates; subsequent `ma
       ""
     ],
     "organization": "",
-    "pattern": "",
-    "ram": 0
+    "ram": 0,
+    "pattern": null
   },
-  "date": 1549907345,
-  "service": "cpu",
-  "hostname": "7a635ad1f814-172017000002",
-  "pid": 21,
-  "cpu": {
-    "date": 1549907346,
+  "config": {
     "log_level": "info",
     "debug": false,
-    "period": 60,
-    "interval": 1,
-    "percent": 2.5
+    "period": "60",
+    "interval": "1",
+    "services": null
+  },
+  "service": {
+    "label": "cpu",
+    "version": "0.0.3"
   }
 }
 ```

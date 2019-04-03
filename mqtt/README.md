@@ -35,7 +35,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.mqtt`
-+ `version` - `0.0.1`
++ `version` - `0.0.2`
 
 #### Optional variables
 + `MQTT_PERIOD` - update time in seconds for server statistics
@@ -54,6 +54,8 @@ Copy this [repository][repository], change to the `mqtt` directory, then use the
 % make
 ...
 {
+  "mqtt": null,
+  "date": 1554315853,
   "hzn": {
     "agreementid": "",
     "arch": "",
@@ -64,23 +66,29 @@ Copy this [repository][repository], change to the `mqtt` directory, then use the
       ""
     ],
     "organization": "",
-    "pattern": "",
-    "ram": 0
+    "ram": 0,
+    "pattern": null
   },
-  "date": 1550798064,
-  "service": "mqtt",
-  "pid": 13,
+  "config": null,
+  "service": {
+    "label": "mqtt",
+    "version": "0.0.2"
+  }
+}
+```
+
+The `mqtt` payload will be incomplete until the service completes; subsequent `make check` will return complete; see below:
+
+```
+{
   "mqtt": {
-    "date": 1550798079,
-    "log_level": "info",
-    "debug": false,
-    "period": 30,
-    "pid": 17,
+    "date": 1554315868,
+    "pid": 30,
     "version": "mosquitto version 1.4.15",
     "broker": {
       "bytes": {
-        "received": 45836001021,
-        "sent": 43188059313
+        "received": 8304505370,
+        "sent": 7894992284
       },
       "clients": {
         "connected": 1
@@ -88,28 +96,47 @@ Copy this [repository][repository], change to the `mqtt` directory, then use the
       "load": {
         "messages": {
           "sent": {
-            "one": 21.91,
-            "five": 105.69,
-            "fifteen": 215.26
+            "one": 922.8,
+            "five": 967.88,
+            "fifteen": 1043.74
           },
           "received": {
-            "one": 30.31,
-            "five": 146.31,
-            "fifteen": 373
+            "one": 2484.32,
+            "five": 2687,
+            "fifteen": 2903.34
           }
         }
       },
       "publish": {
         "messages": {
-          "received": 481086,
-          "sent": 173971,
+          "received": 1021075,
+          "sent": 30789,
           "dropped": 0
         }
       },
       "subscriptions": {
-        "count": 132
+        "count": 153
       }
     }
+  },
+  "date": 1554315853,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": null,
+  "service": {
+    "label": "mqtt",
+    "version": "0.0.2"
   }
 }
 ```

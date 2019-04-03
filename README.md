@@ -1,4 +1,4 @@
-#  	&#127749; Open Horizon example _services_ and _patterns_
+#  	&#9968; Open Horizon example _services_ and _patterns_
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud. 
 

@@ -236,12 +236,8 @@ nodes-list:
 	    && ssh $${machine} 'hzn agreement list' | jq -c '{"agreements":[.[].workload_to_run]}' \
 	    && ssh $${machine} 'hzn service list 2> /dev/null' | jq -c '{"services":[.[]?.url]}' \
 	    && ssh $${machine} 'docker ps --format "{{.Names}},{{.Image}}"' | awk -F, '{ printf("{\"name\":\"%s\",\"image\":\"%s\"}\n", $$1, $$2) }' | jq -c '{"container":.name}' \
-	    || echo "${RED}>>>${NC} MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
+	    || echo "${RED}>>> MAKE **" $$(date +%T) "** not found $${machine}""${NC}" &> /dev/stderr; \
 	done
-
-CONFIG := ../setup/horizon.json
-
-# export PATTERN=$$(jq -r '. as $$d|.configurations[]|select(.nodes[]?.device=="test-cpu-2").pattern as $$p|$$d|.patterns[]|select(.id==$$p).name' ${CONFIG}); 
 
 nodes: ${DIR}/userinput.json
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- registering nodes: ${TEST_NODE_NAMES}""${NC}" &> /dev/stderr

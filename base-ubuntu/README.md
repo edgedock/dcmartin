@@ -35,7 +35,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.base-ubuntu`
-+ `version` - `0.0.2`
++ `version` - `0.0.4`
 
 #### Optional variables
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
@@ -43,11 +43,11 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 
 ## How To Use
 
-Specify `dcmartin/com.github.dcmartin.open-horizon.base-ubuntu:0.0.2` in service `build.json`
+Specify `dcmartin/com.github.dcmartin.open-horizon.base-ubuntu:0.0.4` in service `build.json`
 
 ### Building this continer
 
-Copy this [repository][repository], change to the `base` directory, then use the **make** command; see below:
+Copy this [repository][repository], change to the `base-ubuntu` directory, then use the **make** command; see below:
 
 ```
 % mkdir ~/gitdir
@@ -57,14 +57,25 @@ Copy this [repository][repository], change to the `base` directory, then use the
 % make
 ...
 {
-  "hostname": "abec6ffa6455-172017000002",
-  "org": "dcmartin@us.ibm.com",
-  "pattern": "base",
-  "device": "test-cpu-2-arm_base",
-  "pid": 0,
-  "base": {
-    "log_level": "info",
-    "debug": "false"
+  "base-ubuntu": null,
+  "date": 1554314590,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": null,
+  "service": {
+    "label": "base-ubuntu",
+    "version": "0.0.4"
   }
 }
 ```

@@ -35,10 +35,10 @@ Provides entity count information as micro-service; updates periodically (defaul
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.yolo`
-+ `version` - `0.0.2`
++ `version` - `0.0.8`
 
 #### Optional variables
-+ `YOLO_CONFIG` - configuration of YOLO; `tiny`, `v2`, or `v3`
++ `YOLO_CONFIG` - configuration of YOLO; `tinyv2`, `tinyv3`,`v2`, or `v3`
 + `YOLO_ENTITY` - entity to count; defaults to `all`
 + `YOLO_PERIOD` - seconds between updates; defaults to `0`
 + `YOLO_THRESHOLD` - minimum probability; default `0.25`; range `0.0` to `1.0`
@@ -57,19 +57,40 @@ Copy this [repository][repository], change to the `yolo` directory, then use the
 % make
 ...
 {
-  "yolo": {
+  "yolo": null,
+  "date": 1554316177,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": {
     "log_level": "info",
-    "debug": true,
-    "date": 1551045756,
+    "debug": false,
+    "date": 1554316177,
     "period": 0,
     "entity": "all",
+    "scale": "none",
     "config": "tiny",
+    "device": "/dev/video0",
     "threshold": 0.25,
-    "names": [ "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ]
+    "services": null,
+    "names": [
+      "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+    ]
   },
-  "hzn": { "agreementid": "", "arch": "", "cpus": 0, "device_id": "", "exchange_url": "", "host_ips": [ "" ], "organization": "", "pattern": "", "ram": 0 },
-  "date": 1551045756,
-  "service": "yolo"
+  "service": {
+    "label": "yolo",
+    "version": "0.0.8"
+  }
 }
 ```
 
@@ -78,32 +99,58 @@ The `yolo` payload will be incomplete until the service completes; subsequent `m
 ```
 {
   "yolo": {
-    "log_level": "info",
-    "debug": true,
-    "date": 1551045824,
-    "period": 0,
-    "entity": "all",
-    "config": "tiny",
-    "threshold": 0.25,
-    "names": [ "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ],
     "mock": "eagle",
-    "time": 0.830621,
-    "info": { "type": "JPEG", "size": "773x512", "bps": "8-bit", "color": "sRGB" },
+    "info": {
+      "type": "JPEG",
+      "size": "773x512",
+      "bps": "8-bit",
+      "color": "sRGB"
+    },
+    "time": 0.861101,
+    "count": 1,
     "detected": [
       {
         "entity": "bird",
         "count": 1
       }
     ],
-    "count": 1,
-    "scale": "none",
-    "image": "redacted"
+    "image": "<redacted>",
+    "date": 1554316261
   },
-  "hzn": { "agreementid": "", "arch": "", "cpus": 0, "device_id": "", "exchange_url": "", "host_ips": [ "" ], "organization": "", "pattern": "", "ram": 0 },
-  "date": 1551045756,
-  "service": "yolo"
+  "date": 1554316177,
+  "hzn": {
+    "agreementid": "",
+    "arch": "",
+    "cpus": 0,
+    "device_id": "",
+    "exchange_url": "",
+    "host_ips": [
+      ""
+    ],
+    "organization": "",
+    "ram": 0,
+    "pattern": null
+  },
+  "config": {
+    "log_level": "info",
+    "debug": false,
+    "date": 1554316177,
+    "period": 0,
+    "entity": "all",
+    "scale": "none",
+    "config": "tiny",
+    "device": "/dev/video0",
+    "threshold": 0.25,
+    "services": null,
+    "names": [
+      "person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+    ]
+  },
+  "service": {
+    "label": "yolo",
+    "version": "0.0.8"
+  }
 }
-
 ```
 
 ## Example

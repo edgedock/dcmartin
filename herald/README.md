@@ -35,7 +35,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 ## Service discovery
 + `org` - `dcmartin@us.ibm.com`
 + `url` - `com.github.dcmartin.open-horizon.herald`
-+ `version` - `0.0.1`
++ `version` - `0.0.3`
 
 #### Optional variables
 + `HERALD_PERIOD` - seconds between updates; defaults to `30`
@@ -54,6 +54,11 @@ Copy this [repository][repository], change to the `herald` directory, then use t
 % make
 ...
 {
+  "herald": {
+    "date": 1554314848,
+    "pid": 30
+  },
+  "date": 1554314847,
   "hzn": {
     "agreementid": "",
     "arch": "",
@@ -64,29 +69,19 @@ Copy this [repository][repository], change to the `herald` directory, then use t
       ""
     ],
     "organization": "",
-    "pattern": "",
-    "ram": 0
+    "ram": 0,
+    "pattern": null
   },
-  "date": 1549596687,
-  "service": "herald",
-  "hostname": "06ab8e7ac516-172017000002",
-  "pid": 21,
-  "herald": {
-    "date": 1549596748,
+  "config": {
     "log_level": "info",
     "debug": false,
-    "period": 30,
-    "pid": 24,
-    "found": {
-      "discovered": [
-        {
-          "data": "Hello, World!",
-          "address": "172.17.0.2"
-        }
-      ],
-      "version": "1.0",
-      "udp_port": 5959
-    }
+    "period": "30",
+    "port": 5960,
+    "services": null
+  },
+  "service": {
+    "label": "herald",
+    "version": "0.0.3"
   }
 }
 ```

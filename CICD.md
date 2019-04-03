@@ -92,7 +92,13 @@ For more information refer to [`MAKEVARS.md`][makevars-md]
 
 [makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/MAKEVARS.md
 
-## &#10122; - Clone and configure
+## Step 1 - Clone and configure 
+
+Video [&#128249;][clone-to-publish-video] and [script][clone-to-publish-script]
+
+[clone-to-publish-video]: https://youtu.be/vLicHLN90JQ
+[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-to-publish-cpu.txt
+
 
 Clone this [repository][repository] into a new directory (n.b. it may also be [forked][forking-repository]):
 
@@ -125,7 +131,7 @@ for j in */pattern.json; do jq '.services[].serviceOrgid="'${HZN_ORG_ID}'"' $j >
 for j in */build.json; do sed -i -e 's|dcmartin/|'"${DOCKER_NAMESPACE}"'/|g' "${j}"; done
 ```
 
-## &#10123; - Install Open Horizon
+## Step 2 - Install Open Horizon
 With the assumption that `docker` has already been installed; if not refer to these [instructions][get-docker].
 
 [get-docker]: https://docs.docker.com/install/
@@ -145,7 +151,7 @@ cd $GD/open-horizon
 sudo bash ./setup/aptget-horizon.sh
 ```
 
-## &#10124; - Create IBM Cloud API key file
+## Step 3 - Create IBM Cloud API key file
 Visit the IBM Cloud [IAM][iam-service] service to create and download a platform API key; copy that `apiKey.json` file into the `open-horizon/` directory:
 
 [iam-service]: https://cloud.ibm.com/iam
@@ -154,7 +160,7 @@ Visit the IBM Cloud [IAM][iam-service] service to create and download a platform
 cp -f ~/apiKey.json $GD/open-horizon/apiKey.json 
 ```
 
-## &#10125; - Create code-signing key files
+## Step 4 - Create code-signing key files
 Create a private-public key pair for encryption and digital signature:
 
 ```
@@ -167,10 +173,10 @@ mv -f *.pem ${HZN_ORG_ID}.pem
 
 [clone-config-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-config.txt
 
-## &#10004; - Finished
+## &#10004; Finished
 The resulting `open-horizon/` directory contains all the necessary components to build a set of service, a deployable pattern, and a set of nodes for testing.
 
-## &#10033; - IBM Container Registry (_optional_)
+## &#10033; Optional: _alternative registry_
 Refer to the [`REGISTRY.md`][registry-md] instructions for additional information on utilizing the IBM Cloud Container Registry.
 
 [registry-md]: https://github.com/dcmartin/open-horizon/blob/master/REGISTRY.md
@@ -180,8 +186,28 @@ Services are organized into subdirectories of `open-horizon/` directory and all 
 
 Two base service containers are provided; one for Alpine with its minimal footprint, and one for Ubuntu with its support for a wide range of software packages.
 
-1. `base-alpine` - a base service container for Alpine LINUX
-2. `base-ubuntu` - a base service container for Ubuntu LINUX
+1. [`base-alpine`][base-alpine] - a base service container for Alpine LINUX
+2. [`base-ubuntu`][base-ubuntu] - a base service container for Ubuntu LINUX
+
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+[base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
+[base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
+[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
+[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
+[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
+[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
+[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
+[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
+[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
+[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
+[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
+[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
+[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
+[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
 The `cpu`,`hal`,`wan`, and `mqtt` services are Alpine-based and of minimal size.
 The `yolo` and `yolo2msghub` services are Ubuntu-based to support Kafka and YOLO/Darknet.
@@ -190,11 +216,11 @@ The `yolo` and `yolo2msghub` services are Ubuntu-based to support Kafka and YOLO
 
 The containers built and pushed for these two services are utilized to build the remaining samples:
 
-1. `cpu` - a cpu percentage monitor
-2. `hal` - a hardware-abstraction-layer inventory
-3. `wan` - a wide-area-network monitor
-4. `yolo` - the `you-only-look-once` image entity detection and classification tool
-5. `yolo2msghub` - uses 1-4 to send local state and entity detection information via Kafka
+1. [`cpu`][cpu-service] - a cpu percentage monitor
+2. [`hal`][hal-service] - a hardware-abstraction-layer inventory
+3. [`wan`][wan-service] - a wide-area-network monitor
+4. [`yolo`][yolo-service] - the `you-only-look-once` image entity detection and classification tool
+5. [`yolo2msghub`][yolo2msghub-service] - uses 1-4 to send local state and entity detection information via Kafka
 
 Each of the services may be built out-of-the-box (OOTB) using the `make` command.  Please refer to [`MAKE.md`][make-md] for additional information.
 
