@@ -338,9 +338,12 @@ Your branch is up to date with 'origin/master'.
 Branches can be used for development purposes and then merged back into the parent branch:
 
 ```
+% git checkout beta
+% git pull origin master
 % git checkout master
+% git pull origin master
 % git merge beta
-
+```
 
 # 6. Test
 The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed to test devices.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
