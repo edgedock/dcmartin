@@ -40,21 +40,29 @@ Monitors attached camera and provides [motion-project.github.io][motion-project-
 + `url` - `com.github.dcmartin.open-horizon.motion2mqtt`
 + `version` - `0.0.10`
 
-#### Optional variables
-
-+ `MOTION_DEVICE_DB` - device database name (aka top-level topic); defaults to `motion`
-+ `MOTION_MQTT_HOST` - FQDN or IP address of MQTT server; defaults to `mqtt`
-+ `MOTION_DEVICE_NAME` - device name; defaults to `HZN_DEVICE_ID` or `hostname`
-+ `MOTION_MQTT_PORT` - port number; defaults to `1883`
-+ `MOTION_MQTT_USERNAME` - MQTT username; defaults to ""
-+ `MOTION_MQTT_PASSWORD` - MQTT password; defaults to ""
-+ `MOTION_POST_PICTURES` - post pictures; default `off`; options include `on`, `best`, and `center`
+## Variables
++ `MOTION_GROUP` - group name (aka top-level topic); defaults to `motion`
++ `MOTION_DEVICE` - device name; defaults to `HZN_DEVICE_ID` or `hostname`
++ `MOTION_TIMEZONE` - 
++ `MOTION_POST_PICTURES` - post pictures; default `off`; options: `on`, `first`, `last`, `best`, and `center`
++ `MOTION_LOCATE_MODE` - default `off`; options: `box`,`cross`,`redbox`,`redcross`
++ `MOTION_EVENT_GAP` - default: `30`
++ `MOTION_FRAMERATE` - default: `2`
++ `MOTION_THRESHOLD` - default: `5000`
++ `MOTION_THRESHOLD_TUNE` - default: `false`
++ `MOTION_NOISE_LEVEL` - default: `32`
++ `MOTION_NOISE_TUNE` - default: `true`
 + `MOTION_LOG_LEVEL` - level of logging for motion2mqtt; default `2`
 + `MOTION_LOG_TYPE` - type of logging for motion2mqtt; default `all`
++ `MOTION_PERIOD` - default: 30
++ `MQTT_HOST` - IP or FQDN for mqtt host; default `mqtt`
++ `MQTT_PORT` - port number; defaults to `1883`
++ `MQTT_USERNAME` - MQTT username; defaults to ""
++ `MQTT_PASSWORD` - MQTT password; defaults to ""
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
++ `DEBUG` - default: `false`
 
 ## How To Use
-
 Copy this [repository][repository], change to the `motion2mqtt` directory, then use the **make** command; see below:
 
 ```
