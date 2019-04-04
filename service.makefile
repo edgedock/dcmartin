@@ -16,11 +16,10 @@ DIR ?= horizon
 TAG ?= $(if $(wildcard ../TAG),$(shell cat ../TAG),)
 
 ## SERVICE
-SERVICE_ORG := $(if ${HZN_ORG_ID},${HZN_ORG_ID},"HZN_ORG_ID")
 SERVICE_LABEL = $(shell jq -r '.label' service.json)
 SERVICE_NAME = $(if ${TAG},${SERVICE_LABEL}-${TAG},${SERVICE_LABEL})
 SERVICE_VERSION = $(shell jq -r '.version' service.json)
-SERVICE_TAG = "${SERVICE_ORG}/${SERVICE_URL}_${SERVICE_VERSION}_${BUILD_ARCH}"
+SERVICE_TAG = "${HZN_ORG_ID}/${SERVICE_URL}_${SERVICE_VERSION}_${BUILD_ARCH}"
 SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
 SERVICE_URI := $(shell jq -r '.url' service.json)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
@@ -85,7 +84,7 @@ $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE):
 
 ${DIR}: service.json userinput.json $(APIKEY)
 	@rm -fr ${DIR}/ && mkdir -p ${DIR}/
-	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
+	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${HZN_ORG_ID}" -d ${DIR}
 	@jq '.org="'${HZN_ORG_ID}'"|.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
 	@export HZN_EXCHANGE_URL=${HEU} TAG=${TAG} && ./sh/fixservice.sh ${DIR}
@@ -97,7 +96,7 @@ ${DIR}/pattern.json: pattern.json ${DIR}
 	@./sh/fixpattern.sh ${DIR}
 
 depend: $(APIKEY) ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./sh/mkdepend.sh ${DIR}
+	@export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${HZN_ORG_ID}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./sh/mkdepend.sh ${DIR}
 
 ##
 ## CONTAINERS
@@ -160,25 +159,27 @@ service-push:
 service-start: remove service-stop depend # $(SERVICE_REQVARS) 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
 	@./sh/checkvars.sh ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
 
-service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) "${NC}" &> /dev/stderr
+TEST_OUTPUT = ./test.${BUILD_ARCH}_${SERVICE_URL}-${SERVICE_VERSION}.out
+
+test-service: $(TEST_OUTPUT)
+
+service-test: service-start test-service
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH} $<" "${NC}" &> /dev/stderr
 	-@${MAKE} service-stop
-	@export HZN_EXCHANGE_URL=${HEU} && ./sh/service-test.sh 
 
-test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
+$(TEST_OUTPUT): 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service ${SERVICE_NAME} version ${SERVICE_VERSION} for $(BUILD_ARCH)""${NC}" &> /dev/stderr
-	-@$(MAKE) test > ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
-	@${MAKE} service-stop
+	-@$(MAKE) test > $(TEST_OUTPUT)
 
 service-stop: 
-	-@if [ -d "${DIR}" ]; then export HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
+	-@if [ -d "${DIR}" ]; then export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
 	
 publish-service: ${DIR} $(APIKEY) $(KEYS)
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing service: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
-	@export HZN_EXCHANGE_URL=${HEU} && if [ ! -z "$(DOCKER_PUBLICKEY)" ]; then ARGS="-r $(DOCKER_REGISTRY):iamapikey:$(DOCKER_PUBLICKEY)"; fi && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) $${ARGS:-}
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && if [ ! -z "$(DOCKER_PUBLICKEY)" ]; then ARGS="-r $(DOCKER_REGISTRY):iamapikey:$(DOCKER_PUBLICKEY)"; fi && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) $${ARGS:-}
 
 service-publish: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-publish: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
@@ -187,9 +188,9 @@ service-publish:
 	done
 
 service-verify: $(APIKEY) $(KEYS)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-verify: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
-	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
-	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${SERVICE_ORG} -u iamapikey:$(shell cat $(APIKEY)) "${SERVICE_TAG}"
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-verify: $(SERVICE_NAME); organization: ${HZN_ORG_ID}""${NC}" &> /dev/stderr
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) "${SERVICE_TAG}"
 
 service-clean:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-clean: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
@@ -198,7 +199,7 @@ service-clean:
 	done
 
 exchange-clean: ${DIR}
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- exchange-clean: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- exchange-clean: $(SERVICE_NAME); organization: ${HZN_ORG_ID}""${NC}" &> /dev/stderr
 	@./sh/service-clean.sh
 
 ##
@@ -209,14 +210,14 @@ pattern-test:
 	@export HZN_EXCHANGE_URL=${HEU} && ./sh/pattern-test.sh 
 
 pattern-publish: ${APIKEY} pattern.json
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing: ${SERVICE_NAME}; organization: ${SERVICE_ORG}; exchange: ${HEU}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing: ${SERVICE_NAME}; organization: ${HZN_ORG_ID}; exchange: ${HEU}""${NC}" &> /dev/stderr
 	@export TAG=${TAG} && ./sh/fixpattern.sh ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${HZN_ORG_ID}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 pattern-validate: pattern.json
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- validating: ${SERVICE_NAME}; organization: ${SERVICE_ORG}; exchange: ${HEU}""${NC}" &> /dev/stderr
-	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern verify -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) --public-key-file ${PUBLIC_KEY_FILE} ${SERVICE_NAME}
-	@export HZN_EXCHANGE_URL=${HEU} && FOUND=false && for pattern in $$(hzn exchange pattern list -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) | jq -r '.[]'); do if [ "$${pattern}" = "${SERVICE_ORG}/${SERVICE_NAME}" ]; then found=true; break; fi; done && if [ -z $${found} ]; then echo "Did not find $(SERVICE_ORG)/$(SERVICE_NAME)"; exit 1; else echo "Found pattern $${pattern}"; fi
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- validating: ${SERVICE_NAME}; organization: ${HZN_ORG_ID}; exchange: ${HEU}""${NC}" &> /dev/stderr
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern verify -o "${HZN_ORG_ID}" -u iamapikey:$(shell cat $(APIKEY)) --public-key-file ${PUBLIC_KEY_FILE} ${SERVICE_NAME}
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && FOUND=false && for pattern in $$(hzn exchange pattern list -o "${HZN_ORG_ID}" -u iamapikey:$(shell cat $(APIKEY)) | jq -r '.[]'); do if [ "$${pattern}" = "${HZN_ORG_ID}/${SERVICE_NAME}" ]; then found=true; break; fi; done && if [ -z $${found} ]; then echo "Did not find $(HZN_ORG_ID)/$(SERVICE_NAME)"; exit 1; else echo "Found pattern $${pattern}"; fi
 
 ##
 ## TESTING
@@ -293,7 +294,7 @@ distclean: service-clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check test push service-start service-stop service-test service-publish publish-service service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean depend
+.PHONY: default all build run check test push service-start service-stop service-test test-service service-publish publish-service service-verify $(TEST_NODE_NAMES) $(SERVICE_ARCH_SUPPORT) clean distclean depend 
 
 ##
 ## COLORS
