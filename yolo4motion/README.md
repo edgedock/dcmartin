@@ -37,9 +37,23 @@ Provides entity count information as micro-service; updates periodically (defaul
 + `url` - `com.github.dcmartin.open-horizon.yolo4motion`
 + `version` - `0.0.1`
 
-#### Optional variables
-+ `YOLO_ENTITY` - entity to count; defaults to `person`
-+ `YOLO_PERIOD` - seconds between updates; defaults to `0`
+## Variables
++ `YOLO_CONFIG` - configuration: `tiny`|`tinyv2`, `tinyv3`, `v2`, `v3`; default: `tiny`
++ `YOLO_SCALE` - width and height to scale image; defaults to `none`
++ `YOLO_ENTITY` - entity to count; defaults to `all`
++ `YOLO_THRESHOLD` - entity to count; defaults to `0.25`
++ `YOLO_PERIOD` - seconds between updates; defaults to `60`
++ `MQTT_HOST` - hostname or IP address of MQTT broker; defaults to `mqtt`
++ `MQTT_PORT` - port for MQTT; defaults to `1883`
++ `MQTT_USERNAME` - username for MQTT access; default "" (_empty string_)
++ `MQTT_PASSWORD` - password for MQTT access; default "" (_empty string_)
++ `YOLO4MOTION_GROUP` - topic group; default `+` (_all_)
++ `YOLO4MOTION_DEVICE` - topic device; default `+` (_all_)
++ `YOLO4MOTION_CAMERA` - topic camera; default `+` (_all_)
++ `YOLO4MOTION_TOPIC_EVENT` - topic event; default 'event/end'
++ `YOLO4MOTION_TOPIC_PAYLOAD` - topic payload; default `image`
++ `YOLO4MOTION_TOO_OLD` - events older in seconds are ignored; default `300`
++ `YOLO4MOTION_USE_MOCK` - generate mock events for testing
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`)
 
 ## How To Use
