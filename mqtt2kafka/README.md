@@ -38,10 +38,7 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `version` - `0.0.1`
 + `arch` - `arm`, `arm64`, `amd64`
 
-#### Required variables
-+ `MQTT2KAFKA_APIKEY` - message hub API key
-
-#### Optional variables
+## Variables
 + `MQTT_HOST` - IP or FQDN for mqtt host; defaults to `mqtt` on local VPN
 + `MQTT_PORT` - MQTT port number; defaults to 1883
 + `MQTT_USERNAME` - MQTT username; default "" (_empty string_); indicating no username
@@ -49,7 +46,6 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `MQTT2KAFKA_APIKEY` - API key for Kafka broker
 + `MQTT2KAFKA_ADMIN_URL` - administrative URL; **no changes necessary**
 + `MQTT2KAFKA_BROKER`- message hub broker list; **no changes necessary**
-+ `MQTT2KAFKA_TOO_OLD` - events older in seconds are ignored
 + `MQTT2KAFKA_SUBSCRIBE` - MQTT topic on which to listen for event; defaults to `+/+/+/event/end`
 + `MQTT2KAFKA_PAYLOAD` - MQTT topic extension for corresponding payload (if any); defaults to `image`
 + `MQTT2KAFKA_PUBLISH` - Kafka topic on which to publish; defaults to MQTT receive topic
