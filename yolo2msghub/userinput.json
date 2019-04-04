@@ -2,31 +2,31 @@
   "global": [],
   "services": [
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.yolo2msghub",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": { "YOLO2MSGHUB_APIKEY": "specify-api-key", "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.yolo",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": { "YOLO_ENTITY": "person", "YOLO_PERIOD": 60, "YOLO_CONFIG": "tiny" }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.cpu",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": { "CPU_PERIOD": 60 }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.wan",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": { "WAN_PERIOD": 900 }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.hal",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": { "HAL_PERIOD": 1800 }

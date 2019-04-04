@@ -1,5 +1,5 @@
 {
-  "org": "dcmartin@us.ibm.com",
+  "org": "${HZN_ORG_ID}",
   "label": "herald",
   "description": "announces discoveries",
   "documentation": "https://github.com/dcmartin/open-horizon/herald/README.md",
@@ -10,19 +10,42 @@
   "sharable": "singleton",
   "requiredServices": [],
   "userInput": [
-        { "name": "HERALD_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "30" },
-        { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
-        { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
-],
+    {
+      "name": "HERALD_PERIOD",
+      "label": "seconds between update",
+      "type": "int",
+      "defaultValue": "30"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "label": "specify logging level",
+      "type": "string",
+      "defaultValue": "info"
+    },
+    {
+      "name": "DEBUG",
+      "label": "debug on/off",
+      "type": "boolean",
+      "defaultValue": "false"
+    }
+  ],
   "deployment": {
     "services": {
       "herald": {
         "environment": [
-          "SERVICE_LABEL=herald","SERVICE_VERSION=0.0.3","SERVICE_PORT=5960"
+          "SERVICE_LABEL=herald",
+          "SERVICE_VERSION=0.0.3",
+          "SERVICE_PORT=5960"
         ],
         "specific_ports": [
-          { "HostPort": "5959/udp", "HostIP": "0.0.0.0" },
-          { "HostPort": "5960/tcp", "HostIP": "0.0.0.0" }
+          {
+            "HostPort": "5959/udp",
+            "HostIP": "0.0.0.0"
+          },
+          {
+            "HostPort": "5960/tcp",
+            "HostIP": "0.0.0.0"
+          }
         ],
         "image": null,
         "privileged": true

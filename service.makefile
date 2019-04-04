@@ -11,11 +11,12 @@ GIT_REMOTE_URL=$(shell git remote get-url origin)
 CMD := $(shell whereis hzn | awk '{ print $1 }')
 HEU := $(if ${HZN_EXCHANGE_URL},${HZN_EXCHANGE_URL},$(if $(CMD),$(shell $(CMD) node list 2> /dev/null | jq -r '.configuration.exchange_api'),))
 HEU := $(if ${HEU},${HEU},"https://alpha.edge-fabric.com/v1")
+IBM ?= $(shell ibmcloud account show | egrep "Account Owner" | sed 's/.*:[ ]*\([^ ]*\) /\1/g')
 DIR ?= horizon
 TAG ?= $(if $(wildcard ../TAG),$(shell cat ../TAG),)
 
 ## SERVICE
-SERVICE_ORG := $(if ${HZN_ORG_ID},${HZN_ORG_ID},$(shell jq -r '.org' service.json))
+SERVICE_ORG := $(if ${HZN_ORG_ID},${HZN_ORG_ID},"HZN_ORG_ID")
 SERVICE_LABEL = $(shell jq -r '.label' service.json)
 SERVICE_NAME = $(if ${TAG},${SERVICE_LABEL}-${TAG},${SERVICE_LABEL})
 SERVICE_VERSION = $(shell jq -r '.version' service.json)
@@ -51,7 +52,7 @@ DOCKER_TAG = $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
 DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
 
 ## BUILD
-BUILD_BASE=$(shell jq -r ".build_from.${BUILD_ARCH}" build.json)
+BUILD_BASE=$(shell export DOCKER_REGISTRY=$(DOCKER_REGISTRY) DOCKER_NAMESPACE=${DOCKER_NAMESPACE} DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) && jq -r ".build_from.${BUILD_ARCH}" build.json | envsubst)
 BUILD_ORG=$(shell echo $(BUILD_BASE) | sed "s|\(.*\)/[^/]*|\1|")
 SAME_ORG=$(shell if [ $(BUILD_ORG) = $(DOCKER_REPOSITORY) ]; then echo ${DOCKER_REPOSITORY}; else echo ""; fi)
 BUILD_PKG=$(shell echo $(BUILD_BASE) | sed "s|.*/\([^:]*\):.*|\1|")
@@ -87,16 +88,16 @@ ${DIR}: service.json userinput.json $(APIKEY)
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service new -o "${SERVICE_ORG}" -d ${DIR}
 	@jq '.org="'${HZN_ORG_ID}'"|.label="'${SERVICE_LABEL}'"|.arch="'${BUILD_ARCH}'"|.url="'${SERVICE_URL}'"|.deployment.services=([.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'")|.key="'${SERVICE_LABEL}'"|.value.image="'${DOCKER_TAG}'"]|from_entries)' service.json > ${DIR}/service.definition.json
 	@cp -f userinput.json ${DIR}/userinput.json
-	@export HZN_EXCHANGE_URL=${HEU} TAG=${TAG} && ./fixservice.sh ${DIR}
+	@export HZN_EXCHANGE_URL=${HEU} TAG=${TAG} && ./sh/fixservice.sh ${DIR}
 
 ${DIR}/userinput.json: userinput.json ${DIR}
-	@./checkvars.sh ${DIR}
+	@./sh/checkvars.sh ${DIR}
 
 ${DIR}/pattern.json: pattern.json ${DIR}
-	@./fixpattern.sh ${DIR}
+	@./sh/fixpattern.sh ${DIR}
 
 depend: $(APIKEY) ${DIR}
-	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./mkdepend.sh ${DIR}
+	@export HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${SERVICE_ORG}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./sh/mkdepend.sh ${DIR}
 
 ##
 ## CONTAINERS
@@ -114,7 +115,7 @@ stop:
 
 run: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
-	@./docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	@./sh/docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 	@sleep 2
 
 remove:
@@ -138,7 +139,7 @@ push: build login
 
 test:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	./test.sh "${DOCKER_TAG}"
+	./sh/test.sh "${DOCKER_TAG}"
 
 ##
 ## SERVICES
@@ -158,14 +159,14 @@ service-push:
 
 service-start: remove service-stop depend # $(SERVICE_REQVARS) 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
-	@./checkvars.sh ${DIR}
+	@./sh/checkvars.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
 
 service-test: ./test.${SERVICE_VERSION}.${BUILD_ARCH}.out
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH}" $$(tail -f $<) "${NC}" &> /dev/stderr
 	-@${MAKE} service-stop
-	@export HZN_EXCHANGE_URL=${HEU} && ./service-test.sh 
+	@export HZN_EXCHANGE_URL=${HEU} && ./sh/service-test.sh 
 
 test.${SERVICE_VERSION}.${BUILD_ARCH}.out: service-start
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service ${SERVICE_NAME} version ${SERVICE_VERSION} for $(BUILD_ARCH)""${NC}" &> /dev/stderr
@@ -198,18 +199,18 @@ service-clean:
 
 exchange-clean: ${DIR}
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- exchange-clean: $(SERVICE_NAME); organization: ${SERVICE_ORG}""${NC}" &> /dev/stderr
-	@./service-clean.sh
+	@./sh/service-clean.sh
 
 ##
 ## PATTERNS
 ##
 
 pattern-test:
-	@export HZN_EXCHANGE_URL=${HEU} && ./pattern-test.sh 
+	@export HZN_EXCHANGE_URL=${HEU} && ./sh/pattern-test.sh 
 
 pattern-publish: ${APIKEY} pattern.json
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing: ${SERVICE_NAME}; organization: ${SERVICE_ORG}; exchange: ${HEU}""${NC}" &> /dev/stderr
-	@export TAG=${TAG} && ./fixpattern.sh ${DIR}
+	@export TAG=${TAG} && ./sh/fixpattern.sh ${DIR}
 	@export HZN_EXCHANGE_URL=${HEU} && hzn exchange pattern publish -o "${SERVICE_ORG}" -u iamapikey:$(shell cat $(APIKEY)) -f ${DIR}/pattern.json -p ${SERVICE_NAME} -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE}
 
 pattern-validate: pattern.json
@@ -242,10 +243,10 @@ nodes-list:
 
 nodes: ${DIR}/userinput.json
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- registering nodes: ${TEST_NODE_NAMES}""${NC}" &> /dev/stderr
-	@./checkvars.sh ${DIR}
+	@./sh/checkvars.sh ${DIR}
 	@for machine in $(TEST_NODE_NAMES); do \
 	  echo "${MC}>>> MAKE --" $$(date +%T) "-- registering $${machine}" "${NC}"; \
-	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) && ./nodereg.sh $${machine} ${SERVICE_NAME} ${DIR}/userinput.json; \
+	  export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_APIKEY=$(shell cat $(APIKEY)) && ./sh/nodereg.sh $${machine} ${SERVICE_NAME} ${DIR}/userinput.json; \
 	done
 
 nodes-undo:
@@ -281,7 +282,7 @@ nodes-purge: nodes-undo nodes-clean
 
 clean: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json
+	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json test.*.jpeg
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: service-clean

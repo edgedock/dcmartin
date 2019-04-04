@@ -2,7 +2,7 @@
   "global": [],
   "services": [
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.cpu",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {

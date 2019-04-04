@@ -2,7 +2,7 @@
 
 Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud. 
 
-[design-md]: https://github.com/dcmartin/open-horizon/tree/master/DESIGN.md
+[design-md]: https://github.com/dcmartin/open-horizon/tree/master/doc/DESIGN.md
 
 # 1. [Status][status-md] ([_beta_][beta-md])
 
@@ -133,9 +133,9 @@ David C Martin (github@dcmartin.com)
 [open-horizon]: http://github.com/open-horizon/
 [repository]: https://github.com/dcmartin/open-horizon
 [setup-readme-md]: https://github.com/dcmartin/open-horizon/blob/master/setup/README.md
-[service-md]: https://github.com/dcmartin/open-horizon/blob/master/SERVICE.md
-[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/CICD.md
-[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/PATTERN.md
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/SERVICE.md
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/CICD.md
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/PATTERN.md
 [status-md]: https://github.com/dcmartin/open-horizon/blob/master/STATUS.md
 [beta-md]: https://github.com/dcmartin/open-horizon/blob/master/BETA.md
 

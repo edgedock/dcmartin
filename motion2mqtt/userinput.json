@@ -2,7 +2,7 @@
   "global": [],
   "services": [
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.motion2mqtt",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
@@ -19,7 +19,7 @@
       }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.mqtt2kafka",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {
@@ -35,7 +35,7 @@
       }
     },
     {
-      "org": "dcmartin@us.ibm.com",
+      "org": "${HZN_ORG_ID}",
       "url": "com.github.dcmartin.open-horizon.yolo4motion",
       "versionRange": "[0.0.0,INFINITY)",
       "variables": {

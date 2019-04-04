@@ -5,39 +5,63 @@
   "services": [
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "amd64",
-      "serviceVersions": [ { "version": "0.0.13" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.13"
+        }
+      ]
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm",
-      "serviceVersions": [ { "version": "0.0.13" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.13"
+        }
+      ]
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.motion2mqtt",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm64",
-      "serviceVersions": [ { "version": "0.0.13" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.13"
+        }
+      ]
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "amd64",
-      "serviceVersions": [ { "version": "0.0.1" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm",
-      "serviceVersions": [ { "version": "0.0.1" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.mqtt2kafka",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm64",
-      "serviceVersions": [ { "version": "0.0.1" } ]
+      "serviceVersions": [
+        {
+          "version": "0.0.1"
+        }
+      ]
     }
   ]
 }

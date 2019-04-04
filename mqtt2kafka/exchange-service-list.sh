@@ -1,1 +1,0 @@
-../exchange-service-list.sh

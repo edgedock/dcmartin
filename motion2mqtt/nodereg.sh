@@ -1,1 +1,0 @@
-../nodereg.sh

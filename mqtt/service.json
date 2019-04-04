@@ -1,5 +1,5 @@
 {
-  "org": "dcmartin@us.ibm.com",
+  "org": "${HZN_ORG_ID}",
   "label": "mqtt",
   "description": "Provide MQTT service",
   "documentation": "https://github.com/dcmartin/open-horizon/mqtt/README.md",
@@ -10,15 +10,31 @@
   "sharable": "singleton",
   "requiredServices": [],
   "userInput": [
-        { "name": "MQTT_PERIOD", "label": "seconds between update", "type": "int", "defaultValue": "30" },
-        { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
-        { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
-],
+    {
+      "name": "MQTT_PERIOD",
+      "label": "seconds between update",
+      "type": "int",
+      "defaultValue": "30"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "label": "specify logging level",
+      "type": "string",
+      "defaultValue": "info"
+    },
+    {
+      "name": "DEBUG",
+      "label": "debug on/off",
+      "type": "boolean",
+      "defaultValue": "false"
+    }
+  ],
   "deployment": {
     "services": {
       "mqtt": {
         "environment": [
-          "SERVICE_LABEL=mqtt","SERVICE_VERSION=0.0.2"
+          "SERVICE_LABEL=mqtt",
+          "SERVICE_VERSION=0.0.2"
         ],
         "specific_ports": [],
         "image": null,

@@ -1,1 +1,0 @@
-../checkvars.sh

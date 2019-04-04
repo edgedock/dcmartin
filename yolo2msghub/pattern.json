@@ -5,7 +5,7 @@
   "services": [
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "amd64",
       "serviceVersions": [
         {
@@ -15,7 +15,7 @@
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm",
       "serviceVersions": [
         {
@@ -25,7 +25,7 @@
     },
     {
       "serviceUrl": "com.github.dcmartin.open-horizon.yolo2msghub",
-      "serviceOrgid": "dcmartin@us.ibm.com",
+      "serviceOrgid": "${HZN_ORG_ID}",
       "serviceArch": "arm64",
       "serviceVersions": [
         {
