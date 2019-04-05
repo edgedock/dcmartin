@@ -156,8 +156,6 @@ echo \
 ```
 
 ## D. Configure CI/CD
-
-### Step 1
 Copy the registry configuration JSON generated in section (C) to the repository root directory and reset environment variables.  For example, presuming `registry.json` is in the user's home directory and `~/gitdir/open-horizon` is the repository top-level directory:
 
 ```
@@ -190,21 +188,8 @@ Login Succeeded
 [credentials-store]: https://docs.docker.com/engine/reference/commandline/login/#credentials-store
 
 
-### Step 2
-
-```
-```
-
-Publishing requires specification of the registry credentials:
-
-```
-DOCKER_CREDENTIALS="${DOCKER_REGISTRY}:iamapikey:${DOCKER_TOKEN}"
-
-hzn exchange service publish -k <private-key-file> -K <public-key-file> -r "registry.ng.bluemix.net:iamapikey:<readonly-token>" -f service.definition.json
-```
-
 ## E. Build using IBM Cloud
-
+This section is TBD.
 
 ```
 ibmcloud cr login
