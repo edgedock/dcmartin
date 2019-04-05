@@ -126,9 +126,8 @@ mkdir -p $GD
 cd $GD
 git clone http://github.com/dcmartin/open-horizon
 cd $GD/open-horizon
-for j in */service.json; do jq '.org="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
-for j in */pattern.json; do jq '.services[].serviceOrgid="'${HZN_ORG_ID}'"' $j > $j.$$ && mv $j.$$ $j; done
-for j in */build.json; do sed -i -e 's|dcmartin/|'"${DOCKER_NAMESPACE}"'/|g' "${j}"; done
+echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
+echo "${HZN_ORG_ID}" > HZN_ORG_ID
 ```
 
 ## Step 2 - Install Open Horizon
