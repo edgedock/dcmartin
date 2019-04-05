@@ -98,7 +98,9 @@ There are also _base_ containers that are used by the other services:
 
 # 3. Copy and Use
 
-The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.
+The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.  An introductory video [&#128249;][coding-with-dave-1] is available.
+
+[coding-with-dave-1]: https://youtu.be/qrYhJ9jNcOA
 
 See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
