@@ -28,7 +28,7 @@ Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and defin
 # 1. Introduction
 Open Horizon edge fabric provides method and apparatus to run multiple Docker containers on edge nodes.  These nodes are LINUX devices running the Docker virtualization engine, the Open Horizon edge fabric client, and registered with an Open Horizon exchange.
 
-The edge fabric enables multiple containers, networks, and physical sensors to stitched into a pattern designed to meet a need.  The only limitation of the fabric are the devices' capabilities; for example one device may have a camera attached and another may have a GPU.
+The edge fabric enables multiple containers, networks, and physical sensors to be woven into a pattern designed to meet a given need with a set of capabilities.  The only limitation of the fabric are the edge devices' capabilities; for example one device may have a camera attached and another may have a GPU.
 
 The CI/CD process demonstrated in this repository enables the automated building, testing, pushing, publishing, and deploying edge fabric services to devices for the purposes of development and testing.  Release management and production deployment are out-of-scope.
 
@@ -56,9 +56,9 @@ A node that is currently operational should not fail due to an automated CI/CD p
 
 The key success criteria are:
  
-2. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
-3. __enforce testing__ - all components should provide interfaces and cases for testing
-4. __automate anything__ - to the greatest degree possible, automate the process
+1. __stage everything__ - all changes to deployed systems should be staged for testing prior to release
+1. __enforce testing__ - all components should provide interfaces and cases for testing
+1. __automate everything__ - to the greatest degree possible, automate the process
 
 ### Stage everything
 The change control system for this repository is Git which provides mechanisms to stage changes between various versions of a repository.  These versions are distinguished within a repository via branching from a parent (e.g. the trunk or _master_ branch) and then incorporating any changes through a _commit_ back to the parent.  The _push_ of the change back to the repository may be used to evaluate the state and determine if a _stage_ is ready for a build to be initiated.  
@@ -66,7 +66,7 @@ The change control system for this repository is Git which provides mechanisms t
 ### Enforce testing
 Staged changes require testing processes to automate the build process.  Each service should conform to a standard test harness with either a default or custom test script.  Standardization of the testing process enables replication and re-use of tests for the service and its required services, simplifying testing.  Additional standardization in testing should be extended to API coverage through utilization of Swagger (n.b. IBM API Connect).
 
-### Automate anything
+### Automate everything
 A combination of tools enables automation for almost every component in the CI/CD process.  However, certain activities remain the provenance of human review and oversite, including _pull requests_ and _release management_.  In addition, modification of a service _version_ is _not_ dependent on either the Git or Docker repository version information.
 
 # 3.Use
@@ -98,7 +98,6 @@ These files are utilized for the control attributes; they may also be specified 
 + `DOCKER_PASSWORD` - password to verify account in registry
 + `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
 + `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
-+ `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
 
 For more information refer to [`MAKEVARS.md`][makevars-md]
 
@@ -106,20 +105,14 @@ For more information refer to [`MAKEVARS.md`][makevars-md]
 
 ## Step 1 - Clone and configure 
 
-Video [&#128249;][clone-to-publish-video] and [script][clone-to-publish-script]
-
-[clone-to-publish-video]: https://youtu.be/vLicHLN90JQ
-[clone-to-publish-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-to-publish-cpu.txt
-
-
 Clone this [repository][repository] into a new directory (n.b. it may also be [forked][forking-repository]):
 
 [forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
 
 This repository is configured with the following default `make` variables which should be changed:
 
-+ `DOCKER_NAMESPACE` - the identifier for the registry; for example, the _userid_ on [docker.io][docker-hub]
-+ `HZN_ORG_ID` - organizational identifier in the Open Horizon exchange; for example: <userid>@cloud.ibm.com
++ `DOCKER_NAMESPACE` - the identifier for the registry; for example, the _userid_ on [hub.docker.com][docker-hub]
++ `HZN_ORG_ID` - organizational identifier in the Open Horizon exchange; for example: `<userid>@cloud.ibm.com`
 
 [docker-hub]: http://hub.docker.com
 
@@ -137,10 +130,14 @@ Use the following instructions (n.b. [automation script][clone-config-script]) t
 mkdir -p $GD
 cd $GD
 git clone http://github.com/dcmartin/open-horizon
-cd $GD/open-horizon
+cd open-horizon
 echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
 echo "${HZN_ORG_ID}" > HZN_ORG_ID
 ```
+
+Creating the `DOCKER_NAMESPACE` and `HZN_ORG_ID` files will ensure persistence of configuration.  
+
+**NOTE**: If using [IBM Container Registry][registry-md] and the `./open-horizon/registry.json` file exists, the Docker registry configuration therein will be utilized.
 
 ## Step 2 - Install Open Horizon
 With the assumption that `docker` has already been installed; if not refer to these [instructions][get-docker].
@@ -221,7 +218,7 @@ Two base service containers are provided; one for Alpine with its minimal footpr
 [jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
 The `cpu`,`hal`,`wan`, and `mqtt` services are Alpine-based and of minimal size.
-The `yolo` and `yolo2msghub` services are Ubuntu-based to support Kafka and YOLO/Darknet.
+The `yolo` and `yolo2msghub` services are Ubuntu-based to support YOLO/Darknet and Kafka, respectively.
 
 ## Examples
 
@@ -240,10 +237,22 @@ To `build` and `check` the services, run the following commands:
 
 ```
 cd $GD/open-horizon
+```
+
+```
 make
 ```
+
+```
+make check
+```
+
+```
+make test
+```
+
 ### Step 2
-To `push` -- and `build` as necessary -- all the services' containers to the registry:
+To `push` -- and `build` as necessary -- all the services' architecture(s) containers to the registry:
 
 ```
 cd $GD/open-horizon
