@@ -34,6 +34,18 @@ The CI/CD process demonstrated in this repository enables the automated building
 
 The examples herein were created to exercise the CI/CD process across a range of configurations using Open Horizon and Docker.
 
+An introductory video series called _Coding with Dave_ is on YouTube:
+
+\#|Title|&#128279;
+---|---|---
+1.|_Make A Little_ |[&#128250;][coding-with-dave-1]
+2.|_Node Control_ |[&#128250;][coding-with-dave-2]
+3.|_From the Top_ |[&#128250;][coding-with-dave-3]
+
+[coding-with-dave-1]: https://youtu.be/qrYhJ9jNcOA
+[coding-with-dave-2]: https://youtu.be/TpS4xQN6WUE
+[coding-with-dave-3]: https://youtu.be/38-FrQCajPg
+
 # 2. Design
 
 The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The primary objective is to:
