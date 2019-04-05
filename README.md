@@ -100,18 +100,6 @@ There are also _base_ containers that are used by the other services:
 
 The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.  See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 
-An introductory video series called _Coding with Dave_ is on YouTube:
-
-\#|Title|&#128279;
----|---|---
-1.|_Make A Little_ |[&#128250;][coding-with-dave-1]
-2.|_Node Control_ |[&#128250;][coding-with-dave-2]
-3.|_From the Top_ |[&#128250;][coding-with-dave-3]
-
-[coding-with-dave-1]: https://youtu.be/qrYhJ9jNcOA
-[coding-with-dave-2]: https://youtu.be/TpS4xQN6WUE
-[coding-with-dave-3]: https://youtu.be/38-FrQCajPg
-
 #  Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
@@ -166,3 +154,8 @@ YAML|1|0|10|28
 Expect|1|0|0|5
 --------|--------|--------|--------|--------
 SUM:|192|2807|1202|19415
+
+## MAP
+
+![alt map](http://www.clustrmaps.com/map_v2.png?d=b6TnAROswVvp8u4K3_6FHn9fu7NGlN6T_Rt3dSYwPqI&cl=ffffff")
+
