@@ -41,7 +41,7 @@ These services and patterns are built and pushed to designated Docker registry &
 
 # 2. Services & Patterns
 
-Services are defined within a directory hierarchy of this [repository][repository]. Please refer to [`DESIGN.md`][design-md] for more information on the design of these examples services.  All services in this repository share a common [design][design-md].
+Services are defined within a directory hierarchy of this [repository][repository]. All services in this repository share a common [design][design-md].
 
 Patterns include:
 
@@ -155,14 +155,14 @@ David C Martin (github@dcmartin.com)
 
 Language|files|blank|comment|code
 :-------|-------:|-------:|-------:|-------:
-JSON|101|2|0|10840
-Markdown|28|991|0|5352
-Bourne Shell|59|721|727|5120
-Dockerfile|14|163|101|617
-make|2|72|51|194
+Markdown|38|1578|0|9579
+Bourne Shell|72|861|943|5679
+JSON|55|1|0|2714
+Dockerfile|19|258|157|977
+make|2|84|57|279
 Bourne Again Shell|3|15|15|106
 Python|1|10|20|48
-YAML|1|0|2|28
+YAML|1|0|10|28
 Expect|1|0|0|5
 --------|--------|--------|--------|--------
-SUM:|210|1974|916|22310
+SUM:|192|2807|1202|19415
