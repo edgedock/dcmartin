@@ -169,4 +169,5 @@ SUM:|192|2807|1202|19415
 
 ## MAP
 
-<a href="https://clustrmaps.com/site/1aod3" title="Visit tracker"><img src="//www.clustrmaps.com/map_v2.png?d=b6TnAROswVvp8u4K3_6FHn9fu7NGlN6T_Rt3dSYwPqI&cl=ffffff"></a>
+![alt map](http://www.clustrmaps.com/map_v2.png?d=b6TnAROswVvp8u4K3_6FHn9fu7NGlN6T_Rt3dSYwPqI&cl=ffffff")
+
