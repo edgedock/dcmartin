@@ -61,14 +61,14 @@ pattern-validate:
 
 .PHONY: ${ALL} default all build run check stop push publish verify clean start test sync
 
-sync: ../ibm/open-horizon .gitignore CLOC.md 
+sync: ../ibm/open-horizon .gitignore ./doc/CLOC.md 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- synching ${ALL}""${NC}" &> /dev/stderr
 	@rsync -av makefile service.makefile *.md *.sh .gitignore .travis.yml ../ibm/open-horizon
 	@for dir in $(ALL) ${SETUP}; do \
 	  rsync -a --info=name --exclude='service.json' --exclude='userinput.json' --exclude='pattern.json' --exclude-from=./.gitignore $${dir}/ ../ibm/open-horizon/$${dir}/ ; \
 	done
 	
-CLOC.md: .gitignore .
+./doc/CLOC.md: .gitignore .
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- counting source code""${NC}" &> /dev/stderr
 	@cloc --md --exclude-list-file=.gitignore . > CLOC.md
 

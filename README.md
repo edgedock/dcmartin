@@ -26,18 +26,18 @@ Open Horizon is a distributed, decentralized, automated system for the orchestra
 [amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [arm-shield]: https://img.shields.io/badge/armhf-yes-green.svg
 
-## 1.1 Repository & Exchange
+## 1.1 Registry & Exchange
 
-These services and patterns are built and pushed to public [repositories][docker-dcmartin] on [Docker Hub][docker-hub].  and available in the exchange.  Defaults:
+These services and patterns are built and pushed to designated Docker registry & namespace as well as Open Horizon exchange and organization.  The default build configuration is:
 
-+ `HZN_EXCHANGE_URL` is `https://alpha.edge-fabric.com/v1`
-+ `HZN_ORG_ID` is `dcmartin@us.ibm.com`.
-+ `DOCKER_NAMESPACE` is [`dcmartin`][docker-dcmartin]
-+ `URL` is [`com.github.dcmartin.open-horizon`][repository]
++ `HZN_EXCHANGE_URL` defaults to `https://alpha.edge-fabric.com/v1`
++ `HZN_ORG_ID` is **unspecified** (e.g. `dcmartin@us.ibm.com`)
++ `DOCKER_NAMESPACE` is **unspecified** (e.g. [`dcmartin`][docker-dcmartin])
++ `DOCKER_REGISTRY` is **unset** and defaults to `docker.io`
 
 [docker-dcmartin]: https://hub.docker.com/?namespace=dcmartin
 
-**NOTE**: build, push, and publish containers, services, and patterns using appropriate values.
+**NOTE**: The `HZN_ORG_ID` and `DOCKER_NAMESPACE` should be specified appropriately prior to any build.
 
 # 2. Services & Patterns
 
@@ -96,15 +96,23 @@ There are also _base_ containers that are used by the other services:
 [jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
 [jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
-# 3. Copy and Use
+# 3. How to Use
 
-The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.  An introductory video [&#128249;][coding-with-dave-1] is available.
+The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.  See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
+
+An introductory video series called _Coding with Dave_ is on YouTube:
+
+\#|Title|&#128279;
+---|---|---
+1.|_Make A Little_ |[&#128250;][coding-with-dave-1]
+2.|_Node Control_ |[&#128250;][coding-with-dave-2]
+3.|_From the Top_ |[&#128250;][coding-with-dave-3]
 
 [coding-with-dave-1]: https://youtu.be/qrYhJ9jNcOA
+[coding-with-dave-2]: https://youtu.be/TpS4xQN6WUE
+[coding-with-dave-3]: https://youtu.be/38-FrQCajPg
 
-See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
-
-#  	&#127919;  Further Information 
+#  Further Information 
 
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 

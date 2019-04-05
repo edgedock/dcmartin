@@ -15,3 +15,7 @@
 # 1 Black Circle: &#10122; 
 # 2 Black Circle: &#10123; 
 
+# Film Frames: &#127902;
+# Link Symboi: &#128279;
+# Television:  	&#128250;
+# Dartboard: &#127919;  
