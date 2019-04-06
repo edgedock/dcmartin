@@ -37,6 +37,7 @@ script:
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - make build
 after_success:
+  - export DEBUG=true
   - make test-service
   - make push
   - make publish-service
