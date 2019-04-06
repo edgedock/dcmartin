@@ -35,9 +35,8 @@ script:
 script:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-  - make build
+  - make build && make test-service
 after_success:
-  - make test-service
   - make push
   - make publish-service
   - make pattern-publish
