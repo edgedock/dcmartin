@@ -7,8 +7,8 @@ branches:
   only:
     - master
 env:
-#  - BUILD_ARCH=amd64
-  - BUILD_ARCH=arm
+  - BUILD_ARCH=amd64
+#  - BUILD_ARCH=arm
 #  - BUILD_ARCH=arm64
 addons:
   apt:
@@ -27,12 +27,10 @@ addons:
     - qemu
     - binfmt-support
     - qemu-user-static
-    - apt-cross
     - dpkg-cross
 # http://wiki.micromint.com/index.php/Debian_ARM_Cross-compile
 before_install:
   # https://wiki.debian.org/QemuUserEmulation
-  #- if [ ${BUILD_ARCH} != 'amd64' ]; then update-binfmts --display; sudo docker run --privileged linuxkit/binfmt:v0.6; fi
   - if [ ${BUILD_ARCH} != 'amd64' ]; then update-binfmts --display; fi
   - if [ ${BUILD_ARCH} == 'arm' ]; then sudo dpkg --add-architecture armhf && sudo apt-get update && dpkg-cross -i -a arm libc6_<version>_armel.deb; fi
   - if [ ${BUILD_ARCH} == 'arm64' ]; then sudo dpkg --add-architecture aarch64 && sudo apt-get update && dpkg-cross -i -a arm64 libc6_<version>_aarch.deb; fi
