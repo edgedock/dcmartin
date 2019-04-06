@@ -1,6 +1,6 @@
-#  	&#9968; Open Horizon example _services_ and _patterns_
+# &#9968; Open Horizon example _services_ and _patterns_
 
-Open Horizon is a distributed, decentralized, automated system for the orchestration of workloads at the _edge_ of the *cloud*.  More information is available on [Github][open-horizon].  Devices with Horizon installed may _register_ for patterns using services provided by the IBM Cloud. 
+This [repository][repository] contains a set of examples to demonstrate a [CI/CD][cicd-md] process for services and patterns.
 
 [design-md]: https://github.com/dcmartin/open-horizon/tree/master/doc/DESIGN.md
 
@@ -96,12 +96,9 @@ There are also _base_ containers that are used by the other services:
 [jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
 [jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
-# 3. How to Use
-
-The services and patterns in this [repository][repository] may be built and tested either as a group or individually.  Please refer to [`CICD.md`][cicd-md] for more information on using these examples.  See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
-
 #  Further Information 
 
+See [`SERVICE.md`][service-md] and [`PATTERN.md`][pattern-md] for more information on building services and patterns.
 Refer to the following for more information on [getting started][edge-fabric] and [installation][edge-install].
 
 # Changelog & Releases
