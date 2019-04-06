@@ -1,31 +1,16 @@
 # `BUILD.md` - build process automation
 
-## CI/CD
-
-The control attributes for the CI/CD process are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
-
-+ `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
-+ `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
-+ `DOCKER_LOGIN` - account identifier for access to registry
-+ `DOCKER_PASSWORD` - password to verify account in registry
-+ `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
-+ `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
-+ `HZN_EXCHANGE_USERAUTH` - credentials user to exchange, e.g. `<org>/iamapikey:<apikey>`
-
-More information is available  in [`CICD.md`][cicd-md].
-
-[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/CICD.md
-
 ## Introduction
 
-This [repository][repository] is built using the `make` software; please refer to [`MAKE.md`][make-md] for more information.  The top-level [`makefile`][makefile] (n.b. lower-case) controls build across all services; please refer to [`SERVICE.md`][service-md] for additional details.
+This [repository][repository] is built using the following tools: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].
 
-Top-level `make` targets:
+Services are built using `make` command and a set of targets; see:
 
-+ `default` - perform the default target for each service
-+ `all` - build, publish, and verify all services for all appropriate architectures
-+ `pattern-publish` - publish all patterns specified
-+ `pattern-validate` - validate all patterns specified
++ [`MAKE.md`][make-md]
++ [`MAKEVARS.md`][makevars-md]
+
+[docker-start]: https://www.docker.com/get-started
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/CICD.md
 
 ## 1. Build control files
 
@@ -41,10 +26,9 @@ Within each directory is a set of files to control the build process:
 
 ### 1.1 `Makefile` &  `.travis.yml`
 
-The `Makefile` is shared across all services; it is a symbolic link to a common [`service.makefile`][service-makefile] in the root of the repository.
-Services are built using `make` command and a set of targets (see [`MAKE.md`][make-md] and [`MAKEVARS.md`][makevars-md]).
+The `Makefile` is shared across all services; it is a symbolic link to a common, shared, [file][service-makefile] in the root of the repository.  The top-level [`makefile`][makefile] invokes targets across service directories.
 
-The [Travis][travis-ci] process automation system for continuous-integration enables the execution of the build process and tools in a cloud environment. Travis expectations and limitations effect the CI/CD process.  Please see [`TRAVIS.md`][travis-md] for more information.
+The [Travis][travis-ci] process automation system for continuous-integration enables the execution of the build process and tools in a cloud environment.  Please see [`TRAVIS.md`][travis-md] for more information.
 
 ### 1.2 `Dockerfile` & `build.json`
 
@@ -165,40 +149,6 @@ Process the _pattern_ configuration template with any additional `TAG` informati
 ### 2.7 `pattern-test.sh` (_aka_ `exchange-test.sh`)
 
 One script with three names for interrogating the _exchange_.  When invoked as `pattern-test.sh`, which is symbolically linked to `exchange-test.sh`, the _pattern_ is tested to determine if all services are up-to-date with respect to organization, architecture, and semantic version number.  Out-of-date pattern configurations will fail with an error message.
-
-## 3. Build process automation
-
-The `make` program is used to build; software requirements are: `make`, `git`, `curl`, `jq`, and [`docker`][docker-start].
-
-[docker-start]: https://www.docker.com/get-started
-
-The automated CI/CD process utilizes [Travis CI][travis-ci]; please refer to [`TRAVIS.md`][travis-md] for more information.
-
-### 3.1 Pre-requisites
-
-A _quick-start_ for Debian LINUX (Ubuntu or Raspbian) is to install `docker` and the build tools:
-
-```
-wget -qO - get.docker.com  | sh
-sudo addgroup $(whoami) docker
-sudo apt install -y git make curl jq
-```
-
-**NOTE**:  `logout` and `login` to establish `docker` group privileges.
-
-### 3.2 Getting started
-
-Clone this [repository][repository] and `make` the software. 
-
-```
-mkdir ~/gitdir
-cd ~/gitdir
-git clone http://github.com/dcmartin/open-horizon
-cd open-horizon
-make
-```
-
-The default target for the `make` process will `build` the container images, `run` them locally, and `check` the status of each _service_. More information is available in [`MAKE.md`][make-md].
 
 [docker-start]: https://www.docker.com/get-started
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKE.md
