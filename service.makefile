@@ -33,7 +33,7 @@ PUBLIC_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}*.pem),$(wildcard ../${HZN_OR
 KEYS = $(PRIVATE_KEY_FILE) $(PUBLIC_KEY_FILE)
 
 ## IBM Cloud API Key
-APIKEY := $(if ../APIKEY,$(shell cat ../APIKEY && echo APIKEY),$(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY && echo APIKEY),APIKEY)
+APIKEY := $(if ../APIKEY,$(shell cat ../APIKEY && echo ../APIKEY),$(if $(wildcard ../apiKey.json),$(shell jq -r '.apiKey' ../apiKey.json > APIKEY && echo APIKEY),APIKEY_NOT_FOUND))
 
 ## docker
 DOCKER_NAMESPACE ?= $(if $(wildcard ../DOCKER_NAMESPACE),$(shell cat ../DOCKER_NAMESPACE),$(if $(wildcard ../registry.json),$(shell jq -r '.namespace' ../registry.json),$(shell whoami)))
