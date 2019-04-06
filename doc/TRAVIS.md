@@ -8,6 +8,23 @@
 
 # Build automation
 
+The complete job lifecycle, including three optional deployment phases and after checking out the git repository and changing to the repository directory, is:
+
++    _OPTIONAL Install_ `apt addons`
++    _OPTIONAL Install_ `cache components`
++    `before_install`
++    `install`
++    `before_script`
++    `script`
++    _OPTIONAL_ `before_cache` (for cleaning up cache)
++    `after_success` or `after_failure`
++    _OPTIONAL_ `before_deploy`
++    _OPTIONAL_ `deploy`
++    _OPTIONAL_ `after_deploy`
++    `after_script`
+
+A build can be composed of many jobs.
+
 These tasks are defined in a YAML file for the GIT repository; this [repository][repository] has a [`.travis.yml`][travis-yaml] configuration file.
 
 [travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml

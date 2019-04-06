@@ -6,8 +6,7 @@
 ## things TO change - create your own HZN_HZN_ORG_ID_ID and URL files.
 ##
 
-HZN_ORG_ID ?= $(if $(wildcard HZN_ORG_ID),$(shell cat HZN_ORG_ID),dcmartin@us.ibm.com)
-URL ?= $(if $(wildcard URL),$(shell cat URL),com.github.dcmartin.open-horizon)
+HZN_ORG_ID ?= $(if $(wildcard HZN_ORG_ID),$(shell cat HZN_ORG_ID),HZN_ORG_ID)
 
 # tag this build environment
 TAG ?= $(if $(wildcard TAG),$(shell cat TAG),)
@@ -20,9 +19,9 @@ BUILD_ARCH ?= $(if $(wildcard BUILD_ARCH),$(shell cat BUILD_ARCH),)
 ##
 
 BASES = base-alpine base-ubuntu 
-SERVICES = cpu hal wan yolo mqtt hzncli herald yolo4motion mqtt2kafka 
+SERVICES = cpu hal wan yolo # mqtt hzncli herald yolo4motion mqtt2kafka 
 JETSONS = jetson-jetpack jetson-cuda jetson-opencv jetson-yolo # jetson-caffe # jetson-digits
-PATTERNS = yolo2msghub motion2mqtt
+PATTERNS = yolo2msghub # motion2mqtt
 SETUP = setup
 
 ALL = $(BASES) $(SERVICES) $(PATTERNS) # ${JETSONS}
@@ -39,24 +38,24 @@ default: $(ALL)
 
 $(ALL):
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making $@""${NC}" &> /dev/stderr
-	@$(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $@
+	@$(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID)  -C $@
 
 $(TARGETS):
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- making $@ in ${ALL}""${NC}" &> /dev/stderr
 	@for dir in $(ALL); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 pattern-publish:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing $(PATTERNS)""${NC}" &> /dev/stderr
 	@for dir in $(PATTERNS); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 pattern-validate: 
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- validating $(PATTERNS)""${NC}" &> /dev/stderr
 	@for dir in $(PATTERNS); do \
-	  $(MAKE) TAG=$(TAG) URL=$(URL) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
+	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID)  -C $$dir $@; \
 	done
 
 .PHONY: ${ALL} default all build run check stop push publish verify clean start test sync

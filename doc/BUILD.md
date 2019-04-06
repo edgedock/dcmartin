@@ -48,13 +48,27 @@ The [Travis][travis-ci] process automation system for continuous-integration ena
 
 ### 1.2 `Dockerfile` & `build.json`
 
-The `Dockerfile` controls the container build process.  A critical component of that process is the `FROM` directive, which indicates the container from which to build.  The `build.json` configuration file provides a mapping for each architecture the _service_ supports.  For example, an Alpine-based LINUX container might include the following:
+The `Dockerfile` controls the container build process.  A critical component of that process is the `FROM` directive, which indicates the container from which to build.
+
+The `build.json` configuration file provides a mapping for each architecture the _service_ supports.  For example, the Alpine-based LINUX `base-alpine` configuration:
 
 ```
-"build_from": {
-    "arm64": "arm64v8/alpine:3.8",
-    "amd64": "alpine:3.8",
-    "arm": "arm32v6/alpine:3.8"
+{
+    "squash": false,
+    "build_from": {
+        "amd64": "alpine:3.8",
+        "arm": "arm32v6/alpine:3.8",
+        "arm64": "arm64v8/alpine:3.8",
+        "386": null,
+        "ppc64": null,
+        "ppc64le": null,
+        "mips64": null,
+        "mips64le": null,
+        "s390x": null,
+        "mips": null,
+        "mipsle": null
+    },
+    "args": {}
 }
 ```
 
