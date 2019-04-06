@@ -57,7 +57,7 @@ while true; do
     TEST_OUT="test.${DOCKER_TAG##*/}.json"
     echo "${OUT}" > "${TEST_OUT}"
     if [ ! -z "$(command -v ${CMD})" ]; then
-      TEST=$(echo "${OUT}" | ${CMD})
+      TEST=$(echo "${OUT}" | ${CMD} 2> /dev/stderr)
       if [ "${TEST:-}" == 'true' ]; then
         echo "!!! SUCCESS -- $0 $$ -- test ${CMD} returned ${TEST}" &> /dev/stderr
 	echo "${TEST}"

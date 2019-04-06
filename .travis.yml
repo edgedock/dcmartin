@@ -41,7 +41,8 @@ after_success:
   # - make check
   # - make service-start
   - make service-test
-  - make service-push
+  - make push
+  - make publish-service
   # - make push
   # - make nodes
   # - make test-nodes until all good
