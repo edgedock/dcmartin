@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # args
 if [ ! -z "${1}" ]; then DIR="${1}"; else DIR="horizon"; if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory unspecified; default: ${DIR}" &> /dev/stderr; fi; fi
 if [ ! -z "${2}" ]; then 
@@ -22,9 +23,12 @@ SERVICE_URL=$(jq -r '.url' ${SERVICE_DEFINITION})
 USERINPUT="${DIR}/userinput.json"
 if [ ! -s "${USERINPUT}" ]; then echo "*** ERROR -- $0 $$ -- cannot locate userinput JSON ${USERINPUT}; exiting"; exit 1; fi
 
+if [ ! -z "${DEBUG:-}" ]; then echo "--- INFO -- $0 $$ -- SERVICE_TEMPLATE: ${SERVICE_TEMPLATE}; SERVICE_URL=${SERVICE_URL}" &> /dev/stderr; fi
+
 # check mandatory variables (i.e. those whose value is null in template)
 for evar in $(jq -r '.userInput[].name' "${SERVICE_TEMPLATE}"); do 
   VAL=$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'${evar}'").value' ${USERINPUT}) 
+  if [ ! -z "${DEBUG:-}" ]; then echo "--- INFO -- $0 $$ -- ${evar}: ${VAL}" &> /dev/stderr; fi
   if [ -s "${evar}" ]; then 
     VAL=$(cat "${evar}")
     UI=$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'${evar}')|='${VAL} "${USERINPUT}")
