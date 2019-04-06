@@ -1,10 +1,10 @@
 # Example
 
-This example combines four existing services output and sends their information to the cloud.
+This is an example CI/CD process model for one or more software engineers to develop, test, stage, and release edge services and patterns into a production environment.
 
 ## Assumptions
 
-This example is based on a single developer copying this repository and building a new version of the `yolo2msghub` service and pattern.
+This example is based on a single developer copying this repository and building a new version of the `yolo2msghub`pattern and its inherent and required services.
 
 The developer requires:
 
@@ -28,7 +28,7 @@ and experience with the following:
 
 ## What Will Happen 
 
-The developer will 
+### The developer will 
 
 1. copy this repository
 1. configure for registry & exchange
@@ -38,24 +38,27 @@ The developer will
 1. publish pattern
 1. create branches for `test` and `dev`
 1. configure Travis
-  1. build, test, commit for `test`
-  1. build, test, push, publish for `master`
+ + build, test, commit for `test`
+ + build, test, push, publish for `master`
 1. develop in `dev` branch
-  1. add test case
-  1. implement feature
-  1. build
-  1. test
+  + add test case
+  + implement feature
+  + build
+  + test
 1. request merge from `dev` to `test`
 
-The automated CI/CD system will
+### The CI/CD process will
 
+### Stage 1
 1. detect merge request
 1. checkout `test`
 1. pull from `dev`
 1. build
 1. test
-  1. failure: reject merge
-  1. success: commit `test`
+ + failure: reject merge
+ + success: commit `test`
+
+### Stage 2
 
 2. detect `test` commit
 2. checkout `master`
@@ -65,13 +68,14 @@ The automated CI/CD system will
   2. failure: reject merge
   2. success: commit `master`
 
+### Stage 3
+
 3. detect `master` commit
 3. checkout `master`
 3. build
 3. test
   3. failure: rollback commit
   3. success: push images, publish services, publish pattern
-
 
 # Step-By-Step
 
