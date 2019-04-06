@@ -144,20 +144,11 @@ With the assumption that `docker` has already been installed; if not refer to th
 
 [get-docker]: https://docs.docker.com/install/
 
-+ **macOS**
-
-```
-cd $GD/open-horizon
-sudo bash ./update-hzncli-macos.sh
-```
-**Note**: only the `hzn` command-line-interface tool is installed for macOS
-
-+ **LINUX**
-
 ```
 cd $GD/open-horizon
 sudo bash ./setup/aptget-horizon.sh
 ```
+**Note**: only the `hzn` command-line-interface tool is installed for macOS
 
 ## Step 3 - Create IBM Cloud API key file
 Visit the IBM Cloud [IAM][iam-service] service to create and download a platform API key; copy that `apiKey.json` file into the `open-horizon/` directory:
@@ -312,10 +303,10 @@ For example the `yolo2msghub/horizon/service.definition.json` configuration (see
   "public": true,
   "sharable": "singleton",
   "requiredServices": [
-    { "url": "com.github.dcmartin.open-horizon.yolo-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.8", "arch": "amd64" },
-    { "url": "com.github.dcmartin.open-horizon.wan-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" },
-    { "url": "com.github.dcmartin.open-horizon.hal-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" },
-    { "url": "com.github.dcmartin.open-horizon.cpu-beta", "org": "dcmartin@us.ibm.com", "version": "0.0.3", "arch": "amd64" }
+    { "url": "com.github.dcmartin.open-horizon.yolo-beta", "org": "${HZN_ORG_ID}", "version": "0.0.8", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.wan-beta", "org": "${HZN_ORG_ID}", "version": "0.0.3", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.hal-beta", "org": "${HZN_ORG_ID}", "version": "0.0.3", "arch": "amd64" },
+    { "url": "com.github.dcmartin.open-horizon.cpu-beta", "org": "${HZN_ORG_ID}", "version": "0.0.3", "arch": "amd64" }
   ],
   "userInput": [
     { "name": "YOLO2MSGHUB_APIKEY", "label": "message hub API key", "type": "string", "defaultValue": null },

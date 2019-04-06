@@ -34,7 +34,23 @@ The [Travis][travis-ci] process automation system for continuous-integration ena
 
 The `Dockerfile` controls the container build process.  A critical component of that process is the `FROM` directive, which indicates the container from which to build.
 
-The `build.json` configuration file provides a mapping for each architecture the _service_ supports.  For example, the Alpine-based LINUX `base-alpine` configuration:
+The `Dockerfile` also includes information for `LABEL` container information, for example:
+
+```
+LABEL \
+    org.label-schema.schema-version="1.0" \
+    org.label-schema.build-date="${BUILD_DATE}" \
+    org.label-schema.build-arch="${BUILD_ARCH}" \
+    org.label-schema.name="cpu" \
+    org.label-schema.description="base alpine container" \
+    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/cpu/" \
+    org.label-schema.vcs-ref="${BUILD_REF}" \
+    org.label-schema.version="${BUILD_VERSION}" \
+    org.label-schema.vendor="David C Martin <github@dcmartin.com>"
+```
+
+
+The **`build.json`** configuration file provides a mapping for each architecture the _service_ supports.  For example, the Alpine-based LINUX `base-alpine` configuration:
 
 ```
 {
@@ -58,19 +74,37 @@ The `build.json` configuration file provides a mapping for each architecture the
 
 This example indicates three (3) supported architectures with values: `arm64`, `amd64`, and `arm`, and corresponding Docker container tags. The architecture values must be common across the build automation process and configuration files; it also **effects the building and naming of container images and services**. However, values may be specified as necessary to ensure uniqueness.
 
-The `Dockerfile` also includes information for `LABEL` container information, for example:
+**NOTE:** Version attributions for the `BUILD_FROM` target is drawn from version of the parent service, e.g. `version` in the `yolo/service.json` service configuration template value of `0.0.7`; see below:
 
+### `base-ubuntu/build.json`
 ```
-LABEL \
-    org.label-schema.schema-version="1.0" \
-    org.label-schema.build-date="${BUILD_DATE}" \
-    org.label-schema.build-arch="${BUILD_ARCH}" \
-    org.label-schema.name="cpu" \
-    org.label-schema.description="base alpine container" \
-    org.label-schema.vcs-url="http://github.com/dcmartin/open-horizon/master/cpu/" \
-    org.label-schema.vcs-ref="${BUILD_REF}" \
-    org.label-schema.version="${BUILD_VERSION}" \
-    org.label-schema.vendor="David C Martin <github@dcmartin.com>"
+{
+  "build_from": {
+    "amd64": "ubuntu:bionic",
+    "arm": "arm32v7/ubuntu:bionic",
+    "arm64": "arm64v8/ubuntu:bionic"
+  }
+}
+```
+### `yolo/build.json`
+```
+{
+  "build_from": {
+    "amd64": "${DOCKER_REPOSITORY}/amd64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
+    "arm": "${DOCKER_REPOSITORY}/arm_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
+    "arm64": "${DOCKER_REPOSITORY}/arm64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2"
+  }
+}
+```
+### `yolo4motion/build.json`
+```
+{
+  "build_from": {
+    "amd64": "${DOCKER_REPOSITORY}/amd64_com.github.dcmartin.open-horizon.yolo:0.0.7",
+    "arm": "${DOCKER_REPOSITORY}/arm_com.github.dcmartin.open-horizon.yolo:0.0.7",
+    "arm64": "${DOCKER_REPOSITORY}/arm64_com.github.dcmartin.open-horizon.yolo:0.0.7"
+  },
+}
 ```
 
 ### 1.3 `service.json` & `userinput.json`

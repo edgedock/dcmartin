@@ -1,20 +1,5 @@
 # `SERVICE.md` - _Service_ build process automation
 
-## CI/CD
-
-The control attributes for the CI/CD process are listed below; they may be specified as environment variables, files, or automatically extracted from relevant JSON configuration files, e.g. `~/.docker/config.json`, `registry.json` and `apiKey.json` for the Docker configuration, registry, and IBM Cloud, respectively.
-
-+ `DOCKER_NAMESPACE` - identifies the collection of repositories, e.g. `dcmartin`
-+ `DOCKER_REGISTRY` - identifies the SaaS server, e.g. `docker.io`
-+ `DOCKER_LOGIN` - account identifier for access to registry
-+ `DOCKER_PASSWORD` - password to verify account in registry
-+ `HZN_ORG_ID` - organizational identifier for Open Horizon edge fabric exchange
-+ `HZN_EXCHANGE_URL` - identifies the SaaS server, e.g. `alpha.edge-fabric.com`
-
-More information is available  in [`CICD.md`][cicd-md].
-
-[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/CICD.md
-
 # Services
 Open Horizon edge fabric services compose one or more Docker containers along with other required services connected with point-to-point virtual-private-networks (VPN). 
 
@@ -130,46 +115,13 @@ make service-publish
 
 Each service is composed of multiple artifacts:
 
-+ `build.json` - a definition of the supported architectures with base containers  (see [`BUILD.md`][build-md]).
++ `build.json` - a dictionary of architectures and containers  
 + `service.json` - a template of the service definition for components and configuration
 + `userinput.json` - a template for registration configuration
 
 ## 2.1 `build.json`
-The build definition contains information used when building the Docker container, notably a specification of supported architecture labels and corresponding `BUILD_FROM` Docker container image tags, for example the `base-ubuntu` example (see below) indicates three (3) supported architectures with corresponding tags.  Most of the services in this [repository][repository] utilize _base_ containers that are also in this repository.  For example, `yolo4motion` utilizes `yolo`, and `yolo` is built from the `base-ubuntu` container.
-
-**NOTE:** Version attributions for the `BUILD_FROM` target is drawn from version of the parent service, e.g. `version` in the `yolo/service.json` service configuration template value of `0.0.7`; see below:
-
-### `base-ubuntu/build.json`
-```
-{
-  "build_from": {
-    "amd64": "ubuntu:bionic",
-    "arm": "arm32v7/ubuntu:bionic",
-    "arm64": "arm64v8/ubuntu:bionic"
-  }
-}
-```
-### `yolo/build.json`
-```
-{
-  "build_from": {
-    "amd64": "${DOCKER_REPOSITORY}/amd64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
-    "arm": "${DOCKER_REPOSITORY}/arm_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2",
-    "arm64": "${DOCKER_REPOSITORY}/arm64_com.github.dcmartin.open-horizon.base-ubuntu:0.0.2"
-  }
-}
-```
-### `yolo4motion/build.json`
-```
-{
-  "build_from": {
-    "amd64": "${DOCKER_REPOSITORY}/amd64_com.github.dcmartin.open-horizon.yolo:0.0.7",
-    "arm": "${DOCKER_REPOSITORY}/arm_com.github.dcmartin.open-horizon.yolo:0.0.7",
-    "arm64": "${DOCKER_REPOSITORY}/arm64_com.github.dcmartin.open-horizon.yolo:0.0.7"
-  },
-}
-```
-
+The JSON configuration file providing a dictionary of support architectures; see [`BUILD.md`][build-md].
+	
 ## 2.2 `service.json` - service configuration _template_
 
 The service template definition includes four (4) important fields that are used in service identification:
