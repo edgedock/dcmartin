@@ -113,16 +113,16 @@ stop:
 	@docker stop "${DOCKER_NAME}"
 
 run: remove service-stop
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${DOCKER_TAG}; name: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	@./sh/docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 	@sleep 2
 
 remove:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container: ${SERVICE_NAME}; container: ${DOCKER_NAME}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container named: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	-@docker rm -f $(DOCKER_NAME) 2> /dev/null || :
 
 check:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking container: ${SERVICE_NAME}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking container: ${DOCKER_TAG}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
 	@rm -f check.json
 	@export JQ_FILTER="$(TEST_JQ_FILTER)" && curl -sSL "http://localhost:${DOCKER_PORT}" -o check.json && jq "$${JQ_FILTER}" check.json
 
@@ -133,11 +133,18 @@ login: ~/.docker/config.json
 	    || echo "${RED}>>>${NC} MAKE **" $$(date +%T) "** docker login failed ${DOCKER_SERVER}""${NC}" &> /dev/stderr; \
 
 push: build login
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${SERVICE_NAME}; tag ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing container: ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	@docker push ${DOCKER_TAG}
 
+##
+## TEST
+##
+
+TEST_RESULT = ./test.${BUILD_ARCH}_${SERVICE_URL}_${SERVICE_VERSION}.out
+TEST_OUTPUT = ./test.${BUILD_ARCH}_${SERVICE_URL}_${SERVICE_VERSION}.json
+
 test:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	./sh/test.sh "${DOCKER_TAG}"
 
 ##
@@ -162,17 +169,12 @@ service-start: remove service-stop depend # $(SERVICE_REQVARS)
 	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
 
-TEST_OUTPUT = ./test.${BUILD_ARCH}_${SERVICE_URL}-${SERVICE_VERSION}.out
-
-test-service: $(TEST_OUTPUT)
-
-service-test: service-start test-service
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- tested service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: ${BUILD_ARCH} $<" "${NC}" &> /dev/stderr
+service-test: service-start
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: $(BUILD_ARCH)""${NC}" &> /dev/stderr
+	-@$(MAKE) test > $(TEST_RESULT)
 	-@${MAKE} service-stop
 
-$(TEST_OUTPUT): 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service ${SERVICE_NAME} version ${SERVICE_VERSION} for $(BUILD_ARCH)""${NC}" &> /dev/stderr
-	-@$(MAKE) test > $(TEST_OUTPUT)
+$(TEST_RESULT): 
 
 service-stop: 
 	-@if [ -d "${DIR}" ]; then export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
@@ -283,7 +285,7 @@ nodes-purge: nodes-undo nodes-clean
 
 clean: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json test.*.jpeg
+	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json test.*.jpeg make.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
 
 distclean: service-clean

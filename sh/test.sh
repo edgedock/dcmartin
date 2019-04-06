@@ -6,6 +6,8 @@ if [ -z "${1}" ]; then
 fi
 DOCKER_TAG="${1}"
 
+TEST_OUT="test.$(echo ${DOCKER_TAG##*/} | sed 's/:/_/g').json"
+
 CID=$(docker ps --format '{{.Names}} {{.Image}}' | egrep "${DOCKER_TAG}" | awk '{ print $1 }')
 if [ -z "${CID}" ]; then
   echo "*** ERROR -- $0 $$ -- cannot find running container with tag: ${DOCKER_TAG}" &> /dev/stderr
@@ -54,7 +56,6 @@ while true; do
     exit 1
   fi
   if [ ! -z "${OUT}" ] && [ "${OUT}" != 'null' ]; then
-    TEST_OUT="test.${DOCKER_TAG##*/}.json"
     echo "${OUT}" > "${TEST_OUT}"
     if [ ! -z "$(command -v ${CMD})" ]; then
       TEST=$(echo "${OUT}" | ${CMD} 2> /dev/stderr)
