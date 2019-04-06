@@ -14,7 +14,7 @@ addons:
   apt:
     update: true
     sources:
-    - sourceline: deb [arch=amd64,arm,arm64] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
+    - sourceline: deb [arch=amd64,armhf,arm64,ppc64el] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
       key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
     packages:
     - make
@@ -27,13 +27,12 @@ addons:
     - qemu
     - binfmt-support
     - qemu-user-static
-# https://wiki.debian.org/QemuUserEmulation
-# https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
 before_install:
-  - if [ ${BUILD_ARCH} != 'amd64' ]; then sudo apt-get install qemu binfmt-support qemu-user-static -y; fi
+  # https://wiki.debian.org/QemuUserEmulation
+  - if [ ${BUILD_ARCH} != 'amd64' ]; then update-binfmts --display; fi
+  # https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
   # - if [ ${BUILD_ARCH} == 'arm' ]; then sudo docker run --privileged linuxkit/binfmt:v0.6 && sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform linux/armhf && sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/ && export BUILDKIT_HOST=tcp://0.0.0.0:1234; fi
 before_script:
-  - update-binfmts --display
   - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin; echo "${HZN_ORG_ID}" > HZN_ORG_ID; echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE; echo "${HZN_EXCHANGE_APIKEY}" > APIKEY; echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key"; echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"; if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi; else if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi; fi
 script:
 script:
