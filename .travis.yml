@@ -37,13 +37,9 @@ script:
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - make build
 after_success:
-  # - make run
-  # - make check
-  # - make service-start
-  - make service-test
+  - make test-service
   - make push
   - make publish-service
-  # - make push
+  - make pattern-publish
   # - make nodes
   # - make test-nodes until all good
-  # - make service-publish
