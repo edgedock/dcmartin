@@ -29,7 +29,10 @@ addons:
     - qemu-user-static
 before_install:
   # https://wiki.debian.org/QemuUserEmulation
+  #- if [ ${BUILD_ARCH} != 'amd64' ]; then update-binfmts --display; sudo docker run --privileged linuxkit/binfmt:v0.6; fi
   - if [ ${BUILD_ARCH} != 'amd64' ]; then update-binfmts --display; fi
+  - if [ ${BUILD_ARCH} = 'arm' ]; then sudo dpkg --add-architecture armhf && sudo apt-get update && sudo apt-get install libc6:armhf; fi
+  - if [ ${BUILD_ARCH} = 'arm64' ]; then sudo dpkg --add-architecture aarch64 && sudo apt-get update && sudo apt-get install libc6:aarch64; fi
   # https://dev.to/zeerorg/build-multi-arch-docker-images-on-travis-5428
   # - if [ ${BUILD_ARCH} == 'arm' ]; then sudo docker run --privileged linuxkit/binfmt:v0.6 && sudo docker run -d --privileged -p 1234:1234 --name buildkit moby/buildkit:latest --addr tcp://0.0.0.0:1234 --oci-worker-platform linux/amd64 --oci-worker-platform linux/armhf && sudo docker cp buildkit:/usr/bin/buildctl /usr/bin/ && export BUILDKIT_HOST=tcp://0.0.0.0:1234; fi
 before_script:
