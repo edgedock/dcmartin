@@ -7,7 +7,7 @@
   "version": "0.0.3",
   "arch": null,
   "sharable": "singleton",
-  "requiredServices": null,
+  "requiredServices": [],
   "userInput": [
     {
       "name": "CPU_PERIOD",

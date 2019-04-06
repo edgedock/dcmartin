@@ -13,7 +13,7 @@ USERINPUT="${DIR}/userinput"
 
 # mandatory
 for json in ${SERVICE} ${USERINPUT}; do
-if [ ! -s "${json}.json" ]; then echo "*** ERROR -- $0 $$ -- no ${json}.json" 2> /dev/stderr; exit 1; fi
+  if [ ! -s "${json}.json" ]; then echo "*** ERROR -- $0 $$ -- no ${json}.json" 2> /dev/stderr; exit 1; fi
 done
 
 # architecture
