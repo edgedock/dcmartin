@@ -39,8 +39,8 @@ before_script:
   - if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi
   # check branch; no secrets for pulls
   - if [ "${TRAVIS_PULL_REQUEST}" = 'false' ]; then echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin && echo "${HZN_ORG_ID}" > HZN_ORG_ID && echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE && echo "${HZN_EXCHANGE_APIKEY}" > APIKEY && echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key" && echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"; fi
-  #- if [ "${TRAVIS_PULL_REQUEST}" = 'false' ]; then export BRANCH="${TRAVIS_BRANCH:-}"; else export BRANCH="${TRAVIS_PULL_REQUEST_BRANCH:-}"; fi
-  #- echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH:-}; PR: ${PR:-none}; BRANCH: ${BRANCH:-none}"
+  - if [ "${TRAVIS_PULL_REQUEST:-}" = 'false' ]; then export BRANCH="${TRAVIS_BRANCH:-unknown}"; else export BRANCH="${TRAVIS_PULL_REQUEST_BRANCH:-noPullFound}"; fi
+  - echo "--- INFO -- TRAVIS_BRANCH: ${TRAVIS_BRANCH:-}; PR: ${PR:-none}; BRANCH: ${BRANCH:-none}"
 
 script:
   - make build-service && make test-service
