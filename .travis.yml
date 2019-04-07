@@ -83,15 +83,15 @@ after_success:
   - make publish-service
   - make pattern-publish
 
-before_deploy:
-  - make nodes-clean
-  - make nodes-list
-
-deploy:
-  - make nodes
-
-after_deploy:
-  - make nodes-list
-  - make nodes-test
-
-
+#before_deploy:
+#  - make nodes-clean
+#  - make nodes-list
+#
+#deploy:
+#  - make nodes
+#
+#after_deploy:
+#  - make nodes-list
+#  - make nodes-test
+#
+#
