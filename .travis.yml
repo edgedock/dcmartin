@@ -60,9 +60,7 @@ before_script:
     else
       export BRANCH="${TRAVIS_PULL_REQUEST_BRANCH}"
     fi
-    if [ "${DEBUG:-}" == 'true' ]; then 
-      echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"
-    fi
+    echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"
 
   # don't do pulls
   - >-
