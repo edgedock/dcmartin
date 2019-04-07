@@ -43,7 +43,7 @@ before_script:
  - echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH:-}; PR: ${PR:-none}; BRANCH: ${BRANCH:-none}";
 
 script:
-  - make build && make test-service
+  - make build-service && make test-service
 
 after_success:
   - make push
