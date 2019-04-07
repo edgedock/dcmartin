@@ -33,29 +33,42 @@ addons:
     - dpkg-cross
 
 before_install:
+  # enable QEMU emulation
   - >-
     if [ "${BUILD_ARCH}" != 'amd64' ]; then 
       sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      if [ "${DEBUG:-}" = 'true' ]; then update-binfmts --display; fi
+      if [ "${DEBUG:-}" == 'true' ]; then update-binfmts --display; fi
       case "${BUILD_ARCH}" in 
         arm) export DPKG='armhf' LIBC='armel' ;; 
         arm64) export DPKG='aarch64' LIBC='aarch' ;; 
-        ppc64el) export DPKG='ppc64le' LIBC='ppc64le' ;; 
-        *) echo "unconfigured architecture: ${BUILD_ARCH}" &> /dev/stderr; exit 1
+        ppc64el) export DPKG='ppc64le' LIBC='ppc64el' ;; 
       esac
-      sudo dpkg --add-architecture ${DPKG} && sudo apt-get update
-      sudo dpkg-cross -i -a ${BUILD_ARCH} libc6_<version>_${LIBC}.deb
+      if [ ! -z "${DPKG:-}" ]; then
+        sudo dpkg --add-architecture ${DPKG} && sudo apt-get update
+        sudo dpkg-cross -i -a ${BUILD_ARCH} libc6_<version>_${LIBC}.deb
+      else
+        echo "ERROR: unconfigured architecture: ${BUILD_ARCH}" &> /dev/stderr
+        exit 1
+      fi
     fi
 
 before_script:
   # check branch
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo ${TRAVIS_BRANCH}; else echo ${TRAVIS_PULL_REQUEST_BRANCH}; fi)
-  - if [ ${DEBUG:-} = 'true' ]; then echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"; fi
-  # ignore pulls (essentially)
+  - >-
+    if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then 
+      export BRANCH=${TRAVIS_BRANCH}
+    else
+      export BRANCH=${TRAVIS_PULL_REQUEST_BRANCH}
+    fi
+    if [ ${DEBUG:-} = 'true' ]; then 
+      echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"
+    fi
+  # don't do pulls
   - >-
     if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then 
       echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin
-      echo "${HZN_ORG_ID}" > HZN_ORG_ID; echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
+      echo "${HZN_ORG_ID}" > HZN_ORG_ID
+      echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
       echo "${HZN_EXCHANGE_APIKEY}" > APIKEY
       echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key"
       echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"
@@ -69,5 +82,16 @@ after_success:
   - make push
   - make publish-service
   - make pattern-publish
-  # - make nodes
-  # - make test-nodes until all good
+
+before_deploy:
+  - make nodes-clean
+  - make nodes-list
+
+deploy:
+  - make nodes
+
+after_deploy:
+  - make nodes-list
+  - make nodes-test
+
+
