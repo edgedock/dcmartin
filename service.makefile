@@ -102,10 +102,6 @@ depend: $(APIKEY) ${DIR}
 ## CONTAINERS
 ##
 
-build: Dockerfile build.json service.json rootfs Makefile
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@export DOCKER_TAG="${DOCKER_TAG}" && docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > "build.$${DOCKER_TAG##*/}.out"
-
 logs:
 	@docker logs -f "${DOCKER_NAME}"
 
@@ -153,8 +149,14 @@ test:
 
 ## build
 
+build: Dockerfile build.json service.json rootfs Makefile
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@export DOCKER_TAG="${DOCKER_TAG}" && docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > "build.$${DOCKER_TAG##*/}.out"
+
+
 build-service: 
 	@$(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$@" build
+	@if [ -s "build.$${DOCKER_TAG##*/}.out" ]; then cat "build.$${DOCKER_TAG##*/}.out"; else echo "${RED}BUILD FAILED${NC}" &> /dev/stderr; fi
 
 service-build:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
