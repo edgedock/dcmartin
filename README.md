@@ -154,5 +154,5 @@ SUM:|192|2807|1202|19415
 
 ## MAP
 
-![alt map](http://www.clustrmaps.com/map_v2.png?d=b6TnAROswVvp8u4K3_6FHn9fu7NGlN6T_Rt3dSYwPqI&cl=ffffff")
+![map](http://clustrmaps.com/map_v2.png?cl=ada6a6&w=1024&t=n&d=b6TnAROswVvp8u4K3_6FHn9fu7NGlN6T_Rt3dSYwPqI&co=ffffff&ct=050505)
 
