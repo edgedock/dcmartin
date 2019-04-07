@@ -9,8 +9,8 @@ branches:
 
 env:
   - BUILD_ARCH=amd64
-  - DEBUG=true BUILD_ARCH=arm
   - DEBUG=true BUILD_ARCH=arm64
+#  - DEBUG=true BUILD_ARCH=arm
 
 addons:
   apt:
