@@ -28,7 +28,6 @@ addons:
     - docker-ce
     - qemu
     - qemu-user-static
-    - qemu-user
     - binfmt-support
     - dpkg-cross
 
@@ -36,11 +35,12 @@ before_install:
 
 before_script:
   # enable QEMU emulation
-  - if [ "${BUILD_ARCH:-}" != 'amd64' ]; then sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset; if [ "${DEBUG:-}" == 'true' ]; then update-binfmts --display; fi; fi
+  - if [ "${BUILD_ARCH:-}" != 'amd64' ]; then sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset; sudo update-binfmts --display; fi
   # branch management
-  - if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi;
+  - if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi
   # check branch; no secrets for pulls
-  - if [ "${TRAVIS_PULL_REQUEST}" != "true" ]; then export BRANCH="${TRAVIS_BRANCH}"; echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR:-none}; BRANCH: ${BRANCH}"; echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin; echo "${HZN_ORG_ID}" > HZN_ORG_ID; echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE; echo "${HZN_EXCHANGE_APIKEY}" > APIKEY; echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key"; echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"; else export BRANCH="${TRAVIS_PULL_REQUEST_BRANCH}"; fi
+  - if [ "${TRAVIS_PULL_REQUEST}" != "true" ]; then export BRANCH="${TRAVIS_BRANCH:-}"; echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin; echo "${HZN_ORG_ID}" > HZN_ORG_ID; echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE; echo "${HZN_EXCHANGE_APIKEY}" > APIKEY; echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key"; echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"; else export BRANCH="${TRAVIS_PULL_REQUEST_BRANCH:-}"; fi
+ - echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH:-}; PR: ${PR:-none}; BRANCH: ${BRANCH:-none}";
 
 script:
   - make build && make test-service
