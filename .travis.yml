@@ -35,7 +35,7 @@ addons:
 before_install:
   # enable QEMU emulation
   # sudo dpkg-cross -i -a ${BUILD_ARCH} "libc6_<version>_${LIBC}.deb"
-  - >-
+  - |-
     if [ "${BUILD_ARCH}" != 'amd64' ]; then 
       sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
       if [ "${DEBUG:-}" == 'true' ]; then update-binfmts --display; fi
@@ -54,7 +54,7 @@ before_install:
 
 before_script:
   # check branch
-  - >-
+  - |-
     if [ "${TRAVIS_PULL_REQUEST}" == 'false' ]; then 
       export BRANCH="${TRAVIS_BRANCH}"
     else
@@ -63,7 +63,7 @@ before_script:
     echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"
 
   # don't do pulls
-  - >-
+  - |-
     if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then 
       echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin
       echo "${HZN_ORG_ID}" > HZN_ORG_ID
