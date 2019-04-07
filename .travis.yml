@@ -34,6 +34,7 @@ addons:
 
 before_install:
   # enable QEMU emulation
+  # sudo dpkg-cross -i -a ${BUILD_ARCH} "libc6_<version>_${LIBC}.deb"
   - >-
     if [ "${BUILD_ARCH}" != 'amd64' ]; then 
       sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
@@ -45,7 +46,6 @@ before_install:
       esac
       if [ ! -z "${DPKG:-}" ]; then
         sudo dpkg --add-architecture ${DPKG} && sudo apt-get update
-        sudo dpkg-cross -i -a ${BUILD_ARCH} libc6_<version>_${LIBC}.deb
       else
         echo "ERROR: unconfigured architecture: ${BUILD_ARCH}" &> /dev/stderr
         exit 1
