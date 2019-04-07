@@ -1,17 +1,17 @@
 {
     "squash": false,
     "build_from": {
-        "amd64": "ubuntu:bionic",
-        "arm": "arm32v7/ubuntu:bionic",
-        "arm64": "arm64v8/ubuntu:bionic",
-	"386": null,
-	"ppc64": null,
-	"ppc64le": null,
-	"mips64": null,
-	"mips64le": null,
-	"s390x": null,
-	"mips": null,
-	"mipsle": null
+        "amd64": "multiarch/ubuntu-core:amd64-xenial",
+        "arm": "multiarch/ubuntu-core:armhf-bionic",
+        "arm64": "multiarch/ubuntu-core:arm64-bionic",
+        "386": "multiarch/ubuntu-core:i386-xenial",
+        "ppc64": null,
+        "ppc64le": "multiarch/ubuntu-core:ppc64el-xenial",
+        "mips64": null,
+        "mips64le": null,
+        "s390x": null,
+        "mips": null,
+        "mipsle": null
     },
     "args": {}
 }

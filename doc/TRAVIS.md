@@ -1,14 +1,15 @@
-# Travis configuration
+# `TRAVIS.md` -  [![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+[Travis][travis-ci] provides automated execution of jobs in the continuous integration process.  Status of this repository is indicated by the badge above.  
 
-[Travis][travis-ci] provides automated execution of tasks in the continuous integration process.  Status of this repository is indicated by the following badge:
+## <img src="travis.png" width=48> Travis jobs
 
-[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+Jobs are defined in a YAML file for the GIT repository; this [repository][repository] has configuration file: [`.travis.yml`][travis-yaml] 
 
+[travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
 [travis-ci]: https://travis-ci.org/
 
-# Build automation
-
-The complete job lifecycle, including three optional deployment phases and after checking out the git repository and changing to the repository directory, is:
+### Job Lifecycle
+The complete job lifecycle, including three optional deployment phases and after checking out the git repository and changing to the repository directory:
 
 +    _OPTIONAL Install_ `apt addons`
 +    _OPTIONAL Install_ `cache components`
@@ -25,9 +26,197 @@ The complete job lifecycle, including three optional deployment phases and after
 
 A build can be composed of many jobs.
 
-These tasks are defined in a YAML file for the GIT repository; this [repository][repository] has a [`.travis.yml`][travis-yaml] configuration file.
+####`addons`
+The software requirements for the build process are installed using an `apt` directive, including the additional `sourceline` and `key_url` for Open Horizon (aka `bluehorizon`):
 
-[travis-yaml]: https://github.com/dcmartin/open-horizon/blob/master/.travis.yml
+```
+addons:
+  apt:
+    update: true
+    sources:
+    - sourceline: deb [arch=amd64,armhf,arm64,ppc64el] http://pkg.bluehorizon.network/linux/ubuntu xenial-updates main
+      key_url: 'http://pkg.bluehorizon.network/bluehorizon.network-public.key'
+    packages:
+    - make
+    - curl
+    - jq
+    - ca-certificates
+    - gnupg
+    - bluehorizon
+```
+#### `before_install`
+Before installation any required architecture emulation is enabled:
+
+```
+before_install:
+  # enable QEMU emulation
+  - >-
+    if [ "${BUILD_ARCH}" != 'amd64' ]; then
+      sudo docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      if [ "${DEBUG:-}" == 'true' ]; then update-binfmts --display; fi
+      case "${BUILD_ARCH}" in
+        arm) export DPKG='armhf' LIBC='armel' ;;
+        arm64) export DPKG='aarch64' LIBC='aarch' ;;
+        ppc64el) export DPKG='ppc64le' LIBC='ppc64el' ;;
+      esac
+      if [ ! -z "${DPKG:-}" ]; then
+        sudo dpkg --add-architecture ${DPKG} && sudo apt-get update
+        sudo dpkg-cross -i -a ${BUILD_ARCH} libc6_<version>_${LIBC}.deb
+      else
+        echo "ERROR: unconfigured architecture: ${BUILD_ARCH}" &> /dev/stderr
+        exit 1
+      fi
+    fi
+```
+
+#### `before_script`
+After installation and prior to script execution; check the branch and only set secret environment variables when _not_ processing a pull request:
+
+```
+before_script:
+  # check branch
+  - >-
+    if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then 
+      export BRANCH=${TRAVIS_BRANCH}
+    else
+      export BRANCH=${TRAVIS_PULL_REQUEST_BRANCH}
+    fi
+    if [ ${DEBUG:-} = 'true' ]; then 
+      echo "--- INFO -- $0 $$ -- TRAVIS_BRANCH: ${TRAVIS_BRANCH}; PR: ${PR}; BRANCH: ${BRANCH}"
+    fi
+  # don't do pulls
+  - >-
+    if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then
+      echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_LOGIN}" --password-stdin
+      echo "${HZN_ORG_ID}" > HZN_ORG_ID
+      echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
+      echo "${HZN_EXCHANGE_APIKEY}" > APIKEY
+      echo "${PRIVATE_KEY}" | base64 --decode > "${HZN_ORG_ID}.key"
+      echo "${PUBLIC_KEY}" | base64 --decode > "${HZN_ORG_ID}.pem"
+      if [ ! -z "${TAG}" ]; then echo "${TAG}" > TAG; fi
+    fi
+```
+
+#### `script`
+
+```
+script:
+  - make build && make test-service
+```
+
+#### `after_success`
+
+```
+after_success:
+  - make push
+  - make publish-service
+  - make pattern-publish
+```
+
+
+
+
+##  <img src="https://raw.githubusercontent.com/multiarch/dockerfile/master/logo.jpg" width=48> Multiple architectures
+
+Services may support more than one architecture.  While certain Docker implementations provide emulation for other architectures, e.g. macOS supports `amd64`, `arm64`, and `arm`, the generic LINUX implementation utilized by TravisCI does not.
+
+To utilize generic LINUX to build for multiple architectures requires the addition of [**QEMU**][qemu-static] emulation support as well as utilization of multi-architecture enabled _base_ container images.
+
+[qemu-static]: https://hub.docker.com/r/multiarch/qemu-user-static
+
+### Official `multiarch` images
+The official [`multiarch`][multiarch-namespace] namespace on Docker Hub has repositories of QEMU enabled images for various architectures:
+
+[multiarch-namespace]: https://hub.docker.com/u/multiarch/
+
++ `arm32v6` - https://hub.docker.com/u/arm32v6/
++ `arm32v7` - https://hub.docker.com/u/arm32v7/
++ `arm64v8` - https://hub.docker.com/u/arm64v8/
++ `s390x` - https://hub.docker.com/u/s390x
++ `ppc64le` - https://hub.docker.com/u/ppc64le/
+
+### LINUX Platforms:
+
++ Ubuntu [`core`][multiarch-ubuntu-core]
++ [Alpine][multiarch-alpine]
+
+[multiarch-ubuntu-core]: https://hub.docker.com/r/multiarch/ubuntu-core
+[multiarch-alpine]: https://hub.docker.com/r/multiarch/alpine
+
+#### Recommended:
+
+name|`tag`|size|update
+---|---|---|---|
+alpine|aarch64-latest-stable|6 MB|8 months ago
+alpine|arm64-latest-stable|6 MB|8 months ago
+alpine|armhf-latest-stable|6 MB|8 months ago
+alpine|amd64-latest-stable|7 MB|8 months ago
+alpine|i386-latest-stable|7 MB|8 months ago
+alpine|x86_64-latest-stable|7 MB|8 months ago
+alpine|x86-latest-stable|7 MB|8 months ago
+ubuntu-core|arm64-xenial|41 MB|9 months ago
+ubuntu-core|arm64-bionic|30 MB|9 months ago
+ubuntu-core|x86_64-xenial|45 MB|9 months ago
+ubuntu-core|x86_64-bionic|33 MB|9 months ago
+ubuntu-core|x86-xenial|45 MB|9 months ago
+ubuntu-core|x86-bionic|34 MB|9 months ago
+ubuntu-core|armf-xenial|40 MB|9 months ago
+ubuntu-core|armf-bionic|28 MB|9 months ago
+ubuntu-core|i386-xenial|51 MB|3 years ago
+ubuntu-core|amd64-xenial|50 MB|3 years ago
+ubuntu-core|ppc64el-xenial|53 MB|3 years ago
+
+### Example: `ubuntu-base/build.json`
+
+```
+{
+    "squash": false,
+    "build_from": {
+        "amd64": "multiarch/ubuntu-core:amd64-xenial",
+        "arm": "multiarch/ubuntu-core:armhf-bionic",
+        "arm64": "multiarch/ubuntu-core:arm64-bionic",
+        "386": "multiarch/ubuntu-core:i386-xenial",
+        "ppc64": null,
+        "ppc64le": "multiarch/ubuntu-core:ppc64el-xenial",
+        "mips64": null,
+        "mips64le": null,
+        "s390x": null,
+        "mips": null,
+        "mipsle": null
+    },
+    "args": {}
+}
+```
+
+## QEMU in Travis
+QEMU container emulation:
+
+```
+before_script:
+  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+```
+
+### Verify QEMU
+
+For ARMv7 (`armhf`)
+
+```
+docker run -it --rm -v /usr/bin/qemu-arm-static:/usr/bin/qemu-arm-static arm32v7/debian /bin/bash
+```
+
+For System 390:
+
+```
+docker run -it --rm -v /usr/bin/qemu-s390x-static:/usr/bin/qemu-s390x-static s390x/debian /bin/bash
+```
+
+For PowerPC (little endian):
+
+```
+docker run -it --rm -v /usr/bin/qemu-ppc64le-static:/usr/bin/qemu-ppc64le-static ppc64le/debian /bin/bash
+```
+
+# Build
 
 ```
 sudo: true
