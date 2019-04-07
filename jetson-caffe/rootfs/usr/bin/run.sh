@@ -36,11 +36,11 @@ else
 fi
 
 # port
-if [ -z "${LOCALHOST_PORT:-}" ]; then 
-  LOCALHOST_PORT=80
+if [ -z "${SERVICE_PORT:-}" ]; then 
+  SERVICE_PORT=80
 else
-  echo "+++ WARN: using localhost port ${LOCALHOST_PORT}" &> /dev/stderr
+  echo "+++ WARN: using localhost port ${SERVICE_PORT}" &> /dev/stderr
 fi
 
 # start listening
-socat TCP4-LISTEN:${LOCALHOST_PORT},fork EXEC:service.sh
+socat TCP4-LISTEN:${SERVICE_PORT},fork EXEC:service.sh

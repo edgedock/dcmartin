@@ -48,13 +48,17 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
       continue
     fi
     if [ "${VALID}" != 'true' ]; then
-      echo "+++ WARN $0 $$ -- invalid payload: ${VALID}" $(jq -c '.' ${PAYLOAD%.*}.out) &> /dev/stderr
+      echo "+++ WARN $0 $$ -- invalid payload: ${VALID}" $(cat ${PAYLOAD%.*}.out) &> /dev/stderr
     fi
     ID=$(jq -r '.hzn.device_id' ${PAYLOAD})
+    ENTITY=$(jq -r '.yolo2msghub.yolo.entity' ${PAYLOAD})
     DATE=$(jq -r '.yolo2msghub.yolo.date' ${PAYLOAD})
+    NOW=$(date +%s)
+    AGO=$((NOW-DATE))
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO $0 $$ -- device: ${ID}; entity: ${ENTITY}; ago: ${AGO}" &> /dev/stderr; fi
     THIS=$(echo "${DEVICES}" | jq '.[]|select(.id=="'${ID}'")')
     if [ -z "${THIS}" ] || [ "${THIS}" == 'null' ]; then
-      THIS='{"id":"'${ID}'","date":'${DATE}',"count":0}'
+      THIS='{"id":"'${ID}'","when":'${DATE}',"date":'${NOW}',"count":0,"ago":'${AGO}'}'
       DEVICES=$(echo "${DEVICES}" | jq '.+=['"${THIS}"']')
       TOTAL=0
       LAST=0
@@ -69,18 +73,19 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
       if [ $(jq -r '.yolo2msghub.yolo.mock' ${PAYLOAD}) == 'null' ]; then
         if [ ${DATE} -gt ${LAST} ]; then
           COUNT=$(jq -r '.yolo2msghub.yolo.count' ${PAYLOAD})
+          jq -r '.yolo2msghub.yolo.image' ${PAYLOAD} | base64 --decode > ${0##*/}.$$.${ID}.jpeg
           if [ ${COUNT} -gt 0 ]; then
-            echo "--- INFO $0 $$ -- ${ID} at ${DATE}: person count ${COUNT}" &> /dev/stderr
+            echo "--- INFO $0 $$ -- ${ID} at ${DATE}: ${ENTITY} count ${COUNT}" &> /dev/stderr
             TOTAL=$((${TOTAL}+${COUNT}))
             THIS=$(echo "${THIS}" | jq '.count='${TOTAL})
-            jq -r '.yolo2msghub.yolo.image' ${PAYLOAD} | base64 --decode > ${0##*/}.$$.${ID}.jpeg
             # if [ ! -z $(command -v open) ]; then open ${0##*/}.$$.${ID}.jpeg; fi
           else
-            echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no person" &> /dev/stderr
+            echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no ${ENTITY}" &> /dev/stderr
           fi
           THIS=$(echo "${THIS}" | jq '.date='${DATE})
+          THIS=$(echo "${THIS}" | jq '.ago='${AGO})
           DEVICES=$(echo "${DEVICES}" | jq '(.[]|select(.id=="'${ID}'"))|='"${THIS}")
-          DEVICES=$(echo "${DEVICES}" | jq '.|sort_by(.count)|reverse')
+          DEVICES=$(echo "${DEVICES}" | jq '.|sort_by(.ago)')
         fi
       else
         echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: mock" $(jq -c '.yolo2msghub.yolo.detected' ${PAYLOAD}) &> /dev/stderr
@@ -88,6 +93,6 @@ kafkacat -E -u -C -q -o end -f "%s\n" -b "${BROKER}" \
     else
       echo "+++ WARN $0 $$ -- ${ID} at ${DATE}: no yolo output" &> /dev/stderr
     fi
-    echo "${DEVICES}" | jq -c '.' &> /dev/stderr
+    echo "${DEVICES}" | jq '.' &> /dev/stderr
 done
 rm -f ${0##*/}.$$.*

@@ -168,18 +168,18 @@ fi
 ```
 
 ## Step 3 - Respond to HTTP
-The last section of the `run.sh` script utilizes the `socat` utility to listen on a designated port and respond by invoking the `service.sh` script.  The `LOCALHOST_PORT` environment variable may be specified; if is it undefined or zero-length, the default port `80` is used.
+The last section of the `run.sh` script utilizes the `socat` utility to listen on a designated port and respond by invoking the `service.sh` script.  The `SERVICE_PORT` environment variable may be specified; if is it undefined or zero-length, the default port `80` is used.
 
 ```
 # port
-if [ -z "${LOCALHOST_PORT:-}" ]; then
-  LOCALHOST_PORT=80
+if [ -z "${SERVICE_PORT:-}" ]; then
+  SERVICE_PORT=80
 else
-  echo "+++ WARN: using localhost port ${LOCALHOST_PORT}" &> /dev/stderr
+  echo "+++ WARN: using localhost port ${SERVICE_PORT}" &> /dev/stderr
 fi
 
 # start listening
-socat TCP4-LISTEN:${LOCALHOST_PORT},fork EXEC:service.sh
+socat TCP4-LISTEN:${SERVICE_PORT},fork EXEC:service.sh
 ```
 
 # B. `service.sh`

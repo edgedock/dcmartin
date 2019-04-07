@@ -45,7 +45,6 @@ This container may be run locally using Docker, pushed to a Docker registry, and
 + `YOLO2MSGHUB_PERIOD` - seconds between updates; defaults to `30`
 + `YOLO2MSGHUB_ADMIN_URL` - administrative URL for REStful API
 + `YOLO2MSGHUB_BROKER` - message hub brokers
-+ `LOCALHOST_PORT` - port for access; default **8587**
 + `LOG_LEVEL` - specify level of logging; default `info`; options include (`debug` and `none`). 
 + `DEBUG` - including debugging output; `true` or `false`; default: `false`
 
@@ -1285,7 +1284,7 @@ test.amd64_com.github.dcmartin.open-horizon.yolo2msghub-beta:0.0.11.json
       "org": "dcmartin@us.ibm.com",
       "url": "com.github.dcmartin.open-horizon.yolo2msghub",
       "versionRange": "[0.0.0,INFINITY)",
-      "variables": { "YOLO2MSGHUB_APIKEY": null, "LOCALHOST_PORT": 8587, "LOG_LEVEL": "info", "DEBUG": false }
+      "variables": { "YOLO2MSGHUB_APIKEY": null, "LOG_LEVEL": "info", "DEBUG": false }
     },
     {
       "org": "dcmartin@us.ibm.com",

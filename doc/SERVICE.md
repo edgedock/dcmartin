@@ -172,7 +172,6 @@ This field is an array of variables that may be used to configure the service; v
     { "name": "YOLO2MSGHUB_ADMIN_URL", "label": "administrative URL", "type": "string", "defaultValue": "https://kafka-admin-prod02.messagehub.services.us-south.bluemix.net:443"},
     { "name": "YOLO2MSGHUB_BROKER", "label": "message hub broker list", "type": "string", "defaultValue": "kafka05-prod02.messagehub.services.us-south.bluemix.net:9093,kafka01-prod02.messagehub.services.us-south.bluemix.net:9093,kafka03-prod02.messagehub.services.us-south.bluemix.net:9093,kafka04-prod02.messagehub.services.us-south.bluemix.net:9093,kafka02-prod02.messagehub.services.us-south.bluemix.net:9093" },
     { "name": "YOLO2MSGHUB_PERIOD", "label": "update interval", "type": "int", "defaultValue": "30" },
-    { "name": "LOCALHOST_PORT", "label": "localhost port", "type": "int", "defaultValue": "8587" },
     { "name": "LOG_LEVEL", "label": "specify logging level", "type": "string", "defaultValue": "info" },
     { "name": "DEBUG", "label": "debug on/off", "type": "boolean", "defaultValue": "false" }
   ],
@@ -186,7 +185,7 @@ This field is a dictionary of `services` that are included in the service deploy
     "services": {
       "yolo2msghub": {
         "environment": [
-          "SERVICE_LABEL=yolo2msghub"
+          "SERVICE_LABEL=yolo2msghub","SERVICE_VERSION=0.0.9","SERVICE_PORT=8587"
         ],
         "devices": null,
         "binds": null,
