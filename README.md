@@ -57,7 +57,7 @@ Services include:
 + [`mqtt`][mqtt-service] - MQTT message broker service
 + [`hzncli`][hzncli] - service container with `hzn` command-line-interface installed
 + [`herald`][herald-service] - multi-cast data received from other heralds on local-area-network
-+ [`yolo2msgub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
++ [`yolo2msghub`][yolo2msghub-service] - transmit `yolo`, `hal`, `cpu`, and `wan` information to Kafka
 + [`motion2mqtt`][motion2mqtt-service] - transmit motion detected images to MQTT
 + [`yolo4motion`][yolo4motion-service] - subscribe to MQTT _topics_ from `motion2mqtt`,  recognize entities, and publish results
 + [`mqtt2kafka`][mqtt2kafka-service] - relay MQTT traffic to Kafka
