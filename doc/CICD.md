@@ -240,7 +240,7 @@ make service-publish
 And then verify:
 
 ```
-make serve-verify
+make service-verify
 ```
 
 ## Step 4
