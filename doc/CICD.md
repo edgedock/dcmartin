@@ -423,7 +423,7 @@ branches:
 ```
 
 #### `env`
-This directive indicates the environments which should be created for the job; each environment will be run in parallel up to the limits imposed by TravisCI (n.b. default `5`).  Additional control variables, e.g. `DEBUG=true` may be specified, for example:
+This directive indicates the environments which should be created for the job; each environment will be run in parallel up to the limits imposed by TravisCI (n.b. default `5`).  All supported architectures for all services should be specified.  Additional control variables, e.g. `DEBUG=true` may be specified, for example:
 
 ```
 env:
