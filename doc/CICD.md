@@ -117,6 +117,7 @@ For more information refer to [`MAKEVARS.md`][makevars-md]
 [makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKEVARS.md
 
 <hr>
+
 # 1. Use
 
 ## Step 0 - Install Open Horizon
@@ -297,6 +298,7 @@ For more information on building services, see [`SERVICE.md`][service-md].
 The build process is designed to process changes to the software and take actions, e.g. rebuilding a service container.  To manage change control this process utilizes the `git` command in conjunction with a SaaS (e.g. `github.com`).
 
 <hr>
+
 # &#9888; WARNING
 
 The namespace and version identifiers for Git do not represent the namespaces, identifiers, or versions used by either Docker or Open Horizon.  **To avoid conflicts in identification of containers, services, and patterns multiple Docker registries & namespaces and Open Horizon exchanges & organizations should be utilized.**
@@ -310,6 +312,7 @@ The value may be used to indicate a branch or stage;  for example development (`
 ```
 echo 'beta' > $GD/open-horizon/TAG
 ```
+
 <hr>
 
 ## Step 1
