@@ -511,7 +511,9 @@ based on the following:
 
 [David C Martin][dcmartin] (github@dcmartin.com)
 
+## MAP
 
+![](http://clustrmaps.com/map_v2.png?cl=919191&w=1024&t=n&d=rCz509nZFssTCzPTGmATxaAmIiEXvfR5tQ58XfvQ0Rs&co=ffffff&ct=808080)
 
 [base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
 [base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
