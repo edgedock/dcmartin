@@ -437,10 +437,10 @@ after_success:
 Travis has been configured to build the `open-horizon` repository; any commits to the `master` branch will trigger automated build, test, push, and publish for the services in this repository, should all make targets succeed.
 
 # 5. MarkDown
-To appropriately inform consumers of the repository, status can be indicated by using _badges_.  There are two primary badges used to describe this repository:
+To appropriately inform consumers of the repository status can be indicated by using _badges_.  There are two primary badges used to describe this repository.  **THIS ONLY WORKS FOR PUBLIC REPOSITORIES**
 
 + Travis build status - obtained from travis-ci.org (e.g. `https://travis-ci.org/dcmartin/open-horizon`)
-+ Container statistics - obtained from microbadger.com
++ Container statistics - obtained from hub.docker.com
 
 The badges issued by these services provide information in the form of small icons, e.g. the following icon indicates this repository's build status:
 
