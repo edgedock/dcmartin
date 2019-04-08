@@ -120,7 +120,7 @@ For more information refer to [`MAKEVARS.md`][makevars-md]
 
 # 1. Use
 
-## Step 0 - Install Open Horizon
+## Step 1
 With the assumption that `docker` has already been installed; if not refer to these [instructions][get-docker].
 
 [get-docker]: https://docs.docker.com/install/
@@ -131,10 +131,7 @@ wget -qO - ibm.biz/get-horizon | sudo bash
 ```
 **Note**: only the `hzn` command-line-interface tool is installed for macOS
 
-
-
-## Step 1 - Clone and configure 
-
+## Step 2
 Clone this [repository][repository] into a new directory (n.b. it may also be [forked][forking-repository]):
 
 [forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
@@ -154,7 +151,7 @@ export DOCKER_NAMESPACE=
 export HZN_ORG_ID=
 ```
 
-Use the following instructions (n.b. [automation script][clone-config-script]) to clone and configure this repository:
+Use the following instructions (n.b. [automation script][clone-config-script]) to clone and configure this repository; uses Docker hub as the default registry and the default Open Horizon exchange.
 
 ```
 mkdir -p $GD
@@ -364,22 +361,50 @@ Your branch is up to date with 'origin/master'.
 ```
 
 ## Step 4
-Once a branch has been successfully tested (and approved if submitted through _pull request_), the branch may be merged with the parent.  For example, merging the `beta` branch back into `master`:
+**Merge `beta` branch into `master`**.  Once the branch has been successfully tested (and approved if submitted through _pull request_), the branch may be merged.  For example, merging the `beta` branch back into `master`:
 
 ```
 % git checkout master
 % git pull origin master
 % git merge beta
-% make service-build && make service-test
+% make service-build && make service-test && && make service-publish
+```
+
+## Step 5
+**Test services as pattern.** After services have been published, patterns may be tested on an appropriate node(s), identified in the `TEST_TMP_MACHINES` file; one device per line.
+
+ The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed for testing.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying nodes.
+
+ If the development host is also configured as a node, it may be used to run the pattern test.
+
+```
+cd $GD/yolo2msghub
+echo 'localhost' > TEST_TMP_MACHINES
+make nodes
+make nodes-test
+```
+
+## Step 6
+If tests are successful, the services and patterns may be pushed for "stable" (aka `master`):
+
+```
+% rm ./open-horizon/TAG
+% git checkout master
+% git pull origin master
+% make service-build && make service-publish && make service-verify
+% make make pattern-publish. && make pattern-validate
 ```
 
 [git-branch-merge]: https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
 
+# 6. Automation
+Automation of these steps utilizes the public [Travis-CI][travis-ci] system to run jobs in conjunction with changes to Git.  Please refer to [`TRAVIS.md`][travis-md] for more information.
 
-# 6. Test
-The `yolo2msghub` _service_ is also configured as a _pattern_ that can be deployed to test devices.  The pattern instantiates the `yolo2msgub` service and its four (4) `requiredServices`: {`cpu`,`hal`,`wan`, and `yolo`} on nodes which _register_ for the service.  Please refer to [`PATTERN.md`][pattern-md] for information on creating and deploying patterns.
 
+
+[travis-ci]: http://travis-ci.org/
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/DESIGN.md
+[travis-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TRAVIS.md
 [service-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/SERVICE.md
 [build-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/BUILD.md
 [pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/PATTERN.md

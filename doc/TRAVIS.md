@@ -26,7 +26,7 @@ The complete job lifecycle, including three optional deployment phases and after
 
 A build can be composed of many jobs.
 
-####`addons`
+#### `addons`
 The software requirements for the build process are installed using an `apt` directive, including the additional `sourceline` and `key_url` for Open Horizon (aka `bluehorizon`):
 
 ```
