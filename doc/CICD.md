@@ -452,7 +452,7 @@ The badges issued by these services provide information in the form of small ico
 [![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
 
 ## Container Status
-Information about the container is available, but _only_ after the image has been registered on the site.  Visit [`microbadger.com`](http://microbadger.com), create an account and link to the appropriate containers.  For example, the `cpu` containers are referenced by their Docker registry's namespace and tag:
+Information about the container is available, but _only_ after the image has been registered on the site.  Visit [`microbadger.com`](http://microbadger.com), create an account and link to the appropriate containers.  For example, the `cpu` containers are referenced by their Docker registry's namespace and tag; an addition badge for pulls is provided by [`shields.io`](http://shields.io).
 
 ```
 [![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
@@ -491,54 +491,50 @@ based on the following:
 [David C Martin][dcmartin] (github@dcmartin.com)
 
 
-[travis-ci]: http://travis-ci.org/
-[design-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/DESIGN.md
-[travis-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TRAVIS.md
-[service-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/SERVICE.md
-[build-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/BUILD.md
-[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/PATTERN.md
-[make-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKE.md
-[open-horizon-github]: http://github.com/open-horizon
-[open-horizon-examples-github]: http://github.com/open-horizon/examples
-[get-ubuntu]: https://www.ubuntu.com/download
-[get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
-[gnu-make]: https://www.gnu.org/software/make/
-[socat-intro]: https://medium.com/@copyconstruct/socat-29453e9fc8a6
-[git-basics]: https://gist.github.com/blackfalcon/8428401
-[json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
-[curl-intro]: https://www.maketecheasier.com/introduction-curl/
-[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TERMINOLOGY.md
-[microbadger]: https://microbadger.com/
-[git-pull-request]: https://help.github.com/en/articles/creating-a-pull-request
-[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
-[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
-[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
-[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+
 [base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
 [base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
-[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
-[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
-[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
-[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
-[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
-[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
-[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
-[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
-[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
-[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
-[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
-[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
-[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
-
-[git-branch-merge]: https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
-
-[repository]:  https://github.com/dcmartin/open-horizon
-[open-horizon]: http://github.com/open-horizon
-
-
-
-[github-com]: http://github.com
+[build-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/BUILD.md
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
+[curl-intro]: https://www.maketecheasier.com/introduction-curl/
+[design-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/DESIGN.md
+[docker-hub]: http://hub.docker.com
 [forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
 [get-docker]: https://docs.docker.com/install/
+[get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
+[get-ubuntu]: https://www.ubuntu.com/download
+[git-basics]: https://gist.github.com/blackfalcon/8428401
+[git-branch-merge]: https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+[git-pull-request]: https://help.github.com/en/articles/creating-a-pull-request
+[github-com]: http://github.com
+[gnu-make]: https://www.gnu.org/software/make/
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
+[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
+[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
+[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
+[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
+[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
+[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
+[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
+[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
+[json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
+[make-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKE.md
 [makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKEVARS.md
-[docker-hub]: http://hub.docker.com
+[microbadger]: https://microbadger.com/
+[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
+[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
+[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
+[open-horizon-examples-github]: http://github.com/open-horizon/examples
+[open-horizon-github]: http://github.com/open-horizon
+[open-horizon]: http://github.com/open-horizon
+[pattern-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/PATTERN.md
+[repository]:  https://github.com/dcmartin/open-horizon
+[service-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/SERVICE.md
+[socat-intro]: https://medium.com/@copyconstruct/socat-29453e9fc8a6
+[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TERMINOLOGY.md
+[travis-ci]: http://travis-ci.org/
+[travis-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TRAVIS.md
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
+[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
