@@ -406,10 +406,31 @@ The resulting screen should appear as follows:
 ## Step 3
 The Travis configuration file is stored in the Git repository and is used to control the jobs.  No changes should be required.  The relevant sections for CI/CD process:
 
++ `branch`
++ `env`
 + `addons`
 + `before_script`
 + `script`
 + `after_success`
+
+#### `branch`
+Controls where and when jobs will be executed; the configuration for this repository only executes on the `master` branch.
+
+```
+branches:
+  only:
+    - master
+```
+
+#### `env`
+This directive indicates the environments which should be created for the job; each environment will be run in parallel up to the limits imposed by TravisCI (n.b. default `5`).  Additional control variables, e.g. `DEBUG=true` may be specified, for example:
+
+```
+env:
+  - BUILD_ARCH=amd64
+  - DEBUG=true BUILD_ARCH=arm64
+  - DEBUG=true BUILD_ARCH=arm
+```
 
 #### `addons`
 The software requirements for the build process are installed using an `apt` directive, including the additional `sourceline` and `key_url` for Open Horizon (aka `bluehorizon`).
