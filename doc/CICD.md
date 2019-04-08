@@ -60,6 +60,7 @@ Within the following scenario:
 [git-pull-request]: https://help.github.com/en/articles/creating-a-pull-request
 
 <hr>
+
 ## A. Introduction
 
 The expectations of this process is to automate the development, testing, and deployment processes for edge fabric patterns and their services across a large number of devices.  The primary objective is to:
