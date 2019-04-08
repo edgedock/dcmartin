@@ -16,7 +16,7 @@ It is presumed that the reader is a software engineer with familiarity with the 
 
 Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and definitions.
 
-# &#9989; What Will Be Learned
+# &#10004; What Will Be Learned
 
 The software engineer will learn how to perform the following:
 
@@ -170,7 +170,7 @@ mv -f *.pem ${HZN_ORG_ID}.pem
 
 [clone-config-script]: https://github.com/dcmartin/open-horizon/blob/master/scripts/clone-config.txt
 
-## &#10004; Finished
+## &#9989; Finished
 The resulting `open-horizon/` directory contains all the necessary components to build a set of service, a deployable pattern, and a set of nodes for testing.
 
 ## &#10033; Optional: _alternative registry_
@@ -256,7 +256,7 @@ And then validate:
 make pattern-validate
 ```
 
-## &#10004; Finished
+## &#9989; Finished
 All services and patterns have been published in the Open Horizon exchange and all associated Docker containers have been pushed to the designated registry.
 
 For more information on building services, see [`SERVICE.md`][service-md].
@@ -365,7 +365,7 @@ If tests are successful, the services and patterns may be pushed for "stable" (a
 % make make pattern-publish. && make pattern-validate
 ```
 
-## &#10004; Finished
+## &#9989; Finished
 Services and pattern have been updated in both Docker registry and Open Horizon exchange.
 
 # 4. Automate
@@ -433,8 +433,8 @@ after_success:
   - make publish-service && make pattern-publish
 ```
 
-## &#10004; Finished
-Travis has been configured to build the `open-horizon` repository.
+## &#9989; Finished
+Travis has been configured to build the `open-horizon` repository; any commits to the `master` branch will trigger automated build, test, push, and publish for the services in this repository, should all make targets succeed.
 
 # 5. MarkDown
 To appropriately inform consumers of the repository, status can be indicated by using _badges_.  There are two primary badges used to describe this repository:
