@@ -4,6 +4,9 @@
 
 Visit the IBM Cloud Catalog and select the [containers][ibm-catalog-containers] component.
 
+![icr.io.png](icr.io.png?raw=true "icr.io")
+
+
 [ibm-catalog]: https://cloud.ibm.com/catalog
 [ibm-catalog-containers]: https://cloud.ibm.com/catalog?category=containers
 

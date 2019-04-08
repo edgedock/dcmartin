@@ -3,9 +3,6 @@ This document provides an introduction to the process and tooling utilized in th
 
 Open Horizon edge fabric provides method and apparatus to run multiple Docker containers on edge nodes.  These nodes are LINUX devices running the Docker virtualization engine, the Open Horizon edge fabric client, and registered with an Open Horizon exchange.  The edge fabric enables multiple containers, networks, and physical sensors to be woven into a pattern designed to meet a given need with a set of capabilities.  The only limitation of the fabric are the edge devices' capabilities; for example one device may have a camera attached and another may have a GPU.
 
-[repository]:  https://github.com/dcmartin/open-horizon
-[open-horizon]: http://github.com/open-horizon
-
 <hr>
 
 #  &#10071; Intended Audience
@@ -14,7 +11,7 @@ It is presumed that the reader is a software engineer with familiarity with the 
 + **LINUX** - The free, open-source, UNIX-like, operating system, e.g. [Ubuntu][get-ubuntu] or [Raspbian][get-raspbian]
 + **HTTP** - The HyperText Transfer Protocol and tooling; see [here][curl-intro] and [here][socat-intro]
 + **Git** - Software management -AAS
-+ **JSON** - JavaScript Object Notation and tooling; see [here][json-intro-jq]
++ **JSON** - JavaScript Object Notation and tooling
 + **Make** - and other standard LINUX build tools; see [here][gnu-make]
 
 Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and definitions.
@@ -27,13 +24,13 @@ The software engineer will learn how to perform the following:
  1. Copy, configure, and use a Git repository
  2. Configure for Docker and Open Horizon
 + Build and test services and patterns
- 3. Build, test, and publish  _service_
- 4. Publish and test _pattern_
+ 3. Build, test, and publish  _service_: { `cpu`,`hal`,`wan`,`yolo`,`yolo2msghub` }
+ 4. Publish and test _pattern_: `yolo2msgub`
 + Change management practices
- 5. Setup a development _branch_
+ 5. Setup a _branch_
  7. Update a _service_
  8. Update a _pattern_
- 6. Submit a _pull request_
+ 6. Merge a _branch_
 + Automate build process
  9. Setup, configure, and use  Travis CI
 + Decorate
@@ -47,17 +44,6 @@ Within the following scenario:
 + One (1) Open Horizon exchange with one (1) organization
 + Public github.com, docker.io, travis-ci.org, and [microbadger.com][microbadger]
 + One (1) repository with two (2) branches: "dev" (`beta`) and “stable” (`master`)
-
-[get-ubuntu]: https://www.ubuntu.com/download
-[get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
-[gnu-make]: https://www.gnu.org/software/make/
-[socat-intro]: https://medium.com/@copyconstruct/socat-29453e9fc8a6
-[git-basics]: https://gist.github.com/blackfalcon/8428401
-[json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
-[curl-intro]: https://www.maketecheasier.com/introduction-curl/
-[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TERMINOLOGY.md
-[microbadger]: https://microbadger.com/
-[git-pull-request]: https://help.github.com/en/articles/creating-a-pull-request
 
 <hr>
 
@@ -114,16 +100,12 @@ These files are utilized for the control attributes; they may also be specified 
 
 For more information refer to [`MAKEVARS.md`][makevars-md]
 
-[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKEVARS.md
-
 <hr>
 
 # 1. Use
 
 ## Step 1
 With the assumption that `docker` has already been installed; if not refer to these [instructions][get-docker].
-
-[get-docker]: https://docs.docker.com/install/
 
 ```
 cd $GD/open-horizon
@@ -132,21 +114,20 @@ wget -qO - ibm.biz/get-horizon | sudo bash
 **Note**: only the `hzn` command-line-interface tool is installed for macOS
 
 ## Step 2
-Clone this [repository][repository] into a new directory (n.b. it may also be [forked][forking-repository]):
+Create a [Github][github-com] account; login and create a [fork][forking-repository] of this [repository][repository].
 
-[forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
 
 This repository has the following default build variables which should be changed:
 
++ `GITHUB` - the namespace of the github.com repository, e.g. `dcmartin`
 + `DOCKER_NAMESPACE` - the identifier for the registry; for example, the _userid_ on [hub.docker.com][docker-hub]
 + `HZN_ORG_ID` - organizational identifier in the Open Horizon exchange; for example: `<userid>@cloud.ibm.com`
-
-[docker-hub]: http://hub.docker.com
 
 Set those environment variables (and `GD` for the _Git_ working directory) appropriately:
 
 ```
 export GD=~/gitdir
+export GITHUB=
 export DOCKER_NAMESPACE=
 export HZN_ORG_ID=
 ```
@@ -156,7 +137,7 @@ Use the following instructions (n.b. [automation script][clone-config-script]) t
 ```
 mkdir -p $GD
 cd $GD
-git clone http://github.com/dcmartin/open-horizon
+git clone http://github.com/${GITHUB}/open-horizon
 cd open-horizon
 echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
 echo "${HZN_ORG_ID}" > HZN_ORG_ID
@@ -205,26 +186,6 @@ Two base service containers are provided; one for Alpine with its minimal footpr
 1. [`base-alpine`][base-alpine] - a base service container for Alpine LINUX
 2. [`base-ubuntu`][base-ubuntu] - a base service container for Ubuntu LINUX
 
-[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
-[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
-[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
-[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
-[base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
-[base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
-[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
-[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
-[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
-[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
-[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
-[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
-[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
-[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
-[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
-[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
-[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
-[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
-[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
-
 The `cpu`,`hal`,`wan`, and `mqtt` services are Alpine-based and of minimal size.
 The `yolo` and `yolo2msghub` services are Ubuntu-based to support YOLO/Darknet and Kafka, respectively.
 
@@ -255,13 +216,13 @@ cd $GD/open-horizon
 make service-build
 ```
 
-**Test services for supported architectures.**  The services' containers status outputs are **tested using the `jq` command** and the first uncommented line from the `TEST_JQ_FILTER` file.  Some services require time to initialize; subsequent requests produce complete status.
+**Test services for supported architectures.**  The services' containers status outputs are **tested using the  [`jq`][json-intro-jq] command** and the first uncommented line from the `TEST_JQ_FILTER` file.  Some services require time to initialize; subsequent requests produce complete status.
 
 ```
 make service-test
 ```
 
-## Step 2
+## Step 2 (_optional_)
 Services require their Docker container images to be _pushed_ to the Docker registry.  Once a Docker container has been built, it may be pushed to a registry.  Services typically support more than one architecture.  A single architecture may be pushed with `push-service` or simply `push`.
 
 **Push containers for supported architectures.**
@@ -271,18 +232,27 @@ make service-push
 ```
 
 ## Step 3
-To publish services in the exchange, run the following commands:
+**Publish services in the exchange**.  Requires pushing the local containers and publishing those references into the exchange.
 
 ```
 make service-publish
+```
+And then verify:
+
+```
 make serve-verify
 ```
 
 ## Step 4
-To publish the `yolo2msghub` pattern, run the following commands:
+**Publish the `yolo2msghub` pattern**.  Records the pattern configuration file referencing the services.
 
 ```
 make pattern-publish
+```
+
+And then validate:
+
+```
 make pattern-validate
 ```
 
@@ -395,12 +365,84 @@ If tests are successful, the services and patterns may be pushed for "stable" (a
 % make make pattern-publish. && make pattern-validate
 ```
 
-[git-branch-merge]: https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+## &#10004; Finished
+Services and pattern have been updated in both Docker registry and Open Horizon exchange.
 
-# 6. Automation
+# 4. Automate
 Automation of these steps utilizes the public [Travis-CI][travis-ci] system to run jobs in conjunction with changes to Git.  Please refer to [`TRAVIS.md`][travis-md] for more information.
 
+## Step 1
+Create a [Travis-CI][travis-ci] account; login with github.com credentials.  Enable the fork of this repository.
 
+![travis-repo-enable.png](travis-repo-enable.png?raw=true "travis-repo-enable")
+
+
+## Step 2
+Change settings in Travis to specify the appropriate control variables as environment variables:
+
++ `DOCKER_LOGIN`
++ `DOCKER_NAMESPACE`
++ `DOCKER_PASSWORD`
++ `HZN_EXCHANGE_APIKEY`
++ `HZN_ORG_ID`
+
+The keys required for signing need to be specified in BASE64 encoding; to create the appropriate values, encode the key files:
+
+```
+base64 ./open-horizon/${HZN_ORG_ID}.key > PRIVATE_KEY
+base64 ./open-horizon/${HZN_ORG_ID}.pem > PUBLIC_KEY
+```
+
+And copy and paste those values in the following Travis settings environment variables:
+
++ `PRIVATE_KEY`
++ `PUBLIC_KEY`
+
+The resulting screen should appear as follows:
+
+![travis-settings.png](travis-settings.png?raw=true "travis-settings")
+
+
+## Step 3
+The Travis configuration file is stored in the Git repository and is used to control the jobs.  No changes should be required.  The relevant sections for CI/CD process:
+
++ `addons`
++ `before_script`
++ `script`
++ `after_success`
+
+#### `addons`
+The software requirements for the build process are installed using an `apt` directive, including the additional `sourceline` and `key_url` for Open Horizon (aka `bluehorizon`).
+
+#### `before_script`
+After installation and prior to script execution; check the branch and only set secret environment variables when _not_ processing a pull request.  QEMU emulation is also enabled for non-native jobs.
+
+#### `script`
+This section of the YAML file is the actual job; in this instance build and test the service; note that only one architecture is built per job.
+
+```
+script:
+  - make build-service && make test-service
+```
+
+#### `after_success`
+If the job is successful, these additional command will push and publish the service as well as publish the pattern.  If all the services has not been built successful, pattern publishing will fail.
+
+```
+after_success:
+  - make publish-service && make pattern-publish
+```
+
+## &#10004; Finished
+Travis has been configured to build the `open-horizon` repository.
+
+# Example Travis Screens
+
+### Travis Dashboard View
+![travis-dashboard.png](travis-dashboard.png?raw=true "travis-dashboard")
+
+### Travis Repository View
+![travis-repo.png](travis-repo.png?raw=true "travis-repo")
 
 [travis-ci]: http://travis-ci.org/
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/DESIGN.md
@@ -411,4 +453,45 @@ Automation of these steps utilizes the public [Travis-CI][travis-ci] system to r
 [make-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKE.md
 [open-horizon-github]: http://github.com/open-horizon
 [open-horizon-examples-github]: http://github.com/open-horizon/examples
+[get-ubuntu]: https://www.ubuntu.com/download
+[get-raspbian]: https://www.raspberrypi.org/downloads/raspbian/
+[gnu-make]: https://www.gnu.org/software/make/
+[socat-intro]: https://medium.com/@copyconstruct/socat-29453e9fc8a6
+[git-basics]: https://gist.github.com/blackfalcon/8428401
+[json-intro-jq]: https://medium.com/cameron-nokes/working-with-json-in-bash-using-jq-13d76d307c4
+[curl-intro]: https://www.maketecheasier.com/introduction-curl/
+[terminology-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/TERMINOLOGY.md
+[microbadger]: https://microbadger.com/
+[git-pull-request]: https://help.github.com/en/articles/creating-a-pull-request
+[yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo/README.md
+[hal-service]: https://github.com/dcmartin/open-horizon/tree/master/hal/README.md
+[cpu-service]: https://github.com/dcmartin/open-horizon/tree/master/cpu/README.md
+[wan-service]: https://github.com/dcmartin/open-horizon/tree/master/wan/README.md
+[base-alpine]: https://github.com/dcmartin/open-horizon/tree/master/base-alpine/README.md
+[base-ubuntu]: https://github.com/dcmartin/open-horizon/tree/master/base-ubuntu/README.md
+[hzncli]: https://github.com/dcmartin/open-horizon/tree/master/hzncli/README.md
+[herald-service]: https://github.com/dcmartin/open-horizon/tree/master/herald/README.md
+[mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt/README.md
+[yolo2msghub-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo2msghub/README.md
+[yolo4motion-service]: https://github.com/dcmartin/open-horizon/tree/master/yolo4motion/README.md
+[motion2mqtt-service]: https://github.com/dcmartin/open-horizon/tree/master/motion2mqtt/README.md
+[mqtt2kafka-service]: https://github.com/dcmartin/open-horizon/tree/master/mqtt2kafka/README.md
+[jetson-caffe-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-caffe/README.md
+[jetson-yolo-service]: https://github.com/dcmartin/open-horizon/tree/master/jetson-yolo/README.md
+[jetson-digits]: https://github.com/dcmartin/open-horizon/tree/master/jetson-digits/README.md
+[jetson-jetpack]: https://github.com/dcmartin/open-horizon/tree/master/jetson-jetpack/README.md
+[jetson-cuda]: https://github.com/dcmartin/open-horizon/tree/master/jetson-cuda/README.md
+[jetson-opencv]: https://github.com/dcmartin/open-horizon/tree/master/jetson-opencv/README.md
 
+[git-branch-merge]: https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+
+[repository]:  https://github.com/dcmartin/open-horizon
+[open-horizon]: http://github.com/open-horizon
+
+
+
+[github-com]: http://github.com
+[forking-repository]: https://github.community/t5/Support-Protips/The-difference-between-forking-and-cloning-a-repository/ba-p/1372
+[get-docker]: https://docs.docker.com/install/
+[makevars-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/MAKEVARS.md
+[docker-hub]: http://hub.docker.com
