@@ -42,7 +42,7 @@ Within the following scenario:
 + A single developer
 + One (1) Docker registry with one (1) namespace
 + One (1) Open Horizon exchange with one (1) organization
-+ Public github.com, docker.io, travis-ci.org, and [microbadger.com][microbadger]
++ Public [github.com](http://github.com), [docker.io](http://hub.docker.com), [travis-ci.org](http://travis-ci.org), and [microbadger.com][microbadger]
 + One (1) repository with two (2) branches: "dev" (`beta`) and “stable” (`master`)
 
 <hr>
