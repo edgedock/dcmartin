@@ -20,22 +20,22 @@ Please refer to [`TERMINOLOGY.md`][terminology-md] for important terms and defin
 
 The software engineer will learn how to perform the following:
 
-+ Use this repository
- 1. Copy, configure, and use a Git repository
- 2. Configure for Docker and Open Horizon
-+ Build and test services and patterns
- 3. Build, test, and publish  _service_: { `cpu`,`hal`,`wan`,`yolo`,`yolo2msghub` }
- 4. Publish and test _pattern_: `yolo2msgub`
-+ Change management practices
- 5. Setup a _branch_
- 7. Update a _service_
- 8. Update a _pattern_
- 6. Merge a _branch_
-+ Automate build process
- 9. Setup, configure, and use  Travis CI
-+ Decorate
- 10. Setup Docker container _badging_
-
+1. Use this repository
+ + Copy, configure, and use a Git repository
+ + Configure for Docker and Open Horizon
+2. Build and test services and patterns
+ + Build, test, and publish  _service_: { `cpu`,`hal`,`wan`,`yolo`,`yolo2msghub` }
+ + Publish and test _pattern_: `yolo2msgub`
+3. Change management practices
+ + Setup a _branch_
+ + Update a _service_
+ + Update a _pattern_
+ + Merge a _branch_
+4. Automate build process
+ + Setup, configure, and use  Travis CI
+5. Update repository MarkDown
+ + Add TravisCI build status
+ + Add Docker container status
  
 Within the following scenario:
 
@@ -436,13 +436,60 @@ after_success:
 ## &#10004; Finished
 Travis has been configured to build the `open-horizon` repository.
 
-# Example Travis Screens
+# 5. MarkDown
+To appropriately inform consumers of the repository, status can be indicated by using _badges_.  There are two primary badges used to describe this repository:
+
++ Travis build status - obtained from travis-ci.org (e.g. `https://travis-ci.org/dcmartin/open-horizon`)
++ Container statistics - obtained from microbadger.com
+
+The badges issued by these services provide information in the form of small icons, e.g. the following icon indicates this repository's build status:
+
+## Travis Status
+```
+[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+```
+
+[![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+
+## Container Status
+Information about the container is available, but _only_ after the image has been registered on the site.  Visit [`microbadger.com`](http://microbadger.com), create an account and link to the appropriate containers.  For example, the `cpu` containers are referenced by their Docker registry's namespace and tag:
+
+```
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
+[![](https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu)
+```
+
+[![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
+[![](https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu)
+
+<hr>
+
+# Appendix A - Example Travis Screens
 
 ### Travis Dashboard View
 ![travis-dashboard.png](travis-dashboard.png?raw=true "travis-dashboard")
 
 ### Travis Repository View
 ![travis-repo.png](travis-repo.png?raw=true "travis-repo")
+
+<hr>
+
+# Changelog & Releases
+
+Releases are based on Semantic Versioning, and use the format
+of ``MAJOR.MINOR.PATCH``. In a nutshell, the version will be incremented
+based on the following:
+
+- ``MAJOR``: Incompatible or major changes.
+- ``MINOR``: Backwards-compatible new features and enhancements.
+- ``PATCH``: Backwards-compatible bugfixes and package updates.
+
+## Authors & contributors
+
+[David C Martin][dcmartin] (github@dcmartin.com)
+
 
 [travis-ci]: http://travis-ci.org/
 [design-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/DESIGN.md

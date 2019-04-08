@@ -7,10 +7,7 @@ Provides CPU usage information as micro-service; updates periodically (default `
 ![Supports amd64 Architecture][amd64-shield]
 [![](https://images.microbadger.com/badges/image/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
 [![](https://images.microbadger.com/badges/version/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu "Get your own version badge on microbadger.com")
-[![Docker Pulls][pulls-amd64]][docker-amd64]
-
-[docker-amd64]: https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu
-[pulls-amd64]: https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg
+[![](https://img.shields.io/docker/pulls/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu.svg)](https://hub.docker.com/r/dcmartin/amd64_com.github.dcmartin.open-horizon.cpu)
 
 ![Supports armhf Architecture][arm-shield]
 [![](https://images.microbadger.com/badges/image/dcmartin/arm_com.github.dcmartin.open-horizon.cpu.svg)](https://microbadger.com/images/dcmartin/arm_com.github.dcmartin.open-horizon.cpu "Get your own image badge on microbadger.com")
