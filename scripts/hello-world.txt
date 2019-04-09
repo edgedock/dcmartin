@@ -1,25 +1,24 @@
+GD=~/gitdir
+HZN_ORG_ID=dcmartin@us.ibm.com
+DOCKER_NAMESPACE=dcmartin
+cd $GD/open-horizon
+rm -fr hello
 mkdir hello
 cd hello
 ln -s ../sh .
 ln -s ../service.makefile Makefile 
-cat > Dockerfile << EOF
-FROM ubuntu:bionic
-RUN apt-get update && apt-get install -qq -y socat
-COPY rootfs /
-CMD ["/usr/bin/run.sh"]
-EOF
+echo 'FROM ubuntu:bionic' >> Dockerfile
+echo 'RUN apt-get update && apt-get install -qq -y socat' >> Dockerfile
+echo 'COPY rootfs /' >> Dockerfile
+echo 'CMD ["/usr/bin/run.sh"]' >> Dockerfile
 mkdir -p rootfs/usr/bin
 pushd rootfs/usr/bin
-cat > run.sh << EOF
-#!/bin/sh
-socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
-EOF
-cat > service.sh << EOF
-#!/bin/sh
-echo "HTTP/1.1 200 OK"
-echo
-echo '{"hello":"world"}'
-EOF
+echo '#!/bin/sh' >> run.sh
+echo 'socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh' >> run.sh
+echo '#!/bin/sh' >> service.sh
+echo 'echo "HTTP/1.1 200 OK"' >> service.sh
+echo 'echo' >> service.sh
+echo 'echo "{\"hello\":\"world\"}"' >> service.sh
 chmod 755 run.sh
 chmod 755 service.sh
 popd

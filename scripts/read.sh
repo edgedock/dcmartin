@@ -33,7 +33,7 @@ COMMAND="${LIGHT_BLUE}"
 
 cat "${SCRIPT}" | while read -r; do 
   echo -e -n "${PROMPT}$(hostname) $(date +%T)"' $ '"${COMMAND}"
-  for ((i=0; i<${#REPLY}; i++)); do echo "after 200" | tclsh; printf "${REPLY:$i:1}"; done
+  for ((i=0; i<${#REPLY}; i++)); do echo "after 125" | tclsh; printf "${REPLY:$i:1}"; done
   echo -e "${NC}"
   eval "${REPLY}"
 done
