@@ -8,8 +8,8 @@ branches:
     - master
 env:
   - BUILD_ARCH=amd64
-  - DEBUG=true BUILD_ARCH=arm64
-#  - DEBUG=true BUILD_ARCH=arm
+#  - BUILD_ARCH=arm64
+#  - BUILD_ARCH=arm
 addons:
   apt:
     update: true
