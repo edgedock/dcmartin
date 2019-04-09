@@ -46,8 +46,22 @@ jq -r '.requiredServices|to_entries[]|.value.url' "${SERVICE}.json" | while read
     if [ -z "${VER}" ]; then echo "Error: empty version for required service ${URL}" &> /dev/stderr; exit 1; fi
     ORG=$(jq -r '.requiredServices|to_entries[]|select(.value.url=="'${URL}'").value.org' "${SERVICE}.json" | envsubst)
     if [ -z "${ORG}" ]; then echo "Error: empty org for required service ${URL}" &> /dev/stderr; exit 1; fi
-    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ --ver ${VER} --arch ${ARCH} --org ${ORG} --url ${URL} -u ${HZN_EXCHANGE_USERAUTH}"; fi
-    hzn dev dependency fetch -d ${DIR}/ --ver "${VER}" --arch "${ARCH}" --org "${ORG}" --url "${URL}" -u "${HZN_EXCHANGE_USERAUTH}"
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory: ${DIR}; version: ${VER}; architecture: ${ARCH}; organization: ${ORG}" &> /dev/stderr; fi
+
+    ## check if local service or non
+    if [ "${ORG}" == ${HZN_ORG_ID} ]; then
+      REQDIR="${URL##*.}"
+      if [ ! -z "${TAG}" ]; then REQDIR=$(echo "${REQDIR}" | sed "s/-${TAG}//"); fi
+    fi
+    if [ ! -z "${REQDIR:-}" ] && [ -d "../${REQDIR:-}/horizon" ]; then
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- found directory ${REQDIR}/horizon for ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ -p ../${REQDIR}/horizon -u "${HZN_EXCHANGE_USERAUTH}"" &> /dev/stderr; fi
+      hzn dev dependency fetch -d ${DIR}/ -p "../${REQDIR}/horizon" -u "${HZN_EXCHANGE_USERAUTH}"
+    else
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- retrieving from exchange: ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ --ver ${VER} --arch ${ARCH} --org ${ORG} --url ${URL} -u ${HZN_EXCHANGE_USERAUTH}"; fi
+      hzn dev dependency fetch -d ${DIR}/ --ver "${VER}" --arch "${ARCH}" --org "${ORG}" --url "${URL}" -u "${HZN_EXCHANGE_USERAUTH}"
+    fi
     if [ $? != 0 ]; then
       echo "*** ERROR -- $0 $$ -- dependency ${REPLY} was not fetched; exiting" &> /dev/stderr
       exit 1
