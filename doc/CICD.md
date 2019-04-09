@@ -81,6 +81,9 @@ The CI/CD process is centered around these primary tools accessed **through the 
 + `travis` - release change management
 + `hzn` - Open Horizon command-line-interface
 + `ssh` - Secure Shell 
++ `jq` - JSON query processing command (&#63743; `brew install jq`)
++ `envsubst` - environment variable substitution command (&#63743; `brew install gettext`)
++ `curl` - **curl** is a tool to transfer data from or to a server (see `man curl`)
 
 The CI/CD process requires configuration to operate properly; **relevant JSON configuration files**:
 
@@ -487,12 +490,16 @@ Information about the container is available, but _only_ after the image has bee
 
 <hr>
 
-# Appendix A - Example Travis Screens
+# Appendix A - Example MicroBadger
 
-### Travis Dashboard View
+![microbadger.png](microbadger.png?raw=true "microbadger")
+
+# Appendix B - Example Travis Screens
+
+## B.1 - Travis Dashboard View
 ![travis-dashboard.png](travis-dashboard.png?raw=true "travis-dashboard")
 
-### Travis Repository View
+## B.2 - Travis Repository View
 ![travis-repo.png](travis-repo.png?raw=true "travis-repo")
 
 <hr>
