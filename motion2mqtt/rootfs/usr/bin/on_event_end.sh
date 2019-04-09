@@ -134,10 +134,6 @@ if ($#jpgs) then
     @ seconds = $THIS - $START
     # test for breaking conditions
     if ( $seconds < 0 ) break
-#      rm -f "$jpg"
-#      @ i--
-#      continue
-#    endif
     # add frame to this interval
     set frames = ( "$jpg:t:r" $frames )
     if ( $seconds > $elapsed ) set elapsed = $seconds
@@ -544,6 +540,12 @@ if ($?DEBUG) then
   echo "$0:t $$ -- ${message}" >& /dev/stderr
   if ($?DEBUG_MQTT) motion2mqtt_pub.sh -t "${MOTION_GROUP}/${MOTION_DEVICE}/debug" -m '{"'${MOTION_DEVICE}'":"'$0:t'","pid":'$$',"message":"'"$message"'"}'
 endif
+
+## remove JSON's and JPEG's
+for jpeg in $(jq -r '.images' ${EVENT_JSON}); do
+  rm -f ${dir}/${jpeg}.*
+done
+rm -f "${EVENT_JSON}"
 
 ###
 ### ALL DONE

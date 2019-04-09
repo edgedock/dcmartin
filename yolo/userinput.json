@@ -10,6 +10,7 @@
         "YOLO_CONFIG": "tiny",
         "YOLO_ENTITY": "all",
         "LOG_LEVEL": "info",
+        "WEBCAM_RESOLUTION": "640x480",
         "DEBUG": false
       }
     }

@@ -18,7 +18,9 @@ source /usr/bin/yolo-tools.sh
 hzn_init
 
 ## initialize servive
-service_init $(yolo_init)
+CONFIG=$(echo $(yolo_init) | jq '.resolution="'${WEBCAM_RESOLUTION}'"|.device="'${WEBCAM_DEVICE}'"')
+
+service_init "${CONFIG}"
 
 ## initialize
 OUTPUT_FILE="${TMPDIR}/${0##*/}.${SERVICE_LABEL}.$$.json"
@@ -32,6 +34,9 @@ cd ${DARKNET}
 
 if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- processing images from /dev/video0 every ${YOLO_PERIOD} seconds" &> /dev/stderr; fi
 
+if [ -z "${WEBCAM_DEVICE}" ]; then WEBCAM_DEVICE="/dev/video0"; fi
+if [ -z "${WEBCAM_RESOLUTION}" ]; then WEBCAM_RESOLUTION="384x288"; fi
+
 while true; do
   # when we start
   DATE=$(date +%s)
@@ -39,7 +44,7 @@ while true; do
   # path to image payload
   JPEG_FILE=$(mktemp)
   # capture image payload from /dev/video0
-  fswebcam --device "${YOLO_DEVICE}" --no-banner "${JPEG_FILE}" &> /dev/null
+  fswebcam --resolution "${WEBCAM_RESOLUTION}" --device "${WEBCAM_DEVICE}" --no-banner "${JPEG_FILE}" &> /dev/null
 
   # process image payload into JSON
   if [ -z "${ITERATION:-}" ]; then ITERATION=0; else ITERATION=$((ITERATION+1)); fi
