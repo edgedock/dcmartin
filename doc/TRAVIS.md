@@ -1,4 +1,5 @@
 # `TRAVIS.md` -  [![Build Status](https://travis-ci.org/dcmartin/open-horizon.svg?branch=master)](https://travis-ci.org/dcmartin/open-horizon)
+
 [Travis][travis-ci] provides automated execution of jobs in the continuous integration process.  Status of this repository is indicated by the badge above.  
 
 ## <img src="travis.png" width=48> Travis jobs
