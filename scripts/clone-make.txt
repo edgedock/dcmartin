@@ -1,6 +1,7 @@
-rm -fr ~/gitdir
-mkdir ~/gitdir
-cd ~/gitdir
+GD=~/gitdir
+rm -fr $GD/open-horizon
+mkdir -p $GD
+cd $GD
 git clone http://github.com/dcmartin/open-horizon
-cd open-horizon/
+cd $GD/open-horizon
 make
