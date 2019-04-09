@@ -22,12 +22,12 @@ if [ ! -s "${SERVICE}" ]; then echo "*** ERROR -- $0 $$ -- Cannot locate service
 SERVICE_LABEL=$(jq -r '.label' "${SERVICE}")
 
 ## privileged
-if [ "$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.privileged?==true' "${SERVICE}")" == 'true' ]; then
+if [ "$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.privileged?==true' "${SERVICE}" 2> /dev/null)" == 'true' ]; then
   OPTIONS="${OPTIONS:-}"' --privileged'
 fi
 
 ## environment
-EVARS=$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.environment?' "${SERVICE}")
+EVARS=$(jq '.deployment.services|to_entries[]|select(.key=="'${SERVICE_LABEL}'").value.environment?' "${SERVICE}" 2> /dev/null)
 if [ "${EVARS}" != 'null' ]; then
   OPTIONS="${OPTIONS:-} $(echo "${EVARS}" | jq -r '.[]' | while read -r; do T="-e ${REPLY}"; echo "${T}"; done)"
 fi
@@ -87,12 +87,15 @@ fi
 
 # ports
 if [ $(jq '.ports!=null' ${SERVICE}) == 'true' ]; then
-  PORTS=$(jq -r '.ports?|to_entries[]|.key?' "${SERVICE}" | sed 's|/tcp||')
+  PORTS=$(jq -r '.ports?|to_entries[]|.key?' "${SERVICE}" | sed 's|/tcp||' 2> /dev/null)
   for PS in ${PORTS}; do
     PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'/tcp")|.value' "${SERVICE}")
     if [ -z "${PE}" ]; then PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'")|.value' "${SERVICE}"); fi
     OPTIONS="${OPTIONS:-}"' --publish='"${PE}"':'"${PS}"
   done
+elif [ ! -z "${DOCKER_PORT}" ]; then
+  if [ -z "${SERVICE_PORT}" ]; then SERVICE_PORT=80; fi
+  OPTIONS="${OPTIONS:-}"' --publish='"${DOCKER_PORT}"':'"${SERVICE_PORT}"
 else
  if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- no ports"; fi
 fi

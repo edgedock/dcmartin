@@ -16,16 +16,17 @@ DIR ?= horizon
 TAG ?= $(if $(wildcard ../TAG),$(shell cat ../TAG),)
 
 ## SERVICE
-SERVICE_LABEL = $(shell jq -r '.label' service.json)
+SERVICE_LABEL ?= $(shell jq -r '.label' service.json | envsubst)
+SERVICE_LABEL := $(if $(SERVICE_LABEL),$(SERVICE_LABEL),$(shell pwd -P | sed 's|.*/||'))
 SERVICE_NAME = $(if ${TAG},${SERVICE_LABEL}-${TAG},${SERVICE_LABEL})
-SERVICE_VERSION = $(shell jq -r '.version' service.json)
+SERVICE_VERSION = $(shell jq -r '.version' service.json | envsubst)
 SERVICE_TAG = "${HZN_ORG_ID}/${SERVICE_URL}_${SERVICE_VERSION}_${BUILD_ARCH}"
-SERVICE_PORT = $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||')
-SERVICE_URI := $(shell jq -r '.url' service.json)
+SERVICE_PORT ?= $(shell jq -r '.deployment.services.'${SERVICE_LABEL}'.specific_ports?|first|.HostPort' service.json | sed 's|/tcp||' 2> /dev/null)
+SERVICE_URI := $(shell jq -r '.url' service.json | envsubst)
 SERVICE_URL := $(if $(URL),$(URL).$(SERVICE_NAME),$(if ${TAG},${SERVICE_URI}-${TAG},${SERVICE_URI}))
-SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json)
-SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json)
-SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[]|select(.value!=null).key' build.json)
+SERVICE_REQVARS := $(shell jq -r '.userInput[]|select(.defaultValue==null).name' service.json 2> /dev/null)
+SERVICE_VARIABLES := $(shell jq -r '.userInput[].name' service.json 2> /dev/null)
+SERVICE_ARCH_SUPPORT = $(shell jq -r '.build_from|to_entries[]|select(.value!=null).key' build.json 2> /dev/null)
 
 ## KEYS
 PRIVATE_KEY_FILE := $(if $(wildcard ../${HZN_ORG_ID}*.key),$(wildcard ../${HZN_ORG_ID}*.key),MISSING_PRIVATE_KEY_FILE)
@@ -43,12 +44,12 @@ DOCKER_PASSWORD ?= $(if $(wildcard ../DOCKER_PASSWORD),$(shell cat ../DOCKER_PAS
 DOCKER_PUBLICKEY ?= $(if $(wildcard ../DOCKER_PUBLICKEY),$(shell cat ../DOCKER_PUBLICKEY),$(if $(wildcard ../registry.json),$(shell jq -r '.public' ../registry.json),))
 DOCKER_REPOSITORY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/$(DOCKER_NAMESPACE),$(DOCKER_NAMESPACE))
 DOCKER_SERVER := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),"docker.io")
-DOCKER_CONFIG := $(if $(wildcard ~/.docker/config.json),$(shell jq -r '.auths|to_entries[]|select(.key|test("'$(DOCKER_SERVER)'"))' ~/.docker/config.json),)
+DOCKER_CONFIG := $(if $(wildcard ~/.docker/config.json),$(shell jq -r '.auths|to_entries[]|select(.key|test("'$(DOCKER_SERVER)'"))' ~/.docker/config.json 2> /dev/null),)
 DOCKER_LOGIN ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.value.auth' | base64 --decode | awk -F: '${ print $1 }'),)
 DOCKER_PASSWORD ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.value.auth' | base64 --decode | awk -F: '${ print $2 }'),)
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
 DOCKER_TAG = $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
-DOCKER_PORT = $(shell jq -r '.ports?|to_entries|first|.value?' service.json)
+DOCKER_PORT ?= $(shell jq -r '.ports?|to_entries|first|.value?' service.json 2> /dev/null)
 
 ## BUILD
 BUILD_BASE=$(shell export DOCKER_REGISTRY=$(DOCKER_REGISTRY) DOCKER_NAMESPACE=${DOCKER_NAMESPACE} DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) && jq -r ".build_from.${BUILD_ARCH}" build.json | envsubst)
@@ -152,8 +153,8 @@ test:
 BUILD_OUT = build.${BUILD_ARCH}_${SERVICE_URL}_${SERVICE_VERSION}.out
 
 build: Dockerfile build.json service.json rootfs Makefile
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	@export DOCKER_TAG="${DOCKER_TAG}" && docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > ${BUILD_OUT}
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- $(SERVICE_LABEL) building: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	export DOCKER_TAG="${DOCKER_TAG}" && docker build --build-arg BUILD_REF=$$(git rev-parse --short HEAD) --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") --build-arg BUILD_ARCH="$(BUILD_ARCH)" --build-arg BUILD_FROM="$(BUILD_FROM)" --build-arg BUILD_VERSION="${SERVICE_VERSION}" . -t "$(DOCKER_TAG)" > ${BUILD_OUT}
 
 
 build-service: build
