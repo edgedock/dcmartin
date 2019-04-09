@@ -1,0 +1,30 @@
+mkdir hello
+cd hello
+ln -s ../sh .
+ln -s ../service.makefile Makefile 
+echo 'FROM ubuntu:bionic' > Dockerfile
+echo 'RUN apt-get update && apt-get install -qq -y socat' >> Dockerfile
+echo 'COPY rootfs /' >> Dockerfile
+echo 'CMD ["/usr/bin/run.sh"]' >> Dockerfile
+mkdir -p rootfs/usr/bin
+pushd rootfs/usr/bin
+cat > run.sh << EOF
+#!/bin/sh
+socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
+EOF
+cat > service.sh << EOF
+#!/bin/sh
+echo "HTTP/1.1 200 OK"
+echo
+echo '{"hello":"world"}'
+EOF
+chmod 755 run.sh
+chmod 755 service.sh
+popd
+echo '{"org":"${HZN_ORG_ID}","url":"${URL}","version":"${VER}","arch":"${BUILD_ARCH}"}' > service.json
+echo '{"build_from":{"amd64":"ubuntu:bionic"}}' > build.json
+export URL="${USER}"
+export VER="0.0.1"
+export SERVICE_LABEL="hello"
+export DOCKER_PORT=12345
+make
