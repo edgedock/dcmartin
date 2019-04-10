@@ -192,7 +192,13 @@ Publish pattern for `hello` service.
 ```
 
 ## Step 14
-Register test devices with `hello` pattern.
+Register development host as a test device; multiple devices may be listed, one per line.
+
+```
+% echo 'localhost' > TEST_TMP_MACHINES
+```
+
+And register test device(s) with `hello` pattern:
 
 ```
 % make nodes
