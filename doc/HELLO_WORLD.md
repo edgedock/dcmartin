@@ -8,11 +8,17 @@ In this example a new service, `hello`, will be created, built, and run; demonst
 ## Step 1
 Copy (clone/fork) this repository and configure; please refer to `CICD.md` for more information.
 
+```
+% git clone http://github.com/dcmartin/open-horizon
+% cd open-horizon
+% export HZN_ORG_ID=
+% export DOCKER_NAMESPACE=
+```
+
 ## Step 2
 Create a new directory for the new service `hello`:
 
 ```
-cd $GD
 mkdir hello
 ```
 
@@ -26,15 +32,13 @@ ln -s ../service.makefile Makefile
 ```
 
 ## Step 4
-Create the Dockerfile:
+Create the Dockerfile with the following contents
 
 ```
-cat > Dockerfile << EOF
 FROM ubuntu:bionic
 RUN apt-get update && apt-get install -qq -y socat
 COPY rootfs /
 CMD ["/usr/bin/run.sh"]
-EOF
 ```
 
 ## Step 5
@@ -45,31 +49,44 @@ mkdir -p rootfs/usr/bin
 ```
 
 ## Step 6
-Create `run.sh` and `service.sh` scripts
+Create `run.sh` and `service.sh` scripts in the `rootfs/usr/bin/` directory:
+
+**`run.sh`**
 
 ```
-pushd rootfs/usr/bin
-cat > run.sh << EOF
 #!/bin/sh
 socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
-EOF
-cat > service.sh << EOF
+```
+
+**`service.sh`**
+
+```
 #!/bin/sh
 echo "HTTP/1.1 200 OK"
 echo
 echo '{"hello":"world"}'
-EOF
-chmod 755 run.sh
-chmod 755 service.sh
-popd
+```
+
+Change the permissions to enable execution:
+
+```
+chmod 755 rootfs/usr/bin/run.sh
+chmod 755 rootfs/usr/bin/service.sh
 ```
 
 ## Step 7
-Create `service.json` and `build.json` configuration files:
+Edit `service.json` configuration file to specify organization unique `url` and `version`:
+
+**`service.json`**
 
 ```
-echo '{"org":"${HZN_ORG_ID}","url":"${URL}","version":"${VER}","arch":"${BUILD_ARCH}"}' > service.json
-echo '{"build_from":{"amd64":"ubuntu:bionic"}}' > build.json
+{"org":"${HZN_ORG_ID}","url":"${USER}-${HOST}","version":"0.0.1","arch":"${BUILD_ARCH}"}
+```
+
+**`build.json`**
+
+```
+{"build_from":{"amd64":"ubuntu:bionic"}}
 ```
 
 ## Step 8
@@ -78,8 +95,8 @@ Configure environment for both Docker port on localhost as well as service label
 ```
 export DOCKER_PORT=12345
 export SERVICE_LABEL="hello"
-export URL="${USER}"
-export VER="0.0.1"
+export SERVICE_URL="${USER}"
+export SERVICE_VERSION="0.0.1"
 ```
 
 ## Step 9
@@ -96,4 +113,26 @@ amd64_dcmartin.hello-beta
 {
   "hello": "world"
 }
+```
+
+## Step 10
+Build service, test, and publish for all architectures.
+
+```
+% make service-build && make service-test && make service-publish
+```
+
+## Step 11
+Publish test pattern for `hello` service:
+
+```
+% make pattern-publish
+```
+
+## Step 12
+Register test device for pattern:
+
+```
+% make nodes
+% make nodes-test
 ```
