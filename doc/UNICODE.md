@@ -21,3 +21,14 @@
 # Dartboard: &#127919;  
 # Apple Logo: &#63743;
 # Penguin: &#128039;
+# Exclamation: &#10071; 
+# Flag in Hole: 	&#9971;
+# Helmet with White Cross: 	&#9937;
+# No Entry: 	&#9940;
+# High Voltage Line: 	&#9889;
+# White Medium Star: 	&#11088;
+# Postal Mark Face	&#12320;
+# Trumpet: &#127930;
+# Check Mark: &#10003;
+# Speaker: &#128266;
+# Jigsaw Puzzle: &#129513;
