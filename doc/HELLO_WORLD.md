@@ -32,7 +32,7 @@ ln -s ../service.makefile Makefile
 ```
 
 ## Step 4
-Create the Dockerfile with the following contents
+Create the **`hello/Dockerfile`** with the following contents
 
 ```
 FROM ubuntu:bionic
@@ -51,14 +51,14 @@ mkdir -p rootfs/usr/bin
 ## Step 6
 Create `run.sh` and `service.sh` scripts in the `rootfs/usr/bin/` directory:
 
-**`run.sh`**
+**`hello/rootfs/usr/bin/run.sh`**
 
 ```
 #!/bin/sh
 socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
 ```
 
-**`service.sh`**
+**`hello/rootfs/usr/bin/service.sh`**
 
 ```
 #!/bin/sh
@@ -75,32 +75,41 @@ chmod 755 rootfs/usr/bin/service.sh
 ```
 
 ## Step 7
-Edit `service.json` configuration file to specify organization unique `url` and `version`:
+Edit `service.json` configuration file to specify organization unique `url` and `version`; the variable values will be substituted during the build process.
 
-**`service.json`**
-
-```
-{"org":"${HZN_ORG_ID}","url":"${USER}-${HOST}","version":"0.0.1","arch":"${BUILD_ARCH}"}
-```
-
-**`build.json`**
+**`hello/service.json`**
 
 ```
-{"build_from":{"amd64":"ubuntu:bionic"}}
+{
+  "label":"hello",
+  "org":"${HZN_ORG_ID}",
+  "url":"${USER}_hello_world",
+  "version":"0.0.1",
+  "arch":"${BUILD_ARCH}"
+}
+```
+
+**`hello/build.json`**
+
+```
+{
+  "build_from":{
+    "amd64":"ubuntu:bionic",
+    "arm": "arm32v7/ubuntu:bionic",
+    "arm64": "arm64v8/ubuntu:bionic",
+  }
+}
 ```
 
 ## Step 8
-Configure environment for both Docker port on localhost as well as service label, identifier (`URL`), and version (`VER`):
+Configure environment for both Docker port on localhost as well as service label:
 
 ```
 export DOCKER_PORT=12345
-export SERVICE_LABEL="hello"
-export SERVICE_URL="${USER}"
-export SERVICE_VERSION="0.0.1"
 ```
 
 ## Step 9
-Build, run, and check the service container locally using the default (i.e. `amd64`) architecture.
+Build, run, and check the service container locally using the native (i.e. `amd64`) architecture.
 
 ```
 % make
@@ -116,21 +125,64 @@ amd64_dcmartin.hello-beta
 ```
 
 ## Step 10
-Build service, test, and publish for all architectures.
+Build, test, and if successful, publish service for __all__ architectures.
 
 ```
 % make service-build && make service-test && make service-publish
 ```
 
 ## Step 11
-Publish test pattern for `hello` service:
+Create pattern configuration file to test the `yolo2msghub` service.  The variables will have values substituted during the build process.
+
+**`hello/pattern.json`**
+
+```
+{
+  "label": "hello",
+  "services": [
+    {
+      "serviceUrl": "${SERVICE_URL}",
+      "serviceOrgid": "${HZN_ORG_ID}",
+      "serviceArch": "amd64",
+      "serviceVersions": [
+        {
+          "version": "${SERVICE_VERSION}"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "${SERVICE_URL}",
+      "serviceOrgid": "${HZN_ORG_ID}",
+      "serviceArch": "arm",
+      "serviceVersions": [
+        {
+          "version": "${SERVICE_VERSION}"
+        }
+      ]
+    },
+    {
+      "serviceUrl": "${SERVICE_URL}",
+      "serviceOrgid": "${HZN_ORG_ID}",
+      "serviceArch": "arm64",
+      "serviceVersions": [
+        {
+          "version": "${SERVICE_VERSION}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Step 12
+Publish pattern for `hello` service.
 
 ```
 % make pattern-publish
 ```
 
-## Step 12
-Register test device for pattern:
+## Step 13
+Register test devices with `hello` pattern.
 
 ```
 % make nodes

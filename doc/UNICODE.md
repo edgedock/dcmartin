@@ -32,3 +32,6 @@
 # Check Mark: &#10003;
 # Speaker: &#128266;
 # Jigsaw Puzzle: &#129513;
+#Alarm Clock	&#9200;
+# Stopwatch	&#9201;
+# Timer Clock	&#9202;
