@@ -3,7 +3,17 @@
 ## Introduction
 As with all software systems a simple example is required to on-board new users; this service is that example.
 
-In this example a new service, `hello`, will be created, built, and run; demonstrating the operational Docker container.
+In this example a new service, `hello`, will be created, built, tested, published, and run.
+
+**Using a  &#63743; macOS computer** with the following software installed:
+
++ Open Horizon - the `hzn` command-line-interface (CLI) and (optional) local agent
++ Docker - the `docker` command-line-interface and service
++ `make` - build automation
++ `jq` - JSON query processor
++ `ssh` - secure shell
++ `envsubst` - GNU `gettext` package command for environment variable substitution
++ `curl` - retrieve resources identified by universal resource locators (URL)
 
 Please refer to [`CICD.md`][cicd-md] for more information.
 
@@ -17,45 +27,50 @@ The Open Horizon exchange and Docker registry defaults are utilized.
 
 ### &#9995; Development host as test device
 
-It is expected that the development host has been configured as an Open Horizon node with the `hzn` command-line-interface (CLI) installed.  In addition, to utilize the localhost as a pattern test node, the user must have both `sudo` and `ssh` privileges for the development host.
+It is expected that the development host has been configured as an Open Horizon node with the `hzn` command-line-interface (CLI) and local agent installed.  To utilize the localhost as a pattern test node, the user must have both `sudo` and `ssh` privileges for the development host.
 
 ## Step 1
-Copy IBM Cloud Platform API key file downloaded from [IAM](https://cloud.ibm.com/iam) and set environment variables for Open Horizon organization and Docker namespace:
+Create a new directory, and clone this [repository][repository]
+
+[repository]: http://github.com/dcmartin/open-horizon
+
+```
+mkdir -p ~/gitdir/open-horizon
+cd ~/gitdir/open-horizon
+git clone http://github.com/dcmartin/open-horizon.git .
+```
+
+## Step 2
+Copy the IBM Cloud Platform API key file downloaded from [IAM](https://cloud.ibm.com/iam), and set environment variables for Open Horizon organization and Docker namespace:
 
 ```
 cp ~/Downloads/apiKey.json .
 export HZN_ORG_ID=
 export DOCKER_NAMESPACE=
-```
-
-And run the following commands to clone and configure this repository.
-
-```
-git clone http://github.com/dcmartin/open-horizon
-cd open-horizon
 echo "${HZN_ORG_ID}" > HZN_ORG_ID
 echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
+```
+
+## Step 3
+Create signing keys used when publishing services and patterns.
+
+```
 hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
 mv -f *.key ${HZN_ORG_ID}.key
 mv -f *.pem ${HZN_ORG_ID}.pem
 ```
-## Step 2
-Create a new directory for the new service `hello`:
+
+## Step 4
+Create a new directory for the new service `hello` and link repository scripts (`sh`) and service `makefile` to `hello` directory:
 
 ```
 mkdir hello
-```
-
-## Step 3
-Link repository scripts (`sh`) and service `makefile` to `hello` directory:
-
-```
 cd hello
 ln -s ../sh .
 ln -s ../service.makefile Makefile
 ```
 
-## Step 4
+## Step 5
 Create the **`hello/Dockerfile`** with the following contents
 
 ```
@@ -65,20 +80,17 @@ COPY rootfs /
 CMD ["/usr/bin/run.sh"]
 ```
 
-## Step 5
-Create directory for scripts:
-
+## Step 6
+Create directory `rootfs/usr/bin/`, and scripts `run.sh` & `service.sh`.
 ```
 mkdir -p rootfs/usr/bin
 ```
-
-## Step 6
-Create `run.sh` and `service.sh` scripts in the `rootfs/usr/bin/` directory:
 
 **`hello/rootfs/usr/bin/run.sh`**
 
 ```
 #!/bin/sh
+# listen to port 80 forever, fork a new process executing script /usr/bin/service.sh to return response
 socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
 ```
 
@@ -86,12 +98,13 @@ socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
 
 ```
 #!/bin/sh
+# generate an HTTP response containing a JavaScript Object Notation (JSON) payload
 echo "HTTP/1.1 200 OK"
 echo
 echo '{"hello":"world"}'
 ```
 
-Change the permissions to enable execution:
+Change the scripts' permissions to enable execution:
 
 ```
 chmod 755 rootfs/usr/bin/run.sh
@@ -99,7 +112,7 @@ chmod 755 rootfs/usr/bin/service.sh
 ```
 
 ## Step 7
-Create `service.json` configuration file; specify organization unique `url`; the variable values will be substituted during the build process.
+Create `service.json` configuration file; the variable values will be substituted during the build process.  Specify a value for `url` to replace default below.
 
 **`hello/service.json`**
 
@@ -136,7 +149,7 @@ Create `build.json` configuration file; specify `FROM` targets for Docker `build
 ```
 
 ## Step 9
-Configure environment for both Docker port on localhost:
+Configure environment for to map container service port (`80`) to an open port on the development host:
 
 ```
 export DOCKER_PORT=12345
@@ -159,10 +172,15 @@ amd64_dcmartin.hello-beta
 ```
 
 ## Step 11
-Build, test, and if successful, publish service for __all__ architectures.
+Build all service containers for __all supported architectures__ (n.b. use `build-service` for single architecture).
 
 ```
-% make service-build && make service-test && make service-publish
+% make service-build
+```
+Then test the service for __all supported architectures__; if successful, publish service for all supported architectures.
+
+```
+make service-test && make service-publish
 ```
 
 ## Step 12
@@ -221,36 +239,47 @@ Register development host as a test device; multiple devices may be listed, one 
 ```
 % echo 'localhost' > TEST_TMP_MACHINES
 ```
+Ensure remote access to test devices; copy SSH credentials from the the delopment host to all test devices; for example:
 
-And register test device(s) with `hello` pattern:
+```
+% ssh-copy-id localhost
+```
+
+## Step 15
+Register test device(s) with `hello` pattern:
 
 ```
 % make nodes
 ```
 
-## Step 15
-Inspect nodes until fully configured:
+## Step 16
+Inspect nodes until fully configured; device output is collected from executing the following commands.
+
++ `hzn node list`
++ `hzn agreement list`
++ `hzn service list`
++ `docker ps`
 
 ```
 % make nodes-list
 ```
 
-## Step 16
-Test nodes for correct output:
+## Step 17
+Test nodes for correct output.
 
 ```
 % make nodes-test
 ```
 
-## Step 17
-Clean nodes.
+## Step 18
+Clean nodes; unregister device from Open Horizon and remove all containers and images.
 
 ```
 % make nodes-clean
 ```
 
-## Step 18
-Clean service.
+## Step 19
+Clean service; remove all running containers and images for all architectures from the development host.
 
 ```
 % make service-clean
