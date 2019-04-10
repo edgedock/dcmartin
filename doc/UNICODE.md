@@ -19,3 +19,5 @@
 # Link Symboi: &#128279;
 # Television:  	&#128250;
 # Dartboard: &#127919;  
+# Apple Logo: &#63743;
+# Penguin: &#128039;
