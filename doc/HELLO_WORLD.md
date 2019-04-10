@@ -5,16 +5,40 @@ As with all software systems a simple example is required to on-board new users;
 
 In this example a new service, `hello`, will be created, built, and run; demonstrating the operational Docker container.
 
+Please refer to [`CICD.md`][cicd-md] for more information.
+
+[cicd-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/CICD.md
+
+### &#10071;  Default exchange & registry
+The Open Horizon exchange and Docker registry defaults are utilized.
+
++ `HZN_EXCHANGE_URL` - `http://alpha.edge-fabric.com/v1/`
++ `DOCKER_REGISTRY` - `docker.io`
+
+### &#9995; Development host as test device
+
+It is expected that the development host has been configured as an Open Horizon node with the `hzn` command-line-interface (CLI) installed.  In addition, to utilize the localhost as a pattern test node, the user must have both `sudo` and `ssh` privileges for the development host.
+
 ## Step 1
-Copy (clone/fork) this repository and configure; please refer to `CICD.md` for more information.
+Copy IBM Cloud Platform API key file downloaded from [IAM](https://cloud.ibm.com/iam) and set environment variables for Open Horizon organization and Docker namespace:
 
 ```
-% git clone http://github.com/dcmartin/open-horizon
-% cd open-horizon
-% export HZN_ORG_ID=
-% export DOCKER_NAMESPACE=
+cp ~/Downloads/apiKey.json .
+export HZN_ORG_ID=
+export DOCKER_NAMESPACE=
 ```
 
+And run the following commands to clone and configure this repository.
+
+```
+git clone http://github.com/dcmartin/open-horizon
+cd open-horizon
+echo "${HZN_ORG_ID}" > HZN_ORG_ID
+echo "${DOCKER_NAMESPACE}" > DOCKER_NAMESPACE
+hzn key create ${HZN_ORG_ID} $(whoami)@$(hostname)
+mv -f *.key ${HZN_ORG_ID}.key
+mv -f *.pem ${HZN_ORG_ID}.pem
+```
 ## Step 2
 Create a new directory for the new service `hello`:
 
@@ -84,7 +108,7 @@ Create `service.json` configuration file; specify organization unique `url`; the
   "label":"hello",
   "org":"${HZN_ORG_ID}",
   "url":"${USER}_hello_world",
-  "version":"${SERVICE_VERSION}",
+  "version":"0.0.1",
   "arch":"${BUILD_ARCH}",
   "deployment": {
     "services": {
