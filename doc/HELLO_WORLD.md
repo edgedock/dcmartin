@@ -75,7 +75,7 @@ chmod 755 rootfs/usr/bin/service.sh
 ```
 
 ## Step 7
-Edit `service.json` configuration file to specify organization unique `url` and `version`; the variable values will be substituted during the build process.
+Create `service.json` configuration file; specify organization unique `url`; the variable values will be substituted during the build process.
 
 **`hello/service.json`**
 
@@ -84,10 +84,20 @@ Edit `service.json` configuration file to specify organization unique `url` and 
   "label":"hello",
   "org":"${HZN_ORG_ID}",
   "url":"${USER}_hello_world",
-  "version":"0.0.1",
-  "arch":"${BUILD_ARCH}"
+  "version":"${SERVICE_VERSION}",
+  "arch":"${BUILD_ARCH}",
+  "deployment": {
+    "services": {
+      "hello": {
+        "image": null
+      }
+    }
+  }
 }
 ```
+
+## Step 8
+Create `build.json` configuration file; specify `FROM` targets for Docker `build`.
 
 **`hello/build.json`**
 
@@ -96,19 +106,19 @@ Edit `service.json` configuration file to specify organization unique `url` and 
   "build_from":{
     "amd64":"ubuntu:bionic",
     "arm": "arm32v7/ubuntu:bionic",
-    "arm64": "arm64v8/ubuntu:bionic",
+    "arm64": "arm64v8/ubuntu:bionic"
   }
 }
 ```
 
-## Step 8
-Configure environment for both Docker port on localhost as well as service label:
+## Step 9
+Configure environment for both Docker port on localhost:
 
 ```
 export DOCKER_PORT=12345
 ```
 
-## Step 9
+## Step 10
 Build, run, and check the service container locally using the native (i.e. `amd64`) architecture.
 
 ```
@@ -124,14 +134,14 @@ amd64_dcmartin.hello-beta
 }
 ```
 
-## Step 10
+## Step 11
 Build, test, and if successful, publish service for __all__ architectures.
 
 ```
 % make service-build && make service-test && make service-publish
 ```
 
-## Step 11
+## Step 12
 Create pattern configuration file to test the `yolo2msghub` service.  The variables will have values substituted during the build process.
 
 **`hello/pattern.json`**
@@ -174,17 +184,46 @@ Create pattern configuration file to test the `yolo2msghub` service.  The variab
 }
 ```
 
-## Step 12
+## Step 13
 Publish pattern for `hello` service.
 
 ```
 % make pattern-publish
 ```
 
-## Step 13
+## Step 14
 Register test devices with `hello` pattern.
 
 ```
 % make nodes
+```
+
+## Step 15
+Inspect nodes until fully configured:
+
+```
+% make nodes-list
+```
+
+## Step 16
+Test nodes for correct output:
+
+```
 % make nodes-test
 ```
+
+## Step 17
+Clean nodes.
+
+```
+% make nodes-clean
+```
+
+## Step 18
+Clean service.
+
+```
+% make service-clean
+```
+
+
