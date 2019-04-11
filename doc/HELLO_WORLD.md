@@ -1,4 +1,4 @@
-# `HELLO.md` - The `hello-world` example
+# `HELLO_WORLD.md` - The `hello-world` example
 
 ## Introduction
 As with all software systems a simple example is required to on-board new users; this service is that example.
@@ -29,13 +29,12 @@ The Open Horizon exchange and Docker registry defaults are utilized.
 
 It is expected that the development host has been configured as an Open Horizon node with the `hzn` command-line-interface (CLI) and local agent installed.  To utilize the localhost as a pattern test node, the user must have both `sudo` and `ssh` privileges for the development host.
 
-### &#63743; macOS (see [adding devices](https://test.cloud.ibm.com/docs/edge-fabric?topic=edge-fabric-adding-devices))
+## &#63743; macOS (see [adding devices](https://test.cloud.ibm.com/docs/edge-fabric?topic=edge-fabric-adding-devices))
 
 ```
-wget http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt 
+curl http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt -o horizon-cli.crt
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain horizon-cli.crt
-wget -q -O - http://pkg.bluehorizon.network/macos/
-wget http://pkg.bluehorizon.network/macos/horizon-cli-2.22.6.pkg
+curl http://pkg.bluehorizon.network/macos/horizon-cli-2.22.6.pkg -o horizon-cli-2.22.6.pkg
 sudo installer -pkg horizon-cli-2.22.6.pkg -target /
 ```
 Start Open Horizon, copy SSH credentials to test devices, and check node status.
@@ -233,7 +232,7 @@ Create pattern configuration file to test the `yolo2msghub` service.  The variab
 
 ```
 {
-  "label": "${USER}-hello",
+  "label": "hello-${USER}",
   "services": [
     {
       "serviceUrl": "${SERVICE_URL}",
@@ -274,6 +273,9 @@ Publish pattern for `hello` service.
 
 ```
 % make pattern-publish
+>>> MAKE -- 19:51:13 -- publishing: hello; organization: dcmartin@us.ibm.com; exchange: https://alpha.edge-fabric.com/v1/
+Updating hello in the exchange...
+Storing dcmartin@us.ibm.com.pem with the pattern in the exchange...
 ```
 
 ## Step 14
@@ -293,7 +295,12 @@ Register test device(s) with `hello` pattern:
 
 ```
 % make nodes
-
+>>> MAKE -- 19:51:17 -- registering nodes: localhost
+>>> MAKE -- 19:51:17 -- registering localhost 
++++ WARN -- ./sh/nodereg.sh 41808 -- missing service organization; using dcmartin@us.ibm.com/hello
+--- INFO -- ./sh/nodereg.sh 41808 -- localhost at IP: 127.0.0.1
+--- INFO -- ./sh/nodereg.sh 41808 -- localhost -- configured with dcmartin@us.ibm.com/hello
+--- INFO -- ./sh/nodereg.sh 41808 -- localhost -- version: ; url: 
 ```
 
 ## Step 16
@@ -306,6 +313,13 @@ Inspect nodes until fully configured; device output is collected from executing 
 
 ```
 % make nodes-list
+>>> MAKE -- 19:51:15 -- listing nodes: localhost
+>>> MAKE -- 19:51:15 -- listing localhost
+{"node":"localhost"}
+{"agreements":[{"url":"hello-dcmartin","org":"dcmartin@us.ibm.com","version":"0.0.1","arch":"amd64"}]}
+{"services":["hello-dcmartin"]}
+{"container":"3b0c98f586bb637a4ec7aa939207518ca7ec5c74ae197c375be2180c7bac67b1-hello"}
+{"container":"horizon1"}
 ```
 
 ## Step 17
@@ -313,6 +327,9 @@ Test nodes for correct output.
 
 ```
 % make nodes-test
+>>> MAKE -- 19:51:22 -- testing: hello; node: localhost; port: 81; date: Wed Apr 10 19:51:22 PDT 2019
+ELAPSED: 0
+{"hello":"world"}
 ```
 
 ## Step 18
@@ -328,5 +345,3 @@ Clean service; remove all running containers and images for all architectures fr
 ```
 % make service-clean
 ```
-
-
