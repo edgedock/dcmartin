@@ -1,5 +1,11 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT FIXES PATTERN SPECIFICATIONS WHEN TAG IS SPECIFIED
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+
 # where
 if [ -z "${1}" ]; then DIR="horizon"; else DIR="${1}"; fi
 if [ ! -d "${DIR}" ]; then

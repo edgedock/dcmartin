@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT CHECKS FOR ENVIRONMENT VARIABLE SPECIFIED AS FILES
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
 
 # args
 if [ ! -z "${1}" ]; then DIR="${1}"; else DIR="horizon"; if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory unspecified; default: ${DIR}" &> /dev/stderr; fi; fi

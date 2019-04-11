@@ -1,5 +1,11 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES EXECUTION OF SERVICE CONTAINERS LOCALLY
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+
 # name
 if [ -n "${1}" ]; then 
   DOCKER_NAME="${1}"

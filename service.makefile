@@ -98,6 +98,7 @@ ${DIR}: service.json userinput.json $(APIKEY)
 #	@export TAG=${TAG} HZN_ORG_ID=${HZN_ORG_ID} SERVICE_LABEL=${SERVICE_LABEL} SERVICE_VERSION=${SERVICE_VERSION} SERVICE_URL=${SERVICE_URL} && ./sh/fixpattern.sh ${DIR}
 
 depend: $(APIKEY) ${DIR}
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- fetching dependencies; service: ${SERVICE_LABEL}; dir: ${DIR}""${NC}" &> /dev/stderr
 	@export HZN_ORG_ID=${HZN_ORG_ID} HZN_EXCHANGE_URL=${HEU} HZN_EXCHANGE_USERAUTH=${HZN_ORG_ID}/iamapikey:$(shell cat $(APIKEY)) TAG=${TAG} && ./sh/mkdepend.sh ${DIR}
 
 ##
@@ -114,7 +115,7 @@ run: remove stop-service
 
 remove:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container named: ${DOCKER_NAME}""${NC}" &> /dev/stderr
-	-@docker rm -f $(DOCKER_NAME) &> /dev/null || :
+	-@docker rm -f $(DOCKER_NAME) &> /dev/null
 
 check:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking container: ${DOCKER_TAG}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
@@ -188,7 +189,7 @@ service-stop:
 
 stop-service: 
 	-@if [ -d "${DIR}" ]; then export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
-	@$(MAKE) DOCKER_NAME=$(DOCKER_NAME) stop
+	-@$(MAKE) DOCKER_NAME=$(DOCKER_NAME) stop
 
 stop:
 	@docker stop "${DOCKER_NAME}"
@@ -197,7 +198,7 @@ stop:
 ## test
 
 service-test:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" test-service; \
 	done
