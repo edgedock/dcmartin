@@ -88,7 +88,7 @@ node_update()
     configuring)
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
-      ssh ${machine} 'hzn eventlog list 2> /dev/stderr' | jq -c '.[]'
+      ssh ${machine} 'hzn eventlog list 2> /dev/stderr' | jq -c '.[]?'
       node_unregister ${machine}
       sleep 10
       ;;
@@ -101,8 +101,8 @@ node_update()
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- configured with ${pattern}" &> /dev/stderr
       if [ "${SERVICE_NAME}" == "${pattern}" ]; then
-        URL=$(ssh ${machine} hzn service list | jq -r '.[].url' | while read; do if [ "${REPLY##*.}" == "${pattern##*/}" ]; then echo "${REPLY}"; fi; done)
-        VER=$(ssh ${machine} hzn service list | jq -r '.[]|select(.url=="'${URL}'").version')
+        URL=$(ssh ${machine} hzn service list | jq -r '.[]?.url' | while read; do if [ "${REPLY##*.}" == "${pattern##*/}" ]; then echo "${REPLY}"; fi; done)
+        VER=$(ssh ${machine} hzn service list | jq -r '.[]?|select(.url=="'${URL}'").version' 2> /dev/null)
         echo "--- INFO -- $0 $$ -- ${machine} -- version: ${VER}; url: ${URL}" &> /dev/stderr
       else
 	node_unregister ${machine}

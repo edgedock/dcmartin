@@ -1,3 +1,4 @@
+#!/bin/bash
 GD=~/gitdir
 HZN_ORG_ID=dcmartin@us.ibm.com
 DOCKER_NAMESPACE=dcmartin
@@ -14,7 +15,7 @@ echo 'CMD ["/usr/bin/run.sh"]' >> Dockerfile
 mkdir -p rootfs/usr/bin
 pushd rootfs/usr/bin
 echo '#!/bin/sh' >> run.sh
-echo 'socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh' >> run.sh
+echo 'socat TCP4-LISTEN:81,fork EXEC:/usr/bin/service.sh' >> run.sh
 echo '#!/bin/sh' >> service.sh
 echo 'echo "HTTP/1.1 200 OK"' >> service.sh
 echo 'echo' >> service.sh
@@ -22,14 +23,15 @@ echo 'echo "{\"hello\":\"world\"}"' >> service.sh
 chmod 755 run.sh
 chmod 755 service.sh
 popd
-echo '{"label":"hello","org":"${HZN_ORG_ID}","url":"${SERVICE_URL}","version":"${SERVICE_VERSION}","arch":"${BUILD_ARCH}","deployment":{"services":{"hello":{"image":null}}}}' ' > service.json
+echo '{"label":"hello","org":"${HZN_ORG_ID}","url":"${USER}-hello","version":"0.0.1","arch":"${BUILD_ARCH}","sharable":"singleton","deployment":{"services":{"hello":{"image":null,"specific_ports":[{"HostPort":"81:81/tcp","HostIP":"0.0.0.0"}]}}}}' > service.json
 echo '{"build_from":{"amd64":"ubuntu:bionic","arm":"arm32v7/ubuntu:bionic","arm64":"arm64v8/ubuntu:bionic"}}' > build.json
+echo '{"services":[{"org":"${HZN_ORG_ID}","url":"${SERVICE_URL}","versionRange":"[0.0.0,INFINITY)","variables":{}}]}' > userinput.json
+echo '{"label":"hello","services":[{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"amd64","serviceVersions":[{"version":"${SERVICE_VERSION}"}]},{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"arm","serviceVersions":[{"version":"${SERVICE_VERSION}"}]},{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"arm64","serviceVersions":[{"version":"${SERVICE_VERSION}"}]}]}' > pattern.json
 export DOCKER_PORT=12345
 make
 make service-build
 make service-test
 make service-publish
-echo '{"label":"hello","services":[{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"amd64","serviceVersions":[{"version":"${SERVICE_VERSION}"}]},{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"arm","serviceVersions":[{"version":"${SERVICE_VERSION}"}]},{"serviceUrl":"${SERVICE_URL}","serviceOrgid":"${HZN_ORG_ID}","serviceArch":"arm64","serviceVersions":[{"version":"${SERVICE_VERSION}"}]}]}' > pattern.json
 make pattern-publish
 make nodes-list
 make nodes
