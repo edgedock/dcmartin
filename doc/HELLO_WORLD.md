@@ -1,4 +1,4 @@
-# `HELLO.md` - The `hello-world` example
+# `HELLO_WORLD.md` - The `hello-world` example
 
 ## Introduction
 As with all software systems a simple example is required to on-board new users; this service is that example.
@@ -32,10 +32,9 @@ It is expected that the development host has been configured as an Open Horizon 
 ## &#63743; macOS (see [adding devices](https://test.cloud.ibm.com/docs/edge-fabric?topic=edge-fabric-adding-devices))
 
 ```
-wget http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt 
+curl http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt -o horizon-cli.crt
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain horizon-cli.crt
-wget -q -O - http://pkg.bluehorizon.network/macos/
-wget http://pkg.bluehorizon.network/macos/horizon-cli-2.22.6.pkg
+curl http://pkg.bluehorizon.network/macos/horizon-cli-2.22.6.pkg -o horizon-cli-2.22.6.pkg
 sudo installer -pkg horizon-cli-2.22.6.pkg -target /
 ```
 Start Open Horizon, copy SSH credentials to test devices, and check node status.
