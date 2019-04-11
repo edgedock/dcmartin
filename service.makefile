@@ -49,7 +49,7 @@ DOCKER_LOGIN ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.va
 DOCKER_PASSWORD ?= $(if $(DOCKER_CONFIG),$(shell echo $(DOCKER_CONFIG) | jq -r '.value.auth' | base64 --decode | awk -F: '${ print $2 }'),)
 DOCKER_NAME = $(BUILD_ARCH)_$(SERVICE_URL)
 DOCKER_TAG := $(DOCKER_REPOSITORY)/$(DOCKER_NAME):$(SERVICE_VERSION)
-DOCKER_PORT ?= $(shell jq -r '.ports?|to_entries|first|.value?' service.json 2> /dev/null)
+DOCKER_PORT ?= $(shell export VAL=$(jq -r '.ports?|to_entries|first|.value?' service.json 2> /dev/null) && if [ -z "${VAL}" ]; then VAL=12345; fi && echo "${VAL}")
 
 ## BUILD
 BUILD_BASE=$(shell export DOCKER_REGISTRY=$(DOCKER_REGISTRY) DOCKER_NAMESPACE=${DOCKER_NAMESPACE} DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) && jq -r ".build_from.${BUILD_ARCH}" build.json | envsubst)
@@ -60,7 +60,7 @@ BUILD_TAG=$(shell echo $(BUILD_BASE) | sed "s|.*/[^:]*:\(.*\)|\1|")
 BUILD_FROM=$(if ${TAG},$(if ${SAME_ORG},${BUILD_ORG}/${BUILD_PKG}-${TAG}:${BUILD_TAG},${BUILD_BASE}),${BUILD_BASE})
 
 ## TEST
-TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell egrep -v '^\#' TEST_JQ_FILTER | head -1),".test=.")
+TEST_JQ_FILTER ?= $(if $(wildcard TEST_JQ_FILTER),$(shell egrep -v '^\#' TEST_JQ_FILTER | head -1),".")
 TEST_NODE_FILTER ?= $(if $(wildcard TEST_NODE_FILTER),$(shell egrep -v '^\#' TEST_NODE_FILTER | head -1),".test=.")
 TEST_NODE_TIMEOUT = 10
 # temporary
@@ -112,7 +112,7 @@ stop:
 
 run: remove service-stop
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${DOCKER_TAG}; name: ${DOCKER_NAME}""${NC}" &> /dev/stderr
-	@./sh/docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
+	@export DOCKER_PORT=$(DOCKER_PORT) SERVICE_PORT=$(SERVICE_PORT) && ./sh/docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 	@sleep 2
 
 remove:
