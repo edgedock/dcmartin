@@ -25,9 +25,33 @@ The Open Horizon exchange and Docker registry defaults are utilized.
 + `HZN_EXCHANGE_URL` - `http://alpha.edge-fabric.com/v1/`
 + `DOCKER_REGISTRY` - `docker.io`
 
-### &#9995; Development host as test device
+### &#9995; Development host
 
 It is expected that the development host has been configured as an Open Horizon node with the `hzn` command-line-interface (CLI) and local agent installed.  To utilize the localhost as a pattern test node, the user must have both `sudo` and `ssh` privileges for the development host.
+
+### &#63743; macOS (see [adding devices](https://test.cloud.ibm.com/docs/edge-fabric?topic=edge-fabric-adding-devices))
+
+```
+wget http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt 
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain horizon-cli.crt
+wget -q -O - http://pkg.bluehorizon.network/macos/
+wget http://pkg.bluehorizon.network/macos/horizon-cli-2.22.6.pkg
+sudo installer -pkg horizon-cli-2.22.6.pkg -target /
+```
+Start Open Horizon, copy SSH credentials to test devices, and check node status.
+
+```
+horizon-container start
+ssh-copy-id localhost
+ssh localhost hzn node list
+```
+
+Create a symbolic links from `/usr/bin` to `/usr/local/bin` to enable remote access to `hzn` and `docker`:
+
+```
+sudo ln -s /usr/local/bin/hzn /usr/bin
+sudo ln -s /usr/local/bin/docker /usr/bin
+```
 
 ## Step 1
 Create a new directory, and clone this [repository][repository]
@@ -90,8 +114,8 @@ mkdir -p rootfs/usr/bin
 
 ```
 #!/bin/sh
-# listen to port 80 forever, fork a new process executing script /usr/bin/service.sh to return response
-socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh
+# listen to port 81 forever, fork a new process executing script /usr/bin/service.sh to return response
+socat TCP4-LISTEN:81,fork EXEC:/usr/bin/service.sh
 ```
 
 **`hello/rootfs/usr/bin/service.sh`**
@@ -118,18 +142,37 @@ Create `service.json` configuration file; the variable values will be substitute
 
 ```
 {
-  "label":"hello",
-  "org":"${HZN_ORG_ID}",
-  "url":"${USER}_hello_world",
-  "version":"0.0.1",
-  "arch":"${BUILD_ARCH}",
+  "label": "hello",
+  "org": "${HZN_ORG_ID}",
+  "url": "hello-${USER}",
+  "version": "0.0.1",
+  "arch": "${BUILD_ARCH}",
+  "sharable": "singleton",
   "deployment": {
     "services": {
       "hello": {
-        "image": null
+        "image": null,
+        "specific_ports": [ { "HostPort": "81:81/tcp", "HostIP": "0.0.0.0" }]
       }
     }
   }
+}
+```
+
+Create `userinput.json` configuration file; this file will be used for testing.
+
+**`userinput.json`**
+
+```
+{
+  "services": [
+    {
+      "org": "${HZN_ORG_ID}",
+      "url": "${SERVICE_URL}",
+      "versionRange": "[0.0.0,INFINITY)",
+      "variables": {}
+    }
+  ]
 }
 ```
 
@@ -149,7 +192,7 @@ Create `build.json` configuration file; specify `FROM` targets for Docker `build
 ```
 
 ## Step 9
-Configure environment for to map container service port (`80`) to an open port on the development host:
+Configure environment for to map container service port (`81`) to an open port on the development host:
 
 ```
 export DOCKER_PORT=12345
@@ -190,7 +233,7 @@ Create pattern configuration file to test the `yolo2msghub` service.  The variab
 
 ```
 {
-  "label": "hello",
+  "label": "${USER}-hello",
   "services": [
     {
       "serviceUrl": "${SERVICE_URL}",
@@ -239,7 +282,7 @@ Register development host as a test device; multiple devices may be listed, one 
 ```
 % echo 'localhost' > TEST_TMP_MACHINES
 ```
-Ensure remote access to test devices; copy SSH credentials from the the delopment host to all test devices; for example:
+Ensure remote access to test devices; copy SSH credentials from the the development host to all test devices; for example:
 
 ```
 % ssh-copy-id localhost
@@ -250,6 +293,7 @@ Register test device(s) with `hello` pattern:
 
 ```
 % make nodes
+
 ```
 
 ## Step 16
