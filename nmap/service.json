@@ -1,0 +1,21 @@
+{
+  "label": "nmap",
+  "org": "${HZN_ORG_ID}",
+  "url": "nmap",
+  "version": "0.0.1",
+  "arch": "${BUILD_ARCH}",
+  "sharable": "singleton",
+  "deployment": {
+    "services": {
+      "hello": {
+        "image": null,
+        "specific_ports": [
+          {
+            "HostPort": "81:81/tcp",
+            "HostIP": "0.0.0.0"
+          }
+        ]
+      }
+    }
+  }
+}
