@@ -107,17 +107,14 @@ depend: $(APIKEY) ${DIR}
 logs:
 	@docker logs -f "${DOCKER_NAME}"
 
-stop:
-	@docker stop "${DOCKER_NAME}"
-
-run: remove service-stop
+run: remove stop-service
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- running container: ${DOCKER_TAG}; name: ${DOCKER_NAME}""${NC}" &> /dev/stderr
 	@export DOCKER_PORT=$(DOCKER_PORT) SERVICE_PORT=$(SERVICE_PORT) && ./sh/docker-run.sh "$(DOCKER_NAME)" "$(DOCKER_TAG)"
 	@sleep 2
 
 remove:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- removing container named: ${DOCKER_NAME}""${NC}" &> /dev/stderr
-	-@docker rm -f $(DOCKER_NAME) 2> /dev/null || :
+	-@docker rm -f $(DOCKER_NAME) &> /dev/null || :
 
 check:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- checking container: ${DOCKER_TAG}; URL: http://localhost:${DOCKER_PORT}""${NC}" &> /dev/stderr
@@ -140,10 +137,6 @@ push: build login
 
 TEST_RESULT = ./test.${BUILD_ARCH}_${SERVICE_URL}_${SERVICE_VERSION}.out
 TEST_OUTPUT = ./test.${BUILD_ARCH}_${SERVICE_URL}_${SERVICE_VERSION}.json
-
-test:
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${DOCKER_TAG}""${NC}" &> /dev/stderr
-	./sh/test.sh "${DOCKER_TAG}"
 
 ##
 ## SERVICES
@@ -180,43 +173,68 @@ service-push:
 
 ## start & stop
 
-service-start: remove service-stop depend # $(SERVICE_REQVARS) 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- starting service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
+service-start: start-service
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- started service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
+
+start-service: remove stop-service depend
 	@./sh/checkvars.sh ${DIR}
 	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service verify -d ${DIR}
 	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service start -S -d ${DIR}
 
-service-stop: 
+start:
+
+service-stop:
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- stopped service: ${SERVICE_NAME}; directory: $(DIR)/""${NC}" &> /dev/stderr
+
+stop-service: 
 	-@if [ -d "${DIR}" ]; then export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn dev service stop -d ${DIR}; fi
+	@$(MAKE) DOCKER_NAME=$(DOCKER_NAME) stop
+
+stop:
+	@docker stop "${DOCKER_NAME}"
+
 	
 ## test
-
-test-service: service-start
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: $(BUILD_ARCH)""${NC}" &> /dev/stderr
-	-@$(MAKE) test > $(TEST_RESULT)
-	-@${MAKE} service-stop
 
 service-test:
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- pushing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" test-service; \
 	done
+
+test-service: start-service
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing service: ${SERVICE_NAME}; version: ${SERVICE_VERSION}; arch: $(BUILD_ARCH)""${NC}" &> /dev/stderr
+	-@$(MAKE) test > $(TEST_RESULT)
+	-@${MAKE} stop-service
+
+test:
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- testing container: ${DOCKER_TAG}""${NC}" &> /dev/stderr
+	@./sh/test.sh "${DOCKER_TAG}"
  
 ## publish & verify
 
-publish-service: ${DIR} $(APIKEY) $(KEYS)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing service: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
-	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && if [ ! -z "$(DOCKER_PUBLICKEY)" ]; then ARGS="-r $(DOCKER_REGISTRY):iamapikey:$(DOCKER_PUBLICKEY)"; fi && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) $${ARGS:-}
-
 service-publish: 
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-publish: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- publishing service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
 	@for arch in $(SERVICE_ARCH_SUPPORT); do \
 	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" publish-service; \
 	done
 
-service-verify: $(APIKEY) $(KEYS)
-	@echo "${MC}>>> MAKE --" $$(date +%T) "-- service-verify: $(SERVICE_NAME); organization: ${HZN_ORG_ID}""${NC}" &> /dev/stderr
-	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange service list -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) | jq '.|to_entries[]|select(.value=="'${SERVICE_TAG}'")!=null'
+publish-service: publish
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- published service: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
+
+publish: ${DIR} $(APIKEY) $(KEYS)
+	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && if [ ! -z "$(DOCKER_PUBLICKEY)" ]; then ARGS="-r $(DOCKER_REGISTRY):iamapikey:$(DOCKER_PUBLICKEY)"; fi && hzn exchange service publish  -k ${PRIVATE_KEY_FILE} -K ${PUBLIC_KEY_FILE} -f ${DIR}/service.definition.json -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) $${ARGS:-}
+
+service-verify: 
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- verifying service: ${SERVICE_NAME}; architectures: ${SERVICE_ARCH_SUPPORT}""${NC}" &> /dev/stderr
+	@for arch in $(SERVICE_ARCH_SUPPORT); do \
+	  $(MAKE) TAG=$(TAG) HZN_ORG_ID=$(HZN_ORG_ID) DOCKER_REPOSITORY=$(DOCKER_REPOSITORY) BUILD_ARCH="$${arch}" verify-service; \
+	done
+
+verify-service: verify
+	@echo "${MC}>>> MAKE --" $$(date +%T) "-- verified service: $(SERVICE_NAME); architecture: ${BUILD_ARCH}""${NC}" &> /dev/stderr
+
+verify:$(APIKEY) $(KEYS)
 	@export HZN_ORG_ID=$(HZN_ORG_ID) HZN_EXCHANGE_URL=${HEU} && hzn exchange service verify --public-key-file ${PUBLIC_KEY_FILE} -o ${HZN_ORG_ID} -u iamapikey:$(shell cat $(APIKEY)) "${SERVICE_TAG}"
 
 ## clean local & exchange
@@ -310,7 +328,7 @@ nodes-purge: nodes-undo nodes-clean
 ## CLEANUP
 ##
 
-clean: remove service-stop
+clean: remove stop-service
 	@echo "${MC}>>> MAKE --" $$(date +%T) "-- cleaning: ${SERVICE_NAME}; tag: ${DOCKER_TAG}""${NC}" &> /dev/stderr
 	@rm -fr ${DIR} check.json build.*.out test.*.out test.*.json test.*.jpeg make.out
 	-@docker rmi $(DOCKER_TAG) 2> /dev/null || :
@@ -323,7 +341,7 @@ distclean: service-clean
 ## BOOKKEEPING
 ##
 
-.PHONY: default all build run check test push service-start service-stop service-test test-service service-publish publish-service service-verify $(TEST_NODE_NAMES) clean distclean depend 
+.PHONY: default all build run check test push start-service stop-service service-start service-stop service-test test-service service-publish publish-service service-verify $(TEST_NODE_NAMES) clean distclean depend 
 
 ##
 ## COLORS
