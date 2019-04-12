@@ -1,5 +1,17 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES AUTOMATED NODE REGISTRATION
+###
+### REQUIRES UTILIZATION OF SSH AND HZN CLI
+###
+### CONSUMES THE FOLLOWING ENVIRONMENT VARIABLES:
+###
+### + HZN_EXCHANGE_URL
+### + HZN_ORG_ID
+### + HZN_EXCHANGE_APIKEY
+###
+
 DEBUG=true
 
 node_alive()
@@ -39,11 +51,33 @@ node_purge()
 {
   machine=${1}
   node_unregister ${machine}
-  echo "--- INFO -- $0 $$ -- purging ${machine}" &> /dev/stderr
-  ssh ${machine} 'sudo apt purge -y bluehorizon horizon horizon-cli' &> /dev/null
+  if [ $(node_is_debian ${machine}) == 'true' ]; then
+    echo "--- INFO -- $0 $$ -- purging ${machine}" &> /dev/stderr
+    ssh ${machine} 'sudo apt purge -y bluehorizon horizon horizon-cli' &> /dev/null
+  else
+    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- ${1} - non-DEBIAN; purge manually" &> /dev/stderr; fi
+  fi
+}
+
+node_is_debian()
+{
+  result='false'
+  debian=$(ssh ${1} 'lsb_release &> /dev/null && echo $?')
+  if [ ! -z "${debian}" ] && [ "${debian}" == '0' ]; then result='true'; fi
+  echo "${result}"
 }
 
 node_install()
+{
+  if [ $(node_is_debian ${1}) == 'true' ]; then
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${1} - DEBIAN" &> /dev/stderr; fi
+    node_aptget ${1}
+  else
+    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- ${1} - non-DEBIAN; install manually" &> /dev/stderr; fi
+  fi
+}
+
+node_aptget()
 {
   machine=${1}
   echo "--- INFO -- $0 $$ -- installing ${machine}" &> /dev/stderr
@@ -88,7 +122,7 @@ node_update()
     configuring)
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- ${state} ${pattern}" &> /dev/stderr
-      ssh ${machine} 'hzn eventlog list 2> /dev/stderr' | jq -c '.[]'
+      ssh ${machine} 'hzn eventlog list 2> /dev/stderr' | jq -c '.[]?'
       node_unregister ${machine}
       sleep 10
       ;;
@@ -101,8 +135,8 @@ node_update()
       pattern=$(node_status ${machine} | jq -r '.pattern')
       echo "--- INFO -- $0 $$ -- ${machine} -- configured with ${pattern}" &> /dev/stderr
       if [ "${SERVICE_NAME}" == "${pattern}" ]; then
-        URL=$(ssh ${machine} hzn service list | jq -r '.[].url' | while read; do if [ "${REPLY##*.}" == "${pattern##*/}" ]; then echo "${REPLY}"; fi; done)
-        VER=$(ssh ${machine} hzn service list | jq -r '.[]|select(.url=="'${URL}'").version')
+        URL=$(ssh ${machine} hzn service list | jq -r '.[]?.url' | while read; do if [ "${REPLY##*.}" == "${pattern##*/}" ]; then echo "${REPLY}"; fi; done)
+        VER=$(ssh ${machine} hzn service list | jq -r '.[]?|select(.url=="'${URL}'").version' 2> /dev/null)
         echo "--- INFO -- $0 $$ -- ${machine} -- version: ${VER}; url: ${URL}" &> /dev/stderr
       else
 	node_unregister ${machine}

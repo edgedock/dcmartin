@@ -1,5 +1,11 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES EXECUTION OF SERVICE CONTAINERS LOCALLY
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+
 # name
 if [ -n "${1}" ]; then 
   DOCKER_NAME="${1}"
@@ -18,7 +24,7 @@ fi
 
 ## configuration
 if [ -z "${SERVICE:-}" ]; then SERVICE="service.json"; fi
-if [ ! -s "${SERVICE}" ]; then echo "*** ERROR -- $0 $$ -- Cannot locate service configuration ${SERVICE}; exiting"; exit 1; fi
+if [ ! -s "${SERVICE}" ]; then echo "*** ERROR -- $0 $$ -- Cannot locate service configuration ${SERVICE}; exiting" &> /dev/stderr; exit 1; fi
 SERVICE_LABEL=$(jq -r '.label' "${SERVICE}")
 
 ## privileged
@@ -34,31 +40,31 @@ fi
 
 ## input
 if [ -z "${USERINPUT:-}" ]; then USERINPUT="userinput.json"; fi
-if [ ! -s "${USERINPUT}" ] && [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- cannot locate ${USERINPUT}; continuing"; fi
+if [ ! -s "${USERINPUT}" ] && [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- cannot locate ${USERINPUT}; continuing" &> /dev/stderr; fi
 
 # temporary file-system
 if [ $(jq '.tmpfs!=null' "${SERVICE}") == 'true' ]; then 
   # size
   TS=$(jq -r '.tmpfs.size' ${SERVICE})
   if [ -z "${TS}" ] || [ "${TS}" == 'null' ]; then 
-    if [ "${DEBUG:-}" == 'true' ];  then echo "--- INFO -- $0 $$ -- temporary filesystem; no size specified; defaulting to 8 Mbytes"; fi
+    if [ "${DEBUG:-}" == 'true' ];  then echo "--- INFO -- $0 $$ -- temporary filesystem; no size specified; defaulting to 8 Mbytes" &> /dev/stderr; fi
     TS=4096000
   fi
   # destination
   TD=$(jq -r '.tmpfs.destination' ${SERVICE})
   if [ -z "${TD}" ] || [ "${TD}" == 'null' ]; then 
-    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- temporary filesystem; no destination specified; defaulting to /tmpfs"; fi
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- temporary filesystem; no destination specified; defaulting to /tmpfs" &> /dev/stderr; fi
     TD="/tmpfs"
   fi
   # mode
   TM=$(jq -r '.tmpfs.mode' ${SERVICE})
   if [ -z "${TM}" ] || [ "${TM}" == 'null' ]; then 
-    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- temporary filesystem; no mode specified; defaulting to 1777"; fi
+    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- temporary filesystem; no mode specified; defaulting to 1777" &> /dev/stderr; fi
     TM="1777"
   fi
   OPTIONS="${OPTIONS:-}"' --mount type=tmpfs,destination='"${TD}"',tmpfs-size='"${TS}"',tmpfs-mode='"${TM}"
 else
-  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no tmpfs"; fi
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no tmpfs" &> /dev/stderr; fi
 fi
 
 # inputs
@@ -82,7 +88,7 @@ if [ "$(jq '.userInput!=null' ${SERVICE})" == 'true' ]; then
     OPTIONS="${OPTIONS:-}"' -e '"${NAME}"'='"${DV}"
   done
 else
-  if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- no inputs"; fi
+  if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- no inputs" &> /dev/stderr; fi
 fi
 
 # ports
@@ -93,12 +99,16 @@ if [ $(jq '.ports!=null' ${SERVICE}) == 'true' ]; then
     if [ -z "${PE}" ]; then PE=$(jq -r '.ports|to_entries[]|select(.key=="'${PS}'")|.value' "${SERVICE}"); fi
     OPTIONS="${OPTIONS:-}"' --publish='"${PE}"':'"${PS}"
   done
-elif [ ! -z "${DOCKER_PORT}" ]; then
-  if [ -z "${SERVICE_PORT}" ]; then SERVICE_PORT=80; fi
-  OPTIONS="${OPTIONS:-}"' --publish='"${DOCKER_PORT}"':'"${SERVICE_PORT}"
 else
- if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- no ports"; fi
+ if [ "${DEBUG:-}" == 'true' ]; then echo "+++ WARN -- $0 $$ -- no ports" &> /dev/stderr; fi
 fi
 
-if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- docker run -d --name ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}"; fi
+if [ ! -z "${SERVICE_PORT:-}" ]; then
+  if [ "${SERVICE_PORT}" == 'null' ]; then SERVICE_PORT=80; fi
+  if [ -z "${DOCKER_PORT:-}" ]; then DOCKER_PORT=12345; fi
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- mapping service port ${SERVICE_PORT} to localhost port ${DOCKER_PORT}" &> /dev/stderr; fi
+  OPTIONS="${OPTIONS:-}"' --publish='"${DOCKER_PORT}"':'"${SERVICE_PORT}"
+fi
+
+if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- docker run -d --name ${DOCKER_NAME} ${OPTIONS} ${DOCKER_TAG}" &> /dev/stderr; fi
 docker run -d --name "${DOCKER_NAME}" ${OPTIONS} "${DOCKER_TAG}"

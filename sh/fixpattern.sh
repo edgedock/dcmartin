@@ -1,5 +1,11 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT FIXES PATTERN SPECIFICATIONS WHEN TAG IS SPECIFIED
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+
 # where
 if [ -z "${1}" ]; then DIR="horizon"; else DIR="${1}"; fi
 if [ ! -d "${DIR}" ]; then
@@ -17,7 +23,7 @@ if [ -s "${PATTERN}" ]; then
     jq -c '.label="'${PATTERN_LABEL}-${TAG}'"|.services=[.services[]|.serviceUrl as $url|.serviceUrl=$url+"-'${TAG}'"]' "${PATTERN}" > "${PATTERN}.$$"
     mv -f "${PATTERN}.$$" "${DIR}/${PATTERN}"
   else
-    cp -f "${PATTERN}" "${DIR}/${PATTERN}"
+    cat "${PATTERN}" | envsubst > "${DIR}/${PATTERN}"
   fi
 else
   echo "*** ERROR -- $0 $$ -- cannot find pattern JSON template: ${PATTERN}" &> /dev/stderr

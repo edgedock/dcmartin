@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+###
+### THIS SCRIPT PROVIDES AN AUTOMATED MUTLI-ARCH BUILD
+###
+### DO __NOT__ CALL INTERACTIVELY
+###
+
 # Login into docker
 docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
 

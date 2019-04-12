@@ -1,5 +1,13 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES AN AUTOMATED SERVICE TEST FOR ANY SERVICE
+###
+### PROCESSES JSON TO PRODUCE TYPE-TREE FOR OUTPUT; COMPARE TO TEST SAMPLE
+###
+### DO __NOT__ CALL INTERACTIVELY
+###
+
 print_object() {
   key="${1}"
   type=$(echo "${OUT}" | jq -r ".${key}|type" 2> /dev/null)

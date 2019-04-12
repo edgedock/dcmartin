@@ -1,5 +1,10 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT CHECKS FOR ENVIRONMENT VARIABLE SPECIFIED AS FILES
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
 
 # args
 if [ ! -z "${1}" ]; then DIR="${1}"; else DIR="horizon"; if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory unspecified; default: ${DIR}" &> /dev/stderr; fi; fi
@@ -26,16 +31,19 @@ if [ ! -s "${USERINPUT}" ]; then echo "*** ERROR -- $0 $$ -- cannot locate useri
 if [ ! -z "${DEBUG:-}" ]; then echo "--- INFO -- $0 $$ -- SERVICE_TEMPLATE: ${SERVICE_TEMPLATE}; SERVICE_URL=${SERVICE_URL}" &> /dev/stderr; fi
 
 # check mandatory variables (i.e. those whose value is null in template)
-for evar in $(jq -r '.userInput[].name' "${SERVICE_TEMPLATE}"); do 
-  VAL=$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'${evar}'").value' ${USERINPUT}) 
-  if [ ! -z "${DEBUG:-}" ]; then echo "--- INFO -- $0 $$ -- ${evar}: ${VAL}" &> /dev/stderr; fi
-  if [ -s "${evar}" ]; then 
-    VAL=$(cat "${evar}")
-    UI=$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'${evar}')|='${VAL} "${USERINPUT}")
-    echo "${UI}" > "${USERINPUT}"
-    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${evar}=${VAL}" &> /dev/stderr; fi
-  elif [ "${VAL}" == 'null' ]; then 
-    echo "*** ERROR -- $0 $$ -- variable ${evar} has no default and value is null; create file named ${evar} with JSON content; exiting"
-    exit 1
-  fi
-done
+user_input=$(jq '.userInput|length' ${SERVICE_TEMPLATE})
+if [ ${user_input} -gt 0 ]; then
+  for evar in $(jq -r '.userInput[].name' "${SERVICE_TEMPLATE}"); do 
+    VAL=$(jq -r '.services[]|select(.url=="'${SERVICE_URL}'").variables|to_entries[]|select(.key=="'${evar}'").value' ${USERINPUT}) 
+    if [ ! -z "${DEBUG:-}" ]; then echo "--- INFO -- $0 $$ -- ${evar}: ${VAL}" &> /dev/stderr; fi
+    if [ -s "${evar}" ]; then 
+      VAL=$(cat "${evar}")
+      UI=$(jq -c '(.services[]|select(.url=="'${SERVICE_URL}'").variables.'${evar}')|='${VAL} "${USERINPUT}")
+      echo "${UI}" > "${USERINPUT}"
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- ${evar}=${VAL}" &> /dev/stderr; fi
+    elif [ "${VAL}" == 'null' ]; then 
+      echo "*** ERROR -- $0 $$ -- variable ${evar} has no default and value is null; create file named ${evar} with JSON content; exiting"
+      exit 1
+    fi
+  done
+fi

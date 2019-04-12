@@ -1,5 +1,11 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES METHODS TO INTERACT WITH THE EXCHANGE
+###
+### IT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+
 if [ -z "${HZN_EXCHANGE_URL}" ]; then export HZN_EXCHANGE_URL="https://alpha.edge-fabric.com/v1"; fi
 if [ ! -s "APIKEY" ]; then 
   if [ -s "../apiKey.json" ]; then 

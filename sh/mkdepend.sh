@@ -1,5 +1,17 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT PROVIDES AUTOMATED DEPENDENCY FETCH
+###
+### THIS SCRIPT SHOULD __NOT__ BE CALLED INTERACTIVELY
+###
+### CONSUMES THE FOLLOWING ENVIRONMENT VARIABLES:
+###
+### + HZN_EXCHANGE_URL
+### + HZN_ORG_ID
+### + HZN_EXCHANGE_USERAUTH
+###
+
 # test envsubst
 if [ -z $(command -v "envsubst") ]; then
   echo "*** ERROR -- $0 $$ -- please install gettext package for command envsubst" &> /dev/stderr
@@ -39,32 +51,35 @@ if [ -z "${HZN_ORG_ID:-}" ]; then
   exit 1
 fi
 
-jq -r '.requiredServices|to_entries[]|.value.url' "${SERVICE}.json" | while read -r; do
-    URL="${REPLY}"
-    if [ -z "${URL}" ]; then echo "Error: empty required service URL: ${URL}" &> /dev/stderr; exit 1; fi
-    VER=$(jq -r '.requiredServices|to_entries[]|select(.value.url=="'${URL}'").value.version' "${SERVICE}.json")
-    if [ -z "${VER}" ]; then echo "Error: empty version for required service ${URL}" &> /dev/stderr; exit 1; fi
-    ORG=$(jq -r '.requiredServices|to_entries[]|select(.value.url=="'${URL}'").value.org' "${SERVICE}.json" | envsubst)
-    if [ -z "${ORG}" ]; then echo "Error: empty org for required service ${URL}" &> /dev/stderr; exit 1; fi
-    if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory: ${DIR}; version: ${VER}; architecture: ${ARCH}; organization: ${ORG}" &> /dev/stderr; fi
+if [ $(jq '.requiredServices?!=null' "${SERVICE}.json") == 'true' ]; then
+  jq -r '.requiredServices|to_entries[]|.value.url' "${SERVICE}.json" | while read -r; do
+      URL="${REPLY}"
+      if [ -z "${URL}" ]; then echo "Error: empty required service URL: ${URL}" &> /dev/stderr; exit 1; fi
+      VER=$(jq -r '.requiredServices|to_entries[]|select(.value.url=="'${URL}'").value.version' "${SERVICE}.json")
+      if [ -z "${VER}" ]; then echo "Error: empty version for required service ${URL}" &> /dev/stderr; exit 1; fi
+      ORG=$(jq -r '.requiredServices|to_entries[]|select(.value.url=="'${URL}'").value.org' "${SERVICE}.json" | envsubst)
+      if [ -z "${ORG}" ]; then echo "Error: empty org for required service ${URL}" &> /dev/stderr; exit 1; fi
+      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- directory: ${DIR}; version: ${VER}; architecture: ${ARCH}; organization: ${ORG}" &> /dev/stderr; fi
 
-    ## check if local service or non
-    if [ "${ORG}" == ${HZN_ORG_ID} ]; then
-      REQDIR="${URL##*.}"
-      if [ ! -z "${TAG}" ]; then REQDIR=$(echo "${REQDIR}" | sed "s/-${TAG}//"); fi
-    fi
-    if [ ! -z "${REQDIR:-}" ] && [ -d "../${REQDIR:-}/horizon" ]; then
-      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- found directory ${REQDIR}/horizon for ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
-      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ -p ../${REQDIR}/horizon -u "${HZN_EXCHANGE_USERAUTH:1:3}"" &> /dev/stderr; fi
-      hzn dev dependency fetch -d ${DIR}/ -p "../${REQDIR}/horizon" -u "${HZN_EXCHANGE_USERAUTH}"
-    else
-      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- retrieving from exchange: ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
-      if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ --ver ${VER} --arch ${ARCH} --org ${ORG} --url ${URL} -u ${HZN_EXCHANGE_USERAUTH:1:3}"; fi
-      hzn dev dependency fetch -d ${DIR}/ --ver "${VER}" --arch "${ARCH}" --org "${ORG}" --url "${URL}" -u "${HZN_EXCHANGE_USERAUTH}"
-    fi
-    if [ $? != 0 ]; then
-      echo "*** ERROR -- $0 $$ -- dependency ${REPLY} was not fetched; exiting" &> /dev/stderr
-      exit 1
-    fi
-done
-
+      ## check if local service or non
+      if [ "${ORG}" == ${HZN_ORG_ID} ]; then
+	REQDIR="${URL##*.}"
+	if [ ! -z "${TAG}" ]; then REQDIR=$(echo "${REQDIR}" | sed "s/-${TAG}//"); fi
+      fi
+      if [ ! -z "${REQDIR:-}" ] && [ -d "../${REQDIR:-}/horizon" ]; then
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- found directory ${REQDIR}/horizon for ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ -p ../${REQDIR}/horizon -u "${HZN_EXCHANGE_USERAUTH:1:3}"" &> /dev/stderr; fi
+	hzn dev dependency fetch -d ${DIR}/ -p "../${REQDIR}/horizon" -u "${HZN_EXCHANGE_USERAUTH}"
+      else
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- retrieving from exchange: ${ORG}/${ARCH}_${URL}:${VER}" &> /dev/stderr; fi
+	if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- hzn dev dependency fetch -d ${DIR}/ --ver ${VER} --arch ${ARCH} --org ${ORG} --url ${URL} -u ${HZN_EXCHANGE_USERAUTH:1:3}"; fi
+	hzn dev dependency fetch -d ${DIR}/ --ver "${VER}" --arch "${ARCH}" --org "${ORG}" --url "${URL}" -u "${HZN_EXCHANGE_USERAUTH}"
+      fi
+      if [ $? != 0 ]; then
+	echo "*** ERROR -- $0 $$ -- dependency ${REPLY} was not fetched; exiting" &> /dev/stderr
+	exit 1
+      fi
+  done
+else
+  if [ "${DEBUG:-}" == 'true' ]; then echo "--- INFO -- $0 $$ -- no required services" &> /dev/stderr; fi
+fi

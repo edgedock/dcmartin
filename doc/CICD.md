@@ -45,6 +45,11 @@ Within the following scenario:
 + Public [github.com](http://github.com), [docker.io](http://hub.docker.com), [travis-ci.org](http://travis-ci.org), and [microbadger.com][microbadger]
 + One (1) repository with two (2) branches: "dev" (`beta`) and “stable” (`master`)
 
+# Next Steps
+Create a new service, the "[hello world][helloworld-md]" example.
+
+[helloworld-md]: https://github.com/dcmartin/open-horizon/blob/master/doc/HELLO_WORLD.md
+
 <hr>
 
 ## A. Introduction

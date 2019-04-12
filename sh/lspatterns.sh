@@ -1,4 +1,15 @@
 #!/bin/bash
+
+###
+### THIS SCRIPT LISTS PATTERNS FOR THE ORGANIZATION 
+###
+### CONSUMES THE FOLLOWING ENVIRONMENT VARIABLES:
+###
+### + HZN_EXCHANGE_URL
+### + HZN_ORG_ID
+### + HZN_EXCHANGE_APIKEY
+###
+
 if [ -z $(command -v jq) ]; then
   echo "*** ERROR $0 $$ -- please install jq"
   exit 1

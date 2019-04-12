@@ -20,7 +20,7 @@ These variables control identification and naming as well as architecture for bu
 They may be used on the command-line to control the build, for example:
 
 ```
-% make BUILD_ARCH=arm64 TAG=test service-publish
+% make BUILD_ARCH=arm64 TAG=test publish-service
 ```
 ## 1.1 Code signing
 
@@ -32,7 +32,9 @@ These variables indicate the files used for code signing.  These files are gener
 Use the following command with appropriate alternatives; any values are acceptable:
 
 ```
-hzn key create MYORG my-email@my-domain.tld
+hzn key create ${HZN_ORG_ID} ${USER}@${HOST}
+mv -f *.key ${HZN_ORG_ID}.key
+mv -f *.pem ${HZN_ORG_ID}.pem
 ```
 
 ## 1.2 IBM Cloud API Key

@@ -30,7 +30,7 @@ ALL = $(BASES) $(SERVICES) $(PATTERNS) # ${JETSONS}
 ## targets
 ##
 
-TARGETS = all build push check test run stop remove clean distclean service-build service-push service-publish service-verify service-start service-test service-stop service-clean publish-service test-service build-service
+TARGETS = all clean distclean build push publish verify build-service push-service start-service publish-service test-service verify-service clean-service service-build service-push service-publish service-verify service-test service-stop service-clean
 
 ## actual
 
