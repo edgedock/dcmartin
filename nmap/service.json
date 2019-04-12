@@ -8,13 +8,7 @@
   "deployment": {
     "services": {
       "hello": {
-        "image": null,
-        "specific_ports": [
-          {
-            "HostPort": "81:81/tcp",
-            "HostIP": "0.0.0.0"
-          }
-        ]
+        "image": null
       }
     }
   }

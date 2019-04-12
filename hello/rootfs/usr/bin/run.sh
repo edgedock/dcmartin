@@ -1,2 +1,2 @@
 #!/bin/sh
-socat TCP4-LISTEN:81,fork EXEC:/usr/bin/service.sh
+socat TCP4-LISTEN:80,fork EXEC:/usr/bin/service.sh

@@ -1,4 +1,4 @@
-BEGIN { i=0; FS="[[:space:]/()]+"; printf("{\"lan\":["); }
+BEGIN { i=0; FS="[[:space:]/()]+"; printf("{\"nmap\":["); }
 
 /Nmap scan report/ {
   if (i++ == 0) printf("{");

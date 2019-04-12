@@ -1,22 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ -z "${NMAP_LAN:-}" ]; then NMAP_LAN='192.168.1.0'; fi
-if [ -z "${NMAP_SUB:-}" ]; then NMAP_SUB=24; fi
-if [ -z "${NMAP_PERIOD:-}" ]; then NMAP_PERIOD=30; fi
+if [ -z "${NMAP_PERIOD:-}" ]; then NMAP_PERIOD=180; fi
 
 # don't update statistics more than once per (in seconds)
 SECONDS=$(date "+%s")
 DATE=$(echo ${SECONDS} \/ ${NMAP_PERIOD} \* ${NMAP_PERIOD} | bc)
 
 # output target
-OUTPUT="/tmp/${0##*/}.$$.${DATE}.json"
+OUTPUT="/tmp/${0##*/}.${DATE}.json"
 # test if been-there-done-that
-if [ ! -s "${OUTPUT}" ]; then
-  # remove old output
-  rm -f "/tmp/${0##*/}".*
-  nmap -sn -T5 ${NMAP_LAN}/${NMAP_SUB} | gawk -f /usr/bin/nmap.awk > ${OUTPUT}
+if [ ! -e "${OUTPUT}" ]; then
+  if [ ! -s "${OUTPUT}" ]; then
+    if [ "${DEBUG:-}" == 'true' ]; then echo "+++ INFO -- $0 $$ -- running ${0%/*}/nmap.sh ${OUTPUT}" &> /dev/stderr; fi
+    touch ${OUTPUT}
+    ${0%/*}/nmap.sh "${OUTPUT}" &
+  fi
+  LAST=($(echo "/tmp/${0##*/}".*.json))
+  N=${#LAST[@]}
+  if [ ${N} -gt 0 ]; then
+    OUTPUT=${LAST[(${N}-1)]}
+    # remove old output
+    if [ ${N} -gt 1 ]; then
+      OLD=$(echo ${LAST[@]} | tr ' ' '\n' | head -$((N-1)))
+      rm -f ${OLD}
+    fi
+  fi
 fi
 
 echo "HTTP/1.1 200 OK"
 echo
-cat ${OUTPUT}
+if [ -s "${OUTPUT}" ]; then
+  cat ${OUTPUT}
+else
+  echo '{"nmap":[]}'
+fi
