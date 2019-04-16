@@ -1,0 +1,21 @@
+FROM alpine:3.8
+
+RUN apk add --no-cache git
+RUN apk add --no-cache build-base
+RUN apk add --no-cache linux-headers
+
+WORKDIR /tmp
+
+RUN git clone git://git.drogon.net/wiringPi
+#RUN cd wiringPi/wiringPi && make DESTDIR=/tmp PREFIX=/wiringPi install-deb
+
+RUN mkdir -p /usr/local
+
+RUN cd wiringPi/wiringPi && make install
+
+COPY /usr/local /usr/local
+
+WORKDIR .
+
+RUN make
+

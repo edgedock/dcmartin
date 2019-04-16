@@ -1,0 +1,15 @@
+FROM ubuntu:bionic
+
+RUN apt-get update
+RUN apt-get install -y git
+RUN apt-get install -y build-essential
+
+RUN git clone git://git.drogon.net/wiringPi
+
+RUN cd wiringPi/wiringPi && make install
+
+COPY src/ /tmp/src
+
+RUN cd /tmp/src && make && cp rpi_i2c_oled /usr/local/bin/.
+
+CMD ["/usr/local/bin/rpi_i2c_oled"]
