@@ -1,5 +1,5 @@
 #
-# Makefile 
+# Makefile
 #
 
 CC = gcc
@@ -14,15 +14,18 @@ LIB = -L/usr/local/lib -lwiringPi -lcrypt -lpthread -lm -lrt
 EXEC = rpi_i2c_oled
 
 SRCS := $(wildcard *.c)
-BINS := $(SRCS:.c=.o)
+BINS := $(SRCS:%.c=%)
 
 all: $(EXEC)
 
-$(EXEC): $(BINS)
-	$(CC) $(BINS) $(LIB) -o $(EXEC)
+$(EXEC): display.o ssd1306_i2c.o
+	$(CC) display.o ssd1306_i2c.o $(LIB) -o $(EXEC)
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(HEADER) $< 
+display.o: display.c
+	$(CC) $(CFLAGS) $(HEADER) display.c
+
+ssd1306_i2c.o: ssd1306_i2c.c
+	$(CC) $(CFLAGS) $(HEADER) ssd1306_i2c.c
 
 clean:
 	rm *.o
