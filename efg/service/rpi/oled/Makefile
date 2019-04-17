@@ -12,7 +12,7 @@ all: build debug
 #all: build
 
 build:
-	docker build -f DockerfileUbuntu.$(ARCH) -t $(EXEC) .
+	docker build -f Dockerfile.$(ARCH) -t $(EXEC) .
 
 debug:
 #	docker run --env HOST_IP=$(HOST_IP) --device=/dev/i2c-1:/dev/i2c-1 -it $(EXEC)
