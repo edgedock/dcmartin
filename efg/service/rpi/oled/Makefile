@@ -42,4 +42,7 @@ publish-service:
 
 #: $${HZN_ORG_ID:?} $${HZN_EXCHANGE_USER_AUTH:?}   # this verifies these env vars are set
 publish-pattern:
-	hzn exchange pattern publish -p $$SERVICE_NAME -f horizon/pattern/pat_rpii2coled.json
+	hzn exchange pattern publish -p $$SERVICE_NAME -f horizon/pattern/pat_pub_rpii2coled.json
+
+register-node:
+	hzn register -n $$EXCHANGE_NODEAUTH $$HZN_ORG_ID $$PATTERN -f horizon/pattern/pat_reg_node_input.json
