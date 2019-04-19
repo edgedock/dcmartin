@@ -1,0 +1,54 @@
+{
+    "org": "$HZN_ORG_ID",
+    "label": "$SERVICE_NAME for $ARCH",
+    "description": "A RPi I2C OLED service",
+    "public": true,
+    "documentation": "",
+    "url": "$MYDOMAIN.$SERVICE_NAME",
+    "version": "$SERVICE_VERSION",
+    "arch": "$ARCH",
+    "sharable": "singleton",
+    "requiredServices": [],
+    "userInput": [
+	{
+            "name" : "EVENT_STREAM_API_KEY",
+	    "label": "Event stream api key obtained from service credential",
+            "type" : "string",
+	    "defaultValue": ""
+	},
+	{
+            "name" : "MOCK",
+	    "label": "Whether mock the service",
+            "type" : "boolean",
+	    "defaultValue": "false"
+	},
+	{
+            "name" : "PUBLISH",
+	    "label": "Whether publish the service",
+            "type" : "boolean",
+	    "defaultValue": "false"
+	},
+	{
+            "name" : "VERBOSE",
+	    "label": "Show verbose output",
+            "type" : "string",
+	    "defaultValue": "0"
+	}
+    ],
+    "deployment": {
+	"services": {
+	    "rpii2coled": {
+		"image": "$DOCKER_HUB_ID/${ARCH}_$SERVICE_NAME:$SERVICE_VERSION",
+		"privileged": true,
+		"devices": [
+		    "/dev/i2c-1:/dev/i2c-1"
+		]
+	    }
+	}
+    }
+}
+
+
+
+
+	
