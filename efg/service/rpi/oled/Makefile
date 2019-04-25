@@ -2,12 +2,13 @@
 # Makefile for Edge Fabric Gateway (efgateway)
 #
 
-VERSION:= '0.0.1'
+VERSION:= '0.0.2'
 DOCKER_NAME:= arm_rpii2coled
+
+IMAGE_NAME:= $(DOCKER_HUB_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 
 ARCH:= $(shell hzn node list | jq .configuration.architecture)
 HOST_IP:= $(shell hostname -I | cut -d ' ' -f1)
-IMAGE_NAME:=$(DOCKER_HUB_ID)/$(DOCKER_NAME):$(SERVICE_VERSION)
 
 default: all
 

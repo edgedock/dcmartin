@@ -61,19 +61,19 @@ int main(int argc, char* argv[]) {
     sprintf(str, "%s", line);
     draw_line(1, 1, str);
 
-    printf(">>%s<<\n", str);
+    //    printf(">>%s<<\n", str);
 
     fetch("cat /sys/class/net/eth0/address", line, sizeof(line)-1);
     remove_a_char(line, ':');
     sprintf(str, "MAC %s", line);
     draw_line(2, 1, str);
 
-    printf(">>%s<<\n", str);
+    //    printf(">>%s<<\n", str);
     
     fetch("top -bn1 | grep load | awk '{printf \"DC %.2f%%\", $(NF-2)}'", line, sizeof(line)-1);
     draw_line(3, 1, line);
 
-    printf(">>%s<<\n", line);
+    //    printf(">>%s<<\n", line);
 
     if(page == 0) {
       //      fetch("free -m | awk 'NR==2{printf \"MM %s/%sMB %.0f%%\", $3,$2,$3*100/$2 }'", line, sizeof(line)-1);
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
       page = 0;
     }
 
-    printf(">>%s<<\n", line);
+    //    printf(">>%s<<\n", line);
     
     updateDisplay(fd);
     sleep(refresh_interval);
